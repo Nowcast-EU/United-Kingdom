@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<!-- Primary Meta Tags -->
+<title>🇬🇧 United Kingdom | Interactive Seat Calculator</title>
+<meta name="title" content="🇬🇧 United Kingdom | Interactive Seat Calculator">
+<meta name="description" content="">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://nowcast-eu.github.io/United-Kingdom/calculator.html">
+<meta property="og:title" content="🇬🇧 United Kingdom | Interactive Seat Calculator">
+<meta property="og:description" content="">
+<meta property="og:image" content="https://nowcast-eu.github.io/United-Kingdom/thumbnail.png">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:url" content="https://nowcast-eu.github.io/United-Kingdom/calculator.html">
+<meta name="twitter:title" content="🇬🇧 United Kingdom | Interactive Seat Calculator">
+<meta name="twitter:description" content="">
+<meta name="twitter:image" content="https://nowcast-eu.github.io/United-Kingdom/thumbnail.png">
+
+<link rel="icon" type="image/png" href="https://nowcast-eu.github.io/United-Kingdom/UK_favicon.png">
+
+<style>
+  body {
+    font-family: Inter, system-ui, sans-serif;
+    background: #fff;
+    color: #0f172a;
+    margin: 0;
+    padding: 0 24px 24px 24px;
+  }
+
+  /* Narrower padding on mobile */
+  @media (max-width: 768px) {
+    body {
+      padding: 0 8px 24px 8px;
+    }
+  }
+
+  h1 {
+    text-align: center;
+    font-weight: 600;
+    font-size: 1.6rem;
+    margin: 28px 0 12px 0;
+  }
+
+  table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    margin-top: 12px; 
+    table-layout: fixed; 
+  }
+
+  th, td { 
+    padding: 4px 6px; 
+    border: 1px solid #e2e8f0; 
+    text-align: left; 
+    word-wrap: break-word; 
+  }
+
+  th { background: #f1f5f9; font-weight: 600; }
+  td.party-column { font-weight: bold; position: relative; padding-left: 14px; color: black; }
+  td.party-column::before { content: ""; position: absolute; left: 0; top: 0; width: 8px; height: 100%; border-radius: 2px 0 0 2px; background-color: var(--party-color); }
+  td.ge2024-column { font-style: italic; color: #999999; }
+  td.seats-column, td.diff-column { font-weight: bold; text-align: center; }
+  .diff-column.positive { color: #008500; }
+  .diff-column.negative { color: #bb0000; }
+  .diff-column.equal { color: #555555; }
+
+  .input-wrapper { display: flex; align-items: center; justify-content: flex-start; }
+  .input-wrapper input {
+    width: 50px; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px;
+    text-align: left; margin-right: 4px; transition: border-color 0.3s ease;
+  }
+  .percent-sign { font-size: 14px; }
+
+  /* --- BUTTONS --- */
+  .button-container { 
+    display: flex; 
+    gap: 8px; 
+    margin-top: 14px; 
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  button#calculate, button#reset {
+    background: #008500; 
+    color: #fff; 
+    border: none; 
+    border-radius: 6px;
+    padding: 8px 14px; 
+    cursor: pointer; 
+    transition: background 0.3s ease;
+  }
+
+  /* Calculate = 80%, Reset = 20% */
+  button#calculate { flex: 0 0 78%; }
+  button#reset { flex: 0 0 20%; }
+
+  tfoot td { font-weight: bold; text-align: center; background: #f1f5f9; }
+  tfoot td:first-child { text-align: left; padding-left: 14px; }
+
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type=number] { -moz-appearance: textfield; }
+
+  /* Coalition builder */
+  #coalition-builder { margin-top: 48px; }
+  .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  h3 { margin: 0; }
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 15px; }
+  .legend-item {
+    display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;
+    border: 1px solid #ccc; border-radius: 8px; padding: 6px 10px; background: #f3f3f3;
+    transition: all 0.25s ease; opacity: 0.6; font-weight: normal;
+  }
+  .legend-item:hover { transform: translateY(-1px); }
+  .legend-item.active { opacity: 1; background: #ffffff; border-color: #999; box-shadow: 0 1px 3px rgba(0,0,0,0.15); font-weight: bold; }
+  .legend-box { width: 20px; height: 20px; border-radius: 4px; }
+  .bar-container { position: relative; height: 117px; background: #f0f0f0; border-radius: 10px; overflow: hidden; margin-bottom: 12px; width: 100%; }
+  .coalition-overlay { position: absolute; top: 0; left: 0; height: 100%; width: 0%; border-top-left-radius: 10px; border-bottom-left-radius: 10px; display: flex; overflow: hidden; transition: width 1s ease; }
+  .segment { height: 100%; flex-shrink: 0; border-radius: 0; }
+  .majority-line {
+    position: absolute; top: 0; bottom: 0; width: 2px;
+    background: repeating-linear-gradient(to bottom,#333,#333 5px,transparent 5px,transparent 10px);
+    left: 50%;
+  }
+  .counter { font-size: 22px; font-weight: bold; text-align: center; margin-bottom: 8px; }
+  .note { font-size: 13px; color: #555; text-align: center; }
+
+  /* --- MOBILE VIEW --- */
+  @media (max-width: 768px) {
+    table, th, td { font-size: 13px; }
+    .counter { font-size: 18px; }
+    h3 { font-size: 16px; }
+    .legend-item { font-size: 12px; padding: 5px 8px; }
+    .input-wrapper input { width: 45px; }
+
+    /* 👇 manually control column widths on mobile */
+    table th:nth-child(1), table td:nth-child(1) { width: 20%; } /* Party */
+    table th:nth-child(2), table td:nth-child(2) { width: 15%; } /* 2023 */
+    table th:nth-child(3), table td:nth-child(3) { width: 25%; } /* Votes */
+    table th:nth-child(4), table td:nth-child(4) { width: 20%; } /* Seats */
+    table th:nth-child(5), table td:nth-child(5) { width: 20%; } /* +/- */
+  }
+
+  @media (max-width: 480px) {
+    table, th, td { font-size: 12px; }
+    .input-wrapper input { width: 40px; }
+  }
+/* --- Uniform table header height + centered header text --- */
+th {
+  height: 30px;           /* 👈 match td height for visual consistency */
+  font-weight: 650;
+  text-align: center;     /* 👈 header text centered only */
+  vertical-align: middle; /* 👈 keep it perfectly aligned vertically */
+}
+
+td {
+  height: 30px;           /* 👈 match th height */
+  vertical-align: middle; /* 👈 ensures text sits evenly across rows */
+}
+/* --- Make the Totals row shorter --- */
+tfoot td {
+  height: 20px;             /* roughly 2/3 of 36px */
+  vertical-align: middle;
+}
+
+
+/* --- Responsive rectangular tab switcher --- */
+/* --- Final rectangular tab switcher --- */
+.tab-switcher {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f4f4f4;
+  border-radius: 12px;
+  padding: 3px;
+  border: 1px solid #d0d0d0;
+  overflow: hidden;
+  width: 140px;             /* base width desktop */
+  max-width: 100%;
+  height: 38px;
+  box-sizing: border-box;
+  -webkit-user-select: none; /* 👈 prevent highlight */
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.tab-btn {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  color: #111;
+  text-align: center;
+  line-height: 1;
+  white-space: nowrap;
+  transition: color 0.25s ease, font-weight 0.25s ease;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent; /* 👈 remove blue tap flash */
+}
+
+.tab-btn.active {
+  font-weight: 700;
+}
+
+.tab-btn:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.tab-pill {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  right: 50%;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 1;
+}
+
+/* --- Mobile scaling + perfect edge alignment --- */
+@media (max-width: 480px) {
+  .tab-switcher {
+    width: 120px;
+    height: 34px;
+    padding: 3px;
+  }
+  .tab-btn {
+    font-size: 13px;
+  }
+  .tab-pill {
+    top: 3px;
+    bottom: 3px;
+    left: 3px;
+    right: 50%;
+  }
+}
+
+</style>
+</head>
+
+<body>
+<h1>House of Commons | Nowcast UK Interactive Seat Calculator</h1>
+  
+<table>
+  <thead>
+    <tr>
+      <th>Party</th>
+      <th>2024</th>
+      <th>Votes (%)</th>
+      <th>Seats</th>
+      <th>+/- 2024</th>
+    </tr>
+  </thead>
+  <tbody id="tbody"></tbody>
+  <tfoot>
+    <tr>
+      <td>Totals</td>
+      <td></td>
+      <td id="total-votes">0.0%</td>
+      <td id="total-seats">0</td>
+      <td></td>
+    </tr>
+  </tfoot>
+</table>
+
+<div class="button-container">
+  <button id="calculate">Calculate</button>
+  <button id="reset">Reset</button>
+</div>
+
+<div id="coalition-builder">
+<div class="header-container">
+  <h3>Coalition Builder (User Generated)</h3>
+
+  <div class="tab-switcher">
+    <div class="tab-pill" id="tab-pill"></div>
+    <button class="tab-btn active" id="tab-result">Result</button>
+    <button class="tab-btn" id="tab-2023">2023</button>
+  </div>
+</div>
+
+  <div class="legend" id="legend"></div>
+  <div class="bar-container" id="bar">
+    <div class="coalition-overlay" id="coalition-overlay"></div>
+    <div class="majority-line" title="Majority (176 seats)"></div>
+  </div>
+  <div class="counter" id="counter">0 / 350</div>
+  <div class="note">Majority = 176 seats</div>
+</div>
+
+<script>
+const BASELINE = {"baseline_national": {"PP": 0.32, "PSOE": 0.2761, "Vox": 0.1797, "Sumar": 0.0606, "Podem": 0.0460, "SALF": 0.0145, "ERC": 0.0178, "JxCat": 0.0151, "EhB": 0.0133, "PNV": 0.0121, "BNG": 0.0087, "Cca": 0.0040, "UPN": 0.0018},
+    
+ "constituencies": [{"name": "A Coruña", "PP": 0.4167, "PSOE": 0.2456, "Vox": 0.0725, "Sumar": 0.0601, "Podem": 0.0394, "SALF": 0.0062, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.1452, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Álava", "PP": 0.1721, "PSOE": 0.2412, "Vox": 0.0565, "Sumar": 0.0626, "Podem": 0.0520, "SALF": 0.0067, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.1853, "PNV": 0.1821, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Albacete", "PP": 0.3867, "PSOE": 0.3005, "Vox": 0.2421, "Sumar": 0.0350, "Podem": 0.0312, "SALF": 0.0183, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Alicante", "PP": 0.3558, "PSOE": 0.2787, "Vox": 0.2363, "Sumar": 0.0631, "Podem": 0.0424, "SALF": 0.0190, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Almería", "PP": 0.3964, "PSOE": 0.2526, "Vox": 0.3102, "Sumar": 0.0325, "Podem": 0.0261, "SALF": 0.0227, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Asturias", "PP": 0.3442, "PSOE": 0.2996, "Vox": 0.1812, "Sumar": 0.0735, "Podem": 0.0550, "SALF": 0.0113, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Ávila", "PP": 0.4196, "PSOE": 0.2378, "Vox": 0.2232, "Sumar": 0.0251, "Podem": 0.0244, "SALF": 0.0142, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Badajoz", "PP": 0.3664, "PSOE": 0.3414, "Vox": 0.1986, "Sumar": 0.0335, "Podem": 0.0292, "SALF": 0.0123, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Balearic Islands", "PP": 0.3442, "PSOE": 0.2621, "Vox": 0.2203, "Sumar": 0.0818, "Podem": 0.0553, "SALF": 0.0169, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Barcelona", "PP": 0.1324, "PSOE": 0.3109, "Vox": 0.1102, "Sumar": 0.0749, "Podem": 0.0621, "SALF": 0.0088, "ERC": 0.1149, "JxCat": 0.0918, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Biscay", "PP": 0.1112, "PSOE": 0.2247, "Vox": 0.0377, "Sumar": 0.0537, "Podem": 0.0465, "SALF": 0.0052, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.1967, "PNV": 0.2962, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Burgos", "PP": 0.3935, "PSOE": 0.3005, "Vox": 0.1855, "Sumar": 0.0424, "Podem": 0.0360, "SALF": 0.0131, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Cáceres", "PP": 0.3683, "PSOE": 0.3388, "Vox": 0.1971, "Sumar": 0.0340, "Podem": 0.0313, "SALF": 0.0113, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Cádiz", "PP": 0.3364, "PSOE": 0.2891, "Vox": 0.2203, "Sumar": 0.0631, "Podem": 0.0468, "SALF": 0.0200, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Cantabria", "PP": 0.4070, "PSOE": 0.2900, "Vox": 0.2044, "Sumar": 0.0414, "Podem": 0.0338, "SALF": 0.0177, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Castellón", "PP": 0.3403, "PSOE": 0.2839, "Vox": 0.2305, "Sumar": 0.0705, "Podem": 0.0453, "SALF": 0.0166, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Ceuta", "PP": 0.3751, "PSOE": 0.2961, "Vox": 0.3377, "Sumar": 0.0118, "Podem": 0.0180, "SALF": 0.0251, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Ciudad Real", "PP": 0.3925, "PSOE": 0.3083, "Vox": 0.2363, "Sumar": 0.0301, "Podem": 0.0258, "SALF": 0.0142, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Córdoba", "PP": 0.3664, "PSOE": 0.2796, "Vox": 0.2029, "Sumar": 0.0675, "Podem": 0.0455, "SALF": 0.0167, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Cuenca", "PP": 0.3848, "PSOE": 0.3249, "Vox": 0.2261, "Sumar": 0.0271, "Podem": 0.0241, "SALF": 0.0135, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Gipuzkoa", "PP": 0.0831, "PSOE": 0.2029, "Vox": 0.0304, "Sumar": 0.0523, "Podem": 0.0447, "SALF": 0.0040, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.2974, "PNV": 0.2490, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Girona", "PP": 0.0938, "PSOE": 0.2517, "Vox": 0.1015, "Sumar": 0.0542, "Podem": 0.0403, "SALF": 0.0072, "ERC": 0.1373, "JxCat": 0.1856, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Granada", "PP": 0.3577, "PSOE": 0.2874, "Vox": 0.2348, "Sumar": 0.0572, "Podem": 0.0429, "SALF": 0.0189, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Guadalajara", "PP": 0.3519, "PSOE": 0.2874, "Vox": 0.2797, "Sumar": 0.0449, "Podem": 0.0396, "SALF": 0.0209, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Huelva", "PP": 0.3529, "PSOE": 0.3135, "Vox": 0.2116, "Sumar": 0.0513, "Podem": 0.0380, "SALF": 0.0158, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Huesca", "PP": 0.3703, "PSOE": 0.2918, "Vox": 0.1841, "Sumar": 0.0567, "Podem": 0.0418, "SALF": 0.0148, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Jaén", "PP": 0.3616, "PSOE": 0.3161, "Vox": 0.2145, "Sumar": 0.0394, "Podem": 0.0301, "SALF": 0.0146, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "La Rioja", "PP": 0.4418, "PSOE": 0.3109, "Vox": 0.1406, "Sumar": 0.0320, "Podem": 0.0313, "SALF": 0.0116, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Las Palmas", "PP": 0.2504, "PSOE": 0.2891, "Vox": 0.2116, "Sumar": 0.0503, "Podem": 0.0469, "SALF": 0.0206, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0508, "UPN": 0.0000},
+{"name": "León", "PP": 0.3577, "PSOE": 0.2926, "Vox": 0.1870, "Sumar": 0.0330, "Podem": 0.0327, "SALF": 0.0131, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Lleida", "PP": 0.1237, "PSOE": 0.2569, "Vox": 0.0986, "Sumar": 0.0389, "Podem": 0.0296, "SALF": 0.0074, "ERC": 0.1738, "JxCat": 0.1704, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Lugo", "PP": 0.4872, "PSOE": 0.2639, "Vox": 0.0623, "Sumar": 0.0256, "Podem": 0.0229, "SALF": 0.0053, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.1263, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Madrid", "PP": 0.3915, "PSOE": 0.2430, "Vox": 0.2029, "Sumar": 0.0759, "Podem": 0.0563, "SALF": 0.0162, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Málaga", "PP": 0.3703, "PSOE": 0.2639, "Vox": 0.2392, "Sumar": 0.0601, "Podem": 0.0431, "SALF": 0.0225, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Melilla", "PP": 0.4756, "PSOE": 0.2212, "Vox": 0.2319, "Sumar": 0.0148, "Podem": 0.0151, "SALF": 0.0186, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Murcia", "PP": 0.3983, "PSOE": 0.2203, "Vox": 0.3160, "Sumar": 0.0468, "Podem": 0.0336, "SALF": 0.0218, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Navarre", "PP": 0.1614, "PSOE": 0.2386, "Vox": 0.0826, "Sumar": 0.0636, "Podem": 0.0501, "SALF": 0.0092, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.1644, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.1378},
+{"name": "Ourense", "PP": 0.4824, "PSOE": 0.2648, "Vox": 0.0681, "Sumar": 0.0266, "Podem": 0.0212, "SALF": 0.0056, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.1220, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Palencia", "PP": 0.4051, "PSOE": 0.3005, "Vox": 0.1870, "Sumar": 0.0296, "Podem": 0.0260, "SALF": 0.0131, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Pontevedra", "PP": 0.3828, "PSOE": 0.2735, "Vox": 0.0681, "Sumar": 0.0651, "Podem": 0.0437, "SALF": 0.0069, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.1365, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Salamanca", "PP": 0.4544, "PSOE": 0.2648, "Vox": 0.2131, "Sumar": 0.0271, "Podem": 0.0259, "SALF": 0.0128, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Santa Cruz de Tenerife", "PP": 0.3422, "PSOE": 0.2926, "Vox": 0.1370, "Sumar": 0.0537, "Podem": 0.0466, "SALF": 0.0171, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.1338, "UPN": 0.0000},
+{"name": "Segovia", "PP": 0.4360, "PSOE": 0.2656, "Vox": 0.2058, "Sumar": 0.0394, "Podem": 0.0329, "SALF": 0.0144, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Seville", "PP": 0.3229, "PSOE": 0.3188, "Vox": 0.1928, "Sumar": 0.0690, "Podem": 0.0508, "SALF": 0.0190, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Soria", "PP": 0.3596, "PSOE": 0.2569, "Vox": 0.1420, "Sumar": 0.0168, "Podem": 0.0231, "SALF": 0.0101, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Tarragona", "PP": 0.1344, "PSOE": 0.2865, "Vox": 0.1507, "Sumar": 0.0557, "Podem": 0.0424, "SALF": 0.0110, "ERC": 0.1411, "JxCat": 0.1051, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Teruel", "PP": 0.3393, "PSOE": 0.2543, "Vox": 0.1899, "Sumar": 0.0266, "Podem": 0.0219, "SALF": 0.0147, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Toledo", "PP": 0.3664, "PSOE": 0.2830, "Vox": 0.2855, "Sumar": 0.0404, "Podem": 0.0317, "SALF": 0.0170, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Valencia", "PP": 0.3258, "PSOE": 0.2796, "Vox": 0.2203, "Sumar": 0.0828, "Podem": 0.0526, "SALF": 0.0182, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Valladolid", "PP": 0.3954, "PSOE": 0.2848, "Vox": 0.2203, "Sumar": 0.0434, "Podem": 0.0367, "SALF": 0.0149, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Zamora", "PP": 0.4331, "PSOE": 0.2830, "Vox": 0.1913, "Sumar": 0.0276, "Podem": 0.0238, "SALF": 0.0114, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000},
+{"name": "Zaragoza", "PP": 0.3490, "PSOE": 0.2682, "Vox": 0.2218, "Sumar": 0.0666, "Podem": 0.0456, "SALF": 0.0167, "ERC": 0.0000, "JxCat": 0.0000, "EhB": 0.0000, "PNV": 0.0000, "BNG": 0.0000, "Cca": 0.0000, "UPN": 0.0000}]};
+
+const CONSTITUENCY_SEATS = {
+  "A Coruña": 8,
+  "Álava": 4,
+  "Albacete": 4,
+  "Alicante": 12,
+  "Almería": 6,
+  "Asturias": 7,
+  "Ávila": 3,
+  "Badajoz": 5,
+  "Balearic Islands": 8,
+  "Barcelona": 32,
+  "Biscay": 8,
+  "Burgos": 4,
+  "Cáceres": 4,
+  "Cádiz": 9,
+  "Cantabria": 5,
+  "Castellón": 5,
+  "Ceuta": 1,
+  "Ciudad Real": 5,
+  "Córdoba": 6,
+  "Cuenca": 3,
+  "Gipuzkoa": 6,
+  "Girona": 6,
+  "Granada": 7,
+  "Guadalajara": 3,
+  "Huelva": 5,
+  "Huesca": 3,
+  "Jaén": 5,
+  "La Rioja": 4,
+  "Las Palmas": 8,
+  "León": 4,
+  "Lleida": 4,
+  "Lugo": 4,
+  "Madrid": 37,
+  "Málaga": 11,
+  "Melilla": 1,
+  "Murcia": 10,
+  "Navarre": 5,
+  "Ourense": 4,
+  "Palencia": 3,
+  "Pontevedra": 7,
+  "Salamanca": 4,
+  "Santa Cruz de Tenerife": 7,
+  "Segovia": 3,
+  "Seville": 12,
+  "Soria": 2,
+  "Tarragona": 6,
+  "Teruel": 3,
+  "Toledo": 6,
+  "Valencia": 16,
+  "Valladolid": 5,
+  "Zamora": 3,
+  "Zaragoza": 7
+};
+
+
+/* ---- Party setup ---- */
+const PARTIES = ["PP", "PSOE", "Vox", "Sumar", "Podem", "SALF", "ERC", "JxCat", "EhB", "PNV", "BNG", "Cca", "UPN", "OTH"];
+const PARTY_COLORS = {"PP":"#1D84CE","PSOE":"#EF1C27","Vox":"#63BE21","Sumar":"#EF4B91","Podem":"#9269F5","SALF":"#785A46","ERC":"#FFB232","JxCat":"#00C7AE","EhB":"#00AC8E","PNV":"#4AAE4A","BNG":"#ADCFEF","Cca":"#FFD700","UPN":"#00599B","OTH":"#DADADA"};
+const GE2024 = {"PP":33.1,"PSOE":31.7,"Vox":12.4,"Sumar":12.3,"Podem":0.0,"SALF":0.0,"ERC":1.9,"JxCat":1.6,"EhB":1.4,"PNV":1.1,"BNG":0.6,"Cca":0.5,"UPN":0.2,"OTH":0};
+const DEFAULTS = {"PP":32.0,"PSOE":27.6,"Vox":18.0,"Sumar":6.1,"Podem":4.6,"SALF":1.5,"ERC":1.8,"JxCat":1.5,"EhB":1.3,"PNV":1.2,"BNG":0.9,"Cca":0.4,"UPN":0.2,"OTH":0};
+const PREV_2023 = {"PP":137,"PSOE":121,"Vox":33,"Sumar":31,"Podem":0,"SALF":0,"ERC":7,"JxCat":7,"EhB":6,"PNV":5,"BNG":1,"Cca":1,"UPN":1,"OTH":0};
+
+const parties = PARTIES.map(name => ({
+  name,
+  color: PARTY_COLORS[name] || "#999",
+  ge2024: GE2024[name],
+  votes: DEFAULTS[name],
+  final: 0
+}));
+
+/* ---- Render table ---- */
+function renderTable(){
+  const tbody=document.getElementById('tbody');
+  tbody.innerHTML=parties.map((p,i)=>`
+    <tr>
+      <td class="party-column" style="--party-color:${p.color}">${p.name}</td>
+      <td class="ge2024-column">${p.ge2024.toFixed(1)}%</td>
+<td>
+  ${p.name === "Others" ? `
+    <div class="input-wrapper">
+      <input type="number" id="votes-${i}" value="${p.votes.toFixed(1)}" disabled>
+      <span class="percent-sign">%</span>
+    </div>
+  ` : `
+    <div class="input-wrapper">
+      <input type="number" id="votes-${i}" value="${p.votes.toFixed(1)}" min="0" max="100" step="0.1">
+      <span class="percent-sign">%</span>
+    </div>
+  `}
+</td>
+      <td class="seats-column" id="seats-${i}">—</td>
+      <td class="diff-column" id="diff-${i}">—</td>
+    </tr>`).join('');
+
+  const inputs=document.querySelectorAll('.input-wrapper input');
+  inputs.forEach((input,index)=>{
+    let originalValue = input.value;
+
+    input.addEventListener('focus',()=>{
+      originalValue = input.value;
+      input.value='';
+    });
+    input.addEventListener('blur',()=>{
+      if(input.value==='') input.value = originalValue;
+    });
+
+    input.addEventListener('keydown',e=>{
+      if(e.key==='Enter'){e.preventDefault();if(inputs[index+1])inputs[index+1].focus();}
+    });
+    input.addEventListener('input',()=>{
+      updateVoteTotal();
+      document.getElementById('calculate').style.background='#ffa500';
+    });
+  });
+  updateVoteTotal();
+}
+
+function updateVoteTotal(){
+  let sum = 0;
+  parties.forEach((p,i)=>{
+    if(p.name !== "Others"){
+      sum += parseFloat(document.getElementById(`votes-${i}`).value) || 0;
+    }
+  });
+
+  const othersValue = Math.max(0, 100 - sum); // never below 0
+  const othersIndex = parties.findIndex(p => p.name === "Others");
+  if(othersIndex !== -1){
+    const othersInput = document.getElementById(`votes-${othersIndex}`);
+    if(othersInput){
+      othersInput.value = othersValue.toFixed(1);
+    }
+  }
+
+  document.getElementById('total-votes').textContent = (sum + othersValue).toFixed(1) + '%';
+}
+
+/* ---- Proportional swing ---- */
+function computeConstituencyShares(){
+  const target={};
+  PARTIES.forEach((n,i)=>target[n]=(parseFloat(document.getElementById(`votes-${i}`).value)||0)/100);
+  const base=BASELINE.baseline_national;const eps=1e-9;
+  return BASELINE.constituencies.map(row=>{
+    const out={name:row.name};let sum=0;
+    PARTIES.forEach(p=>{
+      const baseNat=base[p]??0;
+      const targetNat=target[p]??baseNat;
+      const ratio=(baseNat>eps)?(targetNat/baseNat):(targetNat>0?(targetNat/eps):0);
+      const val=(row[p]??0)*ratio;
+      out[p]=val;sum+=val;
+    });
+    if(sum>0)PARTIES.forEach(p=>out[p]=out[p]/sum);
+    return out;
+  });
+}
+
+/* ---- D’Hondt ---- */
+function dhondtSeats(votes,seats=6,nationalVotes,validParties){
+  const alloc=Object.fromEntries(validParties.map(p=>[p,0]));
+  for(let s=0;s<seats;s++){
+    const quotients=validParties.map(p=>({p,q:(votes[p]||0)/(alloc[p]+1)}));
+    let best=quotients[0];
+    for(let i=1;i<quotients.length;i++){
+      const x=quotients[i];
+      if(x.q>best.q||(Math.abs(x.q-best.q)<1e-12&&(nationalVotes[x.p]||0)>(nationalVotes[best.p]||0)))best=x;
+    }
+    alloc[best.p]+=1;
+  }
+  return alloc;
+}
+
+/* ---- Calculate ---- */
+function calculate(){
+  const nationalVotes={};
+  parties.forEach((p,i)=>{
+    p.votes=parseFloat(document.getElementById(`votes-${i}`).value)||0;
+    nationalVotes[p.name]=p.votes;
+  });
+
+  const perConst=computeConstituencyShares();
+  const totals=Object.fromEntries(PARTIES.map(p=>[p,0]));
+
+perConst.forEach(row => {
+  const sVotes = row; // local votes in this constituency
+
+  // 👇 Calculate total valid vote sum in this constituency
+  let totalVotes = 0;
+  PARTIES.forEach(p => totalVotes += sVotes[p] || 0);
+
+  // 👇 Apply a constituency-level threshold (e.g. 3% of local valid votes)
+  const validParties = PARTIES.filter(p => (sVotes[p] || 0) >= 0.03 * totalVotes);
+
+  // 👇 Allocate seats only among those parties
+  const s = dhondtSeats(sVotes, CONSTITUENCY_SEATS[row.name] || 6, nationalVotes, validParties);
+
+  PARTIES.forEach(p => totals[p] += (s[p] || 0));
+});
+
+  PARTIES.forEach((n,i)=>{
+    const seats=totals[n];
+    document.getElementById(`seats-${i}`).textContent=seats;
+    parties[i].final=seats;
+
+    const diff=seats-(PREV_2023[n]||0);
+    const diffCell=document.getElementById(`diff-${i}`);
+    if(diff>0){diffCell.textContent=`+${diff}`;diffCell.className='diff-column positive';}
+    else if(diff<0){diffCell.textContent=`${diff}`;diffCell.className='diff-column negative';}
+    else{diffCell.textContent='(=)';diffCell.className='diff-column equal';}
+  });
+
+  document.getElementById('total-seats').textContent=Object.values(totals).reduce((a,b)=>a+b,0);
+  document.getElementById('calculate').style.background='#008500';
+  updateCoalitionFromTotals(totals);
+}
+
+/* ---- Reset ---- */
+document.getElementById('reset').addEventListener('click',()=>{
+  parties.forEach((p,i)=>document.getElementById(`votes-${i}`).value=DEFAULTS[p.name].toFixed(1));
+  calculate();
+});
+document.getElementById('calculate').addEventListener('click',calculate);
+renderTable();
+document.addEventListener('DOMContentLoaded',()=>calculate());
+
+/* ---- Coalition Builder ---- */
+const COAL_TOTAL=350,COAL_MAJ=176;
+let selected=[];
+const legend=document.getElementById("legend"),overlay=document.getElementById("coalition-overlay"),counter=document.getElementById("counter");
+
+function toggleParty(n){
+  if(selected.includes(n))selected=selected.filter(x=>x!==n);
+  else selected.push(n);
+  renderCoalition(lastTotalsCache);
+}
+
+let lastTotalsCache=null;
+function updateCoalitionFromTotals(t){lastTotalsCache=t;renderCoalition(t);}
+
+function renderCoalition(t){
+  if(!t)return;
+overlay.innerHTML = "";
+legend.innerHTML = "";
+
+// 🟢 Only show parties that currently have seats
+const validParties = PARTIES.filter(n => (t[n] || 0) > 0);
+
+// ❌ Do NOT clear "selected" — this allows zero-seat parties to stay selected
+// selected = selected.filter(n => validParties.includes(n));
+
+validParties.forEach(n => {
+  const s = t[n] || 0;
+  const item = document.createElement('div');
+  item.className = 'legend-item' + (selected.includes(n) ? ' active' : '');
+  item.innerHTML = `<div class="legend-box" style="background:${PARTY_COLORS[n] || '#999'}"></div> <strong>${n}</strong> ${s}`;
+  item.onclick = () => toggleParty(n);
+  legend.appendChild(item);
+});
+
+  const totalSel=selected.reduce((s,n)=>s+(t[n]||0),0);
+  const width=(totalSel/COAL_TOTAL)*100;
+  overlay.style.width="0%";
+  overlay.innerHTML="";
+  if(totalSel>0){
+    selected.forEach(n=>{
+      const s=t[n]||0;
+      const seg=document.createElement('div');
+      seg.className='segment';
+      seg.style.flexBasis=((s/totalSel)*100)+'%';
+      seg.style.background=PARTY_COLORS[n]||"#999";
+      overlay.appendChild(seg);
+    });
+  }
+  requestAnimationFrame(()=>overlay.style.width=width+"%");
+  counter.textContent=`${totalSel} / ${COAL_TOTAL}`;
+  counter.style.color=totalSel>=COAL_MAJ?"#2BA84A":"#000";
+  document.querySelectorAll(".legend-item").forEach(el=>{
+    const n=el.querySelector("strong").textContent;
+    el.classList.toggle("active",selected.includes(n));
+  });
+}
+/* ---- Tab Switching (fixed state handling) ---- */
+const tabResult = document.getElementById("tab-result");
+const tab2023 = document.getElementById("tab-2023");
+let is2023View = false;
+let lastUserTotals = null; // store the most recent calculated result
+
+// --- patch: remember user totals whenever calculator runs ---
+const originalUpdateCoalitionFromTotals = updateCoalitionFromTotals;
+updateCoalitionFromTotals = function(t) {
+  if (!is2023View) lastUserTotals = t; // only store when user-generated
+  originalUpdateCoalitionFromTotals(t);
+};
+
+tabResult.addEventListener("click", () => {
+  if (!tabResult.classList.contains("active")) {
+    tabResult.classList.add("active");
+    tab2023.classList.remove("active");
+    is2023View = false;
+    document.getElementById("tab-pill").style.transform = "translateX(0%)";
+    updateCoalitionFromTotals(lastUserTotals || lastTotalsCache);
+  }
+});
+
+tab2023.addEventListener("click", () => {
+  if (!tab2023.classList.contains("active")) {
+    tab2023.classList.add("active");
+    tabResult.classList.remove("active");
+    is2023View = true;
+    document.getElementById("tab-pill").style.transform = "translateX(100%)";
+    originalUpdateCoalitionFromTotals(PREV_2023);
+  }
+});
+
+
+
+</script>
+</body>
+</html>
