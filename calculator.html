@@ -441,7 +441,7 @@ function renderTable(){
       <td class="party-column" style="--party-color:${p.color}">${p.name}</td>
       <td class="ge2024-column">${p.ge2024.toFixed(1)}%</td>
 <td>
-  ${p.name === "Others" ? `
+  ${p.name === "OTH" ? `
     <div class="input-wrapper">
       <input type="number" id="votes-${i}" value="${p.votes.toFixed(1)}" disabled>
       <span class="percent-sign">%</span>
@@ -483,13 +483,13 @@ function renderTable(){
 function updateVoteTotal(){
   let sum = 0;
   parties.forEach((p,i)=>{
-    if(p.name !== "Others"){
+    if(p.name !== "OTH"){
       sum += parseFloat(document.getElementById(`votes-${i}`).value) || 0;
     }
   });
 
   const othersValue = Math.max(0, 100 - sum); // never below 0
-  const othersIndex = parties.findIndex(p => p.name === "Others");
+  const othersIndex = parties.findIndex(p => p.name === "OTH");
   if(othersIndex !== -1){
     const othersInput = document.getElementById(`votes-${othersIndex}`);
     if(othersInput){
