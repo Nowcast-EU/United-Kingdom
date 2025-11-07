@@ -302,11 +302,11 @@ tfoot td {
   line-height: 1.4;
 }
 
-  #constituency-bars .bar-row {
+#constituency-bars .bar-row {
   display: flex;
   align-items: center;
   margin-bottom: 6px;
-  height: 22px;
+  height: 24px;
 }
 
 #constituency-bars .bar-label {
@@ -317,22 +317,27 @@ tfoot td {
   color: #111;
 }
 
-#constituency-bars .bar {
+#constituency-bars .bar-container {
+  flex: 1;
   height: 100%;
+  background: #e5e7eb;
   border-radius: 4px;
-  flex-grow: 1;
   position: relative;
+  overflow: hidden;
 }
 
-#constituency-bars .bar span {
-  position: absolute;
-  right: 4px;
-  top: 0;
-  bottom: 0;
+#constituency-bars .bar-fill {
+  height: 100%;
+  border-radius: 4px 0 0 4px;
+  transition: width 0.6s ease;
+}
+
+#constituency-bars .bar-value {
   font-size: 12px;
-  color: #fff;
-  display: flex;
-  align-items: center;
+  color: #111;
+  margin-left: 6px;
+  min-width: 38px;
+  text-align: left;
 }
 
 </style>
@@ -2005,42 +2010,41 @@ tab2023.addEventListener("click", () => {
   }
 });
 
-  // Populate constituency dropdown
-const select = document.getElementById('constituency-select');
+// === Constituency results viewer (scaled bars) ===
+const constituencySelect = document.getElementById('constituency-select');
 BASELINE.constituencies.forEach((c, i) => {
-  const option = document.createElement('option');
-  option.value = i;
-  option.textContent = c.name;
-  select.appendChild(option);
+  const opt = document.createElement('option');
+  opt.value = i;
+  opt.textContent = c.name;
+  constituencySelect.appendChild(opt);
 });
 
-const barsContainer = document.getElementById('constituency-bars');
+const barsDiv = document.getElementById('constituency-bars');
 const winnerText = document.getElementById('winner-text');
 
-select.addEventListener('change', e => {
+constituencySelect.addEventListener('change', e => {
   const index = e.target.value;
-  barsContainer.innerHTML = '';
+  barsDiv.innerHTML = '';
   winnerText.textContent = '';
 
-  if (index === "") return;
+  if (index === '') return;
 
   const data = BASELINE.constituencies[index];
 
-  // Filter out parties with 0 votes
-  const partyResults = Object.entries(data)
-    .filter(([party, val]) => party !== 'name' && val > 0)
-    .map(([party, val]) => ({ party, val }));
+  // Only include parties with votes > 0
+  const results = Object.entries(data)
+    .filter(([p, v]) => p !== 'name' && v > 0)
+    .map(([p, v]) => ({ party: p, value: v }))
+    .sort((a, b) => b.value - a.value);
 
-  // Sort descending
-  partyResults.sort((a, b) => b.val - a.val);
+  // Display winner
+  const winner = results[0];
+  winnerText.textContent = `🏆 Winner: ${winner.party} (${(winner.value * 100).toFixed(1)}%)`;
 
-  // Find the winner
-  const winner = partyResults[0];
-  winnerText.textContent = `🏆 Winner: ${winner.party} (${(winner.val * 100).toFixed(1)}%)`;
+  // Draw bars
+  results.forEach(({ party, value }) => {
+    const percent = (value * 100).toFixed(1);
 
-  // Render bars
-  partyResults.forEach(({ party, val }) => {
-    const percent = (val * 100).toFixed(1);
     const row = document.createElement('div');
     row.className = 'bar-row';
 
@@ -2048,21 +2052,25 @@ select.addEventListener('change', e => {
     label.className = 'bar-label';
     label.textContent = party;
 
-    const bar = document.createElement('div');
-    bar.className = 'bar';
-    bar.style.width = `${percent}%`;
+    const barContainer = document.createElement('div');
+    barContainer.className = 'bar-container';
 
-    // Optional: match party color from table if available
+    const barFill = document.createElement('div');
+    barFill.className = 'bar-fill';
+    barFill.style.width = `${percent}%`;
+
     const partyData = parties.find(p => p.name === party);
-    bar.style.background = partyData ? partyData.color : '#888';
+    barFill.style.background = partyData ? partyData.color : '#777';
 
-    const text = document.createElement('span');
-    text.textContent = `${percent}%`;
+    const valueText = document.createElement('div');
+    valueText.className = 'bar-value';
+    valueText.textContent = `${percent}%`;
 
-    bar.appendChild(text);
+    barContainer.appendChild(barFill);
     row.appendChild(label);
-    row.appendChild(bar);
-    barsContainer.appendChild(row);
+    row.appendChild(barContainer);
+    row.appendChild(valueText);
+    barsDiv.appendChild(row);
   });
 });
 
