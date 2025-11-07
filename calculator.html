@@ -1772,6 +1772,14 @@ perConst.forEach(row => {
   document.getElementById('total-seats').textContent=Object.values(totals).reduce((a,b)=>a+b,0);
   document.getElementById('calculate').style.background='#008500';
   updateCoalitionFromTotals(totals);
+  
+  // ---- Dynamic majority threshold (UK style) ----
+const totalSeats = Object.values(totals).reduce((a,b)=>a+b,0);
+const sfnSeats = totals["SFN"] || 0;
+const majoritySeats = Math.ceil((totalSeats - sfnSeats) / 2);
+
+// update the note text dynamically
+document.querySelector(".note").textContent = `Note: functional majority = ${majoritySeats} seats`;
 }
 
 /* ---- Reset ---- */
