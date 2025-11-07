@@ -300,10 +300,10 @@ tfoot td {
   <div class="legend" id="legend"></div>
   <div class="bar-container" id="bar">
     <div class="coalition-overlay" id="coalition-overlay"></div>
-    <div class="majority-line" title="Majority (176 seats)"></div>
+    <div class="majority-line" title="Majority (326 seats)"></div>
   </div>
-  <div class="counter" id="counter">0 / 350</div>
-  <div class="note">Majority = 176 seats</div>
+  <div class="counter" id="counter">0 / 650</div>
+  <div class="note">Majority = 326 seats</div>
 </div>
 
 <script>
@@ -1784,7 +1784,7 @@ renderTable();
 document.addEventListener('DOMContentLoaded',()=>calculate());
 
 /* ---- Coalition Builder ---- */
-const COAL_TOTAL=350,COAL_MAJ=176;
+const COAL_TOTAL=650,COAL_MAJ=326;
 let selected=[];
 const legend=document.getElementById("legend"),overlay=document.getElementById("coalition-overlay"),counter=document.getElementById("counter");
 
