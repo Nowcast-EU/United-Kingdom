@@ -41,37 +41,39 @@
     }
   }
 
-  h1, h2.subtitle {
+/* --- Shared title + subtitle styling --- */
+h1, h2.subtitle {
   display: block;
-  margin: 0 auto;
-  text-align: center;
-  white-space: nowrap;      /* stay on one line */
-  overflow: hidden;         /* prevent text wrapping */
-  text-overflow: ellipsis;  /* hide overflow gracefully */
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;        /* centers text inside element */
+  overflow-wrap: break-word; /* allow wrapping if too long */
+  white-space: normal;       /* allow wrapping (not single-line) */
+  max-width: 60%;            /* limit width on desktop */
 }
 
-/* --- Main title --- */
+/* --- Title --- */
 h1 {
   font-weight: 600;
-  margin: 28px 0 4px 0;
-  font-size: clamp(1.1rem, 4vw, 1.9rem);
-  line-height: 1.2;
-  width: 60%;               /* desktop width constraint */
+  font-size: clamp(1.2rem, 4vw, 2rem);
+  line-height: 1.25;
+  margin-top: 100px;         /* roughly centers it vertically — tweak as desired */
+  margin-bottom: 8px;
 }
 
 /* --- Subtitle --- */
 h2.subtitle {
   font-weight: 400;
   color: #555;
-  margin: 0 0 20px 0;
-  font-size: clamp(0.9rem, 3vw, 1.3rem);
-  width: 60%;               /* desktop width constraint */
+  font-size: clamp(1rem, 3vw, 1.4rem);
+  margin-top: 0;
+  margin-bottom: 40px;
 }
 
-/* --- Mobile view adjustments --- */
+/* --- Mobile view: expand width to 90% --- */
 @media (max-width: 768px) {
   h1, h2.subtitle {
-    width: 90%;             /* expands to 90% of screen on mobile */
+    max-width: 90%;
   }
 }
 
