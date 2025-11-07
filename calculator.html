@@ -70,10 +70,21 @@ h2.subtitle {
   margin-bottom: 16px;       /* 👈 smaller gap before table */
 }
 
+h2.subtitle a {
+  color: #008500;           /* match your calculator accent green */
+  text-decoration: underline; /* underline links */
+  font-style: italic;         /* ensure italic */
+  transition: color 0.2s ease;
+}
+
+h2.subtitle a:hover {
+  color: #005f00;           /* slightly darker green on hover */
+}
+
 /* --- Mobile view: expand width to 90% --- */
 @media (max-width: 768px) {
   h1, h2.subtitle {
-    max-width: 90%;
+    max-width: 99%;
   }
 }
 
@@ -287,7 +298,11 @@ tfoot td {
 
 <body>
 <h1>Nowcast UK Interactive Seat Calculator</h1>
-<h2 class="subtitle">For the latest polling & projection averages, visit www.nowcast.uk</h2>
+<h2 class="subtitle">
+  For the latest polling & projection averages, visit 
+  <a href="https://www.nowcast.uk" target="_blank"><em>www.nowcast.uk</em></a>
+</h2>
+
   
 <table>
   <thead>
