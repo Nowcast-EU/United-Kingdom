@@ -293,6 +293,15 @@ tfoot td {
   }
 }
 
+  .disclaimer {
+  text-align: center;
+  font-style: italic;
+  color: #999999;
+  font-size: 13px;
+  margin-top: 16px;
+  line-height: 1.4;
+}
+
 </style>
 </head>
 
@@ -350,6 +359,10 @@ tfoot td {
   <div class="counter" id="counter">0 / 650</div>
   <div class="note">Majority = 326 seats</div>
 </div>
+
+<p class="disclaimer">
+  ** This calculator is a simplified version of the Nowcast UK model. Certain features that can't be included such as vote concentration, incumbent effects, and demographic weighting mean some projections may differ from our bi-monthly tracker.
+</p>
 
 <script>
 const BASELINE = {"baseline_national": {"LAB": 0.1781, "CON": 0.1691, "RFM": 0.2931, "LDM": 0.1267, "GRN": 0.1312, "SNP": 0.0280, "PLC": 0.0120, "SFN": 0.0070, "DUP": 0.0060, "ALL": 0.0040, "UUP": 0.0030, "SDL": 0.0030, "TUV": 0.0020, "OTH": 0.0390},
@@ -1828,13 +1841,27 @@ document.querySelector(".note").textContent = `Note: functional majority = ${maj
 }
 
 /* ---- Reset ---- */
-document.getElementById('reset').addEventListener('click',()=>{
-  parties.forEach((p,i)=>document.getElementById(`votes-${i}`).value=DEFAULTS[p.name].toFixed(1));
+document.getElementById('reset').addEventListener('click', () => {
+  // Reset each party’s vote input to its default baseline
+  parties.forEach((p, i) => {
+    const input = document.getElementById(`votes-${i}`);
+    if (input) input.value = DEFAULTS[p.name].toFixed(1);
+  });
+
+  // Run full recalculation (this updates everything, including totals)
   calculate();
+
+  // Force refresh of footer total votes just to ensure consistency
+  let totalVotes = 0;
+  parties.forEach((p, i) => {
+    const v = parseFloat(document.getElementById(`votes-${i}`).value) || 0;
+    totalVotes += v;
+  });
+  document.getElementById('total-votes').textContent = totalVotes.toFixed(1) + '%';
 });
-document.getElementById('calculate').addEventListener('click',calculate);
+document.getElementById('calculate').addEventListener('click', calculate);
 renderTable();
-document.addEventListener('DOMContentLoaded',()=>calculate());
+document.addEventListener('DOMContentLoaded', () => calculate());
 
 /* ---- Coalition Builder ---- */
 const COAL_TOTAL=650,COAL_MAJ=326;
