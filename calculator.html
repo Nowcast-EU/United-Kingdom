@@ -46,10 +46,10 @@ h1, h2.subtitle {
   display: block;
   margin-left: auto;
   margin-right: auto;
-  text-align: center;        /* centers text inside element */
-  overflow-wrap: break-word; /* allow wrapping if too long */
-  white-space: normal;       /* allow wrapping (not single-line) */
-  max-width: 60%;            /* limit width on desktop */
+  text-align: center;
+  overflow-wrap: break-word; /* allow wrapping if text is long */
+  white-space: normal;       /* wrap onto new lines if needed */
+  max-width: 60%;            /* 60% of screen on desktop */
 }
 
 /* --- Title --- */
@@ -57,17 +57,17 @@ h1 {
   font-weight: 600;
   font-size: clamp(1.2rem, 4vw, 2rem);
   line-height: 1.25;
-  margin-top: 100px;         /* roughly centers it vertically — tweak as desired */
-  margin-bottom: 8px;
+  margin-top: 24px;          /* 👈 reduced top margin */
+  margin-bottom: 4px;        /* 👈 minimal gap before subtitle */
 }
 
 /* --- Subtitle --- */
 h2.subtitle {
   font-weight: 400;
   color: #555;
-  font-size: clamp(1rem, 3vw, 1.4rem);
+  font-size: clamp(1rem, 3vw, 1.3rem);
   margin-top: 0;
-  margin-bottom: 40px;
+  margin-bottom: 16px;       /* 👈 smaller gap before table */
 }
 
 /* --- Mobile view: expand width to 90% --- */
