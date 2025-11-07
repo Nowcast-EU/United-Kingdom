@@ -2066,15 +2066,15 @@ tab2023.addEventListener("click", () => {
   }
 });
 
-// === Constituency results viewer (single autocomplete dropdown) ===
+// === Constituency results viewer (working autocomplete dropdown) ===
 const constituencyInput = document.getElementById('constituency-input');
 const constituencyList = document.getElementById('constituency-list');
 const barsDiv = document.getElementById('constituency-bars');
 const winnerText = document.getElementById('winner-text');
 
-// Populate dropdown on focus and filter dynamically
 const allConstituencies = BASELINE.constituencies.map((c, i) => ({ name: c.name, index: i }));
 
+// --- Build the visible dropdown list ---
 function renderList(matches) {
   constituencyList.innerHTML = '';
   if (matches.length === 0) {
@@ -2092,27 +2092,31 @@ function renderList(matches) {
   constituencyList.style.display = 'block';
 }
 
+// --- Filter the list as the user types ---
 function filterList(term) {
   const lowerTerm = term.toLowerCase();
   const matches = allConstituencies.filter(c => c.name.toLowerCase().includes(lowerTerm));
   renderList(matches);
 }
 
+// Show full list when the user focuses
 constituencyInput.addEventListener('focus', () => {
   renderList(allConstituencies);
 });
 
+// Filter dynamically
 constituencyInput.addEventListener('input', e => {
   filterList(e.target.value);
 });
 
+// Close dropdown when clicking outside
 document.addEventListener('click', e => {
   if (!e.target.closest('#constituency-selector')) {
     constituencyList.style.display = 'none';
   }
 });
 
-// When user clicks on a result
+// --- When a constituency is clicked from the list ---
 constituencyList.addEventListener('click', e => {
   if (e.target.tagName === 'LI') {
     const index = e.target.dataset.index;
@@ -2121,7 +2125,7 @@ constituencyList.addEventListener('click', e => {
     constituencyInput.value = name;
     constituencyList.style.display = 'none';
 
-    // Draw bars
+    // Generate constituency bar chart
     const data = BASELINE.constituencies[index];
     barsDiv.innerHTML = '';
     winnerText.textContent = '';
