@@ -41,11 +41,38 @@
     }
   }
 
-  h1 {
-    text-align: center;
-    font-weight: 600;
-    font-size: 1.6rem;
-    margin: 28px 0 12px 0;
+  h1, h2.subtitle {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  white-space: nowrap;      /* stay on one line */
+  overflow: hidden;         /* prevent text wrapping */
+  text-overflow: ellipsis;  /* hide overflow gracefully */
+}
+
+/* --- Main title --- */
+h1 {
+  font-weight: 600;
+  margin: 28px 0 4px 0;
+  font-size: clamp(1.1rem, 4vw, 1.9rem);
+  line-height: 1.2;
+  width: 60%;               /* desktop width constraint */
+}
+
+/* --- Subtitle --- */
+h2.subtitle {
+  font-weight: 400;
+  color: #555;
+  margin: 0 0 20px 0;
+  font-size: clamp(0.9rem, 3vw, 1.3rem);
+  width: 60%;               /* desktop width constraint */
+}
+
+/* --- Mobile view adjustments --- */
+@media (max-width: 768px) {
+  h1, h2.subtitle {
+    width: 90%;             /* expands to 90% of screen on mobile */
   }
 
   table { 
@@ -258,6 +285,7 @@ tfoot td {
 
 <body>
 <h1>House of Commons | Nowcast UK Interactive Seat Calculator</h1>
+<h2 class="subtitle">For the latest polling & projection averages, visit nowcast.uk</h2>
   
 <table>
   <thead>
