@@ -302,19 +302,25 @@ tfoot td {
   line-height: 1.4;
 }
 
+/* --- Constituency bar chart layout --- */
 #constituency-bars .bar-row {
   display: flex;
-  align-items: center;
-  margin-bottom: 6px;
-  height: 24px;
+  align-items: center;          /* ensures vertical centring */
+  margin-bottom: 8px;
+  height: 26px;
 }
 
 #constituency-bars .bar-label {
-  width: 60px;
+  width: 65px;
   text-align: right;
   font-size: 13px;
+  font-weight: 600;             /* bold */
   margin-right: 8px;
   color: #111;
+  line-height: 1;               /* keeps it visually centred */
+  display: flex;
+  align-items: center;          /* vertically centre text */
+  justify-content: flex-end;
 }
 
 #constituency-bars .bar-container {
@@ -324,6 +330,8 @@ tfoot td {
   border-radius: 4px;
   position: relative;
   overflow: hidden;
+  display: flex;
+  align-items: center;          /* vertically align the fill */
 }
 
 #constituency-bars .bar-fill {
@@ -333,11 +341,27 @@ tfoot td {
 }
 
 #constituency-bars .bar-value {
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 600;             /* bold */
   color: #111;
   margin-left: 6px;
-  min-width: 38px;
+  min-width: 42px;
   text-align: left;
+  line-height: 1;
+  display: flex;
+  align-items: center;          /* vertical centring */
+}
+
+#constituency-selector {
+  max-width: 650px;  /* same width as bars */
+  margin: 0 auto;
+}
+
+#constituency-search, 
+#constituency-select {
+  width: 100%;
+  font-size: 14px;
+  box-sizing: border-box;
 }
 
 </style>
@@ -399,13 +423,19 @@ tfoot td {
 </div>
 
   <div id="constituency-results" style="margin-top: 40px;">
-  <h3 style="text-align:center;">Constituency Results Viewer</h3>
+  <h3 style="text-align:center;">Constituency Results (User Generated)</h3>
 
-  <div style="text-align:center; margin-bottom:12px;">
-    <select id="constituency-select" style="padding:6px; border-radius:6px; font-size:14px;">
-      <option value="">Select a constituency...</option>
-    </select>
-  </div>
+<div id="constituency-selector" style="text-align:center; margin-bottom:12px;">
+  <input 
+    type="text" 
+    id="constituency-search" 
+    placeholder="Type to search constituency..." 
+    style="padding:6px; border-radius:6px; font-size:14px; width:100%; box-sizing:border-box; margin-bottom:6px;"
+  />
+  <select id="constituency-select" style="padding:6px; border-radius:6px; font-size:14px; width:100%; box-sizing:border-box;">
+    <option value="">Select a constituency...</option>
+  </select>
+</div>
 
   <div id="constituency-bars" style="max-width:600px; margin:0 auto;"></div>
   <p id="winner-text" style="text-align:center; font-weight:bold; margin-top:12px;"></p>
@@ -2010,13 +2040,31 @@ tab2023.addEventListener("click", () => {
   }
 });
 
-// === Constituency results viewer (scaled bars) ===
+// === Constituency results viewer (scaled bars + searchable dropdown) ===
 const constituencySelect = document.getElementById('constituency-select');
+const constituencySearch = document.getElementById('constituency-search');
+
+// Populate dropdown
 BASELINE.constituencies.forEach((c, i) => {
   const opt = document.createElement('option');
   opt.value = i;
   opt.textContent = c.name;
   constituencySelect.appendChild(opt);
+});
+
+// Live filtering based on search box
+constituencySearch.addEventListener('input', e => {
+  const term = e.target.value.toLowerCase();
+  constituencySelect.innerHTML = '<option value="">Select a constituency...</option>';
+  
+  BASELINE.constituencies.forEach((c, i) => {
+    if (c.name.toLowerCase().includes(term)) {
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = c.name;
+      constituencySelect.appendChild(opt);
+    }
+  });
 });
 
 const barsDiv = document.getElementById('constituency-bars');
