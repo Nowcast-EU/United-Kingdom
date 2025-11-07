@@ -1812,7 +1812,7 @@ function renderCoalition(t){
   const totalSeats = Object.values(t).reduce((a,b)=>a+b,0);
   const sfnSeats = t["SFN"] || 0;
   const majoritySeats = Math.ceil((totalSeats - sfnSeats) / 2);
-  document.querySelector(".note").textContent = `Majority = ${majoritySeats} seats`;
+  document.querySelector(".note").textContent = `Note: functional majority = ${majoritySeats} seats`;
   
 overlay.innerHTML = "";
 legend.innerHTML = "";
