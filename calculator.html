@@ -1929,17 +1929,16 @@ document.getElementById('reset').addEventListener('click', () => {
     if (input) input.value = DEFAULTS[p.name].toFixed(1);
   });
 
-  // Run full recalculation (this updates everything, including totals)
+  // Run full recalculation (this updates seats, diffs, etc.)
   calculate();
 
-  // Force refresh of footer total votes just to ensure consistency
-  let totalVotes = 0;
-  parties.forEach((p, i) => {
-    const v = parseFloat(document.getElementById(`votes-${i}`).value) || 0;
-    totalVotes += v;
-  });
-  document.getElementById('total-votes').textContent = totalVotes.toFixed(1) + '%';
+  // ✅ Recalculate total votes and OTH using the weighting logic
+  updateVoteTotal();
+
+  // ✅ Restore button color to green
+  document.getElementById('calculate').style.background = '#008500';
 });
+  
 document.getElementById('calculate').addEventListener('click', calculate);
 renderTable();
 document.addEventListener('DOMContentLoaded', () => calculate());
