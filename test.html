@@ -1706,13 +1706,11 @@ const parties = PARTIES.map(name => ({
 }));
 
 /* ---- Render table ---- */
-function renderTable(){
+function renderTable() {
   const tbody = document.getElementById('tbody');
 
-  const htmlParts = [];
-
-  parties.forEach((p, i) => {
-    htmlParts.push(`
+  tbody.innerHTML = parties.map((p, i) => {
+    let row = `
       <tr>
         <td class="party-column" style="--party-color:${p.color}">${p.name}</td>
         <td class="ge2024-column">${p.ge2024.toFixed(1)}%</td>
@@ -1732,19 +1730,20 @@ function renderTable(){
         <td class="seats-column" id="seats-${i}">—</td>
         <td class="diff-column" id="diff-${i}">—</td>
       </tr>
-    `);
+    `;
 
-    // --- Divider rows ---
+    // --- Inject divider rows right after certain parties ---
     if (p.name === "GRN") {
-      htmlParts.push(`<tr class="divider-row"><td colspan="5">Scotland Parties</td></tr>`);
+      row += `<tr class="divider-row"><td colspan="5">Scotland Parties</td></tr>`;
     }
     if (p.name === "PLC") {
-      htmlParts.push(`<tr class="divider-row"><td colspan="5">Northern Ireland Parties</td></tr>`);
+      row += `<tr class="divider-row"><td colspan="5">Northern Ireland Parties</td></tr>`;
     }
-  });
 
-  tbody.innerHTML = htmlParts.join('');
+    return row;
+  }).join('');
 
+  // ✅ keep your original input logic below unchanged
   const inputs = document.querySelectorAll('.input-wrapper input');
   inputs.forEach((input, index) => {
     let originalValue = input.value;
@@ -1768,29 +1767,7 @@ function renderTable(){
       document.getElementById('calculate').style.background = '#ffa500';
     });
   });
-  updateVoteTotal();
-}
 
-  const inputs=document.querySelectorAll('.input-wrapper input');
-  inputs.forEach((input,index)=>{
-    let originalValue = input.value;
-
-    input.addEventListener('focus',()=>{
-      originalValue = input.value;
-      input.value='';
-    });
-    input.addEventListener('blur',()=>{
-      if(input.value==='') input.value = originalValue;
-    });
-
-    input.addEventListener('keydown',e=>{
-      if(e.key==='Enter'){e.preventDefault();if(inputs[index+1])inputs[index+1].focus();}
-    });
-    input.addEventListener('input',()=>{
-      updateVoteTotal();
-      document.getElementById('calculate').style.background='#ffa500';
-    });
-  });
   updateVoteTotal();
 }
 
