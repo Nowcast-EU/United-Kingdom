@@ -211,6 +211,17 @@ tfoot td {
   vertical-align: middle;
 }
 
+  /* --- Divider row styling --- */
+.divider-row td {
+  text-align: center;
+  font-weight: 600;
+  background-color: #f9fafb;
+  color: #333;
+  font-size: 13px;
+  height: 10px;
+  border-top: 2px solid #ccc;
+  border-bottom: 2px solid #ccc;
+}
 
 /* --- Responsive rectangular tab switcher --- */
 /* --- Final rectangular tab switcher --- */
@@ -372,7 +383,7 @@ tfoot td {
 </p>
 
 <script>
-const BASELINE = {"baseline_national": {"LAB": 0.1781, "CON": 0.1691, "RFM": 0.2931, "LDM": 0.1267, "GRN": 0.1312, "SNP": 0.0280, "PLC": 0.0120, "SFN": 0.0070, "DUP": 0.0060, "ALL": 0.0040, "UUP": 0.0030, "SDL": 0.0030, "TUV": 0.0020, "OTH": 0.0390},
+const BASELINE = {"baseline_national": {"LAB": 0.1781, "CON": 0.1691, "RFM": 0.2931, "LDM": 0.1267, "GRN": 0.1312, "SNP": 0.33, "PLC": 0.23, "SFN": 0.27, "DUP": 0.221, "ALL": 0.15, "UUP": 0.122, "SDL": 0.111, "TUV": 0.062, "OTH": 0.0390},
     
  "constituencies": [ { "name": "Aldershot", "LAB": 0.235, "CON": 0.213, "RFM": 0.354, "LDM": 0.088, "GRN": 0.103, "SNP": 0.0, "PLC": 0.0, "SFN": 0.0, "DUP": 0.0, "ALL": 0.0, "UUP": 0.0, "SDL": 0.0, "TUV": 0.0, "OTH": 0.007 },
   { "name": "Aldridge-Brownhills", "LAB": 0.138, "CON": 0.273, "RFM": 0.455, "LDM": 0.048, "GRN": 0.087, "SNP": 0.0, "PLC": 0.0, "SFN": 0.0, "DUP": 0.0, "ALL": 0.0, "UUP": 0.0, "SDL": 0.0, "TUV": 0.0, "OTH": 0.0 },
@@ -1682,8 +1693,8 @@ const CONSTITUENCY_SEATS = {
 /* ---- Party setup ---- */
 const PARTIES = ["LAB", "CON", "RFM", "LDM", "GRN", "SNP", "PLC", "SFN", "DUP", "ALL", "UUP", "SDL", "TUV", "OTH"];
 const PARTY_COLORS = {"LAB":"#E4003B","CON":"#0087DC","RFM":"#23C7DF","LDM":"#FAA61A","GRN":"#6AB023","SNP":"#FDF38E","PLC":"#005B54","SFN":"#326760","DUP":"#D46A4C","ALL":"#F6CB2F","UUP":"#48A5EE","SDL":"#2AA82C","TUV":"#0C3A6A","OTH":"#DADADA"};
-const GE2024 = {"LAB":33.7,"CON":23.7,"RFM":14.3,"LDM":12.2,"GRN":6.4,"SNP":2.5,"PLC":0.7,"SFN":0.7,"DUP":0.6,"ALL":0.4,"UUP":0.3,"SDL":0.3,"TUV":0.2,"OTH":3.7};
-const DEFAULTS = {"LAB":18.0,"CON":17.0,"RFM":29.0,"LDM":13.0,"GRN":13.0,"SNP":2.7,"PLC":1.2,"SFN":0.7,"DUP":0.6,"ALL":0.4,"UUP":0.3,"SDL":0.3,"TUV":0.2,"OTH":3.6};
+const GE2024 = {"LAB":33.7,"CON":23.7,"RFM":14.3,"LDM":12.2,"GRN":6.4,"SNP":30.0,"PLC":14.8,"SFN":27.0,"DUP":22.1,"ALL":15.0,"UUP":12.2,"SDL":11.1,"TUV":6.2,"OTH":3.7};
+const DEFAULTS = {"LAB":18.0,"CON":17.0,"RFM":29.0,"LDM":13.0,"GRN":13.0,"SNP":33.0,"PLC":23.0,"SFN":27.0,"DUP":22.1,"ALL":15.0,"UUP":12.2,"SDL":11.1,"TUV":6.2,"OTH":3.6};
 const PREV_2023 = {"LAB":411,"CON":121,"RFM":5,"LDM":72,"GRN":4,"SNP":9,"PLC":4,"SFN":7,"DUP":5,"ALL":1,"UUP":1,"SDL":2,"TUV":1,"OTH":7};
 
 const parties = PARTIES.map(name => ({
@@ -1695,70 +1706,133 @@ const parties = PARTIES.map(name => ({
 }));
 
 /* ---- Render table ---- */
-function renderTable(){
-  const tbody=document.getElementById('tbody');
-  tbody.innerHTML=parties.map((p,i)=>`
+function renderTable() {
+  const tbody = document.getElementById('tbody');
+
+tbody.innerHTML = parties.map((p, i) => {
+  // 🟩 Skip OTH for now — we’ll insert it manually after GRN
+  if (p.name === "OTH") return "";
+
+  let row = `
     <tr>
       <td class="party-column" style="--party-color:${p.color}">${p.name}</td>
       <td class="ge2024-column">${p.ge2024.toFixed(1)}%</td>
-<td>
-  ${p.name === "OTH" ? `
-    <div class="input-wrapper">
-      <input type="number" id="votes-${i}" value="${p.votes.toFixed(1)}" disabled>
-      <span class="percent-sign">%</span>
-    </div>
-  ` : `
-    <div class="input-wrapper">
-      <input type="number" id="votes-${i}" value="${p.votes.toFixed(1)}" min="0" max="100" step="0.1">
-      <span class="percent-sign">%</span>
-    </div>
-  `}
-</td>
+      <td>
+        ${p.name === "OTH" ? `
+          <div class="input-wrapper">
+            <input type="number" id="votes-${i}" value="${p.votes.toFixed(1)}" disabled>
+            <span class="percent-sign">%</span>
+          </div>
+        ` : `
+          <div class="input-wrapper">
+            <input type="number" id="votes-${i}" value="${p.votes.toFixed(1)}" min="0" max="100" step="0.1">
+            <span class="percent-sign">%</span>
+          </div>
+        `}
+      </td>
       <td class="seats-column" id="seats-${i}">—</td>
       <td class="diff-column" id="diff-${i}">—</td>
-    </tr>`).join('');
+    </tr>
+  `;
 
-  const inputs=document.querySelectorAll('.input-wrapper input');
-  inputs.forEach((input,index)=>{
+  // --- Insert OTH row right after GRN ---
+  if (p.name === "GRN") {
+    // find OTH’s index
+    const othIndex = parties.findIndex(x => x.name === "OTH");
+    const oth = parties[othIndex];
+    if (oth) {
+      row += `
+        <tr>
+          <td class="party-column" style="--party-color:${oth.color}">${oth.name}</td>
+          <td class="ge2024-column">${oth.ge2024.toFixed(1)}%</td>
+          <td>
+            <div class="input-wrapper">
+              <input type="number" id="votes-${othIndex}" value="${oth.votes.toFixed(1)}" disabled>
+              <span class="percent-sign">%</span>
+            </div>
+          </td>
+          <td class="seats-column" id="seats-${othIndex}">—</td>
+          <td class="diff-column" id="diff-${othIndex}">—</td>
+        </tr>
+      `;
+    }
+
+    // now add the divider row for Scotland
+    row += `<tr class="divider-row"><td colspan="5"><i>Vote share in Scotland and Wales</i></td></tr>`;
+  }
+
+  if (p.name === "PLC") {
+    row += `<tr class="divider-row"><td colspan="5"><i>Vote share in Northern Ireland</i></td></tr>`;
+  }
+
+  return row;
+}).join('');
+
+  // ✅ keep your original input logic below unchanged
+  const inputs = document.querySelectorAll('.input-wrapper input');
+  inputs.forEach((input, index) => {
     let originalValue = input.value;
 
-    input.addEventListener('focus',()=>{
+    input.addEventListener('focus', () => {
       originalValue = input.value;
-      input.value='';
+      input.value = '';
     });
-    input.addEventListener('blur',()=>{
-      if(input.value==='') input.value = originalValue;
+    input.addEventListener('blur', () => {
+      if (input.value === '') input.value = originalValue;
     });
 
-    input.addEventListener('keydown',e=>{
-      if(e.key==='Enter'){e.preventDefault();if(inputs[index+1])inputs[index+1].focus();}
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (inputs[index + 1]) inputs[index + 1].focus();
+      }
     });
-    input.addEventListener('input',()=>{
+    input.addEventListener('input', () => {
       updateVoteTotal();
-      document.getElementById('calculate').style.background='#ffa500';
+      document.getElementById('calculate').style.background = '#ffa500';
     });
   });
+
   updateVoteTotal();
 }
 
-function updateVoteTotal(){
-  let sum = 0;
-  parties.forEach((p,i)=>{
-    if(p.name !== "OTH"){
-      sum += parseFloat(document.getElementById(`votes-${i}`).value) || 0;
+function updateVoteTotal() {
+  // --- Weight multipliers for total and OTH calculation ---
+  const WEIGHTS = {
+    "SNP": 0.084, 
+    "PLC": 0.05,   
+    "PLC": 0.05,   
+    "SFN": 0.025,  
+    "DUP": 0.025,
+    "ALL": 0.025,
+    "UUP": 0.025,
+    "SDL": 0.025,
+    "TUV": 0.025
+  };
+
+  let weightedSum = 0;
+
+  parties.forEach((p, i) => {
+    if (p.name !== "OTH") {
+      const rawValue = parseFloat(document.getElementById(`votes-${i}`).value) || 0;
+      const weight = WEIGHTS[p.name] || 1;  // 👈 Default weight = 1 (no change)
+      weightedSum += rawValue * weight;
     }
   });
 
-  const othersValue = Math.max(0, 100 - sum); // never below 0
+  // Calculate "OTH" as whatever remains of 100 after weighted sum
+  const othersValue = Math.max(0, 100 - weightedSum);
   const othersIndex = parties.findIndex(p => p.name === "OTH");
-  if(othersIndex !== -1){
+
+  if (othersIndex !== -1) {
     const othersInput = document.getElementById(`votes-${othersIndex}`);
-    if(othersInput){
+    if (othersInput) {
       othersInput.value = othersValue.toFixed(1);
     }
   }
 
-  document.getElementById('total-votes').textContent = (sum + othersValue).toFixed(1) + '%';
+  // Update total votes row (weighted total + adjusted OTH)
+  document.getElementById('total-votes').textContent = (weightedSum + othersValue).toFixed(1) + '%';
 }
 
 /* ---- Proportional swing ---- */
