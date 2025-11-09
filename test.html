@@ -195,22 +195,33 @@ h2.subtitle a:hover {
   }
 /* --- Uniform table header height + centered header text --- */
 th {
-  height: 30px;           /* 👈 match td height for visual consistency */
+  height: 28px;           /* 👈 match td height for visual consistency */
   font-weight: 650;
   text-align: center;     /* 👈 header text centered only */
   vertical-align: middle; /* 👈 keep it perfectly aligned vertically */
 }
 
 td {
-  height: 30px;           /* 👈 match th height */
+  height: 28px;           /* 👈 match th height */
   vertical-align: middle; /* 👈 ensures text sits evenly across rows */
 }
 /* --- Make the Totals row shorter --- */
 tfoot td {
-  height: 20px;             /* roughly 2/3 of 36px */
+  height: 19px;             /* roughly 2/3 of 36px */
   vertical-align: middle;
 }
 
+  /* --- Divider row styling --- */
+.divider-row td {
+  text-align: center;
+  font-weight: 600;
+  background-color: #f9fafb;
+  color: #333;
+  font-size: 14px;
+  height: 20px;
+  border-top: 2px solid #ccc;
+  border-bottom: 2px solid #ccc;
+}
 
 /* --- Responsive rectangular tab switcher --- */
 /* --- Final rectangular tab switcher --- */
@@ -302,93 +313,11 @@ tfoot td {
   line-height: 1.4;
 }
 
-/* --- Constituency bar chart layout --- */
-#constituency-bars .bar-row {
-  display: flex;
-  align-items: center;          /* ensures vertical centring */
-  margin-bottom: 8px;
-  height: 26px;
-}
-
-#constituency-bars .bar-label {
-  width: 65px;
-  text-align: right;
-  font-size: 13px;
-  font-weight: 600;             /* bold */
-  margin-right: 8px;
-  color: #111;
-  line-height: 1;               /* keeps it visually centred */
-  display: flex;
-  align-items: center;          /* vertically centre text */
-  justify-content: flex-end;
-}
-
-#constituency-bars .bar-container {
-  flex: 1;
-  height: 100%;
-  background: #e5e7eb;
-  border-radius: 4px;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: center;          /* vertically align the fill */
-}
-
-#constituency-bars .bar-fill {
-  height: 100%;
-  border-radius: 4px 0 0 4px;
-  transition: width 0.6s ease;
-}
-
-#constituency-bars .bar-value {
-  font-size: 13px;
-  font-weight: 600;             /* bold */
-  color: #111;
-  margin-left: 6px;
-  min-width: 42px;
-  text-align: left;
-  line-height: 1;
-  display: flex;
-  align-items: center;          /* vertical centring */
-}
-
-#constituency-selector {
-  max-width: 650px;
-  margin: 0 auto;
-}
-
-#constituency-input {
-  width: 100%;
-  font-size: 14px;
-  box-sizing: border-box;
-}
-
-#constituency-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  position: absolute;
-  top: 36px;
-  left: 0;
-  right: 0;
-  background: #ffffff;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  max-height: 200px;
-  overflow-y: auto;
-  z-index: 10;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-#constituency-list li {
-  padding: 6px 8px;
-  cursor: pointer;
-  text-align: left;
-  font-size: 14px;
-}
-
-#constituency-list li:hover {
-  background: #f3f4f6;
+/* 👇 Add this block just below the one above */
+@media (min-width: 769px) {
+  .disclaimer {
+    font-size: 15px; /* adjust to preferred size, e.g. 14px–16px */
+  }
 }
 
 </style>
@@ -447,24 +376,6 @@ tfoot td {
   </div>
   <div class="counter" id="counter">0 / 650</div>
   <div class="note">Majority = 326 seats</div>
-</div>
-
-  <div id="constituency-results" style="margin-top: 40px;">
-  <h3 style="text-align:center;">Constituency Results (User Generated)</h3>
-
-<div id="constituency-selector" style="text-align:center; margin-bottom:12px; position:relative;">
-  <input 
-    type="text" 
-    id="constituency-input" 
-    placeholder="Search or select constituency..." 
-    style="padding:6px; border-radius:6px; font-size:14px; width:100%; box-sizing:border-box;"
-    autocomplete="off"
-  />
-  <ul id="constituency-list" style="display:none;"></ul>
-</div>
-
-  <div id="constituency-bars" style="max-width:600px; margin:0 auto;"></div>
-  <p id="winner-text" style="text-align:center; font-weight:bold; margin-top:12px;"></p>
 </div>
 
 <p class="disclaimer">
@@ -1796,27 +1707,69 @@ const parties = PARTIES.map(name => ({
 
 /* ---- Render table ---- */
 function renderTable(){
-  const tbody=document.getElementById('tbody');
-  tbody.innerHTML=parties.map((p,i)=>`
-    <tr>
-      <td class="party-column" style="--party-color:${p.color}">${p.name}</td>
-      <td class="ge2024-column">${p.ge2024.toFixed(1)}%</td>
-<td>
-  ${p.name === "OTH" ? `
-    <div class="input-wrapper">
-      <input type="number" id="votes-${i}" value="${p.votes.toFixed(1)}" disabled>
-      <span class="percent-sign">%</span>
-    </div>
-  ` : `
-    <div class="input-wrapper">
-      <input type="number" id="votes-${i}" value="${p.votes.toFixed(1)}" min="0" max="100" step="0.1">
-      <span class="percent-sign">%</span>
-    </div>
-  `}
-</td>
-      <td class="seats-column" id="seats-${i}">—</td>
-      <td class="diff-column" id="diff-${i}">—</td>
-    </tr>`).join('');
+  const tbody = document.getElementById('tbody');
+
+  const htmlParts = [];
+
+  parties.forEach((p, i) => {
+    htmlParts.push(`
+      <tr>
+        <td class="party-column" style="--party-color:${p.color}">${p.name}</td>
+        <td class="ge2024-column">${p.ge2024.toFixed(1)}%</td>
+        <td>
+          ${p.name === "OTH" ? `
+            <div class="input-wrapper">
+              <input type="number" id="votes-${i}" value="${p.votes.toFixed(1)}" disabled>
+              <span class="percent-sign">%</span>
+            </div>
+          ` : `
+            <div class="input-wrapper">
+              <input type="number" id="votes-${i}" value="${p.votes.toFixed(1)}" min="0" max="100" step="0.1">
+              <span class="percent-sign">%</span>
+            </div>
+          `}
+        </td>
+        <td class="seats-column" id="seats-${i}">—</td>
+        <td class="diff-column" id="diff-${i}">—</td>
+      </tr>
+    `);
+
+    // --- Divider rows ---
+    if (p.name === "GRN") {
+      htmlParts.push(`<tr class="divider-row"><td colspan="5">Scotland Parties</td></tr>`);
+    }
+    if (p.name === "PLC") {
+      htmlParts.push(`<tr class="divider-row"><td colspan="5">Northern Ireland Parties</td></tr>`);
+    }
+  });
+
+  tbody.innerHTML = htmlParts.join('');
+
+  const inputs = document.querySelectorAll('.input-wrapper input');
+  inputs.forEach((input, index) => {
+    let originalValue = input.value;
+
+    input.addEventListener('focus', () => {
+      originalValue = input.value;
+      input.value = '';
+    });
+    input.addEventListener('blur', () => {
+      if (input.value === '') input.value = originalValue;
+    });
+
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (inputs[index + 1]) inputs[index + 1].focus();
+      }
+    });
+    input.addEventListener('input', () => {
+      updateVoteTotal();
+      document.getElementById('calculate').style.background = '#ffa500';
+    });
+  });
+  updateVoteTotal();
+}
 
   const inputs=document.querySelectorAll('.input-wrapper input');
   inputs.forEach((input,index)=>{
@@ -2066,165 +2019,6 @@ tab2023.addEventListener("click", () => {
   }
 });
 
-// === Constituency results viewer (working autocomplete dropdown) ===
-const constituencyInput = document.getElementById('constituency-input');
-const constituencyList = document.getElementById('constituency-list');
-const barsDiv = document.getElementById('constituency-bars');
-const winnerText = document.getElementById('winner-text');
-
-const allConstituencies = BASELINE.constituencies.map((c, i) => ({ name: c.name, index: i }));
-
-// --- Build the visible dropdown list ---
-function renderList(matches) {
-  constituencyList.innerHTML = '';
-  if (matches.length === 0) {
-    constituencyList.style.display = 'none';
-    return;
-  }
-
-  matches.forEach(({ name, index }) => {
-    const li = document.createElement('li');
-    li.textContent = name;
-    li.dataset.index = index;
-    constituencyList.appendChild(li);
-  });
-
-  constituencyList.style.display = 'block';
-}
-
-// --- Filter the list as the user types ---
-function filterList(term) {
-  const lowerTerm = term.toLowerCase();
-  const matches = allConstituencies.filter(c => c.name.toLowerCase().includes(lowerTerm));
-  renderList(matches);
-}
-
-// Show full list when the user focuses
-constituencyInput.addEventListener('focus', () => {
-  renderList(allConstituencies);
-});
-
-// Filter dynamically
-constituencyInput.addEventListener('input', e => {
-  filterList(e.target.value);
-});
-
-// Close dropdown when clicking outside
-document.addEventListener('click', e => {
-  if (!e.target.closest('#constituency-selector')) {
-    constituencyList.style.display = 'none';
-  }
-});
-
-// --- When a constituency is clicked from the list ---
-constituencyList.addEventListener('click', e => {
-  if (e.target.tagName === 'LI') {
-    const index = e.target.dataset.index;
-    const name = e.target.textContent;
-
-    constituencyInput.value = name;
-    constituencyList.style.display = 'none';
-
-    // Generate constituency bar chart
-    const data = BASELINE.constituencies[index];
-    barsDiv.innerHTML = '';
-    winnerText.textContent = '';
-
-    const results = Object.entries(data)
-      .filter(([p, v]) => p !== 'name' && v > 0)
-      .map(([p, v]) => ({ party: p, value: v }))
-      .sort((a, b) => b.value - a.value);
-
-    const winner = results[0];
-    winnerText.textContent = `🏆 Winner: ${winner.party} (${(winner.value * 100).toFixed(1)}%)`;
-
-    results.forEach(({ party, value }) => {
-      const percent = (value * 100).toFixed(1);
-
-      const row = document.createElement('div');
-      row.className = 'bar-row';
-
-      const label = document.createElement('div');
-      label.className = 'bar-label';
-      label.textContent = party;
-
-      const barContainer = document.createElement('div');
-      barContainer.className = 'bar-container';
-
-      const barFill = document.createElement('div');
-      barFill.className = 'bar-fill';
-      barFill.style.width = `${percent}%`;
-
-      const partyData = parties.find(p => p.name === party);
-      barFill.style.background = partyData ? partyData.color : '#777';
-
-      const valueText = document.createElement('div');
-      valueText.className = 'bar-value';
-      valueText.textContent = `${percent}%`;
-
-      barContainer.appendChild(barFill);
-      row.appendChild(label);
-      row.appendChild(barContainer);
-      row.appendChild(valueText);
-      barsDiv.appendChild(row);
-    });
-  }
-});
-
-const barsDiv = document.getElementById('constituency-bars');
-const winnerText = document.getElementById('winner-text');
-
-constituencySelect.addEventListener('change', e => {
-  const index = e.target.value;
-  barsDiv.innerHTML = '';
-  winnerText.textContent = '';
-
-  if (index === '') return;
-
-  const data = BASELINE.constituencies[index];
-
-  // Only include parties with votes > 0
-  const results = Object.entries(data)
-    .filter(([p, v]) => p !== 'name' && v > 0)
-    .map(([p, v]) => ({ party: p, value: v }))
-    .sort((a, b) => b.value - a.value);
-
-  // Display winner
-  const winner = results[0];
-  winnerText.textContent = `🏆 Winner: ${winner.party} (${(winner.value * 100).toFixed(1)}%)`;
-
-  // Draw bars
-  results.forEach(({ party, value }) => {
-    const percent = (value * 100).toFixed(1);
-
-    const row = document.createElement('div');
-    row.className = 'bar-row';
-
-    const label = document.createElement('div');
-    label.className = 'bar-label';
-    label.textContent = party;
-
-    const barContainer = document.createElement('div');
-    barContainer.className = 'bar-container';
-
-    const barFill = document.createElement('div');
-    barFill.className = 'bar-fill';
-    barFill.style.width = `${percent}%`;
-
-    const partyData = parties.find(p => p.name === party);
-    barFill.style.background = partyData ? partyData.color : '#777';
-
-    const valueText = document.createElement('div');
-    valueText.className = 'bar-value';
-    valueText.textContent = `${percent}%`;
-
-    barContainer.appendChild(barFill);
-    row.appendChild(label);
-    row.appendChild(barContainer);
-    row.appendChild(valueText);
-    barsDiv.appendChild(row);
-  });
-});
 
 
 </script>
