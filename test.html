@@ -1758,11 +1758,11 @@ tbody.innerHTML = parties.map((p, i) => {
     }
 
     // now add the divider row for Scotland
-    row += `<tr class="divider-row"><td colspan="5">Scotland Parties</td></tr>`;
+    row += `<tr class="divider-row"><td colspan="5"><i>Vote share in Scotland and Wales</i></td></tr>`;
   }
 
   if (p.name === "PLC") {
-    row += `<tr class="divider-row"><td colspan="5">Northern Ireland Parties</td></tr>`;
+    row += `<tr class="divider-row"><td colspan="5"><i>Vote share in Northern Ireland</i></td></tr>`;
   }
 
   return row;
