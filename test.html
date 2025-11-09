@@ -213,12 +213,12 @@ tfoot td {
 
   /* --- Divider row styling --- */
 .divider-row td {
-  text-align: center;
+  text-align: left;
   font-weight: 600;
   background-color: #f9fafb;
   color: #333;
-  font-size: 13px;
-  height: 15px;
+  font-size: 9px;
+  height: 10px;
   border-top: 2px solid #ccc;
   border-bottom: 2px solid #ccc;
 }
@@ -1734,10 +1734,10 @@ function renderTable() {
 
     // --- Inject divider rows right after certain parties ---
     if (p.name === "GRN") {
-      row += `<tr class="divider-row"><td colspan="5">Scotland and Wales</td></tr>`;
+      row += `<tr class="divider-row"><td colspan="5">Vote shares in Scotland and Wales</td></tr>`;
     }
     if (p.name === "PLC") {
-      row += `<tr class="divider-row"><td colspan="5">Northern Ireland</td></tr>`;
+      row += `<tr class="divider-row"><td colspan="5">Vote shares in Northern Ireland</td></tr>`;
     }
 
     return row;
