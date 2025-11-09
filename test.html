@@ -1771,24 +1771,43 @@ function renderTable() {
   updateVoteTotal();
 }
 
-function updateVoteTotal(){
-  let sum = 0;
-  parties.forEach((p,i)=>{
-    if(p.name !== "OTH"){
-      sum += parseFloat(document.getElementById(`votes-${i}`).value) || 0;
+function updateVoteTotal() {
+  // --- Weight multipliers for total and OTH calculation ---
+  const WEIGHTS = {
+    "SNP": 0.084, 
+    "PLC": 0.05,   
+    "PLC": 0.05,   
+    "SFN": 0.025,  
+    "DUP": 0.025,
+    "ALL": 0.025,
+    "UUP": 0.025,
+    "SDL": 0.025,
+    "TUV": 0.025
+  };
+
+  let weightedSum = 0;
+
+  parties.forEach((p, i) => {
+    if (p.name !== "OTH") {
+      const rawValue = parseFloat(document.getElementById(`votes-${i}`).value) || 0;
+      const weight = WEIGHTS[p.name] || 1;  // 👈 Default weight = 1 (no change)
+      weightedSum += rawValue * weight;
     }
   });
 
-  const othersValue = Math.max(0, 100 - sum); // never below 0
+  // Calculate "OTH" as whatever remains of 100 after weighted sum
+  const othersValue = Math.max(0, 100 - weightedSum);
   const othersIndex = parties.findIndex(p => p.name === "OTH");
-  if(othersIndex !== -1){
+
+  if (othersIndex !== -1) {
     const othersInput = document.getElementById(`votes-${othersIndex}`);
-    if(othersInput){
+    if (othersInput) {
       othersInput.value = othersValue.toFixed(1);
     }
   }
 
-  document.getElementById('total-votes').textContent = (sum + othersValue).toFixed(1) + '%';
+  // Update total votes row (weighted total + adjusted OTH)
+  document.getElementById('total-votes').textContent = (weightedSum + othersValue).toFixed(1) + '%';
 }
 
 /* ---- Proportional swing ---- */
