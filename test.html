@@ -2155,6 +2155,22 @@ tab2023.addEventListener("click", () => {
 
   /* ---- Constituency Search + Bar Display ---- */
 const searchInput = document.getElementById("constituency-search");
+
+  // ---- Focus + blur behavior for constituency search ----
+let lastSelectedConstituency = "";
+
+searchInput.addEventListener("focus", () => {
+  lastSelectedConstituency = searchInput.value;
+  searchInput.value = "";
+});
+
+searchInput.addEventListener("blur", () => {
+  // restore only if user didn't type anything new
+  if (searchInput.value.trim() === "" && lastSelectedConstituency) {
+    searchInput.value = lastSelectedConstituency;
+  }
+});
+
 const dropdown = document.getElementById("constituency-dropdown");
 const barsDiv = document.getElementById("constituency-bars");
 const winnerText = document.getElementById("winner-text");
