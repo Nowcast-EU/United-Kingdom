@@ -2775,46 +2775,46 @@ tbody.innerHTML = parties.map((p, i) => {
 }).join('');
 
   // ✅ keep your original input logic below unchanged
- const inputs = document.querySelectorAll('.input-wrapper input');
+const inputs = document.querySelectorAll('.input-wrapper input');
 inputs.forEach((input, index) => {
   let originalValue = input.value;
 
-  // When user focuses: remember current value
+  // When user focuses: remember current value + clear visually
   input.addEventListener('focus', () => {
     originalValue = input.value;
+    input.value = ''; // visually empty while editing
   });
 
-  // If user leaves the box (blur)
+  // When user leaves (blur)
   input.addEventListener('blur', () => {
-    // If they didn’t type anything new, restore the old value
+    // If left blank or invalid, restore previous
     if (input.value === '' || isNaN(parseFloat(input.value))) {
       input.value = originalValue;
     }
-    // Only run calculate() if value actually changed
+    // Only recalc if changed
     if (parseFloat(input.value) !== parseFloat(originalValue)) {
       calculate();
     }
   });
 
-  // If user presses Enter, move focus to next input without recalculating immediately
+  // Pressing Enter → move to next field, not calculate yet
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      // restore previous value if they left it blank
+      // restore old value if blank
       if (input.value === '' || isNaN(parseFloat(input.value))) {
         input.value = originalValue;
       }
-      // move focus to next input (but don't trigger calculate yet)
+      // move focus to next input
       if (inputs[index + 1]) {
         inputs[index + 1].focus();
       } else {
-        // loop back to first input if at the end
-        inputs[0].focus();
+        inputs[0].focus(); // loop back to first
       }
     }
   });
 
-  // On any input change, update total votes and flag pending change
+  // As user types → update totals + flag unsaved change
   input.addEventListener('input', () => {
     updateVoteTotal();
     document.getElementById('calculate').style.background = '#ffa500';
