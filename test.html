@@ -438,6 +438,57 @@ tfoot td {
   color: var(--party-color);    /* colour set inline via JS */
 }
 
+/* --- Floating Help Button --- */
+#help-button {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #008500;
+  color: #fff;
+  font-size: 20px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: background 0.3s ease, transform 0.2s ease;
+  z-index: 1000;
+}
+
+#help-button:hover {
+  background-color: #006d00;
+  transform: scale(1.05);
+}
+
+/* --- Help Panel --- */
+#help-panel {
+  position: fixed;
+  bottom: 80px;
+  right: 24px;
+  width: 280px;
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  font-family: Inter, system-ui, sans-serif;
+  display: none; /* hidden by default */
+  z-index: 999;
+}
+
+#help-panel h4 {
+  margin-top: 0;
+  font-size: 16px;
+  color: #008500;
+  text-align: center;
+}
+
 </style>
 </head>
 
@@ -510,6 +561,21 @@ tfoot td {
 <p class="disclaimer">
   ** This calculator is a simplified version of the Nowcast UK model. Certain features that can't be included such as vote concentration, incumbent effects, and demographic weighting mean some projections may differ from our bi-monthly tracker.
 </p>
+
+  <!-- Floating Help Button -->
+<div id="help-button">?</div>
+
+<!-- Hidden Help Panel -->
+<div id="help-panel">
+  <h4>Help</h4>
+  <p>
+    • Enter or adjust vote shares for each party.<br>
+    • Press <strong>Calculate</strong> to project seats.<br>
+    • Use the <strong>Coalition Builder</strong> below to test combinations.<br>
+    • The constituency search lets you view local results.<br>
+    • All results are illustrative and based on the Nowcast UK model.
+  </p>
+</div>
 
 <script>
 const BASELINE = {"baseline_national": {"LAB": 0.1781, "CON": 0.1691, "RFM": 0.2931, "LDM": 0.1267, "GRN": 0.1312, "SNP": 0.33, "PLC": 0.23, "SFN": 0.27, "DUP": 0.221, "ALL": 0.15, "UUP": 0.122, "SDL": 0.111, "TUV": 0.062, "OTH": 0.0390},
@@ -3034,6 +3100,23 @@ if (incumbent) {
   winnerText.innerHTML = `${name}: ${winnerHTML}`;
 }
 }  
+
+/* ---- Floating Help Button Toggle ---- */
+const helpBtn = document.getElementById("help-button");
+const helpPanel = document.getElementById("help-panel");
+
+helpBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  const isVisible = helpPanel.style.display === "block";
+  helpPanel.style.display = isVisible ? "none" : "block";
+});
+
+// hide when clicking outside
+document.addEventListener("click", (e) => {
+  if (!helpPanel.contains(e.target) && e.target !== helpBtn) {
+    helpPanel.style.display = "none";
+  }
+});
 
 </script>
 </body>
