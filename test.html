@@ -378,9 +378,10 @@ tfoot td {
 .bar-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 8px;
   height: 22px;
-  gap: 6px;
+  gap: 8px;
 }
 
 .bar-party {
@@ -407,14 +408,12 @@ tfoot td {
 }
 
 .bar-value {
-  position: absolute;
-  right: 6px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 13px;
+  width: 46px; /* fixed space for numbers */
+  text-align: left;
+  font-size: 14px;
   font-weight: 600;
-  color: #fff;
-  text-shadow: 0 0 2px rgba(0,0,0,0.4);
+  flex-shrink: 0;
+  color: #333;
 }
 
 .winner-text {
@@ -2226,14 +2225,15 @@ function showConstituencyResults(name) {
   bar.style.background = p.color;
   wrapper.appendChild(bar);
 
-  // Percentage value on the right end of the bar
-  const valueLabel = document.createElement("div");
-  valueLabel.className = "bar-value";
-  valueLabel.textContent = `${(p.value * 100).toFixed(1)}%`;
-  wrapper.appendChild(valueLabel);
+row.appendChild(wrapper);
 
-  row.appendChild(wrapper);
-  barsDiv.appendChild(row);
+// Percentage value outside the bar (right side)
+const valueLabel = document.createElement("div");
+valueLabel.className = "bar-value";
+valueLabel.textContent = `${(p.value * 100).toFixed(1)}%`;
+row.appendChild(valueLabel);
+
+barsDiv.appendChild(row);
 });
 
   const winner = sorted[0];
