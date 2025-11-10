@@ -542,17 +542,20 @@ tfoot td {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
+  table-layout: fixed; /* ensures equal-width columns */
 }
 
 #gbuk-table th,
 #gbuk-table td {
   border-bottom: 1px solid #eee;
-  padding: 4px 6px;
+  padding: 3px 4px;          /* 👈 thinner cell padding */
   text-align: center;
+  font-size: 13px;
 }
 
+/* make input and text compact */
 #gbuk-table input {
-  width: 60px;
+  width: 50px;               /* 👈 narrower input box */
   text-align: center;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -562,6 +565,31 @@ tfoot td {
 
 #gbuk-table td:last-child {
   font-weight: 600;
+  width: 55px;               /* narrow "UK %" column */
+}
+
+#gbuk-table th:first-child,
+#gbuk-table td:first-child {
+  width: 130px;              /* narrow party name column */
+  text-align: left;
+}
+
+/* 👇 add colour bar styling identical to your main calculator */
+#gbuk-table .party-column {
+  font-weight: bold;
+  position: relative;
+  padding-left: 12px;
+  color: black;
+}
+#gbuk-table .party-column::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 6px;
+  height: 100%;
+  border-radius: 2px 0 0 2px;
+  background-color: var(--party-color);
 }
 
 </style>
@@ -646,17 +674,37 @@ tfoot td {
   <p>Enter GB vote shares — converted UK shares appear automatically (×0.975).</p>
 
   <table id="gbuk-table">
-    <thead>
-      <tr><th>Party</th><th>GB %</th><th>UK %</th></tr>
-    </thead>
-    <tbody>
-      <tr><td>Labour</td><td><input type="number" id="gb-LAB" min="0" max="100" step="0.1"></td><td id="uk-LAB">–</td></tr>
-      <tr><td>Conservative</td><td><input type="number" id="gb-CON" min="0" max="100" step="0.1"></td><td id="uk-CON">–</td></tr>
-      <tr><td>Reform UK</td><td><input type="number" id="gb-RFM" min="0" max="100" step="0.1"></td><td id="uk-RFM">–</td></tr>
-      <tr><td>Liberal Democrat</td><td><input type="number" id="gb-LDM" min="0" max="100" step="0.1"></td><td id="uk-LDM">–</td></tr>
-      <tr><td>Green</td><td><input type="number" id="gb-GRN" min="0" max="100" step="0.1"></td><td id="uk-GRN">–</td></tr>
-    </tbody>
-  </table>
+  <thead>
+    <tr><th>Party</th><th>GB %</th><th>UK %</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="party-column" style="--party-color:#E4003B;">Labour</td>
+      <td><input type="number" id="gb-LAB" min="0" max="100" step="0.1"></td>
+      <td id="uk-LAB">–</td>
+    </tr>
+    <tr>
+      <td class="party-column" style="--party-color:#0087DC;">Conservative</td>
+      <td><input type="number" id="gb-CON" min="0" max="100" step="0.1"></td>
+      <td id="uk-CON">–</td>
+    </tr>
+    <tr>
+      <td class="party-column" style="--party-color:#23C7DF;">Reform UK</td>
+      <td><input type="number" id="gb-RFM" min="0" max="100" step="0.1"></td>
+      <td id="uk-RFM">–</td>
+    </tr>
+    <tr>
+      <td class="party-column" style="--party-color:#FAA61A;">Liberal Democrat</td>
+      <td><input type="number" id="gb-LDM" min="0" max="100" step="0.1"></td>
+      <td id="uk-LDM">–</td>
+    </tr>
+    <tr>
+      <td class="party-column" style="--party-color:#6AB023;">Green</td>
+      <td><input type="number" id="gb-GRN" min="0" max="100" step="0.1"></td>
+      <td id="uk-GRN">–</td>
+    </tr>
+  </tbody>
+</table>
 </div>
 
 <script>
