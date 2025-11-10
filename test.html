@@ -2170,7 +2170,11 @@ searchInput.addEventListener("input", () => {
     dropdown.style.display = "none";
     return;
   }
-  const matches = allConstituencies.filter(name => name.toLowerCase().includes(query));
+const matches = allConstituencies.filter(name => {
+  const lower = name.toLowerCase();
+  // Split into words and check if any word starts with the query
+  return lower.split(/\s+/).some(word => word.startsWith(query));
+});
   matches.slice(0, 10).forEach(name => {
     const li = document.createElement("li");
     li.textContent = name;
