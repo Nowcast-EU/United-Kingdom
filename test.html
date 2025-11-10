@@ -2797,6 +2797,17 @@ tbody.innerHTML = parties.map((p, i) => {
       updateVoteTotal();
       document.getElementById('calculate').style.background = '#ffa500';
     });
+    
+    // 👇 automatically run full calculation when user leaves the input box
+input.addEventListener('blur', () => {
+  calculate();
+});
+    input.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    calculate();
+  }
+});
   });
 
   updateVoteTotal();
