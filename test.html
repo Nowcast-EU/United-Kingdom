@@ -1808,6 +1808,13 @@ const CONSTITUENCY_SEATS = {
   "Ynys Môn": 1
 };
 
+// 👇 incumbent party for each constituency
+const CONSTITUENCY_INCUMBENTS = {
+  "Aberdeen North": "SNP",
+  "Belfast East": "DUP",
+  "Cardiff Central": "LDM",
+  // ... continue for all constituencies
+};
 
 /* ---- Party setup ---- */
 const PARTIES = ["LAB", "CON", "RFM", "LDM", "GRN", "SNP", "PLC", "SFN", "DUP", "ALL", "UUP", "SDL", "TUV", "OTH"];
@@ -2328,6 +2335,15 @@ barsDiv.appendChild(row);
 });
 
   const winner = sorted[0];
+const incumbent = CONSTITUENCY_INCUMBENTS[name];
+if (incumbent) {
+  if (incumbent === winner.name) {
+    winnerText.textContent = `${winner.name} HOLD ${name}`;
+  } else {
+    winnerText.textContent = `${winner.name} GAIN ${name} from ${incumbent}`;
+  }
+} else {
+  // fallback if no incumbent data available
   winnerText.textContent = `${name}: ${winner.name}`;
 }
 
