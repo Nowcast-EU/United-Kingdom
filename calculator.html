@@ -202,12 +202,12 @@ th {
 }
 
 td {
-  height: 28px;           /* 👈 match th height */
+  height: 23px;           /* 👈 match th height */
   vertical-align: middle; /* 👈 ensures text sits evenly across rows */
 }
 /* --- Make the Totals row shorter --- */
 tfoot td {
-  height: 19px;             /* roughly 2/3 of 36px */
+  height: 14px;             /* roughly 2/3 of 36px */
   vertical-align: middle;
 }
 
@@ -218,7 +218,7 @@ tfoot td {
   background-color: #f9fafb;
   color: #333;
   font-size: 13px;
-  height: 10px;
+  height: 8px;
   border-top: 2px solid #ccc;
   border-bottom: 2px solid #ccc;
 }
@@ -2775,29 +2775,58 @@ tbody.innerHTML = parties.map((p, i) => {
 }).join('');
 
   // ✅ keep your original input logic below unchanged
-  const inputs = document.querySelectorAll('.input-wrapper input');
-  inputs.forEach((input, index) => {
-    let originalValue = input.value;
+const inputs = document.querySelectorAll('.input-wrapper input');
+inputs.forEach((input, index) => {
+  let originalValue = input.value;
+  let hasChanged = false; // track if user actually changed it
 
-    input.addEventListener('focus', () => {
-      originalValue = input.value;
-      input.value = '';
-    });
-    input.addEventListener('blur', () => {
-      if (input.value === '') input.value = originalValue;
-    });
-
-    input.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        if (inputs[index + 1]) inputs[index + 1].focus();
-      }
-    });
-    input.addEventListener('input', () => {
-      updateVoteTotal();
-      document.getElementById('calculate').style.background = '#ffa500';
-    });
+  // When user focuses: remember old value, clear visually, but preserve logical value
+  input.addEventListener('focus', () => {
+    originalValue = input.value;
+    input.dataset.displayValue = originalValue; // store in data attr
+    input.value = ''; // visually empty
+    hasChanged = false; // reset change tracking
   });
+
+  // When user types, mark as changed and update total
+  input.addEventListener('input', () => {
+    hasChanged = true;
+    updateVoteTotal();
+    document.getElementById('calculate').style.background = '#ffa500';
+  });
+
+  // When user leaves the box
+  input.addEventListener('blur', () => {
+    // if left blank → restore visually & logically
+    if (input.value === '' || isNaN(parseFloat(input.value))) {
+      input.value = originalValue;
+    }
+
+    // Only recalc if user *actually changed* the value
+    if (hasChanged && parseFloat(input.value) !== parseFloat(originalValue)) {
+      calculate();
+    }
+  });
+
+  // When user presses Enter
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+
+      // if left blank, restore previous visually
+      if (input.value === '' || isNaN(parseFloat(input.value))) {
+        input.value = originalValue;
+      }
+
+      // move to next input
+      if (inputs[index + 1]) {
+        inputs[index + 1].focus();
+      } else {
+        inputs[0].focus(); // loop to top
+      }
+    }
+  });
+});
 
   updateVoteTotal();
 }
