@@ -538,47 +538,52 @@ tfoot td {
   margin-bottom: 6px;
 }
 
+/* --- GB → UK mini calculator table --- */
 #gbuk-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
-  table-layout: fixed; /* ensures equal-width columns */
+  table-layout: fixed; /* ensures all columns equal width */
 }
 
+/* header + cell styles */
 #gbuk-table th,
 #gbuk-table td {
   border-bottom: 1px solid #eee;
-  padding: 3px 4px;          /* 👈 thinner cell padding */
+  padding: 3px 4px;
   text-align: center;
   font-size: 13px;
+  width: 33.33%; /* 👈 each column equal width */
+  box-sizing: border-box;
 }
 
-/* make input and text compact */
+/* narrower popup container */
+#help-panel {
+  width: 260px; /* 👈 thinner default popup */
+}
+
+/* input boxes scale to fit their cells */
 #gbuk-table input {
-  width: 50px;               /* 👈 narrower input box */
+  width: 90%; /* 👈 dynamically scales within cell */
   text-align: center;
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 2px;
   font-size: 13px;
+  box-sizing: border-box;
 }
 
+/* bold result column */
 #gbuk-table td:last-child {
   font-weight: 600;
-  width: 55px;               /* narrow "UK %" column */
 }
 
-#gbuk-table th:first-child,
-#gbuk-table td:first-child {
-  width: 130px;              /* narrow party name column */
-  text-align: left;
-}
-
-/* 👇 add colour bar styling identical to your main calculator */
+/* party column with coloured bar (same style as main table) */
 #gbuk-table .party-column {
   font-weight: bold;
   position: relative;
   padding-left: 12px;
+  text-align: left;
   color: black;
 }
 #gbuk-table .party-column::before {
@@ -590,6 +595,12 @@ tfoot td {
   height: 100%;
   border-radius: 2px 0 0 2px;
   background-color: var(--party-color);
+}
+
+/* subtle grey header for consistency */
+#gbuk-table thead th {
+  background: #f1f5f9;
+  font-weight: 600;
 }
 
 </style>
