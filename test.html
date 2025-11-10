@@ -320,7 +320,7 @@ tfoot td {
   }
 }
 
-  /* ---- Constituency Results ---- */
+/* ---- Constituency Results (tweaked layout) ---- */
 #constituency-section {
   margin-top: 48px;
   text-align: center;
@@ -378,19 +378,43 @@ tfoot td {
 .bar-row {
   display: flex;
   align-items: center;
-  margin-bottom: 6px;
-  height: 20px;
+  margin-bottom: 8px;
+  height: 22px;
+  gap: 6px;
+}
+
+.bar-party {
+  width: 50px;
+  text-align: right;
+  font-weight: 600;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.bar-wrapper {
+  flex: 1;
+  position: relative;
+  background: #f3f3f3;
+  border-radius: 4px;
+  height: 100%;
+  overflow: hidden;
 }
 
 .bar {
   height: 100%;
-  border-radius: 3px;
+  border-radius: 4px;
+  transition: width 0.4s ease;
 }
 
-.bar-label {
-  margin-left: 8px;
-  font-size: 14px;
+.bar-value {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
   font-weight: 600;
+  color: #fff;
+  text-shadow: 0 0 2px rgba(0,0,0,0.4);
 }
 
 .winner-text {
@@ -2183,22 +2207,34 @@ function showConstituencyResults(name) {
 
   barsDiv.innerHTML = "";
   sorted.forEach(p => {
-    const row = document.createElement("div");
-    row.className = "bar-row";
+  const row = document.createElement("div");
+  row.className = "bar-row";
 
-    const bar = document.createElement("div");
-    bar.className = "bar";
-    bar.style.width = ((p.value / max) * 100) + "%";
-    bar.style.background = p.color;
-    row.appendChild(bar);
+  // Party label on the left
+  const partyLabel = document.createElement("div");
+  partyLabel.className = "bar-party";
+  partyLabel.textContent = p.name;
+  row.appendChild(partyLabel);
 
-    const label = document.createElement("span");
-    label.className = "bar-label";
-    label.textContent = `${p.name} (${(p.value * 100).toFixed(1)}%)`;
-    row.appendChild(label);
+  // Bar wrapper + coloured bar inside
+  const wrapper = document.createElement("div");
+  wrapper.className = "bar-wrapper";
 
-    barsDiv.appendChild(row);
-  });
+  const bar = document.createElement("div");
+  bar.className = "bar";
+  bar.style.width = ((p.value / max) * 100) + "%";
+  bar.style.background = p.color;
+  wrapper.appendChild(bar);
+
+  // Percentage value on the right end of the bar
+  const valueLabel = document.createElement("div");
+  valueLabel.className = "bar-value";
+  valueLabel.textContent = `${(p.value * 100).toFixed(1)}%`;
+  wrapper.appendChild(valueLabel);
+
+  row.appendChild(wrapper);
+  barsDiv.appendChild(row);
+});
 
   const winner = sorted[0];
   winnerText.textContent = `${name}: ${winner.name}`;
