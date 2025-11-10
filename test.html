@@ -3247,15 +3247,9 @@ const helpPanel = document.getElementById("help-panel");
 const scale = 0.975;
 const gbParties = ["LAB","CON","RFM","LDM","GRN"];
 
-// toggle open/close
-helpBtn.addEventListener("click", (e) => {
-  e.stopPropagation();
+// toggle open/close ONLY when button clicked
+helpBtn.addEventListener("click", () => {
   helpPanel.style.display = helpPanel.style.display === "block" ? "none" : "block";
-});
-document.addEventListener("click", (e) => {
-  if (!helpPanel.contains(e.target) && e.target !== helpBtn) {
-    helpPanel.style.display = "none";
-  }
 });
 
 // live conversion
