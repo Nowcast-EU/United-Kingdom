@@ -1992,6 +1992,7 @@ function calculate(){
   });
 
   const perConst=computeConstituencyShares();
+  window.latestConstituencyResults = perConst;
   const totals=Object.fromEntries(PARTIES.map(p=>[p,0]));
 
 perConst.forEach(row => {
@@ -2033,6 +2034,10 @@ const majoritySeats = Math.ceil((totalSeats - sfnSeats) / 2);
 
 // update the note text dynamically
 document.querySelector(".note").textContent = `Note: functional majority = ${majoritySeats} seats`;
+
+// --- auto-refresh constituency view if one is selected ---
+const currentName = document.getElementById("constituency-search").value.trim();
+if (currentName) showConstituencyResults(currentName);
 }
 
 /* ---- Reset ---- */
@@ -2216,7 +2221,8 @@ function selectConstituency(name) {
 }
 
 function showConstituencyResults(name) {
-  const c = BASELINE.constituencies.find(x => x.name === name);
+const dataset = window.latestConstituencyResults || BASELINE.constituencies;
+const c = dataset.find(x => x.name === name);
   if (!c) return;
 
   // Compute total and shares
