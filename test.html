@@ -2778,59 +2778,55 @@ tbody.innerHTML = parties.map((p, i) => {
 const inputs = document.querySelectorAll('.input-wrapper input');
 inputs.forEach((input, index) => {
   let originalValue = input.value;
+  let hasChanged = false; // track if user actually changed it
 
-  // When user focuses: remember current value + clear visually
+  // When user focuses: remember old value, clear visually, but preserve logical value
   input.addEventListener('focus', () => {
     originalValue = input.value;
-    input.value = ''; // visually empty while editing
+    input.dataset.displayValue = originalValue; // store in data attr
+    input.value = ''; // visually empty
+    hasChanged = false; // reset change tracking
   });
 
-  // When user leaves (blur)
+  // When user types, mark as changed and update total
+  input.addEventListener('input', () => {
+    hasChanged = true;
+    updateVoteTotal();
+    document.getElementById('calculate').style.background = '#ffa500';
+  });
+
+  // When user leaves the box
   input.addEventListener('blur', () => {
-    // If left blank or invalid, restore previous
+    // if left blank → restore visually & logically
     if (input.value === '' || isNaN(parseFloat(input.value))) {
       input.value = originalValue;
     }
-    // Only recalc if changed
-    if (parseFloat(input.value) !== parseFloat(originalValue)) {
+
+    // Only recalc if user *actually changed* the value
+    if (hasChanged && parseFloat(input.value) !== parseFloat(originalValue)) {
       calculate();
     }
   });
 
-  // Pressing Enter → move to next field, not calculate yet
+  // When user presses Enter
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      // restore old value if blank
+
+      // if left blank, restore previous visually
       if (input.value === '' || isNaN(parseFloat(input.value))) {
         input.value = originalValue;
       }
-      // move focus to next input
+
+      // move to next input
       if (inputs[index + 1]) {
         inputs[index + 1].focus();
       } else {
-        inputs[0].focus(); // loop back to first
+        inputs[0].focus(); // loop to top
       }
     }
   });
-
-  // As user types → update totals + flag unsaved change
-  input.addEventListener('input', () => {
-    updateVoteTotal();
-    document.getElementById('calculate').style.background = '#ffa500';
-  });
-    
-    // 👇 automatically run full calculation when user leaves the input box
-input.addEventListener('blur', () => {
-  calculate();
 });
-    input.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    calculate();
-  }
-});
-  });
 
   updateVoteTotal();
 }
