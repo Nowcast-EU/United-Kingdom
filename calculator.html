@@ -320,6 +320,124 @@ tfoot td {
   }
 }
 
+/* ---- Constituency Results (tweaked layout) ---- */
+#constituency-section {
+  margin-top: 48px;
+  text-align: center;
+}
+  
+#constituency-section > h3 {
+  margin-bottom: 13px; /* adds more space between the title and search box */
+}
+
+.search-container {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto 16px auto;
+}
+
+#constituency-search {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 15px;
+  height: 30px;
+  box-sizing: border-box;
+}
+
+.dropdown {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ccc;
+  border-top: none;
+  z-index: 10;
+  max-height: 180px;
+  overflow-y: auto;
+  display: none;
+}
+
+.dropdown li {
+  padding: 6px 10px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.dropdown li:hover {
+  background: #f1f5f9;
+}
+
+#constituency-bars {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  height: 22px;
+  gap: 8px;
+}
+
+.bar-party {
+  width: 50px;
+  text-align: right;
+  font-weight: 600;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.bar-wrapper {
+  flex: 1;
+  position: relative;
+  background: #f3f3f3;
+  border-radius: 4px;
+  height: 100%;
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.bar-value {
+  width: 46px; /* fixed space for numbers */
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
+  color: #333;
+}
+
+.winner-text {
+  margin-top: 10px;
+  color: #333;
+  font-size: 16px;              /* 👈 slightly larger */
+  font-weight: 500;
+  text-align: center;
+  font-family: Inter, system-ui, sans-serif; /* 👈 match header font */
+}
+
+.winner-text span.party {
+  font-weight: 700;             /* bold party names */
+}
+
+.winner-text span.coloured {
+  color: var(--party-color);    /* colour set inline via JS */
+}
+
 </style>
 </head>
 
@@ -376,6 +494,17 @@ tfoot td {
   </div>
   <div class="counter" id="counter">0 / 650</div>
   <div class="note">Majority = 326 seats</div>
+</div>
+
+  <!-- Constituency-level results -->
+<div id="constituency-section">
+  <h3>Constituency Results (User Generated)</h3>
+  <div class="search-container">
+    <input type="text" id="constituency-search" placeholder="Search for a constituency...">
+    <ul id="constituency-dropdown" class="dropdown"></ul>
+  </div>
+  <div id="constituency-bars"></div>
+  <p id="winner-text" class="winner-text"></p>
 </div>
 
 <p class="disclaimer">
@@ -1689,6 +1818,659 @@ const CONSTITUENCY_SEATS = {
   "Ynys Môn": 1
 };
 
+// 👇 incumbent party for each constituency
+const CONSTITUENCY_INCUMBENTS = {
+  "Aldershot": "LAB",
+  "Aldridge-Brownhills": "CON",
+  "Altrincham and Sale West": "LAB",
+  "Amber Valley": "LAB",
+  "Arundel and South Downs": "CON",
+  "Ashfield": "RFM",
+  "Ashford": "LAB",
+  "Ashton-under-Lyne": "LAB",
+  "Aylesbury": "LAB",
+  "Banbury": "LAB",
+  "Barking": "LAB",
+  "Barnsley North": "LAB",
+  "Barnsley South": "LAB",
+  "Barrow and Furness": "LAB",
+  "Basildon and Billericay": "CON",
+  "Basingstoke": "LAB",
+  "Bassetlaw": "LAB",
+  "Bath": "LDM",
+  "Battersea": "LAB",
+  "Beaconsfield": "CON",
+  "Beckenham and Penge": "LAB",
+  "Bedford": "LAB",
+  "Bermondsey and Old Southwark": "LAB",
+  "Bethnal Green and Stepney": "LAB",
+  "Beverley and Holderness": "CON",
+  "Bexhill and Battle": "CON",
+  "Bexleyheath and Crayford": "LAB",
+  "Bicester and Woodstock": "LDM",
+  "Birkenhead": "LAB",
+  "Birmingham Edgbaston": "LAB",
+  "Birmingham Erdington": "LAB",
+  "Birmingham Hall Green and Moseley": "LAB",
+  "Birmingham Hodge Hill and Solihull North": "LAB",
+  "Birmingham Ladywood": "LAB",
+  "Birmingham Northfield": "LAB",
+  "Birmingham Perry Barr": "OTH",
+  "Birmingham Selly Oak": "LAB",
+  "Birmingham Yardley": "LAB",
+  "Bishop Auckland": "LAB",
+  "Blackburn": "OTH",
+  "Blackley and Middleton South": "LAB",
+  "Blackpool North and Fleetwood": "LAB",
+  "Blackpool South": "LAB",
+  "Blaydon and Consett": "LAB",
+  "Blyth and Ashington": "LAB",
+  "Bognor Regis and Littlehampton": "CON",
+  "Bolsover": "LAB",
+  "Bolton North East": "LAB",
+  "Bolton South and Walkden": "LAB",
+  "Bolton West": "LAB",
+  "Bootle": "LAB",
+  "Boston and Skegness": "RFM",
+  "Bournemouth East": "LAB",
+  "Bournemouth West": "LAB",
+  "Bracknell": "LAB",
+  "Bradford East": "LAB",
+  "Bradford South": "LAB",
+  "Bradford West": "LAB",
+  "Braintree": "CON",
+  "Brent East": "LAB",
+  "Brent West": "LAB",
+  "Brentford and Isleworth": "LAB",
+  "Brentwood and Ongar": "CON",
+  "Bridgwater": "CON",
+  "Bridlington and the Wolds": "CON",
+  "Brigg and Immingham": "CON",
+  "Brighton Kemptown and Peacehaven": "LAB",
+  "Brighton Pavilion": "GRN",
+  "Bristol Central": "GRN",
+  "Bristol East": "LAB",
+  "Bristol North East": "LAB",
+  "Bristol North West": "LAB",
+  "Bristol South": "LAB",
+  "Broadland and Fakenham": "CON",
+  "Bromley and Biggin Hill": "CON",
+  "Bromsgrove": "CON",
+  "Broxbourne": "CON",
+  "Broxtowe": "LAB",
+  "Buckingham and Bletchley": "LAB",
+  "Burnley": "LAB",
+  "Burton and Uttoxeter": "LAB",
+  "Bury North": "LAB",
+  "Bury South": "LAB",
+  "Bury St Edmunds and Stowmarket": "LAB",
+  "Calder Valley": "LAB",
+  "Camborne and Redruth": "LAB",
+  "Cambridge": "LAB",
+  "Cannock Chase": "LAB",
+  "Canterbury": "LAB",
+  "Carlisle": "LAB",
+  "Carshalton and Wallington": "LDM",
+  "Castle Point": "CON",
+  "Central Devon": "CON",
+  "Central Suffolk and North Ipswich": "CON",
+  "Chatham and Aylesford": "LAB",
+  "Cheadle": "LDM",
+  "Chelmsford": "LDM",
+  "Chelsea and Fulham": "LAB",
+  "Cheltenham": "LDM",
+  "Chesham and Amersham": "LDM",
+  "Chester North and Neston": "LAB",
+  "Chester South and Eddisbury": "CON",
+  "Chesterfield": "LAB",
+  "Chichester": "LDM",
+  "Chingford and Woodford Green": "CON",
+  "Chippenham": "LDM",
+  "Chipping Barnet": "LAB",
+  "Chorley": "OTH",
+  "Christchurch": "CON",
+  "Cities of London and Westminster": "LAB",
+  "City of Durham": "LAB",
+  "Clacton": "RFM",
+  "Clapham and Brixton Hill": "LAB",
+  "Colchester": "LAB",
+  "Colne Valley": "LAB",
+  "Congleton": "LAB",
+  "Corby and East Northamptonshire": "LAB",
+  "Coventry East": "LAB",
+  "Coventry North West": "LAB",
+  "Coventry South": "LAB",
+  "Cramlington and Killingworth": "LAB",
+  "Crawley": "LAB",
+  "Crewe and Nantwich": "LAB",
+  "Croydon East": "LAB",
+  "Croydon South": "CON",
+  "Croydon West": "LAB",
+  "Dagenham and Rainham": "LAB",
+  "Darlington": "LAB",
+  "Dartford": "LAB",
+  "Daventry": "CON",
+  "Derby North": "LAB",
+  "Derby South": "LAB",
+  "Derbyshire Dales": "LAB",
+  "Dewsbury and Batley": "OTH",
+  "Didcot and Wantage": "LDM",
+  "Doncaster Central": "LAB",
+  "Doncaster East and the Isle of Axholme": "LAB",
+  "Doncaster North": "LAB",
+  "Dorking and Horley": "LDM",
+  "Dover and Deal": "LAB",
+  "Droitwich and Evesham": "CON",
+  "Dudley": "LAB",
+  "Dulwich and West Norwood": "LAB",
+  "Dunstable and Leighton Buzzard": "LAB",
+  "Ealing Central and Acton": "LAB",
+  "Ealing North": "LAB",
+  "Ealing Southall": "LAB",
+  "Earley and Woodley": "LAB",
+  "Easington": "LAB",
+  "East Grinstead and Uckfield": "CON",
+  "East Ham": "LAB",
+  "East Hampshire": "CON",
+  "East Surrey": "CON",
+  "East Thanet": "LAB",
+  "East Wiltshire": "CON",
+  "East Worthing and Shoreham": "LAB",
+  "Eastbourne": "LDM",
+  "Eastleigh": "LDM",
+  "Edmonton and Winchmore Hill": "LAB",
+  "Ellesmere Port and Bromborough": "LAB",
+  "Eltham and Chislehurst": "LAB",
+  "Ely and East Cambridgeshire": "LDM",
+  "Enfield North": "LAB",
+  "Epping Forest": "CON",
+  "Epsom and Ewell": "LDM",
+  "Erewash": "LAB",
+  "Erith and Thamesmead": "LAB",
+  "Esher and Walton": "LDM",
+  "Exeter": "LAB",
+  "Exmouth and Exeter East": "CON",
+  "Fareham and Waterlooville": "CON",
+  "Farnham and Bordon": "CON",
+  "Faversham and Mid Kent": "CON",
+  "Feltham and Heston": "LAB",
+  "Filton and Bradley Stoke": "LAB",
+  "Finchley and Golders Green": "LAB",
+  "Folkestone and Hythe": "LAB",
+  "Forest of Dean": "LAB",
+  "Frome and East Somerset": "LDM",
+  "Fylde": "CON",
+  "Gainsborough": "CON",
+  "Gateshead Central and Whickham": "LAB",
+  "Gedling": "LAB",
+  "Gillingham and Rainham": "LAB",
+  "Glastonbury and Somerton": "LDM",
+  "Gloucester": "LAB",
+  "Godalming and Ash": "CON",
+  "Goole and Pocklington": "CON",
+  "Gorton and Denton": "LAB",
+  "Gosport": "CON",
+  "Grantham and Bourne": "CON",
+  "Gravesham": "LAB",
+  "Great Grimsby and Cleethorpes": "LAB",
+  "Great Yarmouth": "RFM",
+  "Greenwich and Woolwich": "LAB",
+  "Guildford": "LDM",
+  "Hackney North and Stoke Newington": "LAB",
+  "Hackney South and Shoreditch": "LAB",
+  "Halesowen": "LAB",
+  "Halifax": "LAB",
+  "Hamble Valley": "CON",
+  "Hammersmith and Chiswick": "LAB",
+  "Hampstead and Highgate": "LAB",
+  "Harborough, Oadby and Wigston": "CON",
+  "Harlow": "LAB",
+  "Harpenden and Berkhamsted": "LDM",
+  "Harrogate and Knaresborough": "LDM",
+  "Harrow East": "CON",
+  "Harrow West": "LAB",
+  "Hartlepool": "LAB",
+  "Harwich and North Essex": "CON",
+  "Hastings and Rye": "LAB",
+  "Havant": "CON",
+  "Hayes and Harlington": "LAB",
+  "Hazel Grove": "LDM",
+  "Hemel Hempstead": "LAB",
+  "Hendon": "LAB",
+  "Henley and Thame": "LDM",
+  "Hereford and South Herefordshire": "CON",
+  "Herne Bay and Sandwich": "CON",
+  "Hertford and Stortford": "LAB",
+  "Hertsmere": "CON",
+  "Hexham": "LAB",
+  "Heywood and Middleton North": "LAB",
+  "High Peak": "LAB",
+  "Hinckley and Bosworth": "CON",
+  "Hitchin": "LAB",
+  "Holborn and St Pancras": "LAB",
+  "Honiton and Sidmouth": "LDM",
+  "Hornchurch and Upminster": "CON",
+  "Hornsey and Friern Barnet": "LAB",
+  "Horsham": "LDM",
+  "Houghton and Sunderland South": "LAB",
+  "Hove and Portslade": "LAB",
+  "Huddersfield": "LAB",
+  "Huntingdon": "CON",
+  "Hyndburn": "LAB",
+  "Ilford North": "LAB",
+  "Ilford South": "LAB",
+  "Ipswich": "LAB",
+  "Isle of Wight East": "CON",
+  "Isle of Wight West": "LAB",
+  "Islington North": "OTH",
+  "Islington South and Finsbury": "LAB",
+  "Jarrow and Gateshead East": "LAB",
+  "Keighley and Ilkley": "CON",
+  "Kenilworth and Southam": "CON",
+  "Kensington and Bayswater": "LAB",
+  "Kettering": "LAB",
+  "Kingston and Surbiton": "LDM",
+  "Kingston upon Hull East": "LAB",
+  "Kingston upon Hull North and Cottingham": "LAB",
+  "Kingston upon Hull West and Haltemprice": "LAB",
+  "Kingswinford and South Staffordshire": "CON",
+  "Knowsley": "LAB",
+  "Lancaster and Wyre": "LAB",
+  "Leeds Central and Headingley": "LAB",
+  "Leeds East": "LAB",
+  "Leeds North East": "LAB",
+  "Leeds North West": "LAB",
+  "Leeds South": "LAB",
+  "Leeds South West and Morley": "LAB",
+  "Leeds West and Pudsey": "LAB",
+  "Leicester East": "CON",
+  "Leicester South": "OTH",
+  "Leicester West": "LAB",
+  "Leigh and Atherton": "LAB",
+  "Lewes": "LDM",
+  "Lewisham East": "LAB",
+  "Lewisham North": "LAB",
+  "Lewisham West and East Dulwich": "LAB",
+  "Leyton and Wanstead": "LAB",
+  "Lichfield": "LAB",
+  "Lincoln": "LAB",
+  "Liverpool Garston": "LAB",
+  "Liverpool Riverside": "LAB",
+  "Liverpool Walton": "LAB",
+  "Liverpool Wavertree": "LAB",
+  "Liverpool West Derby": "LAB",
+  "Loughborough": "LAB",
+  "Louth and Horncastle": "CON",
+  "Lowestoft": "LAB",
+  "Luton North": "LAB",
+  "Luton South and South Bedfordshire": "LAB",
+  "Macclesfield": "LAB",
+  "Maidenhead": "LDM",
+  "Maidstone and Malling": "CON",
+  "Makerfield": "LAB",
+  "Maldon": "CON",
+  "Manchester Central": "LAB",
+  "Manchester Rusholme": "LAB",
+  "Manchester Withington": "LAB",
+  "Mansfield": "LAB",
+  "Melksham and Devizes": "LDM",
+  "Melton and Syston": "CON",
+  "Meriden and Solihull East": "CON",
+  "Mid Bedfordshire": "CON",
+  "Mid Buckinghamshire": "CON",
+  "Mid Cheshire": "LAB",
+  "Mid Derbyshire": "LAB",
+  "Mid Dorset and North Poole": "LDM",
+  "Mid Leicestershire": "CON",
+  "Mid Norfolk": "CON",
+  "Mid Sussex": "LDM",
+  "Middlesbrough and Thornaby East": "LAB",
+  "Middlesbrough South and East Cleveland": "LAB",
+  "Milton Keynes Central": "LAB",
+  "Milton Keynes North": "LAB",
+  "Mitcham and Morden": "LAB",
+  "Morecambe and Lunesdale": "LAB",
+  "New Forest East": "CON",
+  "New Forest West": "CON",
+  "Newark": "CON",
+  "Newbury": "LDM",
+  "Newcastle upon Tyne Central and West": "LAB",
+  "Newcastle upon Tyne East and Wallsend": "LAB",
+  "Newcastle upon Tyne North": "LAB",
+  "Newcastle-under-Lyme": "LAB",
+  "Newton Abbot": "LDM",
+  "Newton Aycliffe and Spennymoor": "LAB",
+  "Normanton and Hemsworth": "LAB",
+  "North Bedfordshire": "CON",
+  "North Cornwall": "LDM",
+  "North Cotswolds": "CON",
+  "North Devon": "LDM",
+  "North Dorset": "CON",
+  "North Durham": "LAB",
+  "North East Cambridgeshire": "CON",
+  "North East Derbyshire": "LAB",
+  "North East Hampshire": "LDM",
+  "North East Hertfordshire": "LAB",
+  "North East Somerset and Hanham": "LAB",
+  "North Herefordshire": "GRN",
+  "North Norfolk": "LDM",
+  "North Northumberland": "LAB",
+  "North Shropshire": "LDM",
+  "North Somerset": "LAB",
+  "North Warwickshire and Bedworth": "LAB",
+  "North West Cambridgeshire": "LAB",
+  "North West Essex": "CON",
+  "North West Hampshire": "CON",
+  "North West Leicestershire": "LAB",
+  "North West Norfolk": "CON",
+  "Northampton North": "LAB",
+  "Northampton South": "LAB",
+  "Norwich North": "LAB",
+  "Norwich South": "LAB",
+  "Nottingham East": "LAB",
+  "Nottingham North and Kimberley": "LAB",
+  "Nottingham South": "LAB",
+  "Nuneaton": "LAB",
+  "Old Bexley and Sidcup": "CON",
+  "Oldham East and Saddleworth": "LAB",
+  "Oldham West, Chadderton and Royton": "LAB",
+  "Orpington": "CON",
+  "Ossett and Denby Dale": "LAB",
+  "Oxford East": "LAB",
+  "Oxford West and Abingdon": "LDM",
+  "Peckham": "LAB",
+  "Pendle and Clitheroe": "LAB",
+  "Penistone and Stocksbridge": "LAB",
+  "Penrith and Solway": "LAB",
+  "Peterborough": "LAB",
+  "Plymouth Moor View": "LAB",
+  "Plymouth Sutton and Devonport": "LAB",
+  "Pontefract, Castleford and Knottingley": "LAB",
+  "Poole": "LAB",
+  "Poplar and Limehouse": "LAB",
+  "Portsmouth North": "LAB",
+  "Portsmouth South": "LAB",
+  "Preston": "LAB",
+  "Putney": "LAB",
+  "Queen's Park and Maida Vale": "LAB",
+  "Rawmarsh and Conisbrough": "LAB",
+  "Rayleigh and Wickford": "CON",
+  "Reading Central": "LAB",
+  "Reading West and Mid Berkshire": "LAB",
+  "Redcar": "LAB",
+  "Redditch": "LAB",
+  "Reigate": "CON",
+  "Ribble Valley": "LAB",
+  "Richmond and Northallerton": "CON",
+  "Richmond Park": "LDM",
+  "Rochdale": "LAB",
+  "Rochester and Strood": "LAB",
+  "Romford": "CON",
+  "Romsey and Southampton North": "CON",
+  "Rossendale and Darwen": "LAB",
+  "Rother Valley": "LAB",
+  "Rotherham": "LAB",
+  "Rugby": "LAB",
+  "Ruislip, Northwood and Pinner": "CON",
+  "Runcorn and Helsby": "LAB",
+  "Runnymede and Weybridge": "CON",
+  "Rushcliffe": "LAB",
+  "Rutland and Stamford": "CON",
+  "Salford": "LAB",
+  "Salisbury": "CON",
+  "Scarborough and Whitby": "LAB",
+  "Scunthorpe": "LAB",
+  "Sefton Central": "LAB",
+  "Selby": "LAB",
+  "Sevenoaks": "CON",
+  "Sheffield Brightside and Hillsborough": "LAB",
+  "Sheffield Central": "LAB",
+  "Sheffield Hallam": "LAB",
+  "Sheffield Heeley": "LAB",
+  "Sheffield South East": "LAB",
+  "Sherwood Forest": "LAB",
+  "Shipley": "LAB",
+  "Shrewsbury": "LAB",
+  "Sittingbourne and Sheppey": "LAB",
+  "Skipton and Ripon": "CON",
+  "Sleaford and North Hykeham": "CON",
+  "Slough": "LAB",
+  "Smethwick": "LAB",
+  "Solihull West and Shirley": "CON",
+  "South Basildon and East Thurrock": "RFM",
+  "South Cambridgeshire": "LDM",
+  "South Cotswolds": "LDM",
+  "South Derbyshire": "LAB",
+  "South Devon": "LDM",
+  "South Dorset": "LAB",
+  "South East Cornwall": "LAB",
+  "South Holland and the Deepings": "CON",
+  "South Leicestershire": "CON",
+  "South Norfolk": "LAB",
+  "South Northamptonshire": "CON",
+  "South Ribble": "LAB",
+  "South Shields": "LAB",
+  "South Shropshire": "CON",
+  "South Suffolk": "CON",
+  "South West Devon": "CON",
+  "South West Hertfordshire": "CON",
+  "South West Norfolk": "LAB",
+  "South West Wiltshire": "CON",
+  "Southampton Itchen": "LAB",
+  "Southampton Test": "LAB",
+  "Southend East and Rochford": "LAB",
+  "Southend West and Leigh": "LAB",
+  "Southgate and Wood Green": "LAB",
+  "Southport": "LAB",
+  "Spelthorne": "CON",
+  "Spen Valley": "LAB",
+  "St Albans": "LDM",
+  "St Austell and Newquay": "LAB",
+  "St Helens North": "LAB",
+  "St Helens South and Whiston": "LAB",
+  "St Ives": "LDM",
+  "St Neots and Mid Cambridgeshire": "LDM",
+  "Stafford": "LAB",
+  "Staffordshire Moorlands": "CON",
+  "Stalybridge and Hyde": "LAB",
+  "Stevenage": "LAB",
+  "Stockport": "LAB",
+  "Stockton North": "LAB",
+  "Stockton West": "CON",
+  "Stoke-on-Trent Central": "LAB",
+  "Stoke-on-Trent North": "LAB",
+  "Stoke-on-Trent South": "LAB",
+  "Stone, Great Wyrley and Penkridge": "CON",
+  "Stourbridge": "LAB",
+  "Stratford and Bow": "LAB",
+  "Stratford-on-Avon": "LDM",
+  "Streatham and Croydon North": "LAB",
+  "Stretford and Urmston": "LAB",
+  "Stroud": "LAB",
+  "Suffolk Coastal": "LAB",
+  "Sunderland Central": "LAB",
+  "Surrey Heath": "LDM",
+  "Sussex Weald": "CON",
+  "Sutton and Cheam": "LDM",
+  "Sutton Coldfield": "CON",
+  "Swindon North": "LAB",
+  "Swindon South": "LAB",
+  "Tamworth": "LAB",
+  "Tatton": "CON",
+  "Taunton and Wellington": "LDM",
+  "Telford": "LAB",
+  "Tewkesbury": "LDM",
+  "The Wrekin": "CON",
+  "Thirsk and Malton": "CON",
+  "Thornbury and Yate": "LDM",
+  "Thurrock": "LAB",
+  "Tipton and Wednesbury": "LAB",
+  "Tiverton and Minehead": "LDM",
+  "Tonbridge": "CON",
+  "Tooting": "LAB",
+  "Torbay": "LDM",
+  "Torridge and Tavistock": "CON",
+  "Tottenham": "LAB",
+  "Truro and Falmouth": "LAB",
+  "Tunbridge Wells": "LDM",
+  "Twickenham": "LDM",
+  "Tynemouth": "LAB",
+  "Uxbridge and South Ruislip": "LAB",
+  "Vauxhall and Camberwell Green": "LAB",
+  "Wakefield and Rothwell": "LAB",
+  "Wallasey": "LAB",
+  "Walsall and Bloxwich": "LAB",
+  "Walthamstow": "LAB",
+  "Warrington North": "LAB",
+  "Warrington South": "LAB",
+  "Warwick and Leamington": "LAB",
+  "Washington and Gateshead South": "LAB",
+  "Watford": "LAB",
+  "Waveney Valley": "GRN",
+  "Weald of Kent": "CON",
+  "Wellingborough and Rushden": "LAB",
+  "Wells and Mendip Hills": "LDM",
+  "Welwyn Hatfield": "LAB",
+  "West Bromwich": "LAB",
+  "West Dorset": "LDM",
+  "West Ham and Beckton": "LAB",
+  "West Lancashire": "LAB",
+  "West Suffolk": "CON",
+  "West Worcestershire": "CON",
+  "Westmorland and Lonsdale": "LDM",
+  "Weston-super-Mare": "LAB",
+  "Wetherby and Easingwold": "CON",
+  "Whitehaven and Workington": "LAB",
+  "Widnes and Halewood": "LAB",
+  "Wigan": "LAB",
+  "Wimbledon": "LDM",
+  "Winchester": "LDM",
+  "Windsor": "CON",
+  "Wirral West": "LAB",
+  "Witham": "CON",
+  "Witney": "LDM",
+  "Woking": "LDM",
+  "Wokingham": "LDM",
+  "Wolverhampton North East": "LAB",
+  "Wolverhampton South East": "LAB",
+  "Wolverhampton West": "LAB",
+  "Worcester": "LAB",
+  "Worsley and Eccles": "LAB",
+  "Worthing West": "LAB",
+  "Wycombe": "LAB",
+  "Wyre Forest": "CON",
+  "Wythenshawe and Sale East": "LAB",
+  "Yeovil": "LDM",
+  "York Central": "LAB",
+  "York Outer": "LAB",
+  "Belfast East": "DUP",
+  "Belfast North": "SFN",
+  "Belfast South and Mid Down": "SDL",
+  "Belfast West": "SFN",
+  "East Antrim": "DUP",
+  "East Londonderry": "DUP",
+  "Fermanagh and South Tyrone": "SFN",
+  "Foyle": "SDL",
+  "Lagan Valley": "ALL",
+  "Mid Ulster": "SFN",
+  "Newry and Armagh": "SFN",
+  "North Antrim": "TUV",
+  "North Down": "OTH",
+  "South Antrim": "UUP",
+  "South Down": "SFN",
+  "Strangford": "DUP",
+  "Upper Bann": "DUP",
+  "West Tyrone": "SFN",
+  "Ayr, Carrick and Cumnock": "LAB",
+  "Berwickshire, Roxburgh and Selkirk": "CON",
+  "Central Ayrshire": "LAB",
+  "East Renfrewshire": "LAB",
+  "Na h-Eileanan an Iar": "LAB",
+  "Kilmarnock and Loudoun": "LAB",
+  "Midlothian": "LAB",
+  "North Ayrshire and Arran": "LAB",
+  "Orkney and Shetland": "LDM",
+  "West Aberdeenshire and Kincardine": "CON",
+  "Aberdeen North": "SNP",
+  "Aberdeen South": "SNP",
+  "Aberdeenshire North and Moray East": "SNP",
+  "Airdrie and Shotts": "LAB",
+  "Alloa and Grangemouth": "LAB",
+  "Angus and Perthshire Glens": "SNP",
+  "Arbroath and Broughty Ferry": "SNP",
+  "Argyll, Bute and South Lochaber": "SNP",
+  "Bathgate and Linlithgow": "LAB",
+  "Caithness, Sutherland and Easter Ross": "LDM",
+  "Coatbridge and Bellshill": "LAB",
+  "Cowdenbeath and Kirkcaldy": "LAB",
+  "Cumbernauld and Kirkintilloch": "LAB",
+  "Dumfries and Galloway": "CON",
+  "Dumfriesshire, Clydesdale and Tweeddale": "CON",
+  "Dundee Central": "SNP",
+  "Dunfermline and Dollar": "LAB",
+  "East Kilbride and Strathaven": "LAB",
+  "Edinburgh East and Musselburgh": "LAB",
+  "Edinburgh North and Leith": "LAB",
+  "Edinburgh South": "LAB",
+  "Edinburgh South West": "LAB",
+  "Edinburgh West": "LDM",
+  "Falkirk": "LAB",
+  "Glasgow East": "LAB",
+  "Glasgow North": "LAB",
+  "Glasgow North East": "LAB",
+  "Glasgow South": "LAB",
+  "Glasgow South West": "LAB",
+  "Glasgow West": "LAB",
+  "Glenrothes and Mid Fife": "LAB",
+  "Gordon and Buchan": "CON",
+  "Hamilton and Clyde Valley": "LAB",
+  "Inverclyde and Renfrewshire West": "LAB",
+  "Inverness, Skye and West Ross-shire": "LDM",
+  "Livingston": "LAB",
+  "Lothian East": "LAB",
+  "Mid Dunbartonshire": "LDM",
+  "Moray West, Nairn and Strathspey": "SNP",
+  "Motherwell, Wishaw and Carluke": "LAB",
+  "North East Fife": "LDM",
+  "Paisley and Renfrewshire North": "LAB",
+  "Paisley and Renfrewshire South": "LAB",
+  "Perth and Kinross-shire": "SNP",
+  "Rutherglen": "LAB",
+  "Stirling and Strathallan": "LAB",
+  "West Dunbartonshire": "LAB",
+  "Aberafan Maesteg": "LAB",
+  "Alyn and Deeside": "LAB",
+  "Bangor Aberconwy": "LAB",
+  "Blaenau Gwent and Rhymney": "LAB",
+  "Brecon, Radnor and Cwm Tawe": "LDM",
+  "Bridgend": "LAB",
+  "Caerfyrddin": "PLC",
+  "Caerphilly": "LAB",
+  "Cardiff East": "LAB",
+  "Cardiff North": "LAB",
+  "Cardiff South and Penarth": "LAB",
+  "Cardiff West": "LAB",
+  "Ceredigion Preseli": "PLC",
+  "Clwyd East": "LAB",
+  "Clwyd North": "LAB",
+  "Dwyfor Meirionnydd": "PLC",
+  "Gower": "LAB",
+  "Llanelli": "LAB",
+  "Merthyr Tydfil and Aberdare": "LAB",
+  "Mid and South Pembrokeshire": "LAB",
+  "Monmouthshire": "LAB",
+  "Montgomeryshire and Glyndwr": "LAB",
+  "Neath and Swansea East": "LAB",
+  "Newport East": "LAB",
+  "Newport West and Islwyn": "LAB",
+  "Pontypridd": "LAB",
+  "Rhondda and Ogmore": "LAB",
+  "Swansea West": "LAB",
+  "Torfaen": "LAB",
+  "Vale of Glamorgan": "LAB",
+  "Wrexham": "LAB",
+  "Ynys Môn": "PLC"
+};
 
 /* ---- Party setup ---- */
 const PARTIES = ["LAB", "CON", "RFM", "LDM", "GRN", "SNP", "PLC", "SFN", "DUP", "ALL", "UUP", "SDL", "TUV", "OTH"];
@@ -1696,6 +2478,24 @@ const PARTY_COLORS = {"LAB":"#E4003B","CON":"#0087DC","RFM":"#23C7DF","LDM":"#FA
 const GE2024 = {"LAB":33.7,"CON":23.7,"RFM":14.3,"LDM":12.2,"GRN":6.4,"SNP":30.0,"PLC":14.8,"SFN":27.0,"DUP":22.1,"ALL":15.0,"UUP":12.2,"SDL":11.1,"TUV":6.2,"OTH":3.7};
 const DEFAULTS = {"LAB":18.0,"CON":17.0,"RFM":29.0,"LDM":13.0,"GRN":13.0,"SNP":33.0,"PLC":23.0,"SFN":27.0,"DUP":22.1,"ALL":15.0,"UUP":12.2,"SDL":11.1,"TUV":6.2,"OTH":3.6};
 const PREV_2023 = {"LAB":411,"CON":121,"RFM":5,"LDM":72,"GRN":4,"SNP":9,"PLC":4,"SFN":7,"DUP":5,"ALL":1,"UUP":1,"SDL":2,"TUV":1,"OTH":7};
+
+// Full party name aliases
+const PARTY_ALIASES = {
+  "LAB": "Labour",
+  "CON": "Conservative",
+  "RFM": "Reform UK",
+  "LDM": "Liberal Democrat",
+  "GRN": "Green",
+  "SNP": "SNP",
+  "PLC": "Plaid Cymru",
+  "SFN": "Sinn Féin",
+  "DUP": "DUP",
+  "ALL": "Alliance",
+  "UUP": "UUP",
+  "SDL": "SDLP",
+  "TUV": "TUV",
+  "OTH": "Independent/Other"
+};
 
 const parties = PARTIES.map(name => ({
   name,
@@ -1878,6 +2678,7 @@ function calculate(){
   });
 
   const perConst=computeConstituencyShares();
+  window.latestConstituencyResults = perConst;
   const totals=Object.fromEntries(PARTIES.map(p=>[p,0]));
 
 perConst.forEach(row => {
@@ -1919,6 +2720,10 @@ const majoritySeats = Math.ceil((totalSeats - sfnSeats) / 2);
 
 // update the note text dynamically
 document.querySelector(".note").textContent = `Note: functional majority = ${majoritySeats} seats`;
+
+// --- auto-refresh constituency view if one is selected ---
+const currentName = document.getElementById("constituency-search").value.trim();
+if (currentName) showConstituencyResults(currentName);
 }
 
 /* ---- Reset ---- */
@@ -2039,7 +2844,196 @@ tab2023.addEventListener("click", () => {
   }
 });
 
+  /* ---- Constituency Search + Bar Display ---- */
+const searchInput = document.getElementById("constituency-search");
 
+  // ---- Focus + blur behavior for constituency search ----
+let lastSelectedConstituency = "";
+
+searchInput.addEventListener("focus", () => {
+  lastSelectedConstituency = searchInput.value;
+  searchInput.value = "";
+});
+
+searchInput.addEventListener("blur", () => {
+  // restore only if user didn't type anything new
+  if (searchInput.value.trim() === "" && lastSelectedConstituency) {
+    searchInput.value = lastSelectedConstituency;
+  }
+});
+
+const dropdown = document.getElementById("constituency-dropdown");
+const barsDiv = document.getElementById("constituency-bars");
+const winnerText = document.getElementById("winner-text");
+showPlaceholderBars();
+
+// ---- Placeholder bars shown before user selection ----
+function showPlaceholderBars() {
+  barsDiv.innerHTML = "";
+  for (let i = 0; i < 5; i++) {
+    const row = document.createElement("div");
+    row.className = "bar-row";
+
+    const partyLabel = document.createElement("div");
+    partyLabel.className = "bar-party";
+    partyLabel.textContent = ""; // no text yet
+    row.appendChild(partyLabel);
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "bar-wrapper";
+
+    const bar = document.createElement("div");
+    bar.className = "bar";
+    bar.style.width = "0%"; // unfilled
+    bar.style.background = "#ccc"; // light grey placeholder color
+    wrapper.appendChild(bar);
+
+    row.appendChild(wrapper);
+
+    const valueLabel = document.createElement("div");
+    valueLabel.className = "bar-value";
+    valueLabel.textContent = ""; // no text yet
+    row.appendChild(valueLabel);
+
+    barsDiv.appendChild(row);
+  }
+
+  winnerText.textContent = ""; // no winner yet
+}
+
+// Build searchable list of names
+const allConstituencies = BASELINE.constituencies.map(c => c.name);
+
+// Filter + display dropdown
+searchInput.addEventListener("input", () => {
+  const query = searchInput.value.trim().toLowerCase();
+  dropdown.innerHTML = "";
+  if (query.length === 0) {
+    dropdown.style.display = "none";
+    return;
+  }
+const matches = allConstituencies.filter(name => {
+  const lowerName = name.toLowerCase();
+  const words = lowerName.split(/[\s\-']/); // split on spaces, hyphens, apostrophes
+  const queryWords = query.split(/\s+/).filter(Boolean); // split the user input by spaces
+
+  // every typed word must match the start of *some* word in the constituency name
+  return queryWords.every(qw =>
+    words.some(word => word.startsWith(qw))
+  );
+});
+  matches.slice(0, 10).forEach(name => {
+    const li = document.createElement("li");
+    li.textContent = name;
+    li.addEventListener("click", () => selectConstituency(name));
+    dropdown.appendChild(li);
+  });
+  dropdown.style.display = matches.length > 0 ? "block" : "none";
+});
+
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".search-container")) dropdown.style.display = "none";
+});
+
+function selectConstituency(name) {
+  searchInput.value = name;
+  dropdown.style.display = "none";
+  showConstituencyResults(name);
+}
+
+function showConstituencyResults(name) {
+const dataset = window.latestConstituencyResults || BASELINE.constituencies;
+const c = dataset.find(x => x.name === name);
+  if (!c) return;
+
+  // Compute total and shares
+  const partyShares = PARTIES.map(p => ({
+  name: p,
+  value: c[p] || 0,
+  color: PARTY_COLORS[p]
+  })).filter(x => x.value > 0 || x.name === "OTH");
+
+  const sorted = partyShares.sort((a,b) => b.value - a.value);
+  const max = sorted[0].value;
+
+  barsDiv.innerHTML = "";
+  sorted.forEach(p => {
+  const row = document.createElement("div");
+  row.className = "bar-row";
+
+  // Party label on the left
+  const partyLabel = document.createElement("div");
+  partyLabel.className = "bar-party";
+  partyLabel.textContent = p.name;
+  row.appendChild(partyLabel);
+
+  // Bar wrapper + coloured bar inside
+  const wrapper = document.createElement("div");
+  wrapper.className = "bar-wrapper";
+
+  const bar = document.createElement("div");
+  bar.className = "bar";
+    
+// Determine scale: if the largest party < 50%, we compress so 50% = full width
+let scaleFactor = 1;
+if (max < 0.5) {
+  scaleFactor = 1 / 0.5; // we'll map 50% vote to 100% width
+}
+
+// Scale each bar relative to either 100% or 50% rule
+let barWidth;
+if (max >= 0.5) {
+  // normal proportional scaling
+  barWidth = (p.value / max) * 100;
+} else {
+  // compress so 50% = 100% width
+  barWidth = (p.value / 0.5) * 100;
+}
+
+// clamp to 100%
+barWidth = Math.min(barWidth, 100);
+bar.style.width = barWidth + "%";
+
+  bar.style.background = p.color;
+  wrapper.appendChild(bar);
+
+row.appendChild(wrapper);
+
+// Percentage value outside the bar (right side)
+const valueLabel = document.createElement("div");
+valueLabel.className = "bar-value";
+valueLabel.textContent = `${(p.value * 100).toFixed(1)}%`;
+row.appendChild(valueLabel);
+
+barsDiv.appendChild(row);
+});
+
+  const winner = sorted[0];
+const incumbent = CONSTITUENCY_INCUMBENTS[name];
+const winnerAlias = PARTY_ALIASES[winner.name] || winner.name;
+const incumbentAlias = incumbent ? (PARTY_ALIASES[incumbent] || incumbent) : null;
+
+// helper to choose display colour
+function partyColor(partyCode) {
+  if (["SNP", "ALL"].includes(partyCode)) return "#000000"; // black
+  if (partyCode === "OTH") return "#999999"; // grey for Independent/Other
+  return PARTY_COLORS[partyCode] || "#000000";
+}
+
+// build span HTML
+const winnerHTML = `<span class="party coloured" style="--party-color:${partyColor(winner.name)}">${winnerAlias}</span>`;
+const incumbentHTML = incumbent ? `<span class="party coloured" style="--party-color:${partyColor(incumbent)}">${incumbentAlias}</span>` : "";
+
+if (incumbent) {
+  if (incumbent === winner.name) {
+    winnerText.innerHTML = `${winnerHTML} HOLD`;
+  } else {
+    winnerText.innerHTML = `${winnerHTML} GAIN from ${incumbentHTML}`;
+  }
+} else {
+  winnerText.innerHTML = `${name}: ${winnerHTML}`;
+}
+}  
 
 </script>
 </body>
