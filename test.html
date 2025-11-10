@@ -3274,6 +3274,24 @@ gbParties.forEach(code => {
   });
 });
 
+  // allow Enter key to move to the next input
+gbParties.forEach((code, idx) => {
+  const input = document.getElementById(`gb-${code}`);
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // stop form submission or line break
+      const nextInput = document.getElementById(`gb-${gbParties[idx + 1]}`);
+      if (nextInput) {
+        nextInput.focus();
+      } else {
+        // if it's the last input, loop back to the first
+        document.getElementById(`gb-${gbParties[0]}`).focus();
+      }
+    }
+  });
+});
+
 </script>
 </body>
 </html>
