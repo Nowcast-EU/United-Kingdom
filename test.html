@@ -3025,9 +3025,9 @@ const incumbentHTML = incumbent ? `<span class="party coloured" style="--party-c
 
 if (incumbent) {
   if (incumbent === winner.name) {
-    winnerText.innerHTML = `${winnerHTML} hold ${name}`;
+    winnerText.innerHTML = `${winnerHTML} HOLD`;
   } else {
-    winnerText.innerHTML = `${winnerHTML} gain ${name} from ${incumbentHTML}`;
+    winnerText.innerHTML = `${winnerHTML} GAIN from ${incumbentHTML}`;
   }
 } else {
   winnerText.innerHTML = `${name}: ${winnerHTML}`;
