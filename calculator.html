@@ -438,6 +438,171 @@ tfoot td {
   color: var(--party-color);    /* colour set inline via JS */
 }
 
+/* --- Floating Converter Button --- */
+#help-button {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: #008500;
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  transition: background 0.3s ease, transform 0.2s ease;
+  z-index: 1000;
+}
+#help-button:hover {
+  background-color: #006d00;
+  transform: scale(1.05);
+}
+
+/* --- Conversion Panel --- */
+
+#help-panel button {
+  background: #008500;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  margin-top: 8px;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+#help-panel button:hover {
+  background: #006d00;
+}
+
+#conversion-results {
+  margin-top: 10px;
+  text-align: left;
+  font-size: 13px;
+  color: #333;
+}
+
+  /* --- Floating Converter Button --- */
+#help-button {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: #008500;
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  transition: background 0.3s ease, transform 0.2s ease;
+  z-index: 1000;
+}
+#help-button:hover {
+  background-color: #006d00;
+  transform: scale(1.05);
+}
+
+/* --- Popup Panel --- */
+#help-panel {
+  position: fixed;
+  bottom: 80px;
+  right: 24px;
+  width: 320px;
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 14px 16px;
+  font-size: 14px;
+  line-height: 1.4;
+  font-family: Inter, system-ui, sans-serif;
+  display: none;
+  z-index: 999;
+  text-align: center;
+}
+
+#help-panel h4 {
+  margin-top: 0;
+  font-size: 16px;
+  color: #008500;
+  margin-bottom: 6px;
+}
+
+/* --- GB → UK mini calculator table --- */
+#gbuk-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  table-layout: fixed; /* ensures all columns equal width */
+}
+
+/* header + cell styles */
+#gbuk-table th,
+#gbuk-table td {
+  border-bottom: 1px solid #eee;
+  padding: 3px 4px;
+  text-align: center;
+  font-size: 13px;
+  width: 33.33%; /* 👈 each column equal width */
+  box-sizing: border-box;
+}
+
+/* narrower popup container */
+#help-panel {
+  width: 200px; /* 👈 thinner default popup */
+}
+
+/* input boxes scale to fit their cells */
+#gbuk-table input {
+  width: 90%; /* 👈 dynamically scales within cell */
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 2px;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+/* bold result column */
+#gbuk-table td:last-child {
+  font-weight: 600;
+}
+
+/* party column with coloured bar (same style as main table) */
+#gbuk-table .party-column {
+  font-weight: bold;
+  position: relative;
+  padding-left: 12px;
+  text-align: left;
+  color: black;
+}
+#gbuk-table .party-column::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 6px;
+  height: 100%;
+  border-radius: 2px 0 0 2px;
+  background-color: var(--party-color);
+}
+
+/* subtle grey header for consistency */
+#gbuk-table thead th {
+  background: #f1f5f9;
+  font-weight: 600;
+}
+
 </style>
 </head>
 
@@ -510,6 +675,47 @@ tfoot td {
 <p class="disclaimer">
   ** This calculator is a simplified version of the Nowcast UK model. Certain features that can't be included such as vote concentration, incumbent effects, and demographic weighting mean some projections may differ from our bi-monthly tracker.
 </p>
+
+<!-- Floating Converter Button -->
+<div id="help-button">⇄</div>
+
+<!-- GB→UK Calculator Panel -->
+<div id="help-panel">
+  <h4>GB → UK Vote Share Converter</h4>
+
+  <table id="gbuk-table">
+  <thead>
+    <tr><th>Party</th><th>GB %</th><th>UK %</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="party-column" style="--party-color:#E4003B;">LAB</td>
+      <td><input type="number" id="gb-LAB" min="0" max="100" step="0.1"></td>
+      <td id="uk-LAB">–</td>
+    </tr>
+    <tr>
+      <td class="party-column" style="--party-color:#0087DC;">CON</td>
+      <td><input type="number" id="gb-CON" min="0" max="100" step="0.1"></td>
+      <td id="uk-CON">–</td>
+    </tr>
+    <tr>
+      <td class="party-column" style="--party-color:#23C7DF;">RFM</td>
+      <td><input type="number" id="gb-RFM" min="0" max="100" step="0.1"></td>
+      <td id="uk-RFM">–</td>
+    </tr>
+    <tr>
+      <td class="party-column" style="--party-color:#FAA61A;">LDM</td>
+      <td><input type="number" id="gb-LDM" min="0" max="100" step="0.1"></td>
+      <td id="uk-LDM">–</td>
+    </tr>
+    <tr>
+      <td class="party-column" style="--party-color:#6AB023;">GRN</td>
+      <td><input type="number" id="gb-GRN" min="0" max="100" step="0.1"></td>
+      <td id="uk-GRN">–</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 <script>
 const BASELINE = {"baseline_national": {"LAB": 0.1781, "CON": 0.1691, "RFM": 0.2931, "LDM": 0.1267, "GRN": 0.1312, "SNP": 0.33, "PLC": 0.23, "SFN": 0.27, "DUP": 0.221, "ALL": 0.15, "UUP": 0.122, "SDL": 0.111, "TUV": 0.062, "OTH": 0.0390},
@@ -3034,6 +3240,51 @@ if (incumbent) {
   winnerText.innerHTML = `${name}: ${winnerHTML}`;
 }
 }  
+
+/* ---- Floating GB→UK Mini Calculator ---- */
+const helpBtn = document.getElementById("help-button");
+const helpPanel = document.getElementById("help-panel");
+const scale = 0.975;
+const gbParties = ["LAB","CON","RFM","LDM","GRN"];
+
+// toggle open/close ONLY when button clicked
+helpBtn.addEventListener("click", () => {
+  helpPanel.style.display = helpPanel.style.display === "block" ? "none" : "block";
+});
+
+// live conversion
+gbParties.forEach(code => {
+  const input = document.getElementById(`gb-${code}`);
+  const output = document.getElementById(`uk-${code}`);
+
+  input.addEventListener("input", () => {
+    const val = parseFloat(input.value);
+    if (isNaN(val)) {
+      output.textContent = "–";
+    } else {
+      const converted = (val * scale).toFixed(1);
+      output.textContent = `${converted}%`;
+    }
+  });
+});
+
+  // allow Enter key to move to the next input
+gbParties.forEach((code, idx) => {
+  const input = document.getElementById(`gb-${code}`);
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // stop form submission or line break
+      const nextInput = document.getElementById(`gb-${gbParties[idx + 1]}`);
+      if (nextInput) {
+        nextInput.focus();
+      } else {
+        // if it's the last input, loop back to the first
+        document.getElementById(`gb-${gbParties[0]}`).focus();
+      }
+    }
+  });
+});
 
 </script>
 </body>
