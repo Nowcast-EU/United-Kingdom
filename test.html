@@ -2230,7 +2230,17 @@ function showConstituencyResults(name) {
 
   const bar = document.createElement("div");
   bar.className = "bar";
-  bar.style.width = ((p.value / max) * 100) + "%";
+// Determine scale: if the largest party < 50%, we compress so 50% vote = full width
+let scaleFactor;
+if (max < 0.5) {
+  scaleFactor = 0.5 / max;   // scale up so 50% vote share = full width
+} else {
+  scaleFactor = 1;           // normal full-width scaling
+}
+
+const scaledWidth = Math.min(100, (p.value * scaleFactor / max) * 100);
+bar.style.width = scaledWidth + "%";
+
   bar.style.background = p.color;
   wrapper.appendChild(bar);
 
