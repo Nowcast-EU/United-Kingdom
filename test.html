@@ -438,55 +438,77 @@ tfoot td {
   color: var(--party-color);    /* colour set inline via JS */
 }
 
-/* --- Floating Help Button --- */
+/* --- Floating Converter Button --- */
 #help-button {
   position: fixed;
   bottom: 24px;
   right: 24px;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background-color: #008500;
   color: #fff;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
   transition: background 0.3s ease, transform 0.2s ease;
   z-index: 1000;
 }
-
 #help-button:hover {
   background-color: #006d00;
   transform: scale(1.05);
 }
 
-/* --- Help Panel --- */
+/* --- Conversion Panel --- */
 #help-panel {
   position: fixed;
   bottom: 80px;
   right: 24px;
-  width: 280px;
+  width: 300px;
   background: #ffffff;
   border: 1px solid #ddd;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  padding: 16px;
+  padding: 14px 16px;
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.4;
   font-family: Inter, system-ui, sans-serif;
-  display: none; /* hidden by default */
+  display: none;
   z-index: 999;
+  text-align: center;
 }
 
 #help-panel h4 {
   margin-top: 0;
   font-size: 16px;
   color: #008500;
-  text-align: center;
+  margin-bottom: 6px;
+}
+
+#help-panel button {
+  background: #008500;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  margin-top: 8px;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+#help-panel button:hover {
+  background: #006d00;
+}
+
+#conversion-results {
+  margin-top: 10px;
+  text-align: left;
+  font-size: 13px;
+  color: #333;
 }
 
 </style>
@@ -562,19 +584,15 @@ tfoot td {
   ** This calculator is a simplified version of the Nowcast UK model. Certain features that can't be included such as vote concentration, incumbent effects, and demographic weighting mean some projections may differ from our bi-monthly tracker.
 </p>
 
-  <!-- Floating Help Button -->
-<div id="help-button">?</div>
+<!-- Floating Converter Button -->
+<div id="help-button">⇄</div>
 
-<!-- Hidden Help Panel -->
+<!-- Conversion Panel -->
 <div id="help-panel">
-  <h4>Help</h4>
-  <p>
-    • Enter or adjust vote shares for each party.<br>
-    • Press <strong>Calculate</strong> to project seats.<br>
-    • Use the <strong>Coalition Builder</strong> below to test combinations.<br>
-    • The constituency search lets you view local results.<br>
-    • All results are illustrative and based on the Nowcast UK model.
-  </p>
+  <h4>GB → UK Vote Share Calculator</h4>
+  <p>Adjusts main parties to represent UK-wide vote share (×0.975).</p>
+  <button id="convert-votes">Convert Current Inputs</button>
+  <div id="conversion-results"></div>
 </div>
 
 <script>
@@ -3101,21 +3119,38 @@ if (incumbent) {
 }
 }  
 
-/* ---- Floating Help Button Toggle ---- */
+/* ---- Floating Converter Button ---- */
 const helpBtn = document.getElementById("help-button");
 const helpPanel = document.getElementById("help-panel");
+const convertBtn = document.getElementById("convert-votes");
+const conversionDiv = document.getElementById("conversion-results");
 
+// toggle open/close
 helpBtn.addEventListener("click", (e) => {
   e.stopPropagation();
-  const isVisible = helpPanel.style.display === "block";
-  helpPanel.style.display = isVisible ? "none" : "block";
+  helpPanel.style.display = helpPanel.style.display === "block" ? "none" : "block";
 });
-
-// hide when clicking outside
 document.addEventListener("click", (e) => {
   if (!helpPanel.contains(e.target) && e.target !== helpBtn) {
     helpPanel.style.display = "none";
   }
+});
+
+// conversion logic
+convertBtn.addEventListener("click", () => {
+  const SCALE = 0.975;
+  const targetParties = ["LAB", "CON", "RFM", "LDM", "GRN"];
+  const results = [];
+
+  targetParties.forEach(party => {
+    const partyObj = parties.find(x => x.name === party);
+    if (partyObj) {
+      const adjusted = (partyObj.votes * SCALE).toFixed(1);
+      results.push(`<strong>${PARTY_ALIASES[party] || party}</strong>: ${adjusted}%`);
+    }
+  });
+
+  conversionDiv.innerHTML = results.join("<br>");
 });
 
 </script>
