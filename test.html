@@ -464,30 +464,6 @@ tfoot td {
 }
 
 /* --- Conversion Panel --- */
-#help-panel {
-  position: fixed;
-  bottom: 80px;
-  right: 24px;
-  width: 300px;
-  background: #ffffff;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  padding: 14px 16px;
-  font-size: 14px;
-  line-height: 1.4;
-  font-family: Inter, system-ui, sans-serif;
-  display: none;
-  z-index: 999;
-  text-align: center;
-}
-
-#help-panel h4 {
-  margin-top: 0;
-  font-size: 16px;
-  color: #008500;
-  margin-bottom: 6px;
-}
 
 #help-panel button {
   background: #008500;
@@ -509,6 +485,83 @@ tfoot td {
   text-align: left;
   font-size: 13px;
   color: #333;
+}
+
+  /* --- Floating Converter Button --- */
+#help-button {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: #008500;
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  transition: background 0.3s ease, transform 0.2s ease;
+  z-index: 1000;
+}
+#help-button:hover {
+  background-color: #006d00;
+  transform: scale(1.05);
+}
+
+/* --- Popup Panel --- */
+#help-panel {
+  position: fixed;
+  bottom: 80px;
+  right: 24px;
+  width: 320px;
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 14px 16px;
+  font-size: 14px;
+  line-height: 1.4;
+  font-family: Inter, system-ui, sans-serif;
+  display: none;
+  z-index: 999;
+  text-align: center;
+}
+
+#help-panel h4 {
+  margin-top: 0;
+  font-size: 16px;
+  color: #008500;
+  margin-bottom: 6px;
+}
+
+#gbuk-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+#gbuk-table th,
+#gbuk-table td {
+  border-bottom: 1px solid #eee;
+  padding: 4px 6px;
+  text-align: center;
+}
+
+#gbuk-table input {
+  width: 60px;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 2px;
+  font-size: 13px;
+}
+
+#gbuk-table td:last-child {
+  font-weight: 600;
 }
 
 </style>
@@ -587,12 +640,23 @@ tfoot td {
 <!-- Floating Converter Button -->
 <div id="help-button">⇄</div>
 
-<!-- Conversion Panel -->
+<!-- GB→UK Calculator Panel -->
 <div id="help-panel">
   <h4>GB → UK Vote Share Calculator</h4>
-  <p>Adjusts main parties to represent UK-wide vote share (×0.975).</p>
-  <button id="convert-votes">Convert Current Inputs</button>
-  <div id="conversion-results"></div>
+  <p>Enter GB vote shares — converted UK shares appear automatically (×0.975).</p>
+
+  <table id="gbuk-table">
+    <thead>
+      <tr><th>Party</th><th>GB %</th><th>UK %</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Labour</td><td><input type="number" id="gb-LAB" min="0" max="100" step="0.1"></td><td id="uk-LAB">–</td></tr>
+      <tr><td>Conservative</td><td><input type="number" id="gb-CON" min="0" max="100" step="0.1"></td><td id="uk-CON">–</td></tr>
+      <tr><td>Reform UK</td><td><input type="number" id="gb-RFM" min="0" max="100" step="0.1"></td><td id="uk-RFM">–</td></tr>
+      <tr><td>Liberal Democrat</td><td><input type="number" id="gb-LDM" min="0" max="100" step="0.1"></td><td id="uk-LDM">–</td></tr>
+      <tr><td>Green</td><td><input type="number" id="gb-GRN" min="0" max="100" step="0.1"></td><td id="uk-GRN">–</td></tr>
+    </tbody>
+  </table>
 </div>
 
 <script>
@@ -3119,11 +3183,11 @@ if (incumbent) {
 }
 }  
 
-/* ---- Floating Converter Button ---- */
+/* ---- Floating GB→UK Mini Calculator ---- */
 const helpBtn = document.getElementById("help-button");
 const helpPanel = document.getElementById("help-panel");
-const convertBtn = document.getElementById("convert-votes");
-const conversionDiv = document.getElementById("conversion-results");
+const scale = 0.975;
+const gbParties = ["LAB","CON","RFM","LDM","GRN"];
 
 // toggle open/close
 helpBtn.addEventListener("click", (e) => {
@@ -3136,21 +3200,20 @@ document.addEventListener("click", (e) => {
   }
 });
 
-// conversion logic
-convertBtn.addEventListener("click", () => {
-  const SCALE = 0.975;
-  const targetParties = ["LAB", "CON", "RFM", "LDM", "GRN"];
-  const results = [];
+// live conversion
+gbParties.forEach(code => {
+  const input = document.getElementById(`gb-${code}`);
+  const output = document.getElementById(`uk-${code}`);
 
-  targetParties.forEach(party => {
-    const partyObj = parties.find(x => x.name === party);
-    if (partyObj) {
-      const adjusted = (partyObj.votes * SCALE).toFixed(1);
-      results.push(`<strong>${PARTY_ALIASES[party] || party}</strong>: ${adjusted}%`);
+  input.addEventListener("input", () => {
+    const val = parseFloat(input.value);
+    if (isNaN(val)) {
+      output.textContent = "–";
+    } else {
+      const converted = (val * scale).toFixed(1);
+      output.textContent = `${converted}%`;
     }
   });
-
-  conversionDiv.innerHTML = results.join("<br>");
 });
 
 </script>
