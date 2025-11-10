@@ -320,6 +320,86 @@ tfoot td {
   }
 }
 
+  /* ---- Constituency Results ---- */
+#constituency-section {
+  margin-top: 48px;
+  text-align: center;
+}
+
+.search-container {
+  position: relative;
+  width: 320px;
+  max-width: 100%;
+  margin: 0 auto 16px auto;
+}
+
+#constituency-search {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+.dropdown {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ccc;
+  border-top: none;
+  z-index: 10;
+  max-height: 180px;
+  overflow-y: auto;
+  display: none;
+}
+
+.dropdown li {
+  padding: 6px 10px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.dropdown li:hover {
+  background: #f1f5f9;
+}
+
+#constituency-bars {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  height: 20px;
+}
+
+.bar {
+  height: 100%;
+  border-radius: 3px;
+}
+
+.bar-label {
+  margin-left: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.winner-text {
+  margin-top: 10px;
+  font-style: italic;
+  color: #444;
+  font-size: 14px;
+}
+
 </style>
 </head>
 
@@ -376,6 +456,17 @@ tfoot td {
   </div>
   <div class="counter" id="counter">0 / 650</div>
   <div class="note">Majority = 326 seats</div>
+</div>
+
+  <!-- Constituency-level results -->
+<div id="constituency-section">
+  <h3>Constituency Results</h3>
+  <div class="search-container">
+    <input type="text" id="constituency-search" placeholder="Search for a constituency...">
+    <ul id="constituency-dropdown" class="dropdown"></ul>
+  </div>
+  <div id="constituency-bars"></div>
+  <p id="winner-text" class="winner-text"></p>
 </div>
 
 <p class="disclaimer">
@@ -2039,7 +2130,79 @@ tab2023.addEventListener("click", () => {
   }
 });
 
+  /* ---- Constituency Search + Bar Display ---- */
+const searchInput = document.getElementById("constituency-search");
+const dropdown = document.getElementById("constituency-dropdown");
+const barsDiv = document.getElementById("constituency-bars");
+const winnerText = document.getElementById("winner-text");
 
+// Build searchable list of names
+const allConstituencies = BASELINE.constituencies.map(c => c.name);
+
+// Filter + display dropdown
+searchInput.addEventListener("input", () => {
+  const query = searchInput.value.trim().toLowerCase();
+  dropdown.innerHTML = "";
+  if (query.length === 0) {
+    dropdown.style.display = "none";
+    return;
+  }
+  const matches = allConstituencies.filter(name => name.toLowerCase().includes(query));
+  matches.slice(0, 10).forEach(name => {
+    const li = document.createElement("li");
+    li.textContent = name;
+    li.addEventListener("click", () => selectConstituency(name));
+    dropdown.appendChild(li);
+  });
+  dropdown.style.display = matches.length > 0 ? "block" : "none";
+});
+
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".search-container")) dropdown.style.display = "none";
+});
+
+function selectConstituency(name) {
+  searchInput.value = name;
+  dropdown.style.display = "none";
+  showConstituencyResults(name);
+}
+
+function showConstituencyResults(name) {
+  const c = BASELINE.constituencies.find(x => x.name === name);
+  if (!c) return;
+
+  // Compute total and shares
+  const partyShares = PARTIES.map(p => ({
+    name: p,
+    value: c[p] || 0,
+    color: PARTY_COLORS[p]
+  })).filter(x => x.value > 0);
+
+  const sorted = partyShares.sort((a,b) => b.value - a.value);
+  const max = sorted[0].value;
+
+  barsDiv.innerHTML = "";
+  sorted.forEach(p => {
+    const row = document.createElement("div");
+    row.className = "bar-row";
+
+    const bar = document.createElement("div");
+    bar.className = "bar";
+    bar.style.width = ((p.value / max) * 100) + "%";
+    bar.style.background = p.color;
+    row.appendChild(bar);
+
+    const label = document.createElement("span");
+    label.className = "bar-label";
+    label.textContent = `${p.name} (${(p.value * 100).toFixed(1)}%)`;
+    row.appendChild(label);
+
+    barsDiv.appendChild(row);
+  });
+
+  const winner = sorted[0];
+  winnerText.textContent = `${name}: ${winner.name}`;
+}
 
 </script>
 </body>
