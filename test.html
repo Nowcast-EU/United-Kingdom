@@ -2179,6 +2179,41 @@ searchInput.addEventListener("blur", () => {
 const dropdown = document.getElementById("constituency-dropdown");
 const barsDiv = document.getElementById("constituency-bars");
 const winnerText = document.getElementById("winner-text");
+showPlaceholderBars();
+
+// ---- Placeholder bars shown before user selection ----
+function showPlaceholderBars() {
+  barsDiv.innerHTML = "";
+  for (let i = 0; i < 5; i++) {
+    const row = document.createElement("div");
+    row.className = "bar-row";
+
+    const partyLabel = document.createElement("div");
+    partyLabel.className = "bar-party";
+    partyLabel.textContent = ""; // no text yet
+    row.appendChild(partyLabel);
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "bar-wrapper";
+
+    const bar = document.createElement("div");
+    bar.className = "bar";
+    bar.style.width = "0%"; // unfilled
+    bar.style.background = "#ccc"; // light grey placeholder color
+    wrapper.appendChild(bar);
+
+    row.appendChild(wrapper);
+
+    const valueLabel = document.createElement("div");
+    valueLabel.className = "bar-value";
+    valueLabel.textContent = ""; // no text yet
+    row.appendChild(valueLabel);
+
+    barsDiv.appendChild(row);
+  }
+
+  winnerText.textContent = ""; // no winner yet
+}
 
 // Build searchable list of names
 const allConstituencies = BASELINE.constituencies.map(c => c.name);
