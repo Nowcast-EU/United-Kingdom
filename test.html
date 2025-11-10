@@ -2262,10 +2262,10 @@ const c = dataset.find(x => x.name === name);
 
   // Compute total and shares
   const partyShares = PARTIES.map(p => ({
-    name: p,
-    value: c[p] || 0,
-    color: PARTY_COLORS[p]
-  })).filter(x => x.value > 0);
+  name: p,
+  value: c[p] || 0,
+  color: PARTY_COLORS[p]
+  })).filter(x => x.value > 0 || x.name === "OTH");
 
   const sorted = partyShares.sort((a,b) => b.value - a.value);
   const max = sorted[0].value;
