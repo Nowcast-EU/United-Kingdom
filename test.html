@@ -3015,7 +3015,8 @@ const incumbentAlias = incumbent ? (PARTY_ALIASES[incumbent] || incumbent) : nul
 
 // helper to choose display colour
 function partyColor(partyCode) {
-  if (["SNP", "ALL", "OTH"].includes(partyCode)) return "#000000"; // always black
+  if (["SNP", "ALL"].includes(partyCode)) return "#000000"; // black
+  if (partyCode === "OTH") return "#999999"; // grey for Independent/Other
   return PARTY_COLORS[partyCode] || "#000000";
 }
 
