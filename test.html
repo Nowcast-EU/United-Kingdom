@@ -423,9 +423,19 @@ tfoot td {
 
 .winner-text {
   margin-top: 10px;
-  font-style: italic;
-  color: #444;
-  font-size: 14px;
+  color: #333;
+  font-size: 16px;              /* 👈 slightly larger */
+  font-weight: 500;
+  text-align: center;
+  font-family: Inter, system-ui, sans-serif; /* 👈 match header font */
+}
+
+.winner-text span.party {
+  font-weight: 700;             /* bold party names */
+}
+
+.winner-text span.coloured {
+  color: var(--party-color);    /* colour set inline via JS */
 }
 
 </style>
@@ -3003,14 +3013,24 @@ const incumbent = CONSTITUENCY_INCUMBENTS[name];
 const winnerAlias = PARTY_ALIASES[winner.name] || winner.name;
 const incumbentAlias = incumbent ? (PARTY_ALIASES[incumbent] || incumbent) : null;
 
+// helper to choose display colour
+function partyColor(partyCode) {
+  if (["SNP", "ALL", "OTH"].includes(partyCode)) return "#000000"; // always black
+  return PARTY_COLORS[partyCode] || "#000000";
+}
+
+// build span HTML
+const winnerHTML = `<span class="party coloured" style="--party-color:${partyColor(winner.name)}">${winnerAlias}</span>`;
+const incumbentHTML = incumbent ? `<span class="party coloured" style="--party-color:${partyColor(incumbent)}">${incumbentAlias}</span>` : "";
+
 if (incumbent) {
   if (incumbent === winner.name) {
-    winnerText.textContent = `${winnerAlias} hold ${name}`;
+    winnerText.innerHTML = `${winnerHTML} hold ${name}`;
   } else {
-    winnerText.textContent = `${winnerAlias} gain ${name} from ${incumbentAlias}`;
+    winnerText.innerHTML = `${winnerHTML} gain ${name} from ${incumbentHTML}`;
   }
 } else {
-  winnerText.textContent = `${name}: ${winnerAlias}`;
+  winnerText.innerHTML = `${name}: ${winnerHTML}`;
 }
 }  
 
