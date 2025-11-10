@@ -2775,28 +2775,51 @@ tbody.innerHTML = parties.map((p, i) => {
 }).join('');
 
   // ✅ keep your original input logic below unchanged
-  const inputs = document.querySelectorAll('.input-wrapper input');
-  inputs.forEach((input, index) => {
-    let originalValue = input.value;
+ const inputs = document.querySelectorAll('.input-wrapper input');
+inputs.forEach((input, index) => {
+  let originalValue = input.value;
 
-    input.addEventListener('focus', () => {
-      originalValue = input.value;
-      input.value = '';
-    });
-    input.addEventListener('blur', () => {
-      if (input.value === '') input.value = originalValue;
-    });
+  // When user focuses: remember current value
+  input.addEventListener('focus', () => {
+    originalValue = input.value;
+  });
 
-    input.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        if (inputs[index + 1]) inputs[index + 1].focus();
+  // If user leaves the box (blur)
+  input.addEventListener('blur', () => {
+    // If they didn’t type anything new, restore the old value
+    if (input.value === '' || isNaN(parseFloat(input.value))) {
+      input.value = originalValue;
+    }
+    // Only run calculate() if value actually changed
+    if (parseFloat(input.value) !== parseFloat(originalValue)) {
+      calculate();
+    }
+  });
+
+  // If user presses Enter, move focus to next input without recalculating immediately
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      // restore previous value if they left it blank
+      if (input.value === '' || isNaN(parseFloat(input.value))) {
+        input.value = originalValue;
       }
-    });
-    input.addEventListener('input', () => {
-      updateVoteTotal();
-      document.getElementById('calculate').style.background = '#ffa500';
-    });
+      // move focus to next input (but don't trigger calculate yet)
+      if (inputs[index + 1]) {
+        inputs[index + 1].focus();
+      } else {
+        // loop back to first input if at the end
+        inputs[0].focus();
+      }
+    }
+  });
+
+  // On any input change, update total votes and flag pending change
+  input.addEventListener('input', () => {
+    updateVoteTotal();
+    document.getElementById('calculate').style.background = '#ffa500';
+  });
+});
     
     // 👇 automatically run full calculation when user leaves the input box
 input.addEventListener('blur', () => {
