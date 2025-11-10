@@ -2171,9 +2171,14 @@ searchInput.addEventListener("input", () => {
     return;
   }
 const matches = allConstituencies.filter(name => {
-  const lower = name.toLowerCase();
-  // Split into words and check if any word starts with the query
-  return lower.split(/\s+/).some(word => word.startsWith(query));
+  const lowerName = name.toLowerCase();
+  const words = lowerName.split(/[\s\-']/); // split on spaces, hyphens, apostrophes
+  const queryWords = query.split(/\s+/).filter(Boolean); // split the user input by spaces
+
+  // every typed word must match the start of *some* word in the constituency name
+  return queryWords.every(qw =>
+    words.some(word => word.startsWith(qw))
+  );
 });
   matches.slice(0, 10).forEach(name => {
     const li = document.createElement("li");
