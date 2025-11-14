@@ -2800,7 +2800,10 @@ inputs.forEach((input, index) => {
     // if left blank → restore visually & logically
     if (input.value === '' || isNaN(parseFloat(input.value))) {
       input.value = originalValue;
-    }
+    } else {
+    // 👇 Force 1 decimal place display
+    input.value = parseFloat(input.value).toFixed(1);
+  }
 
     // Only recalc if user *actually changed* the value
     if (hasChanged && parseFloat(input.value) !== parseFloat(originalValue)) {
