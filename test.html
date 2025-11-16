@@ -32,36 +32,69 @@ body {
   background: #fafafa;
 }
 
-.pill-switcher {
+/* Container holding title + switcher */
+.switcher-wrapper {
   position: fixed;
   top: 18px;
   right: 18px;
-  background: white;
-  padding: 6px;
-  border-radius: 50px;
-  display: flex;
-  gap: 4px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   z-index: 10000;
+  text-align: right;
 }
 
-.pill-btn {
-  padding: 8px 16px;
+/* Small title */
+.switcher-title {
+  font-size: 13px;
+  color: #333;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+/* Outer segmented control */
+.segmented {
+  display: inline-flex;
+  background: #efefef;
+  padding: 4px;
   border-radius: 40px;
-  cursor: pointer;
+  position: relative;
+  gap: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+
+/* Buttons inside segmented control */
+.segment-btn {
+  position: relative;
+  z-index: 2;
+  padding: 6px 16px;
   font-size: 14px;
+  cursor: pointer;
   font-weight: 500;
   border: none;
-  background: transparent;
-  transition: all 0.25s ease;
+  background: none;
+  border-radius: 40px;
+  color: #666;
   user-select: none;
+  transition: color 0.2s ease;
 }
 
-.pill-btn.active {
-  background: #007bff;
-  color: white;
+/* Active text color */
+.segment-btn.active {
+  color: black;
 }
 
+/* The sliding "pill" */
+.segment-highlight {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  background: white;
+  border-radius: 40px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  transition: transform 0.25s ease;
+}
+
+/* Iframes */
 iframe {
   width: 100vw;
   height: 100vh;
@@ -77,27 +110,40 @@ iframe.active {
 
 <body>
 
-<!-- Floating pill switcher -->
-<div class="pill-switcher">
-  <button class="pill-btn active" data-target="without">Without 'Your Party'</button>
-  <button class="pill-btn" data-target="with">With 'Your Party'</button>
+
+<!-- Floating switcher -->
+<div class="switcher-wrapper">
+  <div class="switcher-title">'Your Party'</div>
+
+  <div class="segmented">
+    <div class="segment-highlight"></div>
+    
+  <button class="segment-btn active" data-target="without">Off</button>
+  <button class="segment-btn" data-target="with">On</button>
+  </div>
 </div>
 
 <iframe id="without" class="active" src="https://nowcast-eu.github.io/United-Kingdom/calculator.html"></iframe>
 <iframe id="with" src="https://nowcast-eu.github.io/United-Kingdom/your-party.html"></iframe>
 
 <script>
-const buttons = document.querySelectorAll(".pill-btn");
+const buttons = document.querySelectorAll(".segment-btn");
+const highlight = document.querySelector(".segment-highlight");
 const frames = document.querySelectorAll("iframe");
 
-buttons.forEach(btn => {
+buttons.forEach((btn, index) => {
   btn.addEventListener("click", () => {
-    const target = btn.dataset.target;
 
+    // Switch active styles
     buttons.forEach(b => b.classList.remove("active"));
-    frames.forEach(f => f.classList.remove("active"));
-
     btn.classList.add("active");
+
+    // Slide the pill
+    highlight.style.transform = `translateX(${index * 100}%)`;
+
+    // Switch iframes
+    const target = btn.dataset.target;
+    frames.forEach(f => f.classList.remove("active"));
     document.getElementById(target).classList.add("active");
   });
 });
