@@ -2671,7 +2671,7 @@ const VOTE_CONCENTRATION = {
   "CON": 0.00,
   "RFM": 0.00,
   "LDM": 0.00,
-  "GRN": 0.50,
+  "GRN": 0.00,
   "SNP": 0.00,
   "PLC": 0.00,
   "SFN": 0.00,
@@ -2683,12 +2683,14 @@ const VOTE_CONCENTRATION = {
   "OTH": 0.00
 };
 
+  const CONC_EDITABLE = ["LAB", "CON", "RFM", "LDM", "GRN"];
+
   // Build the vote concentration editor table
 function renderConcentrationTable() {
   const tbody = document.getElementById("concentration-body");
   tbody.innerHTML = "";
 
-  PARTIES.forEach(p => {
+ CONC_EDITABLE.forEach(p => {
     const row = document.createElement("tr");
 
     row.innerHTML = `
@@ -2709,26 +2711,68 @@ function renderConcentrationTable() {
   });
 }
 
-  function bindConcentrationInputs() {
-  PARTIES.forEach(p => {
-    const input = document.getElementById(`conc-${p}`);
+function bindConcentrationInputs() {
+  const inputs = CONC_EDITABLE.map(p => document.getElementById(`conc-${p}`));
 
-    input.addEventListener("input", () => {
-      const val = parseFloat(input.value);
-      if (isNaN(val)) return;
+  inputs.forEach((input, index) => {
+    let originalValue = input.value; 
+    let hasChanged = false;
 
-      // Convert user % to decimal multiplier
-      VOTE_CONCENTRATION[p] = val / 100;
-
-      // Recalculate seats immediately
-      calculate();
+    // On focus → remember old value + clear visually
+    input.addEventListener("focus", () => {
+      originalValue = input.value;
+      input.dataset.displayValue = originalValue; 
+      input.value = "";
+      hasChanged = false;
     });
 
-    input.addEventListener("blur", () => {
-      // Always reformat to 1 decimal
+    // On input → mark as changed + update model live
+    input.addEventListener("input", () => {
+      hasChanged = true;
+
       const val = parseFloat(input.value);
       if (!isNaN(val)) {
-        input.value = val.toFixed(1);
+        VOTE_CONCENTRATION[input.id.replace("conc-", "")] = val / 100;
+        calculate();
+      }
+    });
+
+    // On blur → restore or format
+    input.addEventListener("blur", () => {
+      if (input.value === "" || isNaN(parseFloat(input.value))) {
+        input.value = originalValue;
+      } else {
+        input.value = parseFloat(input.value).toFixed(1);
+      }
+
+      // update concentration if changed
+      const val = parseFloat(input.value);
+      if (!isNaN(val)) {
+        VOTE_CONCENTRATION[input.id.replace("conc-", "")] = val / 100;
+        calculate();
+      }
+    });
+
+    // Enter key → move to next input
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+
+        if (input.value === "" || isNaN(parseFloat(input.value))) {
+          input.value = originalValue;
+        } else {
+          input.value = parseFloat(input.value).toFixed(1);
+        }
+
+        const val = parseFloat(input.value);
+        if (!isNaN(val)) {
+          VOTE_CONCENTRATION[input.id.replace("conc-", "")] = val / 100;
+          calculate();
+        }
+
+        // move to next
+        if (inputs[index + 1]) inputs[index + 1].focus();
+        else inputs[0].focus();
       }
     });
   });
