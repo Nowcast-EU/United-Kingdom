@@ -679,42 +679,19 @@ tfoot td {
 <!-- Floating Converter Button -->
 <div id="help-button">⇄</div>
 
-<!-- GB→UK Calculator Panel -->
+<!-- Vote Concentration Editor -->
 <div id="help-panel">
-  <h4>GB → UK Vote Share Converter</h4>
+  <h4>Vote Concentration (%)</h4>
 
-  <table id="gbuk-table">
-  <thead>
-    <tr><th>Party</th><th>GB %</th><th>UK %</th></tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td class="party-column" style="--party-color:#E4003B;">LAB</td>
-      <td><input type="number" id="gb-LAB" min="0" max="100" step="0.1"></td>
-      <td id="uk-LAB">–</td>
-    </tr>
-    <tr>
-      <td class="party-column" style="--party-color:#0087DC;">CON</td>
-      <td><input type="number" id="gb-CON" min="0" max="100" step="0.1"></td>
-      <td id="uk-CON">–</td>
-    </tr>
-    <tr>
-      <td class="party-column" style="--party-color:#23C7DF;">RFM</td>
-      <td><input type="number" id="gb-RFM" min="0" max="100" step="0.1"></td>
-      <td id="uk-RFM">–</td>
-    </tr>
-    <tr>
-      <td class="party-column" style="--party-color:#FAA61A;">LDM</td>
-      <td><input type="number" id="gb-LDM" min="0" max="100" step="0.1"></td>
-      <td id="uk-LDM">–</td>
-    </tr>
-    <tr>
-      <td class="party-column" style="--party-color:#6AB023;">GRN</td>
-      <td><input type="number" id="gb-GRN" min="0" max="100" step="0.1"></td>
-      <td id="uk-GRN">–</td>
-    </tr>
-  </tbody>
-</table>
+  <table id="concentration-table">
+    <thead>
+      <tr>
+        <th>Party</th>
+        <th>Concentration (%)</th>
+      </tr>
+    </thead>
+    <tbody id="concentration-body"></tbody>
+  </table>
 </div>
 
 <script>
@@ -2706,6 +2683,56 @@ const VOTE_CONCENTRATION = {
   "OTH": 0.00
 };
 
+  // Build the vote concentration editor table
+function renderConcentrationTable() {
+  const tbody = document.getElementById("concentration-body");
+  tbody.innerHTML = "";
+
+  PARTIES.forEach(p => {
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+      <td class="party-column" style="--party-color:${PARTY_COLORS[p]}">${p}</td>
+      <td>
+        <input type="number"
+          id="conc-${p}"
+          value="${(VOTE_CONCENTRATION[p] * 100).toFixed(1)}"
+          step="0.1"
+          min="-100"
+          max="100"
+          style="width:70px; text-align:center;"
+        >
+      </td>
+    `;
+
+    tbody.appendChild(row);
+  });
+}
+
+  function bindConcentrationInputs() {
+  PARTIES.forEach(p => {
+    const input = document.getElementById(`conc-${p}`);
+
+    input.addEventListener("input", () => {
+      const val = parseFloat(input.value);
+      if (isNaN(val)) return;
+
+      // Convert user % to decimal multiplier
+      VOTE_CONCENTRATION[p] = val / 100;
+
+      // Recalculate seats immediately
+      calculate();
+    });
+
+    input.addEventListener("blur", () => {
+      // Always reformat to 1 decimal
+      const val = parseFloat(input.value);
+      if (!isNaN(val)) {
+        input.value = val.toFixed(1);
+      }
+    });
+  });
+}
 
 // Full party name aliases
 const PARTY_ALIASES = {
@@ -3045,6 +3072,11 @@ document.getElementById('reset').addEventListener('click', () => {
 document.getElementById('calculate').addEventListener('click', calculate);
 renderTable();
 document.addEventListener('DOMContentLoaded', () => calculate());
+  
+  document.addEventListener("DOMContentLoaded", () => {
+  renderConcentrationTable();
+  bindConcentrationInputs();
+});
 
 /* ---- Coalition Builder ---- */
 const COAL_TOTAL=650,COAL_MAJ=326;
@@ -3336,46 +3368,10 @@ if (incumbent) {
 /* ---- Floating GB→UK Mini Calculator ---- */
 const helpBtn = document.getElementById("help-button");
 const helpPanel = document.getElementById("help-panel");
-const scale = 0.975;
-const gbParties = ["LAB","CON","RFM","LDM","GRN"];
 
 // toggle open/close ONLY when button clicked
 helpBtn.addEventListener("click", () => {
   helpPanel.style.display = helpPanel.style.display === "block" ? "none" : "block";
-});
-
-// live conversion
-gbParties.forEach(code => {
-  const input = document.getElementById(`gb-${code}`);
-  const output = document.getElementById(`uk-${code}`);
-
-  input.addEventListener("input", () => {
-    const val = parseFloat(input.value);
-    if (isNaN(val)) {
-      output.textContent = "–";
-    } else {
-      const converted = (val * scale).toFixed(1);
-      output.textContent = `${converted}%`;
-    }
-  });
-});
-
-  // allow Enter key to move to the next input
-gbParties.forEach((code, idx) => {
-  const input = document.getElementById(`gb-${code}`);
-
-  input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault(); // stop form submission or line break
-      const nextInput = document.getElementById(`gb-${gbParties[idx + 1]}`);
-      if (nextInput) {
-        nextInput.focus();
-      } else {
-        // if it's the last input, loop back to the first
-        document.getElementById(`gb-${gbParties[0]}`).focus();
-      }
-    }
-  });
 });
 
 </script>
