@@ -725,7 +725,7 @@ tfoot td {
 
 <!-- Vote Concentration Editor -->
 <div id="help-panel">
-  <h4>Additional Settings</h4>
+  <h4>Calculator Settings</h4>
 
   <table id="concentration-table">
     <thead>
@@ -2727,6 +2727,14 @@ const VOTE_CONCENTRATION = {
   "OTH": 0.00
 };
 
+  const CONC_DISPLAY_OFFSET = {
+  LAB: 2.0,
+  CON: 5.0,
+  RFM: 0.0,
+  LDM: 7.0,
+  GRN: -10.0
+};
+
   const CONC_EDITABLE = ["LAB", "CON", "RFM", "LDM", "GRN"];
 
   // Build the vote concentration editor table
@@ -2742,7 +2750,7 @@ function renderConcentrationTable() {
       <td>
         <input type="number"
           id="conc-${p}"
-          value="${formatSigned(VOTE_CONCENTRATION[p] * 100)}"
+          value="${((VOTE_CONCENTRATION[p] * 100) + CONC_DISPLAY_OFFSET[p]).toFixed(1)}"
           step="0.1"
           min="-50"
           max="50"
@@ -2758,11 +2766,6 @@ function renderConcentrationTable() {
   function clampConcentration(val) {
   if (isNaN(val)) return 0;
   return Math.max(-50, Math.min(50, val));
-}
-
-  function formatSigned(val) {
-  if (isNaN(val)) return "";
-  return (val > 0 ? "+" : "") + val.toFixed(1);
 }
 
 function bindConcentrationInputs() {
@@ -2793,7 +2796,10 @@ input.addEventListener("input", () => {
 
   if (!isNaN(val)) {
     val = clampConcentration(val);
-    VOTE_CONCENTRATION[input.id.replace("conc-", "")] = val / 100;
+  
+    const party = input.id.replace("conc-", "");
+VOTE_CONCENTRATION[party] = (val - CONC_DISPLAY_OFFSET[party]) / 100;
+  
     calculate();
   }
 });
@@ -2808,9 +2814,11 @@ input.addEventListener("input", () => {
 
       // update concentration if changed
 let val = clampConcentration(parseFloat(input.value));
-input.value = formatSigned(val);
+input.value = val.toFixed(1);
 
-VOTE_CONCENTRATION[input.id.replace("conc-", "")] = val / 100;
+const party = input.id.replace("conc-", "");
+VOTE_CONCENTRATION[party] = (val - CONC_DISPLAY_OFFSET[party]) / 100;
+
 calculate();
     });
 
@@ -2822,12 +2830,14 @@ calculate();
         if (input.value === "" || isNaN(parseFloat(input.value))) {
           input.value = originalValue;
         } else {
-          input.value = formatSigned(parseFloat(input.value));
+          input.value = parseFloat(input.value).toFixed(1);
         }
 
         const val = parseFloat(input.value);
         if (!isNaN(val)) {
-          VOTE_CONCENTRATION[input.id.replace("conc-", "")] = val / 100;
+          const party = input.id.replace("conc-", "");
+VOTE_CONCENTRATION[party] = (val - CONC_DISPLAY_OFFSET[party]) / 100;
+          
           calculate();
         }
 
