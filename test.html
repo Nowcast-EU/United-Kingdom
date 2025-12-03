@@ -603,6 +603,49 @@ tfoot td {
   font-weight: 600;
 }
 
+  /* --- Concentration editor table layout --- */
+#concentration-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* important */
+}
+
+#concentration-table th:nth-child(1),
+#concentration-table td:nth-child(1) {
+  width: 40%; /* Party */
+}
+
+#concentration-table th:nth-child(2),
+#concentration-table td:nth-child(2) {
+  width: 60%; /* Input */
+}
+
+#concentration-table th {
+  background: #f1f5f9;
+  height: 28px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+#concentration-table td {
+  height: 26px;
+  vertical-align: middle;
+  padding: 4px 6px;
+}
+
+#concentration-table input {
+  width: 70px;
+  height: 24px;
+  text-align: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 13px;
+  padding: 2px 4px;
+  box-sizing: border-box;
+}
+
 </style>
 </head>
 
