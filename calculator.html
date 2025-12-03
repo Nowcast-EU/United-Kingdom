@@ -603,6 +603,50 @@ tfoot td {
   font-weight: 600;
 }
 
+  /* --- Concentration editor table layout --- */
+#concentration-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto; /* important */
+}
+
+#concentration-table th:nth-child(1),
+#concentration-table td:nth-child(1) {
+  width: 40%; /* Party */
+}
+
+#concentration-table th:nth-child(2),
+#concentration-table td:nth-child(2) {
+  width: 60%; /* Input */
+}
+
+#concentration-table th {
+  background: #f1f5f9;
+  height: 28px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+#concentration-table td {
+  height: 26px;
+  text-align: center;
+  vertical-align: middle;
+  padding: 4px 6px;
+}
+
+#concentration-table input {
+  width: 70px;
+  height: 24px;
+  text-align: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 13px;
+  padding: 2px 4px;
+  box-sizing: border-box;
+}
+
 </style>
 </head>
 
@@ -677,44 +721,21 @@ tfoot td {
 </p>
 
 <!-- Floating Converter Button -->
-<div id="help-button">⇄</div>
+<div id="help-button">⚙️</div>
 
-<!-- GB→UK Calculator Panel -->
+<!-- Vote Concentration Editor -->
 <div id="help-panel">
-  <h4>GB → UK Vote Share Converter</h4>
+  <h4>Calculator Settings</h4>
 
-  <table id="gbuk-table">
-  <thead>
-    <tr><th>Party</th><th>GB %</th><th>UK %</th></tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td class="party-column" style="--party-color:#E4003B;">LAB</td>
-      <td><input type="number" id="gb-LAB" min="0" max="100" step="0.1"></td>
-      <td id="uk-LAB">–</td>
-    </tr>
-    <tr>
-      <td class="party-column" style="--party-color:#0087DC;">CON</td>
-      <td><input type="number" id="gb-CON" min="0" max="100" step="0.1"></td>
-      <td id="uk-CON">–</td>
-    </tr>
-    <tr>
-      <td class="party-column" style="--party-color:#23C7DF;">RFM</td>
-      <td><input type="number" id="gb-RFM" min="0" max="100" step="0.1"></td>
-      <td id="uk-RFM">–</td>
-    </tr>
-    <tr>
-      <td class="party-column" style="--party-color:#FAA61A;">LDM</td>
-      <td><input type="number" id="gb-LDM" min="0" max="100" step="0.1"></td>
-      <td id="uk-LDM">–</td>
-    </tr>
-    <tr>
-      <td class="party-column" style="--party-color:#6AB023;">GRN</td>
-      <td><input type="number" id="gb-GRN" min="0" max="100" step="0.1"></td>
-      <td id="uk-GRN">–</td>
-    </tr>
-  </tbody>
-</table>
+  <table id="concentration-table">
+    <thead>
+      <tr>
+        <th>Party</th>
+        <th>Concentration</th>
+      </tr>
+    </thead>
+    <tbody id="concentration-body"></tbody>
+  </table>
 </div>
 
 <script>
@@ -2685,6 +2706,134 @@ const GE2024 = {"LAB":33.7,"CON":23.7,"RFM":14.3,"LDM":12.2,"GRN":6.4,"SNP":30.0
 const DEFAULTS = {"LAB":18.0,"CON":17.0,"RFM":29.0,"LDM":12.0,"GRN":14.0,"SNP":33.0,"PLC":25.0,"SFN":27.0,"DUP":22.1,"ALL":15.0,"UUP":12.2,"SDL":11.1,"TUV":6.2,"OTH":3.6};
 const PREV_2023 = {"LAB":411,"CON":121,"RFM":5,"LDM":72,"GRN":4,"SNP":9,"PLC":4,"SFN":7,"DUP":5,"ALL":1,"UUP":1,"SDL":2,"TUV":1,"OTH":7};
 
+  // ---- Vote concentration (adjustable per party) ----
+// Positive values increase local strength when local > national baseline,
+// negative values reduce local strength in both comparisons.
+// Defaults: 0
+const VOTE_CONCENTRATION = {
+  "LAB": 0.00,
+  "CON": 0.00,
+  "RFM": 0.00,
+  "LDM": 0.00,
+  "GRN": 0.00,
+  "SNP": 0.00,
+  "PLC": 0.00,
+  "SFN": 0.00,
+  "DUP": 0.00,
+  "ALL": 0.00,
+  "UUP": 0.00,
+  "SDL": 0.00,
+  "TUV": 0.00,
+  "OTH": 0.00
+};
+
+  const CONC_EDITABLE = ["LAB", "CON", "RFM", "LDM", "GRN"];
+
+  // Build the vote concentration editor table
+function renderConcentrationTable() {
+  const tbody = document.getElementById("concentration-body");
+  tbody.innerHTML = "";
+
+ CONC_EDITABLE.forEach(p => {
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+      <td class="party-column" style="--party-color:${PARTY_COLORS[p]}">${p}</td>
+      <td>
+        <input type="number"
+          id="conc-${p}"
+          value="${(VOTE_CONCENTRATION[p] * 100).toFixed(1)}"
+          step="0.1"
+          min="-50"
+          max="50"
+          style="width:70px; text-align:center;"
+        >
+      </td>
+    `;
+
+    tbody.appendChild(row);
+  });
+}
+
+  function clampConcentration(val) {
+  if (isNaN(val)) return 0;
+  return Math.max(-50, Math.min(50, val));
+}
+
+function bindConcentrationInputs() {
+  const inputs = CONC_EDITABLE.map(p => document.getElementById(`conc-${p}`));
+
+  inputs.forEach((input, index) => {
+    let originalValue = input.value; 
+    let hasChanged = false;
+
+    // On focus → remember old value + clear visually
+    input.addEventListener("focus", () => {
+      originalValue = input.value;
+      input.dataset.displayValue = originalValue; 
+      input.value = "";
+      hasChanged = false;
+    });
+
+    // On input → mark as changed + update model live
+input.addEventListener("input", () => {
+  const raw = input.value;
+
+  // Allow the user to type a lone "-" while editing
+  if (raw === "-") {
+    return;
+  }
+
+  let val = parseFloat(raw);
+
+  if (!isNaN(val)) {
+    val = clampConcentration(val);
+    VOTE_CONCENTRATION[input.id.replace("conc-", "")] = val / 100;
+    calculate();
+  }
+});
+
+    // On blur → restore or format
+    input.addEventListener("blur", () => {
+      if (input.value === "" || isNaN(parseFloat(input.value))) {
+        input.value = originalValue;
+      } else {
+        input.value = parseFloat(input.value).toFixed(1);
+      }
+
+      // update concentration if changed
+let val = clampConcentration(parseFloat(input.value));
+input.value = val.toFixed(1);
+
+VOTE_CONCENTRATION[input.id.replace("conc-", "")] = val / 100;
+calculate();
+    });
+
+    // Enter key → move to next input
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+
+        if (input.value === "" || isNaN(parseFloat(input.value))) {
+          input.value = originalValue;
+        } else {
+          input.value = parseFloat(input.value).toFixed(1);
+        }
+
+        const val = parseFloat(input.value);
+        if (!isNaN(val)) {
+          VOTE_CONCENTRATION[input.id.replace("conc-", "")] = val / 100;
+          calculate();
+        }
+
+        // move to next
+        if (inputs[index + 1]) inputs[index + 1].focus();
+        else inputs[0].focus();
+      }
+    });
+  });
+}
+
 // Full party name aliases
 const PARTY_ALIASES = {
   "LAB": "Labour",
@@ -2873,21 +3022,59 @@ function updateVoteTotal() {
   document.getElementById('total-votes').textContent = (weightedSum + othersValue).toFixed(1) + '%';
 }
 
-/* ---- Proportional swing ---- */
+  // Apply vote concentration adjustments to a constituency baseline row.
+// - row: the original constituency baseline object (has keys for each party).
+// - baseNat: BASELINE.baseline_national (national baselines).
+// - conc: VOTE_CONCENTRATION object.
+// Returns a NEW object with adjusted party baseline values for that constituency.
+function applyVoteConcentrationToRow(row, baseNat, conc) {
+  const out = { name: row.name };
+  PARTIES.forEach(p => {
+    const local = row[p] ?? 0;        // local (constituency) baseline
+    const nat   = baseNat[p] ?? 0;   // national baseline
+    // If local > national baseline -> multiply by (1 + conc)
+    // Else -> multiply by (1 - conc)
+    // If conc is negative this still behaves as expected.
+    let multiplier;
+    if (local > nat) multiplier = 1 + (conc[p] ?? 0);
+    else multiplier = 1 - (conc[p] ?? 0);
+
+    // Safety: prevent negative multipliers (clamp to small non-negative)
+    multiplier = Math.max(0, multiplier);
+
+    out[p] = (local || 0) * multiplier;
+  });
+  return out;
+}
+
+/* ---- Proportional swing (with vote concentration step) ---- */
 function computeConstituencyShares(){
-  const target={};
-  PARTIES.forEach((n,i)=>target[n]=(parseFloat(document.getElementById(`votes-${i}`).value)||0)/100);
-  const base=BASELINE.baseline_national;const eps=1e-9;
-  return BASELINE.constituencies.map(row=>{
-    const out={name:row.name};let sum=0;
-    PARTIES.forEach(p=>{
-      const baseNat=base[p]??0;
-      const targetNat=target[p]??baseNat;
-      const ratio=(baseNat>eps)?(targetNat/baseNat):(targetNat>0?(targetNat/eps):0);
-      const val=(row[p]??0)*ratio;
-      out[p]=val;sum+=val;
+  const target = {};
+  PARTIES.forEach((n,i)=> target[n] = (parseFloat(document.getElementById(`votes-${i}`).value)||0)/100);
+
+  const base = BASELINE.baseline_national;
+  const eps = 1e-9;
+
+  return BASELINE.constituencies.map(originalRow => {
+    // 1) Apply vote concentration adjustments BEFORE proportional swing
+    const adjustedRow = applyVoteConcentrationToRow(originalRow, base, VOTE_CONCENTRATION);
+
+    // 2) Now compute proportional swing relative to national baselines
+    const out = { name: adjustedRow.name };
+    let sum = 0;
+    PARTIES.forEach(p => {
+      const baseNat = base[p] ?? 0;
+      const targetNat = target[p] ?? baseNat;
+      // ratio = target national share / baseline national share
+      const ratio = (baseNat > eps) ? (targetNat / baseNat) : (targetNat > 0 ? (targetNat / eps) : 0);
+      const val = (adjustedRow[p] ?? 0) * ratio;
+      out[p] = val;
+      sum += val;
     });
-    if(sum>0)PARTIES.forEach(p=>out[p]=out[p]/sum);
+
+    // 3) Normalize so the constituency shares sum to 1 (if sum > 0)
+    if (sum > 0) PARTIES.forEach(p => out[p] = out[p] / sum);
+
     return out;
   });
 }
@@ -2985,6 +3172,11 @@ document.getElementById('reset').addEventListener('click', () => {
 document.getElementById('calculate').addEventListener('click', calculate);
 renderTable();
 document.addEventListener('DOMContentLoaded', () => calculate());
+  
+  document.addEventListener("DOMContentLoaded", () => {
+  renderConcentrationTable();
+  bindConcentrationInputs();
+});
 
 /* ---- Coalition Builder ---- */
 const COAL_TOTAL=650,COAL_MAJ=326;
@@ -3276,46 +3468,10 @@ if (incumbent) {
 /* ---- Floating GB→UK Mini Calculator ---- */
 const helpBtn = document.getElementById("help-button");
 const helpPanel = document.getElementById("help-panel");
-const scale = 0.975;
-const gbParties = ["LAB","CON","RFM","LDM","GRN"];
 
 // toggle open/close ONLY when button clicked
 helpBtn.addEventListener("click", () => {
   helpPanel.style.display = helpPanel.style.display === "block" ? "none" : "block";
-});
-
-// live conversion
-gbParties.forEach(code => {
-  const input = document.getElementById(`gb-${code}`);
-  const output = document.getElementById(`uk-${code}`);
-
-  input.addEventListener("input", () => {
-    const val = parseFloat(input.value);
-    if (isNaN(val)) {
-      output.textContent = "–";
-    } else {
-      const converted = (val * scale).toFixed(1);
-      output.textContent = `${converted}%`;
-    }
-  });
-});
-
-  // allow Enter key to move to the next input
-gbParties.forEach((code, idx) => {
-  const input = document.getElementById(`gb-${code}`);
-
-  input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault(); // stop form submission or line break
-      const nextInput = document.getElementById(`gb-${gbParties[idx + 1]}`);
-      if (nextInput) {
-        nextInput.focus();
-      } else {
-        // if it's the last input, loop back to the first
-        document.getElementById(`gb-${gbParties[0]}`).focus();
-      }
-    }
-  });
 });
 
 </script>
