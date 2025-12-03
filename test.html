@@ -2776,15 +2776,22 @@ function bindConcentrationInputs() {
     });
 
     // On input → mark as changed + update model live
-    input.addEventListener("input", () => {
-      hasChanged = true;
+input.addEventListener("input", () => {
+  const raw = input.value;
 
-let val = clampConcentration(parseFloat(input.value));
-input.value = isNaN(val) ? "" : val;  // prevent typing outside range
+  // Allow the user to type a lone "-" while editing
+  if (raw === "-") {
+    return;
+  }
 
-VOTE_CONCENTRATION[input.id.replace("conc-", "")] = val / 100;
-calculate();
-    });
+  let val = parseFloat(raw);
+
+  if (!isNaN(val)) {
+    val = clampConcentration(val);
+    VOTE_CONCENTRATION[input.id.replace("conc-", "")] = val / 100;
+    calculate();
+  }
+});
 
     // On blur → restore or format
     input.addEventListener("blur", () => {
