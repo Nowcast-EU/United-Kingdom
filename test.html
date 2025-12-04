@@ -2777,8 +2777,8 @@ function renderConcentrationTable() {
           id="conc-${p}"
           value="${((VOTE_CONCENTRATION[p] * 100) + (CONC_DISPLAY_OFFSET[p] || 0)).toFixed(1)}"
           step="0.1"
-          min="-50"
-          max="50"
+          min="-100"
+          max="100"
           style="width:70px; text-align:center;"
         >
       </td>
@@ -2802,7 +2802,7 @@ function renderConcentrationTable() {
 
   function clampConcentration(val) {
   if (isNaN(val)) return 0;
-  return Math.max(-50, Math.min(50, val));
+  return Math.max(-100, Math.min(100, val));
 }
 
 function bindConcentrationInputs() {
