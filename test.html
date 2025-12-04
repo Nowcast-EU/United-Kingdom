@@ -2749,7 +2749,7 @@ const VOTE_CONCENTRATION = {
   GRN: -10.0
 };
 
-  // --- Display offsets for incumbent inputs (shown to user, not the real internal value)
+  // display offsets for the incumbent input boxes (display only)
 const INC_DISPLAY_OFFSET = {
   LAB: 1.0,
   CON: 2.0,
@@ -2787,10 +2787,10 @@ function renderConcentrationTable() {
       <td>
         <input type="number"
           id="inc-${p}"
-          vvalue="${((Number(INCUMBENT_STRENGTH[p] || 0) * 100) + (INC_DISPLAY_OFFSET[p] || 0)).toFixed(1)}"
+          value="${(((Number(INCUMBENT_STRENGTH[p] || 0) * 100) + (INC_DISPLAY_OFFSET[p] || 0))).toFixed(1)}"
           step="0.1"
-          min="-50"
-          max="50"
+          min="-100"
+          max="100"
           style="width:70px; text-align:center;"
         >
       </td>
@@ -2806,7 +2806,6 @@ function renderConcentrationTable() {
 }
 
 function bindConcentrationInputs() {
-  let initialLoad = true;
   const concInputs = CONC_EDITABLE.map(p => document.getElementById(`conc-${p}`));
   const incInputs  = CONC_EDITABLE.map(p => document.getElementById(`inc-${p}`));
 
@@ -2814,14 +2813,11 @@ function bindConcentrationInputs() {
   concInputs.forEach((input, index) => {
     let originalValue = input.value;
 
-input.addEventListener("focus", () => {
-    // Prevent blanking the field on the very first automatic browser focus
-    if (initialLoad) return;
-
-    originalValue = input.value;
-    input.dataset.displayValue = originalValue;
-    input.value = "";
-});
+    input.addEventListener("focus", () => {
+      originalValue = input.value;
+      input.dataset.displayValue = originalValue;
+      input.value = "";
+    });
 
     input.addEventListener("input", () => {
       const raw = input.value;
@@ -2863,14 +2859,11 @@ input.addEventListener("focus", () => {
   incInputs.forEach((input, index) => {
     let originalValue = input.value;
 
-input.addEventListener("focus", () => {
-    // Prevent blanking the field on the very first automatic browser focus
-    if (initialLoad) return;
-
-    originalValue = input.value;
-    input.dataset.displayValue = originalValue;
-    input.value = "";
-});
+    input.addEventListener("focus", () => {
+      originalValue = input.value;
+      input.dataset.displayValue = originalValue;
+      input.value = "";
+    });
 
     input.addEventListener("input", () => {
       const raw = input.value;
@@ -2906,8 +2899,6 @@ input.addEventListener("focus", () => {
       }
     });
   });
-  
-  initialLoad = false;
 }
 
 // Full party name aliases
