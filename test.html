@@ -745,14 +745,6 @@ tfoot td {
 </div>
 
 <script>
-
-  // format a numeric value for display in the inputs, e.g. +2.0 or -3.5
-function formatSignedDisplay(n) {
-  const num = Number(n) || 0;
-  // show + for 0 and positives (matches your requested behaviour)
-  return (num >= 0 ? "+" : "") + num.toFixed(1);
-}
-
 const BASELINE = {"baseline_national": {"LAB": 0.17834, "CON": 0.16768, "RFM": 0.29351, "LDM": 0.12348, "GRN": 0.13577, "SNP": 0.33, "PLC": 0.25, "SFN": 0.27, "DUP": 0.221, "ALL": 0.15, "UUP": 0.122, "SDL": 0.111, "TUV": 0.062, "OTH": 0.037},
     
  "constituencies": [ {"name": "Aldershot", "LAB": 0.236, "CON": 0.211, "RFM": 0.355, "LDM": 0.086, "GRN": 0.107, "SNP": 0.0, "PLC": 0.0, "SFN": 0.0, "DUP": 0.0, "ALL": 0.0, "UUP": 0.0, "SDL": 0.0, "TUV": 0.0, "OTH": 0.006},
@@ -2781,10 +2773,9 @@ function renderConcentrationTable() {
 
       <!-- Concentration column (display offset applied) -->
       <td>
-        <input type="text"
+        <input type="number"
           id="conc-${p}"
-          value="${formatSignedDisplay(((VOTE_CONCENTRATION[p] * 100) + (CONC_DISPLAY_OFFSET[p] || 0)) >= 0 ? '+' : '') 
-        + ((VOTE_CONCENTRATION[p] * 100) + (CONC_DISPLAY_OFFSET[p] || 0)).toFixed(1)}"
+          value="${((VOTE_CONCENTRATION[p] * 100) + (CONC_DISPLAY_OFFSET[p] || 0)).toFixed(1)}"
           step="0.5"
           min="-100"
           max="100"
@@ -2794,10 +2785,9 @@ function renderConcentrationTable() {
 
       <!-- Incumbent strength column -->
       <td>
-        <input type="text"
+        <input type="number"
           id="inc-${p}"
-          value="${formatSignedDisplay(((VOTE_CONCENTRATION[p] * 100) + (INC_DISPLAY_OFFSET[p] || 0)) >= 0 ? '+' : '') 
-        + ((VOTE_CONCENTRATION[p] * 100) + (INC_DISPLAY_OFFSET[p] || 0)).toFixed(1)}"
+          value="${(((Number(INCUMBENT_STRENGTH[p] || 0) * 100) + (INC_DISPLAY_OFFSET[p] || 0))).toFixed(1)}"
           step="0.5"
           min="-100"
           max="100"
@@ -2832,7 +2822,7 @@ function bindConcentrationInputs() {
     input.addEventListener("input", () => {
       const raw = input.value;
       if (raw === "-") return;
-      let val = parseFloat(raw.replace("+", ""));
+      let val = parseFloat(raw);
       if (isNaN(val)) return;
       val = clampConcentration(val);
 
@@ -2849,7 +2839,7 @@ function bindConcentrationInputs() {
         return;
       }
       let val = clampConcentration(parseFloat(input.value));
-      input.value = (val >= 0 ? "+" : "") + val.toFixed(1);
+      input.value = val.toFixed(1);
 
       const party = input.id.replace("conc-", "");
       VOTE_CONCENTRATION[party] = (val - (CONC_DISPLAY_OFFSET[party] || 0)) / 100;
@@ -2878,7 +2868,7 @@ function bindConcentrationInputs() {
     input.addEventListener("input", () => {
       const raw = input.value;
       if (raw === "-") return;
-      let val = parseFloat(raw.replace("+", ""));
+      let val = parseFloat(raw);
       if (isNaN(val)) return;
       val = clampConcentration(val);
 
@@ -2894,7 +2884,7 @@ function bindConcentrationInputs() {
         return;
       }
       let val = clampConcentration(parseFloat(input.value));
-      input.value = (val >= 0 ? "+" : "") + val.toFixed(1);
+      input.value = val.toFixed(1);
 
       const party = input.id.replace("inc-", "");
       INCUMBENT_STRENGTH[party] = (val - (INC_DISPLAY_OFFSET[party] || 0)) / 100;
@@ -3256,12 +3246,12 @@ document.getElementById('reset').addEventListener('click', () => {
   CONC_EDITABLE.forEach(p => {
     const concInput = document.getElementById(`conc-${p}`);
     if (concInput) {
-      concInput.value = formatSignedDisplay(CONC_DISPLAY_OFFSET[p] || 0).toFixed(1);
+      concInput.value = (CONC_DISPLAY_OFFSET[p] || 0).toFixed(1);
     }
 
     const incInput = document.getElementById(`inc-${p}`);
     if (incInput) {
-      incInput.value = formatSignedDisplay(INC_DISPLAY_OFFSET[p] || 0).toFixed(1);
+      incInput.value = (INC_DISPLAY_OFFSET[p] || 0).toFixed(1);
     }
   });
 
