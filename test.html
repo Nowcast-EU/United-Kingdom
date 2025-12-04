@@ -3229,19 +3229,37 @@ if (currentName) showConstituencyResults(currentName);
 
 /* ---- Reset ---- */
 document.getElementById('reset').addEventListener('click', () => {
-  // Reset each party’s vote input to its default baseline
+
+  // ---- Reset vote share inputs ----
   parties.forEach((p, i) => {
     const input = document.getElementById(`votes-${i}`);
     if (input) input.value = DEFAULTS[p.name].toFixed(1);
   });
 
-  // Run full recalculation (this updates seats, diffs, etc.)
-  calculate();
+  // ---- Reset concentration & incumbent strength ----
+  CONC_EDITABLE.forEach(p => {
+    VOTE_CONCENTRATION[p] = 0.0;
+    INCUMBENT_STRENGTH[p] = 0.0;
+  });
 
-  // ✅ Recalculate total votes and OTH using the weighting logic
+  // ---- Reset display values for settings panel ----
+  CONC_EDITABLE.forEach(p => {
+    const concInput = document.getElementById(`conc-${p}`);
+    if (concInput) {
+      concInput.value = (CONC_DISPLAY_OFFSET[p] || 0).toFixed(1);
+    }
+
+    const incInput = document.getElementById(`inc-${p}`);
+    if (incInput) {
+      incInput.value = (INC_DISPLAY_OFFSET[p] || 0).toFixed(1);
+    }
+  });
+
+  // ---- Recalculate everything ----
+  calculate();
   updateVoteTotal();
 
-  // ✅ Restore button color to green
+  // ---- Return calculate button to green ----
   document.getElementById('calculate').style.background = '#008500';
 });
   
