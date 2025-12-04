@@ -2806,6 +2806,7 @@ function renderConcentrationTable() {
 }
 
 function bindConcentrationInputs() {
+  let initialLoad = true;
   const concInputs = CONC_EDITABLE.map(p => document.getElementById(`conc-${p}`));
   const incInputs  = CONC_EDITABLE.map(p => document.getElementById(`inc-${p}`));
 
@@ -2813,11 +2814,14 @@ function bindConcentrationInputs() {
   concInputs.forEach((input, index) => {
     let originalValue = input.value;
 
-    input.addEventListener("focus", () => {
-      originalValue = input.value;
-      input.dataset.displayValue = originalValue;
-      input.value = "";
-    });
+input.addEventListener("focus", () => {
+    // Prevent blanking the field on the very first automatic browser focus
+    if (initialLoad) return;
+
+    originalValue = input.value;
+    input.dataset.displayValue = originalValue;
+    input.value = "";
+});
 
     input.addEventListener("input", () => {
       const raw = input.value;
@@ -2859,11 +2863,14 @@ function bindConcentrationInputs() {
   incInputs.forEach((input, index) => {
     let originalValue = input.value;
 
-    input.addEventListener("focus", () => {
-      originalValue = input.value;
-      input.dataset.displayValue = originalValue;
-      input.value = "";
-    });
+input.addEventListener("focus", () => {
+    // Prevent blanking the field on the very first automatic browser focus
+    if (initialLoad) return;
+
+    originalValue = input.value;
+    input.dataset.displayValue = originalValue;
+    input.value = "";
+});
 
     input.addEventListener("input", () => {
       const raw = input.value;
@@ -2899,6 +2906,8 @@ function bindConcentrationInputs() {
       }
     });
   });
+  
+  initialLoad = false;
 }
 
 // Full party name aliases
