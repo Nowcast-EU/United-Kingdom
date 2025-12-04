@@ -725,7 +725,7 @@ tfoot td {
 
 <!-- Vote Concentration Editor -->
 <div id="help-panel">
-  <h4>Calculator Settings</h4>
+  <h4>Additional Settings</h4>
 
   <table id="concentration-table">
     <thead>
@@ -2727,6 +2727,14 @@ const VOTE_CONCENTRATION = {
   "OTH": 0.00
 };
 
+  const CONC_DISPLAY_OFFSET = {
+  LAB: 2.0,
+  CON: 5.0,
+  RFM: 0.0,
+  LDM: 7.0,
+  GRN: -10.0
+};
+
   const CONC_EDITABLE = ["LAB", "CON", "RFM", "LDM", "GRN"];
 
   // Build the vote concentration editor table
@@ -2742,7 +2750,7 @@ function renderConcentrationTable() {
       <td>
         <input type="number"
           id="conc-${p}"
-          value="${(VOTE_CONCENTRATION[p] * 100).toFixed(1)}"
+          value="${((VOTE_CONCENTRATION[p] * 100) + CONC_DISPLAY_OFFSET[p]).toFixed(1)}"
           step="0.1"
           min="-50"
           max="50"
@@ -2788,7 +2796,10 @@ input.addEventListener("input", () => {
 
   if (!isNaN(val)) {
     val = clampConcentration(val);
-    VOTE_CONCENTRATION[input.id.replace("conc-", "")] = val / 100;
+  
+    const party = input.id.replace("conc-", "");
+VOTE_CONCENTRATION[party] = (val - CONC_DISPLAY_OFFSET[party]) / 100;
+  
     calculate();
   }
 });
@@ -2805,7 +2816,9 @@ input.addEventListener("input", () => {
 let val = clampConcentration(parseFloat(input.value));
 input.value = val.toFixed(1);
 
-VOTE_CONCENTRATION[input.id.replace("conc-", "")] = val / 100;
+const party = input.id.replace("conc-", "");
+VOTE_CONCENTRATION[party] = (val - CONC_DISPLAY_OFFSET[party]) / 100;
+
 calculate();
     });
 
@@ -2822,7 +2835,9 @@ calculate();
 
         const val = parseFloat(input.value);
         if (!isNaN(val)) {
-          VOTE_CONCENTRATION[input.id.replace("conc-", "")] = val / 100;
+          const party = input.id.replace("conc-", "");
+VOTE_CONCENTRATION[party] = (val - CONC_DISPLAY_OFFSET[party]) / 100;
+          
           calculate();
         }
 
