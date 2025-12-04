@@ -438,7 +438,7 @@ tfoot td {
   color: var(--party-color);    /* colour set inline via JS */
 }
 
-/* --- Floating Converter Button --- */
+/* Floating Converter Button (use for the button element) */
 #help-button {
   position: fixed;
   bottom: 24px;
@@ -448,19 +448,36 @@ tfoot td {
   border-radius: 50%;
   background-color: #008500;
   color: #fff;
-  font-size: 18px;
-  font-weight: bold;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0,0,0,0.25);
   transition: background 0.3s ease, transform 0.2s ease;
   z-index: 1000;
+  border: none;           /* remove default button border */
+  padding: 0;             /* keep exact size */
 }
+
+/* ensure focus shows an outline for keyboard users */
+#help-button:focus {
+  outline: 2px solid rgba(255,255,255,0.9);
+  outline-offset: 2px;
+}
+
+/* hover behaviour */
 #help-button:hover {
   background-color: #006d00;
   transform: scale(1.05);
+}
+
+/* size the SVG inside the button and make it inherit color */
+#help-button svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+  pointer-events: none;   /* clicks hit the button, not the svg */
+  color: inherit;         /* ensures the path using currentColor gets white */
 }
 
 /* --- Conversion Panel --- */
@@ -485,31 +502,6 @@ tfoot td {
   text-align: left;
   font-size: 13px;
   color: #333;
-}
-
-  /* --- Floating Converter Button --- */
-#help-button {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background-color: #008500;
-  color: #fff;
-  font-size: 18px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-  transition: background 0.3s ease, transform 0.2s ease;
-  z-index: 1000;
-}
-#help-button:hover {
-  background-color: #006d00;
-  transform: scale(1.05);
 }
 
 /* --- Popup Panel --- */
@@ -726,7 +718,12 @@ tfoot td {
 </p>
 
 <!-- Floating Converter Button -->
-<div id="help-button">⚙️</div>
+<button id="help-button" aria-label="Settings" title="Settings" type="button">
+  <!-- inline SVG cog icon (24x24) -->
+  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false" role="img">
+    <path fill="currentColor" d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.63l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.02 7.02 0 0 0-1.62-.94l-.36-2.54A.5.5 0 0 0 14.27 2h-4.54a.5.5 0 0 0-.49.42l-.36 2.54c-.59.27-1.14.62-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.8 8.48a.5.5 0 0 0 .12.63l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94L2.92 16.17a.5.5 0 0 0-.12.63l1.92 3.32c.14.25.44.36.7.28l2.39-.96c.48.32 1.03.67 1.62.94l.36 2.54c.05.28.29.48.57.48h4.54c.28 0 .52-.2.57-.48l.36-2.54c.59-.27 1.14-.62 1.62-.94l2.39.96c.26.08.56-.03.7-.28l1.92-3.32a.5.5 0 0 0-.12-.63l-2.03-1.58zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z"/>
+  </svg>
+</button>
 
 <!-- Vote Concentration Editor -->
 <div id="help-panel">
