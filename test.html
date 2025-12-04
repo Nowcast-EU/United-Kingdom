@@ -2773,9 +2773,10 @@ function renderConcentrationTable() {
 
       <!-- Concentration column (display offset applied) -->
       <td>
-        <input type="number"
+        <input type="text"
           id="conc-${p}"
-          value="${((VOTE_CONCENTRATION[p] * 100) + (CONC_DISPLAY_OFFSET[p] || 0)).toFixed(1)}"
+          value="${(((VOTE_CONCENTRATION[p] * 100) + (CONC_DISPLAY_OFFSET[p] || 0)) >= 0 ? '+' : '') 
+        + ((VOTE_CONCENTRATION[p] * 100) + (CONC_DISPLAY_OFFSET[p] || 0)).toFixed(1)}"
           step="0.5"
           min="-100"
           max="100"
@@ -2785,9 +2786,10 @@ function renderConcentrationTable() {
 
       <!-- Incumbent strength column -->
       <td>
-        <input type="number"
+        <input type="text"
           id="inc-${p}"
-          value="${(((Number(INCUMBENT_STRENGTH[p] || 0) * 100) + (INC_DISPLAY_OFFSET[p] || 0))).toFixed(1)}"
+          value="${(((VOTE_CONCENTRATION[p] * 100) + (INC_DISPLAY_OFFSET[p] || 0)) >= 0 ? '+' : '') 
+        + ((VOTE_CONCENTRATION[p] * 100) + (INC_DISPLAY_OFFSET[p] || 0)).toFixed(1)}"
           step="0.5"
           min="-100"
           max="100"
@@ -2822,7 +2824,7 @@ function bindConcentrationInputs() {
     input.addEventListener("input", () => {
       const raw = input.value;
       if (raw === "-") return;
-      let val = parseFloat(raw);
+      let val = parseFloat(raw.replace("+", ""));
       if (isNaN(val)) return;
       val = clampConcentration(val);
 
@@ -2839,7 +2841,7 @@ function bindConcentrationInputs() {
         return;
       }
       let val = clampConcentration(parseFloat(input.value));
-      input.value = val.toFixed(1);
+      input.value = (val >= 0 ? "+" : "") + val.toFixed(1);
 
       const party = input.id.replace("conc-", "");
       VOTE_CONCENTRATION[party] = (val - (CONC_DISPLAY_OFFSET[party] || 0)) / 100;
@@ -2868,7 +2870,7 @@ function bindConcentrationInputs() {
     input.addEventListener("input", () => {
       const raw = input.value;
       if (raw === "-") return;
-      let val = parseFloat(raw);
+      let val = parseFloat(raw.replace("+", ""));
       if (isNaN(val)) return;
       val = clampConcentration(val);
 
@@ -2884,7 +2886,7 @@ function bindConcentrationInputs() {
         return;
       }
       let val = clampConcentration(parseFloat(input.value));
-      input.value = val.toFixed(1);
+      input.value = (val >= 0 ? "+" : "") + val.toFixed(1);
 
       const party = input.id.replace("inc-", "");
       INCUMBENT_STRENGTH[party] = (val - (INC_DISPLAY_OFFSET[party] || 0)) / 100;
