@@ -2749,6 +2749,15 @@ const VOTE_CONCENTRATION = {
   GRN: -10.0
 };
 
+  // display offsets for the incumbent input boxes (display only)
+const INC_DISPLAY_OFFSET = {
+  LAB: 1.0,
+  CON: 2.0,
+  RFM: -30.0,
+  LDM: 0.0,
+  GRN: -45.0
+};
+
   const CONC_EDITABLE = ["LAB", "CON", "RFM", "LDM", "GRN"];
 
   // Build the vote concentration editor table
@@ -2767,9 +2776,9 @@ function renderConcentrationTable() {
         <input type="number"
           id="conc-${p}"
           value="${((VOTE_CONCENTRATION[p] * 100) + (CONC_DISPLAY_OFFSET[p] || 0)).toFixed(1)}"
-          step="0.1"
-          min="-50"
-          max="50"
+          step="0.5"
+          min="-100"
+          max="100"
           style="width:70px; text-align:center;"
         >
       </td>
@@ -2778,10 +2787,10 @@ function renderConcentrationTable() {
       <td>
         <input type="number"
           id="inc-${p}"
-          value="${(Number(INCUMBENT_STRENGTH[p] || 0) * 100).toFixed(1)}"
-          step="0.1"
-          min="-50"
-          max="50"
+          value="${(((Number(INCUMBENT_STRENGTH[p] || 0) * 100) + (INC_DISPLAY_OFFSET[p] || 0))).toFixed(1)}"
+          step="0.5"
+          min="-100"
+          max="100"
           style="width:70px; text-align:center;"
         >
       </td>
@@ -2793,7 +2802,7 @@ function renderConcentrationTable() {
 
   function clampConcentration(val) {
   if (isNaN(val)) return 0;
-  return Math.max(-50, Math.min(50, val));
+  return Math.max(-100, Math.min(100, val));
 }
 
 function bindConcentrationInputs() {
@@ -2864,7 +2873,7 @@ function bindConcentrationInputs() {
       val = clampConcentration(val);
 
       const party = input.id.replace("inc-", "");
-      INCUMBENT_STRENGTH[party] = val / 100;
+      INCUMBENT_STRENGTH[party] = (val - (INC_DISPLAY_OFFSET[party] || 0)) / 100;
 
       calculate();
     });
@@ -2878,7 +2887,7 @@ function bindConcentrationInputs() {
       input.value = val.toFixed(1);
 
       const party = input.id.replace("inc-", "");
-      INCUMBENT_STRENGTH[party] = val / 100;
+      INCUMBENT_STRENGTH[party] = (val - (INC_DISPLAY_OFFSET[party] || 0)) / 100;
 
       calculate();
     });
