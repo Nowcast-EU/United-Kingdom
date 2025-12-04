@@ -517,7 +517,7 @@ tfoot td {
   position: fixed;
   bottom: 80px;
   right: 24px;
-  width: 320px;
+  width: 400px;
   background: #ffffff;
   border: 1px solid #ddd;
   border-radius: 10px;
@@ -559,7 +559,7 @@ tfoot td {
 
 /* narrower popup container */
 #help-panel {
-  width: 200px; /* 👈 thinner default popup */
+  width: 250px; /* 👈 thinner default popup */
 }
 
 /* input boxes scale to fit their cells */
@@ -612,12 +612,17 @@ tfoot td {
 
 #concentration-table th:nth-child(1),
 #concentration-table td:nth-child(1) {
-  width: 40%; /* Party */
+  width: 30%; /* Party */
 }
 
 #concentration-table th:nth-child(2),
 #concentration-table td:nth-child(2) {
-  width: 60%; /* Input */
+  width: 35%; /* Input */
+}
+
+#concentration-table th:nth-child(3),
+#concentration-table td:nth-child(3) {
+  width: 35%; /* Input */
 }
 
 #concentration-table th {
@@ -637,7 +642,7 @@ tfoot td {
 }
 
 #concentration-table input {
-  width: 70px;
+  width: 45px;
   height: 24px;
   text-align: center;
   border: 1px solid #cbd5e1;
@@ -725,13 +730,14 @@ tfoot td {
 
 <!-- Vote Concentration Editor -->
 <div id="help-panel">
-  <h4>Additional Settings</h4>
+  <h4>Additional Settings (%)</h4>
 
   <table id="concentration-table">
     <thead>
       <tr>
         <th>Party</th>
         <th>Concentration</th>
+        <th>Incumbents</th>
       </tr>
     </thead>
     <tbody id="concentration-body"></tbody>
@@ -2728,20 +2734,11 @@ const VOTE_CONCENTRATION = {
 };
 
   const INCUMBENT_STRENGTH = {
-  "LAB": 0.00,
-  "CON": 0.00,
-  "RFM": 0.00,
-  "LDM": 0.00,
-  "GRN": 0.00,
-  "SNP": 0.00,
-  "PLC": 0.00,
-  "SFN": 0.00,
-  "DUP": 0.00,
-  "ALL": 0.00,
-  "UUP": 0.00,
-  "SDL": 0.00,
-  "TUV": 0.00,
-  "OTH": 0.00
+  LAB: 0.00,
+  CON: 0.00,
+  RFM: 0.00,
+  LDM: 0.00,
+  GRN: 0.00
 };
 
   const CONC_DISPLAY_OFFSET = {
@@ -2759,15 +2756,29 @@ function renderConcentrationTable() {
   const tbody = document.getElementById("concentration-body");
   tbody.innerHTML = "";
 
- CONC_EDITABLE.forEach(p => {
+  CONC_EDITABLE.forEach(p => {
     const row = document.createElement("tr");
 
     row.innerHTML = `
       <td class="party-column" style="--party-color:${PARTY_COLORS[p]}">${p}</td>
+
+      <!-- Concentration column (display offset applied) -->
       <td>
         <input type="number"
           id="conc-${p}"
-          value="${((VOTE_CONCENTRATION[p] * 100) + CONC_DISPLAY_OFFSET[p]).toFixed(1)}"
+          value="${((VOTE_CONCENTRATION[p] * 100) + (CONC_DISPLAY_OFFSET[p] || 0)).toFixed(1)}"
+          step="0.1"
+          min="-50"
+          max="50"
+          style="width:70px; text-align:center;"
+        >
+      </td>
+
+      <!-- Incumbent strength column -->
+      <td>
+        <input type="number"
+          id="inc-${p}"
+          value="${(Number(INCUMBENT_STRENGTH[p] || 0) * 100).toFixed(1)}"
           step="0.1"
           min="-50"
           max="50"
@@ -2786,81 +2797,96 @@ function renderConcentrationTable() {
 }
 
 function bindConcentrationInputs() {
-  const inputs = CONC_EDITABLE.map(p => document.getElementById(`conc-${p}`));
+  const concInputs = CONC_EDITABLE.map(p => document.getElementById(`conc-${p}`));
+  const incInputs  = CONC_EDITABLE.map(p => document.getElementById(`inc-${p}`));
 
-  inputs.forEach((input, index) => {
-    let originalValue = input.value; 
-    let hasChanged = false;
+  // --- Concentration inputs (existing behaviour + display offset handling) ---
+  concInputs.forEach((input, index) => {
+    let originalValue = input.value;
 
-    // On focus → remember old value + clear visually
     input.addEventListener("focus", () => {
       originalValue = input.value;
-      input.dataset.displayValue = originalValue; 
+      input.dataset.displayValue = originalValue;
       input.value = "";
-      hasChanged = false;
     });
 
-    // On input → mark as changed + update model live
-input.addEventListener("input", () => {
-  const raw = input.value;
+    input.addEventListener("input", () => {
+      const raw = input.value;
+      if (raw === "-") return;
+      let val = parseFloat(raw);
+      if (isNaN(val)) return;
+      val = clampConcentration(val);
 
-  // Allow the user to type a lone "-" while editing
-  if (raw === "-") {
-    return;
-  }
+      const party = input.id.replace("conc-", "");
+      // store REAL value = displayed - offset
+      VOTE_CONCENTRATION[party] = (val - (CONC_DISPLAY_OFFSET[party] || 0)) / 100;
 
-  let val = parseFloat(raw);
+      calculate();
+    });
 
-  if (!isNaN(val)) {
-    val = clampConcentration(val);
-  
-    const party = input.id.replace("conc-", "");
-VOTE_CONCENTRATION[party] = (val - CONC_DISPLAY_OFFSET[party]) / 100;
-  
-    calculate();
-  }
-});
-
-    // On blur → restore or format
     input.addEventListener("blur", () => {
-      if (input.value === "" || isNaN(parseFloat(input.value))) {
+      if (input.value === "" || input.value === "-" || isNaN(parseFloat(input.value))) {
         input.value = originalValue;
-      } else {
-        input.value = parseFloat(input.value).toFixed(1);
+        return;
       }
+      let val = clampConcentration(parseFloat(input.value));
+      input.value = val.toFixed(1);
 
-      // update concentration if changed
-let val = clampConcentration(parseFloat(input.value));
-input.value = val.toFixed(1);
+      const party = input.id.replace("conc-", "");
+      VOTE_CONCENTRATION[party] = (val - (CONC_DISPLAY_OFFSET[party] || 0)) / 100;
 
-const party = input.id.replace("conc-", "");
-VOTE_CONCENTRATION[party] = (val - CONC_DISPLAY_OFFSET[party]) / 100;
-
-calculate();
+      calculate();
     });
 
-    // Enter key → move to next input
     input.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         e.preventDefault();
+        if (concInputs[index + 1]) concInputs[index + 1].focus(); else concInputs[0].focus();
+      }
+    });
+  });
 
-        if (input.value === "" || isNaN(parseFloat(input.value))) {
-          input.value = originalValue;
-        } else {
-          input.value = parseFloat(input.value).toFixed(1);
-        }
+  // --- Incumbent strength inputs (must ONLY update INCUMBENT_STRENGTH) ---
+  incInputs.forEach((input, index) => {
+    let originalValue = input.value;
 
-        const val = parseFloat(input.value);
-        if (!isNaN(val)) {
-          const party = input.id.replace("conc-", "");
-VOTE_CONCENTRATION[party] = (val - CONC_DISPLAY_OFFSET[party]) / 100;
-          
-          calculate();
-        }
+    input.addEventListener("focus", () => {
+      originalValue = input.value;
+      input.dataset.displayValue = originalValue;
+      input.value = "";
+    });
 
-        // move to next
-        if (inputs[index + 1]) inputs[index + 1].focus();
-        else inputs[0].focus();
+    input.addEventListener("input", () => {
+      const raw = input.value;
+      if (raw === "-") return;
+      let val = parseFloat(raw);
+      if (isNaN(val)) return;
+      val = clampConcentration(val);
+
+      const party = input.id.replace("inc-", "");
+      INCUMBENT_STRENGTH[party] = val / 100;
+
+      calculate();
+    });
+
+    input.addEventListener("blur", () => {
+      if (input.value === "" || input.value === "-" || isNaN(parseFloat(input.value))) {
+        input.value = originalValue;
+        return;
+      }
+      let val = clampConcentration(parseFloat(input.value));
+      input.value = val.toFixed(1);
+
+      const party = input.id.replace("inc-", "");
+      INCUMBENT_STRENGTH[party] = val / 100;
+
+      calculate();
+    });
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        if (incInputs[index + 1]) incInputs[index + 1].focus(); else incInputs[0].focus();
       }
     });
   });
@@ -3062,19 +3088,28 @@ function updateVoteTotal() {
 function applyVoteConcentrationToRow(row, baseNat, conc) {
   const out = { name: row.name };
   PARTIES.forEach(p => {
-    const local = row[p] ?? 0;        // local (constituency) baseline
-    const nat   = baseNat[p] ?? 0;   // national baseline
-    // If local > national baseline -> multiply by (1 + conc)
-    // Else -> multiply by (1 - conc)
-    // If conc is negative this still behaves as expected.
-    let multiplier;
-    if (local > nat) multiplier = 1 + (conc[p] ?? 0);
-    else multiplier = 1 - (conc[p] ?? 0);
+    const local = Number(row[p] ?? 0);      // local baseline
+    const nat   = Number(baseNat[p] ?? 0);  // national baseline
 
-    // Safety: prevent negative multipliers (clamp to small non-negative)
+    // --- concentration multiplier (safe defaults) ---
+    const concVal = Number(conc[p] ?? 0);
+    let multiplier = 1;
+    if (local > nat) multiplier = 1 + concVal;
+    else multiplier = 1 - concVal;
+
+    // safety: ensure multiplier numeric
+    if (!isFinite(multiplier)) multiplier = 1;
     multiplier = Math.max(0, multiplier);
 
-    out[p] = (local || 0) * multiplier;
+    // --- incumbent strength (only for incumbent party) ---
+    const incumbentParty = CONSTITUENCY_INCUMBENTS[row.name];
+    const incVal = Number(INCUMBENT_STRENGTH[p] ?? 0); // default 0 if missing
+    if (p === incumbentParty && incVal !== 0) {
+      multiplier = multiplier * (1 + incVal);
+      if (!isFinite(multiplier)) multiplier = Math.max(0, Number(multiplier) || 0);
+    }
+
+    out[p] = local * multiplier;
   });
   return out;
 }
