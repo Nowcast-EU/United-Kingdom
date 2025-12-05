@@ -438,7 +438,7 @@ tfoot td {
   color: var(--party-color);    /* colour set inline via JS */
 }
 
-/* --- Floating Converter Button --- */
+/* Floating Converter Button (use for the button element) */
 #help-button {
   position: fixed;
   bottom: 24px;
@@ -448,19 +448,35 @@ tfoot td {
   border-radius: 50%;
   background-color: #008500;
   color: #fff;
-  font-size: 18px;
-  font-weight: bold;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0,0,0,0.25);
   transition: background 0.3s ease, transform 0.2s ease;
   z-index: 1000;
+  border: none;           /* remove default button border */
+  padding: 0;             /* keep exact size */
 }
+
+/* ensure focus shows an outline for keyboard users */
+#help-button:focus {
+  outline: 2px solid rgba(255,255,255,0.9);
+  outline-offset: 2px;
+}
+
+/* hover behaviour */
 #help-button:hover {
   background-color: #006d00;
   transform: scale(1.05);
+}
+
+/* size the img inside the button */
+#help-button img {
+  width: 25px;
+  height: 25px;
+  display: block;
+  pointer-events: none;   /* clicks hit the button, not the svg */
 }
 
 /* --- Conversion Panel --- */
@@ -485,31 +501,6 @@ tfoot td {
   text-align: left;
   font-size: 13px;
   color: #333;
-}
-
-  /* --- Floating Converter Button --- */
-#help-button {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background-color: #008500;
-  color: #fff;
-  font-size: 18px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-  transition: background 0.3s ease, transform 0.2s ease;
-  z-index: 1000;
-}
-#help-button:hover {
-  background-color: #006d00;
-  transform: scale(1.05);
 }
 
 /* --- Popup Panel --- */
@@ -726,7 +717,9 @@ tfoot td {
 </p>
 
 <!-- Floating Converter Button -->
-<div id="help-button">⚙️</div>
+<button id="help-button" aria-label="Settings" title="Settings" type="button">
+  <img id="help-icon" src="https://raw.githubusercontent.com/Nowcast-EU/United-Kingdom/refs/heads/main/cog.svg" alt="" />
+</button>
 
 <!-- Vote Concentration Editor -->
 <div id="help-panel">
