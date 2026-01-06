@@ -36,6 +36,11 @@
       position: relative;
     }
 
+    .bar-container {
+      width: 100%;
+      position: relative;
+    }
+
     iframe {
       width: 100%;
       border: none;
@@ -47,6 +52,13 @@
       .flourish-container {
         /* Aspect ratio: 1 wide, 1.25 tall */
         aspect-ratio: 1 / 1.4;
+        max-width: 1000px;
+        margin: 0 auto;
+        position: relative;
+      }
+
+      .bar-container {
+        aspect-ratio: 4 / 1;
         max-width: 1000px;
         margin: 0 auto;
         position: relative;
@@ -69,6 +81,12 @@
         position: relative;
       }
 
+      .bar-container {
+        aspect-ratio: 4 / 2;
+        width: 100%;
+        position: relative;
+      }
+
       iframe {
         position: absolute;
         top: 0;
@@ -82,6 +100,10 @@
 <body>
   <div class="flourish-container">
     <iframe src="https://flo.uri.sh/visualisation/26928540/embed" scrolling="no" frameborder="0"></iframe>
+  </div>
+  
+    <div class="bar-container">
+    <iframe src="https://flo.uri.sh/visualisation/25559039/embed" scrolling="no" frameborder="0"></iframe>
   </div>
 </body>
 </html>
