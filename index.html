@@ -31,12 +31,37 @@
       font-family: system-ui, sans-serif;
     }
 
+        .logo-container {
+  position: relative; /* container for absolute positioning */
+  width: 100%;        /* full width of page */
+}
+
+.page-logo {
+  position: absolute; /* position relative to .logo-container */
+  top: 0.3rem;          /* distance from top of page */
+  right: 0.3rem;        /* distance from right edge */
+  height: 4rem;       /* adjust logo size */
+  width: auto;        /* maintain aspect ratio */
+  z-index: 10;        /* above the Flourish content */
+}
+
+  @media (max-width: 767px) {
+  .page-logo {
+    height: 2.5rem;
+  }
+}
+
     .flourish-container {
       width: 100%;
       position: relative;
     }
 
     .bar-container {
+      width: 100%;
+      position: relative;
+    }
+
+    .graph-container {
       width: 100%;
       position: relative;
     }
@@ -59,6 +84,13 @@
 
       .bar-container {
         aspect-ratio: 4 / 1;
+        max-width: 1000px;
+        margin: 0 auto;
+        position: relative;
+      }
+
+      .graph-container {
+        aspect-ratio: 1.7 / 1;
         max-width: 1000px;
         margin: 0 auto;
         position: relative;
@@ -87,6 +119,12 @@
         position: relative;
       }
 
+      .graph-container {
+        aspect-ratio: 2.5 / 2;
+        width: 100%;
+        position: relative;
+      }
+
       iframe {
         position: absolute;
         top: 0;
@@ -98,12 +136,21 @@
   </style>
 </head>
 <body>
+
+    <div class="logo-container">
+    <img src="NowcastUKlogo.png" alt="Logo" class="page-logo">
+  </div>
+  
   <div class="flourish-container">
     <iframe src="https://flo.uri.sh/visualisation/26928540/embed" scrolling="no" frameborder="0"></iframe>
   </div>
   
     <div class="bar-container">
     <iframe src="https://flo.uri.sh/visualisation/25559039/embed" scrolling="no" frameborder="0"></iframe>
+  </div>
+
+    <div class="graph-container">
+    <iframe src="https://flo.uri.sh/visualisation/27195458/embed" scrolling="no" frameborder="0"></iframe>
   </div>
 </body>
 </html>
