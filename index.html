@@ -72,6 +72,33 @@
       display: block;
     }
 
+              /* ===== MAJORITY LINE (BAR CHART ONLY) ===== */
+.majority-line {
+  position: absolute;
+  left: 50%;                 /* 50% = majority threshold */
+  top: 60%;                  /* start halfway down */
+  bottom: 20%;                 /* extend to bottom */
+  width: 2px;
+  background: #000000;
+  transform: translateX(-50%);
+  z-index: 5;
+  pointer-events: none;      /* critical for iframe interaction */
+}
+
+  /* ===== MAJORITY LABEL ===== */
+.majority-label {
+  position: absolute;
+  top: 100%;              /* directly beneath the line */
+  margin-top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
     /* --- Desktop view --- */
     @media (min-width: 768px) {
       .flourish-container {
@@ -107,6 +134,11 @@
 
     /* --- Mobile view --- */
     @media (max-width: 767px) {
+
+    .majority-line {
+    bottom: 25%;          /* mobile bottom */
+  }
+      
       .flourish-container {
         aspect-ratio: 1 / 1.7;
         width: 100%;
@@ -140,10 +172,16 @@
   <div class="flourish-container">
     <iframe src="https://flo.uri.sh/visualisation/26928540/embed" scrolling="no" frameborder="0"></iframe>
   </div>
-  
-    <div class="bar-container">
-    <iframe src="https://flo.uri.sh/visualisation/25559039/embed" scrolling="no" frameborder="0"></iframe>
-  </div>
+
+      <div class="bar-container">
+<div class="majority-line">
+  <span class="majority-label">Majority</span>
+</div>
+
+  <iframe src="https://flo.uri.sh/visualisation/25559039/embed"
+          scrolling="no"
+          frameborder="0"></iframe>
+</div>
 
     <div class="graph-container">
     <iframe src="https://flo.uri.sh/visualisation/27195458/embed" scrolling="no" frameborder="0"></iframe>
