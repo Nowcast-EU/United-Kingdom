@@ -1,1 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🇬🇧 | Nowcast UK Projection</title>
 
+  <!-- Social / Thumbnail preview -->
+  <meta property="og:title" content="🇬🇧 | Nowcast UK Projection">
+  <meta property="og:description" content="">
+  <meta property="og:image" content="https://nowcast-eu.github.io/United-Kingdom/UK_LogoBG.png">
+  <meta property="og:url" content="https://nowcast-eu.github.io/United-Kingdom/">
+  <meta property="og:type" content="website">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:type" content="image/png">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="🇬🇧 | Nowcast UK Projection">
+  <meta name="twitter:description" content="">
+  <meta name="twitter:image" content="https://nowcast-eu.github.io/United-Kingdom/thumbnail.png">
+
+  <!-- Favicon -->
+<link rel="icon" type="image/png" href="UK_favicon.png" />
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
+      font-family: system-ui, sans-serif;
+    }
+
+        .logo-container {
+  position: relative; /* container for absolute positioning */
+  width: 100%;        /* full width of page */
+}
+
+.page-logo {
+  position: absolute; /* position relative to .logo-container */
+  top: 2rem;          /* distance from top of page */
+  right: 12rem;        /* distance from right edge */
+  height: 6rem;       /* adjust logo size */
+  width: auto;        /* maintain aspect ratio */
+  z-index: 10;        /* above the Flourish content */
+}
+
+  @media (max-width: 767px) {
+  .page-logo {
+    top: 3.7rem;          /* distance from top of page */
+    right: 0.7rem;        /* distance from right edge */
+    height: 3rem;
+  }
+}
+
+    .flourish-container {
+      width: 100%;
+      position: relative;
+    }
+
+    .bar-container {
+      width: 100%;
+      position: relative;
+    }
+
+    .graph-container {
+      width: 100%;
+      position: relative;
+    }
+
+    iframe {
+      width: 100%;
+      border: none;
+      display: block;
+    }
+
+              /* ===== MAJORITY LINE (BAR CHART ONLY) ===== */
+.majority-line {
+  position: absolute;
+  left: 50%;                 /* 50% = majority threshold */
+  top: 65%;                  /* start halfway down */
+  bottom: 10%;                 /* extend to bottom */
+  width: 2px;
+  background: #000000;
+  transform: translateX(-50%);
+  z-index: 5;
+  pointer-events: none;      /* critical for iframe interaction */
+}
+
+  /* ===== MAJORITY LABEL ===== */
+.majority-label {
+  position: absolute;
+  top: 100%;              /* directly beneath the line */
+  margin-top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+    /* --- Desktop view --- */
+    @media (min-width: 768px) {
+      .flourish-container {
+        /* Aspect ratio: 1 wide, 1.25 tall */
+        aspect-ratio: 1 / 1.5;
+        max-width: 1000px;
+        margin: 0 auto;
+        position: relative;
+      }
+
+      .bar-container {
+        aspect-ratio: 4 / 1;
+        transform: translateY(-35px);
+        z-index: 10;
+        max-width: 1000px;
+        margin: 0 auto;
+        position: relative;
+      }
+
+      .graph-container {
+        aspect-ratio: 1.7 / 1;
+        transform: translateY(-35px);
+        z-index: 10;
+        max-width: 1000px;
+        margin: 0 auto;
+        position: relative;
+      }
+
+      iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    /* --- Mobile view --- */
+    @media (max-width: 767px) {
+
+    .majority-line {
+       top: 67.5%; 
+    bottom: 15%;          /* mobile bottom */
+  }
+      
+      .flourish-container {
+        aspect-ratio: 1 / 1.8;
+        width: 100%;
+        position: relative;
+      }
+
+      .bar-container {
+        aspect-ratio: 4 / 2;
+        transform: translateY(-30px);
+        z-index: 10;
+        width: 100%;
+        position: relative;
+      }
+
+      .graph-container {
+        aspect-ratio: 2.5 / 2;
+        transform: translateY(-30px);
+        z-index: 10;
+        width: 100%;
+        position: relative;
+      }
+
+      iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="logo-container"> <img src="UK_LogoBG.png" alt="Logo" class="page-logo"> </div>
+  
+  <div class="flourish-container">
+    <iframe src="https://flo.uri.sh/visualisation/26928540/embed" scrolling="no" frameborder="0"></iframe>
+  </div>
+
+      <div class="bar-container">
+<div class="majority-line">
+  <span class="majority-label">Majority</span>
+</div>
+
+  <iframe src="https://flo.uri.sh/visualisation/25559039/embed"
+          scrolling="no"
+          frameborder="0"></iframe>
+</div>
+
+    <div class="graph-container">
+    <iframe src="https://flo.uri.sh/visualisation/27195458/embed" scrolling="no" frameborder="0"></iframe>
+  </div>
+</body>
+</html>
