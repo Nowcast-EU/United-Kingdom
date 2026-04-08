@@ -217,14 +217,14 @@ function renderTable(){
   if(snpIndex >= 0){
     const d1 = document.createElement('tr');
     d1.className = 'sub-national-divider';
-    d1.innerHTML = `<td></td><td></td><td>sub-national totals</td><td></td><td></td>`;
+    d1.innerHTML = `<td colspan="5">sub-national totals</td>`;
     tbodyEl.insertBefore(d1, rows[snpIndex]);
   }
   const sfnIndex = parties.findIndex(p => p.name === 'SFN');
   if(sfnIndex >= 0){
     const d2 = document.createElement('tr');
     d2.className = 'sub-national-divider';
-    d2.innerHTML = `<td></td><td></td><td>Northern Ireland</td><td></td><td></td>`;
+    d2.innerHTML = `<td colspan="5">Northern Ireland</td>`;
     tbodyEl.insertBefore(d2, rows[sfnIndex]);
   }
 
