@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Nowcast UK - PR Calculator</title>
+<title>Nowcast UK | PR Calculator</title>
 
     <!-- Social / Thumbnail preview -->
   <meta property="og:title" content="🇬🇧 | PR Calculator">
@@ -370,9 +370,7 @@ function renderCoalition(){
 
   const counter = document.getElementById('counter');
   counter.textContent = `${totalSel} / 650`;
-  const sfnSeats = coalitionParties.find(p=>p.name==='SFN')?.seats||0;
-  const workable = Math.ceil((650-sfnSeats)/2);
-  counter.style.color = totalSel >= workable ? '#2BA84A' : '#000';
+  counter.style.color = totalSel >= majority ? '#2BA84A' : '#000';
 
   const sfnSeats = coalitionParties.find(p=>p.name==='SFN')?.seats||0;
   const workable = Math.ceil((650-sfnSeats)/2);
