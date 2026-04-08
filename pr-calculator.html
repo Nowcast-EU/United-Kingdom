@@ -131,8 +131,15 @@ const calculateBtn = document.getElementById('calculate');
 const resetBtn = document.getElementById('reset');
 
 const coalitionDefs = [
-  { label: 'Grand coalition', members: ['LAB','CON'] },
-  { label: '2010 coalition',  members: ['CON','LDM'] },
+  { label: 'Grand Coalition', members: ['LAB','CON'] },
+  { label: 'Romania Coalition', members: ['LAB','CON','LDM'] },
+  { label: 'Traffic Light', members: ['LAB','LDM','GRN'] },
+  { label: '"Progressive Alliance"', members: ['LAB','LDM','GRN','SNP','PLC'] },
+  { label: 'Broad Left', members: ['LAB','LDM','GRN','SNP','PLC','SDL','ALL','YRP'] },
+  { label: 'Broad Right', members: ['CON','RFM','RES','UUP','DUP','TUV'] },
+  { label: 'United Right', members: ['CON','RFM','RES'] },
+  { label: '2010 Coalition',  members: ['CON','LDM'] },
+  { label: '1977 Coalition',  members: ['LAB','LDM'] },
 ];
 
 function renderTable(){
@@ -367,7 +374,9 @@ function renderCoalitionList(){
     const icon = document.createElement('div');
     icon.className = 'coal-icon';
     icon.style.fontSize = '20px';
-    icon.textContent = row.total >= majority ? '✅' : '❌';
+   const sfnSeats = parties.find(p=>p.name==='SFN')?.final||0;
+   const workable = Math.ceil((totalSeats - sfnSeats) / 2);
+   icon.textContent = row.total >= workable ? '✅' : '❌';
 
     flex.appendChild(bar);
     flex.appendChild(icon);
