@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>PR Calculator + Coalition Builder</title>
 <style>
-  /* ---------------- Tiered PR Calculator Styles ---------------- */
   body {
     font-family: Inter, system-ui, sans-serif;
     background: #fff;
@@ -117,7 +116,6 @@
   input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
   input[type=number] { -moz-appearance: textfield; }
 
-  /* ---------------- Coalition Builder Styles ---------------- */
   #coalition-builder { margin-top: 48px; }
   .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
   h3 { margin: 0; }
@@ -174,7 +172,6 @@
 </head>
 <body>
 
-<!-- ---------------- Tiered PR Calculator ---------------- -->
 <table>
   <thead>
     <tr>
@@ -200,7 +197,6 @@
   <button id="reset">Reset</button>
 </div>
 
-<!-- ---------------- Coalition Builder ---------------- -->
 <div id="coalition-builder">
   <div class="header-container">
     <h3>PR Coalition Builder (user generated input)</h3>
@@ -220,7 +216,6 @@
 </div>
 
 <script>
-/* ---------------- PR Calculator Script ---------------- */
 const totalSeats = 650;
 const parties = [
   {name:'LAB', color:'#e4003b', ge2024: 33.7, votes:17.8, final:0},
@@ -228,7 +223,8 @@ const parties = [
   {name:'RFM', color:'#23c7df', ge2024: 14.3, votes:29.3, final:0},
   {name:'LDM', color:'#faa61a', ge2024: 12.2, votes:12.7, final:0},
   {name:'GRN', color:'#6ab023', ge2024: 6.4, votes:13.1, final:0},
-  {name:'YRP', color:'#f76bee', ge2024: 0.0, votes:0.0, final:0}, // new party YRP included
+  {name:'YRP', color:'#f76bee', ge2024: 0.0, votes:0.0, final:0},
+  {name:'RES', color:'#000000', ge2024: 0.0, votes:0.0, final:0},
   {name:'SNP', color:'#fdf38e', ge2024: 30.0, votes:33.0, final:0},
   {name:'PLC', color:'#005b54', ge2024: 14.8, votes:23.0, final:0},
   {name:'SFN', color:'#326760', ge2024: 27.0, votes:27.0, final:0},
@@ -241,8 +237,6 @@ const parties = [
 
 const calculateBtn = document.getElementById('calculate');
 const resetBtn = document.getElementById('reset');
-
-// Store default votes
 const defaultVotes = parties.map(p => p.votes);
 
 function renderTable(){
@@ -295,7 +289,7 @@ function renderTable(){
       if(val>100){ input.value = 100; input.style.borderColor = 'red'; }
       else input.style.borderColor = '#cbd5e1';
       updateVoteTotal();
-      calculateBtn.style.background = '#ffa500'; // fade to orange
+      calculateBtn.style.background = '#ffa500';
     });
   });
   updateVoteTotal();
@@ -314,14 +308,11 @@ function updateVoteTotal() {
 }
 
 function calculate(){
-  // update votes from inputs
   parties.forEach((p,i)=>{ p.votes = parseFloat(document.getElementById(`votes-${i}`).value)||0; });
 
-  // SNP and PLC fixed-seat allocations
   const partyF = parties.find(p=>p.name==='SNP'); partyF.final = Math.round(partyF.votes/100*57);
   const partyG = parties.find(p=>p.name==='PLC'); partyG.final = Math.round(partyG.votes/100*32);
 
-  // Northern Ireland allocation block
   const groupHtoM = parties.filter(p=>['SFN','DUP','ALL','SDL','UUP','TUV'].includes(p.name));
   const totalVotesHtoM = groupHtoM.reduce((s,p)=>s+p.votes,0);
   const quotaHtoM = totalVotesHtoM/18;
@@ -335,10 +326,9 @@ function calculate(){
   for(let i=0;i<remainingHtoM;i++) allocationHtoM[i].final++;
   allocationHtoM.forEach(p=>{ const index=parties.findIndex(x=>x.name===p.name); parties[index].final=p.final; });
 
-  // remaining seats for the rest (including YRP)
   const seatsTaken = partyF.final + partyG.final + allocationHtoM.reduce((s,p)=>s+p.final,0);
   const remainingSeats = totalSeats - seatsTaken;
-  const groupRest = parties.filter(p=>['LAB','CON','RFM','LDM','GRN','YRP'].includes(p.name));
+  const groupRest = parties.filter(p=>['LAB','CON','RFM','LDM','GRN','YRP','RES'].includes(p.name));
   const totalVotesRest = groupRest.reduce((s,p)=>s+p.votes,0);
   const quotaRest = totalVotesRest/remainingSeats;
   let allocationRest = groupRest.map(p=>{
@@ -351,29 +341,24 @@ function calculate(){
   for(let i=0;i<remainingRest;i++) allocationRest[i].final++;
   allocationRest.forEach(p=>{ const index=parties.findIndex(x=>x.name===p.name); parties[index].final=p.final; });
 
-  // update table seats and totals
   parties.forEach((p,i)=>{ document.getElementById(`seats-${i}`).textContent = p.final; });
   document.getElementById('total-seats').textContent = parties.reduce((sum,p)=>sum+p.final,0);
 
-  calculateBtn.style.background = '#008500'; // reset to green
-  renderCoalition(); // update coalition builder automatically
+  calculateBtn.style.background = '#008500';
+  renderCoalition();
 }
 
-// Reset button restores defaults
 resetBtn.addEventListener('click', ()=>{
   parties.forEach((p,i)=>document.getElementById(`votes-${i}`).value = defaultVotes[i].toFixed(1));
   calculate();
 });
 
-/* ---------------- Coalition Builder Script ---------------- */
 const totalSeatsCoalition = 650;
 let selected = [];
 let activeTab = 0;
 
 const datasets = [
-  // dataset[0] is intentionally not used as a static snapshot because we want live values from parties[].final
   null,
-  // static GE2024 baseline
   parties.map(p=>{ 
     const staticGE = [
       { name: "LAB", seats: 234, color: "#E4003B" },
@@ -382,6 +367,7 @@ const datasets = [
       { name: "LDM", seats: 81, color: "#FAA61A" },
       { name: "GRN", seats: 43, color: "#6AB023" },
       { name: "YRP", seats: 0, color: "#F76BEE" },
+      { name: "RES", seats: 0, color: "#000000" },
       { name: "SNP", seats: 17, color: "#FDF38E" },
       { name: "PLC", seats: 5, color: "#005B54" },
       { name: "SFN", seats: 5, color: "#326760" },
@@ -416,38 +402,33 @@ function toggleParty(name){
 
 function renderCoalition(){
   overlay.innerHTML = "";
-  // choose live result (reads parties[].final) for tab 0, static GE numbers for tab 1
   const coalitionParties = (activeTab===0)
     ? parties.map(p=>({ name: p.name, seats: Number(p.final || 0), color: p.color }))
     : datasets[1];
 
-  // build legend
   legend.innerHTML = "";
   coalitionParties.forEach(p=>{
     const item = document.createElement('div');
     item.className = 'legend-item' + (selected.includes(p.name) ? ' active' : '');
-    item.innerHTML = `<div class="legend-box" style="background:${p.color}"></div> <strong>${p.name}</strong> ${p.seats}`;
+    item.innerHTML = `<div class="legend-box" style="background:${p.color}; ${p.color==='#000000'?'border:1px solid #ccc;':''}"></div> <strong>${p.name}</strong> ${p.seats}`;
     item.onclick = ()=>toggleParty(p.name);
     legend.appendChild(item);
   });
 
-  // compute selected totals and draw overlay segments
   const totalSeatsSelected = selected.reduce((sum,name)=>{
     const part = coalitionParties.find(x=>x.name===name);
     return part ? sum + Number(part.seats || 0) : sum;
   }, 0);
 
   const widthPercent = (totalSeatsSelected / totalSeatsCoalition) * 100;
-  // clear overlay then append segments sized proportionally to selected block
-  overlay.style.width = "0%"; // reset for animation
-  overlay.innerHTML = ""; // clear
+  overlay.style.width = "0%";
+  overlay.innerHTML = "";
   if(totalSeatsSelected > 0){
     selected.forEach(name=>{
       const p = coalitionParties.find(x=>x.name===name);
       if(!p) return;
       const seg = document.createElement('div');
       seg.className = 'segment';
-      // compute each segment width relative to the selected block
       const flexBasisPercent = (p.seats / totalSeatsSelected) * 100;
       seg.style.flexBasis = flexBasisPercent + "%";
       seg.style.background = p.color;
@@ -456,10 +437,8 @@ function renderCoalition(){
     });
   }
 
-  // animate overlay width
   requestAnimationFrame(()=>{ overlay.style.width = widthPercent + "%"; });
 
-  // update counter and note
   counter.textContent = `${totalSeatsSelected} / ${totalSeatsCoalition}`;
   counter.style.color = totalSeatsSelected >= majority ? "#2BA84A" : "#000";
 
@@ -467,7 +446,6 @@ function renderCoalition(){
   const workableMajority = Math.ceil((totalSeatsCoalition - sfnSeats) / 2);
   document.querySelector(".note").innerHTML = `Note: workable majority excluding Sinn Fein is <b><i>${workableMajority}</i></b>`;
 
-  // update legend active states
   document.querySelectorAll(".legend-item").forEach(el=>{
     const name = el.querySelector("strong").textContent;
     el.classList.toggle("active", selected.includes(name));
@@ -476,7 +454,7 @@ function renderCoalition(){
 
 document.getElementById('calculate').addEventListener('click', calculate);
 renderTable();
-calculate(); // perform initial calculation so coalition builder has seat numbers
+calculate();
 </script>
 
 </body>
