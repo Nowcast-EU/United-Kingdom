@@ -370,7 +370,9 @@ function renderCoalition(){
 
   const counter = document.getElementById('counter');
   counter.textContent = `${totalSel} / 650`;
-  counter.style.color = totalSel >= majority ? '#2BA84A' : '#000';
+  const sfnSeats = coalitionParties.find(p=>p.name==='SFN')?.seats||0;
+  const workable = Math.ceil((650-sfnSeats)/2);
+  counter.style.color = totalSel >= workable ? '#2BA84A' : '#000';
 
   const sfnSeats = coalitionParties.find(p=>p.name==='SFN')?.seats||0;
   const workable = Math.ceil((650-sfnSeats)/2);
