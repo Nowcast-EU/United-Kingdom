@@ -376,7 +376,7 @@ function renderCoalition(){
 
   const sfnSeats = coalitionParties.find(p=>p.name==='SFN')?.seats||0;
   const workable = Math.ceil((650-sfnSeats)/2);
-  document.querySelector('.note').innerHTML = `Note: workable majority excluding Sinn Fein is <b><i>${workable}</i></b>`;
+  document.querySelector('.note').innerHTML = `Note: workable majority excluding Sinn Féin is <b><i>${workable}</i></b>`;
 
   document.querySelectorAll('.legend-item').forEach(el=>{
     el.classList.toggle('active', selected.includes(el.querySelector('strong').textContent));
