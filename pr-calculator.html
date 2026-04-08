@@ -4,173 +4,60 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>PR Calculator + Coalition Builder</title>
+
 <style>
-  body {
-    font-family: Inter, system-ui, sans-serif;
-    background: #fff;
-    color: #0f172a;
-    margin: 0;
-    padding: 24px;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 12px;
-  }
-  th, td {
-    padding: 4px 6px;
-    border: 1px solid #e2e8f0;
-  }
-  th {
-    background: #f1f5f9;
-    font-weight: 600;
-    text-align: left;
-  }
-  td.party-column {
-    font-weight: bold;
-    position: relative;
-    padding-left: 14px;
-    color: black;
-  }
-  td.party-column::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 8px;
-    height: 100%;
-    border-radius: 2px 0 0 2px;
-    background-color: var(--party-color);
-  }
-  td.ge2024-column {
-    font-style: italic;
-    color: #999999;
-  }
-  td.seats-column {
-    font-weight: bold;
-    text-align: center;
-  }
-  .input-wrapper {
-    display: flex;
-    align-items: center;
-  }
-  .input-wrapper input {
-    width: 50px;
-    padding: 4px;
-    border: 1px solid #cbd5e1;
-    border-radius: 4px;
-    text-align: left;
-    margin-right: 4px;
-    transition: border-color 0.3s ease;
-  }
+  body { font-family: Inter, system-ui, sans-serif; background: #fff; color: #0f172a; margin: 0; padding: 24px; }
+  :root { --main-bar-h: 117px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+  th, td { padding: 4px 6px; border: 1px solid #e2e8f0; }
+  th { background: #f1f5f9; font-weight: 600; text-align: left; }
+  td.party-column { font-weight: bold; position: relative; padding-left: 14px; color: black; }
+  td.party-column::before { content: ""; position: absolute; left: 0; top: 0; width: 8px; height: 100%; border-radius: 2px 0 0 2px; background-color: var(--party-color); }
+  td.ge2024-column { font-style: italic; color: #999999; }
+  td.seats-column { font-weight: bold; text-align: center; }
+  .input-wrapper { display: flex; align-items: center; }
+  .input-wrapper input { width: 50px; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; text-align: left; margin-right: 4px; transition: border-color 0.3s ease; }
   .percent-sign { font-size: 14px; }
-
-  .button-container {
-    display: flex;
-    gap: 8px;
-    margin-top: 14px;
-  }
-  button#calculate {
-    background: #008500;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 14px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-    flex: 0 0 80%;
-  }
-  button#reset {
-    background: #008500;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 14px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-    flex: 0 0 20%;
-  }
-
-  tfoot td {
-    font-weight: bold;
-    text-align: center;
-    background: #f1f5f9;
-  }
+  .button-container { display: flex; gap: 8px; margin-top: 14px; }
+  button#calculate { background: #008500; color: #fff; border: none; border-radius: 6px; padding: 8px 14px; cursor: pointer; transition: background 0.3s ease; flex: 0 0 80%; }
+  button#reset { background: #008500; color: #fff; border: none; border-radius: 6px; padding: 8px 14px; cursor: pointer; transition: background 0.3s ease; flex: 0 0 20%; }
+  tfoot td { font-weight: bold; text-align: center; background: #f1f5f9; }
   tfoot td:first-child { text-align: left; padding-left: 14px; }
-
-  tr.sub-national-divider td {
-    text-align: center;
-    font-style: italic;
-    font-weight: normal;
-    font-size: 0.85em;
-    background: #f0f4f8;
-    border-top: none;
-    border-bottom: none;
-    padding: 6px 0;
-    line-height: 1;
-  }
-  tr.sub-national-divider td:nth-child(3),
-  #total-votes { text-align: left; padding-left: 6px; }
-
-  input[type=number]::-webkit-inner-spin-button, 
-  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  tr.sub-national-divider td { text-align: center; font-style: italic; font-weight: normal; font-size: 0.85em; background: #f0f4f8; border-top: none; border-bottom: none; padding: 6px 0; line-height: 1; }
+  tr.sub-national-divider td:nth-child(3), #total-votes { text-align: left; padding-left: 6px; }
+  input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
   input[type=number] { -moz-appearance: textfield; }
-
   #coalition-builder { margin-top: 48px; }
   .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
   h3 { margin: 0; }
   .tab-switcher { position: relative; display: flex; background: #f3f3f3; border-radius: 12px; border: 1px solid #ccc; overflow: hidden; height: 34px; min-width: 140px; }
-  .tab-button {
-    flex: 1;
-    padding: 6px 12px;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    font-weight: bold;
-    transition: color 0.25s ease;
-    border-radius: 0;
-    z-index: 1;
-    position: relative;
-  }
+  .tab-button { flex: 1; padding: 6px 12px; border: none; background: transparent; cursor: pointer; font-weight: bold; transition: color 0.25s ease; border-radius: 0; z-index: 1; position: relative; }
   .tab-button.active { color: #000; }
-  .tab-slider {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 50%;
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-    transition: transform 0.25s ease;
-    z-index: 0;
-  }
+  .tab-slider { position: absolute; top: 0; bottom: 0; width: 50%; background: #ffffff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.15); transition: transform 0.25s ease; z-index: 0; }
   .legend { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 15px; }
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    user-select: none;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 6px 10px;
-    background: #f3f3f3;
-    transition: all 0.25s ease;
-    opacity: 0.6;
-    font-weight: normal;
-  }
+  .legend-item { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; border: 1px solid #ccc; border-radius: 8px; padding: 6px 10px; background: #f3f3f3; transition: all 0.25s ease; opacity: 0.6; font-weight: normal; }
   .legend-item:hover { transform: translateY(-1px); }
   .legend-item.active { opacity: 1; background: #ffffff; border-color: #999; box-shadow: 0 1px 3px rgba(0,0,0,0.15); font-weight: bold; }
   .legend-box { width: 20px; height: 20px; border-radius: 4px; }
-  .bar-container { position: relative; height: 117px; background: #f0f0f0; border-radius: 10px; overflow: hidden; margin-bottom: 12px; width: 100%; }
+  .bar-container { position: relative; height: var(--main-bar-h); background: #f0f0f0; border-radius: 10px; overflow: hidden; margin-bottom: 12px; width: 100%; }
   .coalition-overlay { position: absolute; top: 0; left: 0; height: 100%; width: 0%; border-top-left-radius: 10px; border-bottom-left-radius: 10px; border-top-right-radius: 0; border-bottom-right-radius: 0; display: flex; overflow: hidden; transition: width 1s ease; }
   .segment { height: 100%; flex-shrink: 0; border-radius: 0; }
   .majority-line { position: absolute; top: 0; bottom: 0; width: 2px; background: repeating-linear-gradient(to bottom,#333,#333 5px,transparent 5px,transparent 10px); left: 50%; }
   .counter { font-size: 22px; font-weight: bold; text-align: center; margin-bottom: 8px; }
   .note { font-size: 13px; color: #555; text-align: center; }
+  .section-divider { position: relative; margin: 28px 0 18px; text-align: center; }
+  .section-divider::before { content: ""; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #555555; transform: translateY(-50%); }
+  .section-divider span { position: relative; display: inline-block; padding: 0 10px; background: #ffffff; color: #555555; font-weight: 600; font-size: 14px; letter-spacing: 0.2px; }
+  #coalition-list { width: 100%; }
+  .coalition-block { margin-bottom: calc(var(--main-bar-h) / 4); }
+  .coal-label { font-size: 14px; margin-bottom: 6px; color: #333; font-weight: 600; }
+  .coal-flex { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; }
+  .mini-bar { position: relative; background: #f0f0f0; border-radius: 10px; height: calc(var(--main-bar-h) / 2); overflow: hidden; width: 100%; }
+  .mini-overlay { position: absolute; top: 0; left: 0; height: 100%; width: 0%; display: flex; border-radius: 10px 0 0 10px; overflow: hidden; transition: width 0.8s ease; }
+  .mini-total { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #000000; text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff; pointer-events: none; }
+  .coal-icon { font-size: 20px; width: 24px; text-align: center; }
+  .mini-seg { height: 100%; flex-shrink: 0; }
 </style>
-</head>
-<body>
 
 <table>
   <thead>
@@ -215,8 +102,12 @@
   <div class="note"></div>
 </div>
 
+<div class="section-divider"><span>Possible coalitions</span></div>
+<div id="coalition-list"></div>
+
 <script>
 const totalSeats = 650;
+const majority = 326;
 const parties = [
   {name:'LAB', color:'#e4003b', ge2024: 33.7, votes:17.8, final:0},
   {name:'CON', color:'#0087dc', ge2024: 23.7, votes:16.9, final:0},
@@ -235,9 +126,14 @@ const parties = [
   {name:'TUV', color:'#0c3a6a', ge2024: 6.2, votes:6.2, final:0},
 ];
 
+const defaultVotes = parties.map(p => p.votes);
 const calculateBtn = document.getElementById('calculate');
 const resetBtn = document.getElementById('reset');
-const defaultVotes = parties.map(p => p.votes);
+
+const coalitionDefs = [
+  { label: 'Grand coalition', members: ['LAB','CON'] },
+  { label: '2010 coalition',  members: ['CON','LDM'] },
+];
 
 function renderTable(){
   const tbody = document.getElementById('tbody');
@@ -257,45 +153,44 @@ function renderTable(){
 
   const tbodyEl = document.getElementById('tbody');
   const rows = Array.from(tbodyEl.children);
-
   const snpIndex = parties.findIndex(p => p.name === 'SNP');
   if(snpIndex >= 0){
-    const divider1 = document.createElement('tr');
-    divider1.className = 'sub-national-divider';
-    divider1.innerHTML = `<td></td><td></td><td>sub-national totals</td><td></td>`;
-    tbodyEl.insertBefore(divider1, rows[snpIndex]);
+    const d1 = document.createElement('tr');
+    d1.className = 'sub-national-divider';
+    d1.innerHTML = `<td></td><td></td><td>sub-national totals</td><td></td>`;
+    tbodyEl.insertBefore(d1, rows[snpIndex]);
   }
   const sfnIndex = parties.findIndex(p => p.name === 'SFN');
   if(sfnIndex >= 0){
-    const divider2 = document.createElement('tr');
-    divider2.className = 'sub-national-divider';
-    divider2.innerHTML = `<td></td><td></td><td>Northern Ireland</td><td></td>`;
-    tbodyEl.insertBefore(divider2, rows[sfnIndex]);
+    const d2 = document.createElement('tr');
+    d2.className = 'sub-national-divider';
+    d2.innerHTML = `<td></td><td></td><td>Northern Ireland</td><td></td>`;
+    tbodyEl.insertBefore(d2, rows[sfnIndex]);
   }
 
-  const inputs = document.querySelectorAll('.input-wrapper input');
-  inputs.forEach((input, index) => {
+  document.querySelectorAll('.input-wrapper input').forEach((input, index) => {
+    const inputs = document.querySelectorAll('.input-wrapper input');
     input.addEventListener('keydown', (e) => {
-      if(e.key === 'Enter') { e.preventDefault(); if(inputs[index+1]) inputs[index+1].focus(); }
+      if(e.key === 'Enter'){ e.preventDefault(); if(inputs[index+1]) inputs[index+1].focus(); }
     });
-    input.addEventListener('focus', () => { input.dataset.previous = input.value; input.value=''; input.style.borderColor='#cbd5e1'; });
-    input.addEventListener('blur', () => { 
-      if(input.value==='') input.value=input.dataset.previous||'0.0'; 
-      if(parseFloat(input.value) > 100) input.value='100';
+    input.addEventListener('focus', () => { input.dataset.previous = input.value; input.value = ''; });
+    input.addEventListener('blur', () => {
+      if(input.value === '') input.value = input.dataset.previous || '0.0';
+      if(parseFloat(input.value) > 100) input.value = '100';
       input.style.borderColor = '#cbd5e1';
+      calculate();
     });
     input.addEventListener('input', () => {
       let val = parseFloat(input.value) || 0;
-      if(val>100){ input.value = 100; input.style.borderColor = 'red'; }
+      if(val > 100){ input.value = 100; input.style.borderColor = 'red'; }
       else input.style.borderColor = '#cbd5e1';
       updateVoteTotal();
-      calculateBtn.style.background = '#ffa500';
     });
   });
   updateVoteTotal();
 }
 
-function updateVoteTotal() {
+function updateVoteTotal(){
   let sum = 0;
   parties.forEach((p,i)=>{
     const val = parseFloat(document.getElementById(`votes-${i}`).value)||0;
@@ -313,142 +208,171 @@ function calculate(){
   const partyF = parties.find(p=>p.name==='SNP'); partyF.final = Math.round(partyF.votes/100*57);
   const partyG = parties.find(p=>p.name==='PLC'); partyG.final = Math.round(partyG.votes/100*32);
 
-  const groupHtoM = parties.filter(p=>['SFN','DUP','ALL','SDL','UUP','TUV'].includes(p.name));
-  const totalVotesHtoM = groupHtoM.reduce((s,p)=>s+p.votes,0);
-  const quotaHtoM = totalVotesHtoM/18;
-  let allocationHtoM = groupHtoM.map(p=>{
-    const exact=p.votes/quotaHtoM; const initial=Math.floor(exact); const remainder=exact-initial;
-    return {...p,exact,initial,remainder,final:initial};
-  });
-  let assignedHtoM = allocationHtoM.reduce((s,a)=>s+a.initial,0);
-  let remainingHtoM=18-assignedHtoM;
-  allocationHtoM.sort((a,b)=>b.remainder!==a.remainder?b.remainder-a.remainder:b.votes!==a.votes?b.votes-a.votes:a.name.localeCompare(b.name));
-  for(let i=0;i<remainingHtoM;i++) allocationHtoM[i].final++;
-  allocationHtoM.forEach(p=>{ const index=parties.findIndex(x=>x.name===p.name); parties[index].final=p.final; });
+  const groupNI = parties.filter(p=>['SFN','DUP','ALL','SDL','UUP','TUV'].includes(p.name));
+  const totalNI = groupNI.reduce((s,p)=>s+p.votes,0);
+  const quotaNI = totalNI/18;
+  let allocNI = groupNI.map(p=>{ const exact=p.votes/quotaNI; const initial=Math.floor(exact); return {...p,exact,initial,remainder:exact-initial,final:initial}; });
+  let assignedNI = allocNI.reduce((s,a)=>s+a.initial,0);
+  allocNI.sort((a,b)=>b.remainder!==a.remainder?b.remainder-a.remainder:b.votes!==a.votes?b.votes-a.votes:a.name.localeCompare(b.name));
+  for(let i=0;i<18-assignedNI;i++) allocNI[i].final++;
+  allocNI.forEach(p=>{ const idx=parties.findIndex(x=>x.name===p.name); parties[idx].final=p.final; });
 
-  const seatsTaken = partyF.final + partyG.final + allocationHtoM.reduce((s,p)=>s+p.final,0);
+  const seatsTaken = partyF.final + partyG.final + allocNI.reduce((s,p)=>s+p.final,0);
   const remainingSeats = totalSeats - seatsTaken;
   const groupRest = parties.filter(p=>['LAB','CON','RFM','LDM','GRN','YRP','RES'].includes(p.name));
-  const totalVotesRest = groupRest.reduce((s,p)=>s+p.votes,0);
-  const quotaRest = totalVotesRest/remainingSeats;
-  let allocationRest = groupRest.map(p=>{
-    const exact=p.votes/quotaRest; const initial=Math.floor(exact); const remainder=exact-initial;
-    return {...p,exact,initial,remainder,final:initial};
-  });
-  let assignedRest = allocationRest.reduce((s,p)=>s+p.initial,0);
-  let remainingRest = remainingSeats-assignedRest;
-  allocationRest.sort((a,b)=>b.remainder!==a.remainder?b.remainder-a.remainder:b.votes!==a.votes?b.votes-a.votes:a.name.localeCompare(b.name));
-  for(let i=0;i<remainingRest;i++) allocationRest[i].final++;
-  allocationRest.forEach(p=>{ const index=parties.findIndex(x=>x.name===p.name); parties[index].final=p.final; });
+  const totalRest = groupRest.reduce((s,p)=>s+p.votes,0);
+  const quotaRest = totalRest/remainingSeats;
+  let allocRest = groupRest.map(p=>{ const exact=p.votes/quotaRest; const initial=Math.floor(exact); return {...p,exact,initial,remainder:exact-initial,final:initial}; });
+  let assignedRest = allocRest.reduce((s,p)=>s+p.initial,0);
+  allocRest.sort((a,b)=>b.remainder!==a.remainder?b.remainder-a.remainder:b.votes!==a.votes?b.votes-a.votes:a.name.localeCompare(b.name));
+  for(let i=0;i<remainingSeats-assignedRest;i++) allocRest[i].final++;
+  allocRest.forEach(p=>{ const idx=parties.findIndex(x=>x.name===p.name); parties[idx].final=p.final; });
 
   parties.forEach((p,i)=>{ document.getElementById(`seats-${i}`).textContent = p.final; });
-  document.getElementById('total-seats').textContent = parties.reduce((sum,p)=>sum+p.final,0);
-
+  document.getElementById('total-seats').textContent = parties.reduce((s,p)=>s+p.final,0);
   calculateBtn.style.background = '#008500';
+
   renderCoalition();
+  renderCoalitionList();
 }
 
 resetBtn.addEventListener('click', ()=>{
-  parties.forEach((p,i)=>document.getElementById(`votes-${i}`).value = defaultVotes[i].toFixed(1));
+  parties.forEach((p,i)=>{ document.getElementById(`votes-${i}`).value = defaultVotes[i].toFixed(1); });
   calculate();
 });
 
-const totalSeatsCoalition = 650;
 let selected = [];
 let activeTab = 0;
 
-const datasets = [
-  null,
-  parties.map(p=>{ 
-    const staticGE = [
-      { name: "LAB", seats: 234, color: "#E4003B" },
-      { name: "CON", seats: 156, color: "#0087DC" },
-      { name: "RFM", seats: 96, color: "#23C7DF" },
-      { name: "LDM", seats: 81, color: "#FAA61A" },
-      { name: "GRN", seats: 43, color: "#6AB023" },
-      { name: "YRP", seats: 0, color: "#F76BEE" },
-      { name: "RES", seats: 0, color: "#000000" },
-      { name: "SNP", seats: 17, color: "#FDF38E" },
-      { name: "PLC", seats: 5, color: "#005B54" },
-      { name: "SFN", seats: 5, color: "#326760" },
-      { name: "DUP", seats: 4, color: "#D46A4C" },
-      { name: "ALL", seats: 3, color: "#F6CB2F" },
-      { name: "UUP", seats: 3, color: "#3399FF" },
-      { name: "SDL", seats: 2, color: "#2AA82C" },
-      { name: "TUV", seats: 1, color: "#0C3A6A" }
-    ].find(x=>x.name===p.name);
-    return { name: p.name, seats: staticGE ? staticGE.seats : 0, color: staticGE ? staticGE.color : p.color };
-  })
+const ge2024static = [
+  {name:'LAB',seats:234,color:'#e4003b'},{name:'CON',seats:156,color:'#0087dc'},
+  {name:'RFM',seats:96,color:'#23c7df'},{name:'LDM',seats:81,color:'#faa61a'},
+  {name:'GRN',seats:43,color:'#6ab023'},{name:'YRP',seats:0,color:'#f76bee'},
+  {name:'RES',seats:0,color:'#000000'},{name:'SNP',seats:17,color:'#fdf38e'},
+  {name:'PLC',seats:5,color:'#005b54'},{name:'SFN',seats:5,color:'#326760'},
+  {name:'DUP',seats:4,color:'#d46a4c'},{name:'ALL',seats:3,color:'#f6cb2f'},
+  {name:'UUP',seats:3,color:'#3399ff'},{name:'SDL',seats:2,color:'#2aa82c'},
+  {name:'TUV',seats:1,color:'#0c3a6a'}
 ];
 
-const majority = 326;
-const legend = document.getElementById("legend");
-const overlay = document.getElementById("coalition-overlay");
-const counter = document.getElementById("counter");
-const slider = document.getElementById("tab-slider");
-
-function switchTab(index) {
-  activeTab=index;
-  document.querySelectorAll(".tab-button").forEach((btn,i)=>btn.classList.toggle("active",i===index));
-  slider.style.transform=`translateX(${index*100}%)`;
+function switchTab(index){
+  activeTab = index;
+  document.querySelectorAll('.tab-button').forEach((btn,i)=>btn.classList.toggle('active',i===index));
+  document.getElementById('tab-slider').style.transform = `translateX(${index*100}%)`;
   renderCoalition();
 }
 
 function toggleParty(name){
-  if(selected.includes(name)) selected = selected.filter(n=>n!==name);
-  else selected.push(name);
+  selected = selected.includes(name) ? selected.filter(n=>n!==name) : [...selected,name];
   renderCoalition();
 }
 
 function renderCoalition(){
-  overlay.innerHTML = "";
-  const coalitionParties = (activeTab===0)
-    ? parties.map(p=>({ name: p.name, seats: Number(p.final || 0), color: p.color }))
-    : datasets[1];
+  const coalitionParties = activeTab===0
+    ? parties.map(p=>({name:p.name,seats:Number(p.final||0),color:p.color}))
+    : ge2024static;
 
-  legend.innerHTML = "";
+  const legend = document.getElementById('legend');
+  legend.innerHTML = '';
   coalitionParties.forEach(p=>{
     const item = document.createElement('div');
-    item.className = 'legend-item' + (selected.includes(p.name) ? ' active' : '');
-    item.innerHTML = `<div class="legend-box" style="background:${p.color}; ${p.color==='#000000'?'border:1px solid #ccc;':''}"></div> <strong>${p.name}</strong> ${p.seats}`;
+    item.className = 'legend-item'+(selected.includes(p.name)?' active':'');
+    item.innerHTML = `<div class="legend-box" style="background:${p.color};${p.color==='#000000'?'border:1px solid #ccc;':''}"></div> <strong>${p.name}</strong> ${p.seats}`;
     item.onclick = ()=>toggleParty(p.name);
     legend.appendChild(item);
   });
 
-  const totalSeatsSelected = selected.reduce((sum,name)=>{
-    const part = coalitionParties.find(x=>x.name===name);
-    return part ? sum + Number(part.seats || 0) : sum;
-  }, 0);
-
-  const widthPercent = (totalSeatsSelected / totalSeatsCoalition) * 100;
-  overlay.style.width = "0%";
-  overlay.innerHTML = "";
-  if(totalSeatsSelected > 0){
+  const totalSel = selected.reduce((s,n)=>{ const p=coalitionParties.find(x=>x.name===n); return p?s+p.seats:s; },0);
+  const overlay = document.getElementById('coalition-overlay');
+  overlay.style.width = '0%';
+  overlay.innerHTML = '';
+  if(totalSel > 0){
     selected.forEach(name=>{
       const p = coalitionParties.find(x=>x.name===name);
       if(!p) return;
       const seg = document.createElement('div');
       seg.className = 'segment';
-      const flexBasisPercent = (p.seats / totalSeatsSelected) * 100;
-      seg.style.flexBasis = flexBasisPercent + "%";
+      seg.style.flexBasis = ((p.seats/totalSel)*100)+'%';
       seg.style.background = p.color;
       seg.title = `${p.name}: ${p.seats}`;
       overlay.appendChild(seg);
     });
   }
+  requestAnimationFrame(()=>{ overlay.style.width = ((totalSel/650)*100)+'%'; });
 
-  requestAnimationFrame(()=>{ overlay.style.width = widthPercent + "%"; });
+  const counter = document.getElementById('counter');
+  counter.textContent = `${totalSel} / 650`;
+  counter.style.color = totalSel >= majority ? '#2BA84A' : '#000';
 
-  counter.textContent = `${totalSeatsSelected} / ${totalSeatsCoalition}`;
-  counter.style.color = totalSeatsSelected >= majority ? "#2BA84A" : "#000";
+  const sfnSeats = coalitionParties.find(p=>p.name==='SFN')?.seats||0;
+  const workable = Math.ceil((650-sfnSeats)/2);
+  document.querySelector('.note').innerHTML = `Note: workable majority excluding Sinn Fein is <b><i>${workable}</i></b>`;
 
-  const sfnSeats = coalitionParties.find(p => p.name === 'SFN')?.seats || 0;
-  const workableMajority = Math.ceil((totalSeatsCoalition - sfnSeats) / 2);
-  document.querySelector(".note").innerHTML = `Note: workable majority excluding Sinn Fein is <b><i>${workableMajority}</i></b>`;
+  document.querySelectorAll('.legend-item').forEach(el=>{
+    el.classList.toggle('active', selected.includes(el.querySelector('strong').textContent));
+  });
+}
 
-  document.querySelectorAll(".legend-item").forEach(el=>{
-    const name = el.querySelector("strong").textContent;
-    el.classList.toggle("active", selected.includes(name));
+function renderCoalitionList(){
+  const container = document.getElementById('coalition-list');
+  container.innerHTML = '';
+
+  const results = coalitionDefs.map(def=>{
+    const parts = def.members.map(m=>parties.find(p=>p.name===m)).filter(Boolean);
+    if(parts.length !== def.members.length) return null;
+    if(parts.some(p=>(p.final||0) <= 0)) return null;
+    const total = parts.reduce((s,p)=>s+(p.final||0),0);
+    const segs = [...parts].sort((a,b)=>b.final-a.final).map(p=>({name:p.name,seats:p.final||0,color:p.color}));
+    return {label:def.label,total,segs};
+  }).filter(Boolean);
+
+  if(results.length===0) return;
+  results.sort((a,b)=>b.total-a.total);
+
+  results.forEach(row=>{
+    const block = document.createElement('div');
+    block.className = 'coalition-block';
+
+    const label = document.createElement('div');
+    label.className = 'coal-label';
+    label.textContent = row.label;
+    block.appendChild(label);
+
+    const flex = document.createElement('div');
+    flex.className = 'coal-flex';
+
+    const bar = document.createElement('div');
+    bar.className = 'mini-bar';
+
+    const ov = document.createElement('div');
+    ov.className = 'mini-overlay';
+    ov.style.width = ((row.total/totalSeats)*100)+'%';
+
+    row.segs.forEach(s=>{
+      const seg = document.createElement('div');
+      seg.className = 'mini-seg';
+      seg.style.flexBasis = ((s.seats/row.total)*100)+'%';
+      seg.style.background = s.color;
+      seg.title = `${s.name}: ${s.seats}`;
+      ov.appendChild(seg);
+    });
+
+    const tot = document.createElement('div');
+    tot.className = 'mini-total';
+    tot.textContent = row.total;
+
+    bar.appendChild(ov);
+    bar.appendChild(tot);
+
+    const icon = document.createElement('div');
+    icon.className = 'coal-icon';
+    icon.style.fontSize = '20px';
+    icon.textContent = row.total >= majority ? '✅' : '❌';
+
+    flex.appendChild(bar);
+    flex.appendChild(icon);
+    block.appendChild(flex);
+    container.appendChild(block);
   });
 }
 
