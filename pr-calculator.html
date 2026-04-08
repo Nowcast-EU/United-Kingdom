@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Nowcast UK | PR Calculator</title>
 
-    <!-- Social / Thumbnail preview -->
   <meta property="og:title" content="🇬🇧 | PR Calculator">
   <meta property="og:description" content="">
   <meta property="og:image" content="https://nowcast-eu.github.io/United-Kingdom/UK_LogoBG.png">
@@ -20,8 +19,7 @@
   <meta name="twitter:description" content="">
   <meta name="twitter:image" content="https://nowcast-eu.github.io/United-Kingdom/thumbnail.png">
 
-  <!-- Favicon -->
-<link rel="icon" type="image/png" href="UK_favicon.png" />
+  <link rel="icon" type="image/png" href="UK_favicon.png" />
 
 <style>
   body { font-family: Inter, system-ui, sans-serif; background: #fff; color: #0f172a; margin: 0; padding: 24px; }
@@ -33,6 +31,7 @@
   td.party-column::before { content: ""; position: absolute; left: 0; top: 0; width: 8px; height: 100%; border-radius: 2px 0 0 2px; background-color: var(--party-color); }
   td.ge2024-column { font-style: italic; color: #999999; }
   td.seats-column { font-weight: bold; text-align: center; }
+  td.change-column { font-weight: bold; text-align: center; width: 75px; }
   .input-wrapper { display: flex; align-items: center; }
   .input-wrapper input { width: 50px; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; text-align: left; margin-right: 4px; transition: border-color 0.3s ease; }
   .percent-sign { font-size: 14px; }
@@ -77,54 +76,25 @@
   .mini-seg { height: 100%; flex-shrink: 0; }
 
   @media (min-width: 769px) {
-  body {
-    max-width: 1000px;
-    margin: 0 auto;
+    body { max-width: 1000px; margin: 0 auto; }
   }
-}
 
   @media (max-width: 768px) {
-  .legend-item {
-    font-size: 12px;
-    padding: 4px 7px;
-    gap: 5px;
+    .legend-item { font-size: 12px; padding: 4px 7px; gap: 5px; }
+    .legend-box { width: 14px; height: 14px; }
+    table th, table td { font-size: 12px; padding: 3px 4px; }
+    .input-wrapper input { width: 42px; font-size: 12px; padding: 3px; }
+    .tab-switcher { min-width: 100px; height: 28px; }
+    .tab-button { font-size: 12px; padding: 4px 8px; }
+    #coalition-builder h3 { font-size: 14px; }
   }
-  .legend-box {
-    width: 14px;
-    height: 14px;
-  }
-  table th, table td {
-    font-size: 12px;
-    padding: 3px 4px;
-  }
-  .input-wrapper input {
-    width: 42px;
-    font-size: 12px;
-    padding: 3px;
-  }
-
-.tab-switcher {
-  min-width: 100px;
-  height: 28px;
-}
-.tab-button {
-  font-size: 12px;
-  padding: 4px 8px;
-}
-
- #coalition-builder h3 {
-  font-size: 14px;
-}
-      
-}
-  
 </style>
 
-    <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:16px;">
+<div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:16px;">
   <img src="https://raw.githubusercontent.com/Nowcast-EU/United-Kingdom/refs/heads/main/NowcastUKlogo.png" style="height:40px; width:auto;">
   <span style="font-size:20px; font-weight:600;">Hypothetical PR Calculator</span>
 </div>
-    
+
 <table>
   <thead>
     <tr>
@@ -132,6 +102,7 @@
       <th>GE2024</th>
       <th>Votes (%)</th>
       <th>Seats</th>
+      <th>+/- vs. 2024[PR]</th>
     </tr>
   </thead>
   <tbody id="tbody"></tbody>
@@ -141,6 +112,7 @@
       <td></td>
       <td id="total-votes">0.0%</td>
       <td id="total-seats">0</td>
+      <td></td>
     </tr>
   </tfoot>
 </table>
@@ -175,21 +147,21 @@
 const totalSeats = 650;
 const majority = 326;
 const parties = [
-  {name:'LAB', color:'#e4003b', ge2024: 33.7, votes:17.8, final:0},
-  {name:'CON', color:'#0087dc', ge2024: 23.7, votes:16.9, final:0},
-  {name:'RFM', color:'#23c7df', ge2024: 14.3, votes:29.3, final:0},
-  {name:'LDM', color:'#faa61a', ge2024: 12.2, votes:12.7, final:0},
-  {name:'GRN', color:'#6ab023', ge2024: 6.4, votes:13.1, final:0},
-  {name:'YRP', color:'#f76bee', ge2024: 0.0, votes:0.0, final:0},
-  {name:'RES', color:'#000000', ge2024: 0.0, votes:0.0, final:0},
-  {name:'SNP', color:'#fdf38e', ge2024: 30.0, votes:33.0, final:0},
-  {name:'PLC', color:'#005b54', ge2024: 14.8, votes:23.0, final:0},
-  {name:'SFN', color:'#326760', ge2024: 27.0, votes:27.0, final:0},
-  {name:'DUP', color:'#d46a4c', ge2024: 22.1, votes:22.1, final:0},
-  {name:'ALL', color:'#f6cb2f', ge2024: 15.0, votes:15.0, final:0},
-  {name:'UUP', color:'#3399ff', ge2024: 12.2, votes:12.2, final:0},
-  {name:'SDL', color:'#2aa82c', ge2024: 11.1, votes:11.1, final:0},
-  {name:'TUV', color:'#0c3a6a', ge2024: 6.2, votes:6.2, final:0},
+  {name:'LAB', color:'#e4003b', ge2024: 33.7, votes:17.8, final:0, last:0},
+  {name:'CON', color:'#0087dc', ge2024: 23.7, votes:16.9, final:0, last:0},
+  {name:'RFM', color:'#23c7df', ge2024: 14.3, votes:29.3, final:0, last:0},
+  {name:'LDM', color:'#faa61a', ge2024: 12.2, votes:12.7, final:0, last:0},
+  {name:'GRN', color:'#6ab023', ge2024: 6.4,  votes:13.1, final:0, last:0},
+  {name:'YRP', color:'#f76bee', ge2024: 0.0,  votes:0.0,  final:0, last:0},
+  {name:'RES', color:'#000000', ge2024: 0.0,  votes:0.0,  final:0, last:0},
+  {name:'SNP', color:'#fdf38e', ge2024: 30.0, votes:33.0, final:0, last:0},
+  {name:'PLC', color:'#005b54', ge2024: 14.8, votes:23.0, final:0, last:0},
+  {name:'SFN', color:'#326760', ge2024: 27.0, votes:27.0, final:0, last:0},
+  {name:'DUP', color:'#d46a4c', ge2024: 22.1, votes:22.1, final:0, last:0},
+  {name:'ALL', color:'#f6cb2f', ge2024: 15.0, votes:15.0, final:0, last:0},
+  {name:'UUP', color:'#3399ff', ge2024: 12.2, votes:12.2, final:0, last:0},
+  {name:'SDL', color:'#2aa82c', ge2024: 11.1, votes:11.1, final:0, last:0},
+  {name:'TUV', color:'#0c3a6a', ge2024: 6.2,  votes:6.2,  final:0, last:0},
 ];
 
 const defaultVotes = parties.map(p => p.votes);
@@ -204,8 +176,8 @@ const coalitionDefs = [
   { label: 'Broad Left', members: ['LAB','LDM','GRN','SNP','PLC','SDL','ALL','YRP'] },
   { label: 'Broad Right', members: ['CON','RFM','RES','UUP','DUP','TUV'] },
   { label: 'United Right', members: ['CON','RFM','RES'] },
-  { label: '2010 Coalition',  members: ['CON','LDM'] },
-  { label: '1977 Coalition',  members: ['LAB','LDM'] },
+  { label: '2010 Coalition', members: ['CON','LDM'] },
+  { label: '1977 Coalition', members: ['LAB','LDM'] },
 ];
 
 function renderTable(){
@@ -221,6 +193,7 @@ function renderTable(){
         </div>
       </td>
       <td class="seats-column" id="seats-${i}">—</td>
+      <td class="change-column" id="change-${i}">—</td>
     </tr>
   `).join('');
 
@@ -230,14 +203,14 @@ function renderTable(){
   if(snpIndex >= 0){
     const d1 = document.createElement('tr');
     d1.className = 'sub-national-divider';
-    d1.innerHTML = `<td></td><td></td><td>sub-national totals</td><td></td>`;
+    d1.innerHTML = `<td></td><td></td><td>sub-national totals</td><td></td><td></td>`;
     tbodyEl.insertBefore(d1, rows[snpIndex]);
   }
   const sfnIndex = parties.findIndex(p => p.name === 'SFN');
   if(sfnIndex >= 0){
     const d2 = document.createElement('tr');
     d2.className = 'sub-national-divider';
-    d2.innerHTML = `<td></td><td></td><td>Northern Ireland</td><td></td>`;
+    d2.innerHTML = `<td></td><td></td><td>Northern Ireland</td><td></td><td></td>`;
     tbodyEl.insertBefore(d2, rows[sfnIndex]);
   }
 
@@ -301,7 +274,15 @@ function calculate(){
   for(let i=0;i<remainingSeats-assignedRest;i++) allocRest[i].final++;
   allocRest.forEach(p=>{ const idx=parties.findIndex(x=>x.name===p.name); parties[idx].final=p.final; });
 
-  parties.forEach((p,i)=>{ document.getElementById(`seats-${i}`).textContent = p.final; });
+  parties.forEach((p,i)=>{
+    document.getElementById(`seats-${i}`).textContent = p.final;
+    const diff = p.final - p.last;
+    const cell = document.getElementById(`change-${i}`);
+    if(diff > 0){ cell.textContent = `+${diff}`; cell.style.color = '#008500'; }
+    else if(diff < 0){ cell.textContent = `${diff}`; cell.style.color = '#bb0000'; }
+    else { cell.textContent = '(=)'; cell.style.color = '#555555'; }
+  });
+
   document.getElementById('total-seats').textContent = parties.reduce((s,p)=>s+p.final,0);
   calculateBtn.style.background = '#008500';
 
@@ -375,7 +356,9 @@ function renderCoalition(){
 
   const counter = document.getElementById('counter');
   counter.textContent = `${totalSel} / 650`;
-  counter.style.color = totalSel >= majority ? '#2BA84A' : '#000';
+  const sfnSeatsC = coalitionParties.find(p=>p.name==='SFN')?.seats||0;
+  const workableC = Math.ceil((650-sfnSeatsC)/2);
+  counter.style.color = totalSel >= workableC ? '#2BA84A' : '#000';
 
   const sfnSeats = coalitionParties.find(p=>p.name==='SFN')?.seats||0;
   const workable = Math.ceil((650-sfnSeats)/2);
@@ -439,9 +422,9 @@ function renderCoalitionList(){
     const icon = document.createElement('div');
     icon.className = 'coal-icon';
     icon.style.fontSize = '20px';
-   const sfnSeats = parties.find(p=>p.name==='SFN')?.final||0;
-   const workable = Math.ceil((totalSeats - sfnSeats) / 2);
-   icon.textContent = row.total >= workable ? '✅' : '❌';
+    const sfnSeats = parties.find(p=>p.name==='SFN')?.final||0;
+    const workable = Math.ceil((totalSeats - sfnSeats) / 2);
+    icon.textContent = row.total >= workable ? '✅' : '❌';
 
     flex.appendChild(bar);
     flex.appendChild(icon);
