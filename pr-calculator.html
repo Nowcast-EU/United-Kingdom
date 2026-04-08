@@ -327,7 +327,6 @@ function renderCoalitionList(){
   const results = coalitionDefs.map(def=>{
     const parts = def.members.map(m=>parties.find(p=>p.name===m)).filter(Boolean);
     if(parts.length !== def.members.length) return null;
-    if(parts.some(p=>(p.final||0) <= 0)) return null;
     const total = parts.reduce((s,p)=>s+(p.final||0),0);
     const segs = [...parts].sort((a,b)=>b.final-a.final).map(p=>({name:p.name,seats:p.final||0,color:p.color}));
     return {label:def.label,total,segs};
