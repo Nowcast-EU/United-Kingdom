@@ -1,0 +1,1136 @@
+{{#if Yes_NI}}
+N/A - no Westminster polling</br> for Northern Ireland
+{{/if}}
+
+<p>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    :root {
+      --middle-offset: 35%; /* 👈 percentage instead of px */
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 60px auto 70px; /* fixed layout across devices */
+      align-items: center;
+      padding: 1px 0;
+      width: 100%;
+    }
+
+.row {
+  line-height: 1.2;
+}
+
+    .left {
+      display: flex;
+      align-items: center;
+      text-align: left;
+      padding-left: 1px;
+    }
+
+    .middle {
+      text-align: left;
+      padding-left: var(--middle-offset); /* scalable offset */
+    }
+
+    .right {
+      text-align: right;
+      padding-right: 2px;
+    }
+
+    .circle {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 4px;
+      flex-shrink: 0;
+    }
+
+    .divider {
+      border-top: 1px solid #ccc;
+      margin: 2px 0;
+    }
+
+.right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.right span {
+  display: inline-block;
+  width: 4.5em;
+  text-align: right;
+}
+
+.bar-container {
+  position: relative;
+  width: 16rem;
+  height: 20px;
+  border-radius: 1px;
+  padding-top: 0px;
+  overflow: hidden;
+}
+
+.bar-wrapper {
+  margin-top: 6px;
+}
+
+.bar-wrapper + .bar-wrapper {
+  margin-top: 5px;   /* only affects the gap between bars */
+}
+
+
+.bar-title {
+  font-size: 0.85rem;
+  line-height: 2;
+  margin-bottom: 0px;
+  color: #333;
+  font-weight: 600;
+}
+
+.bar-container.small {
+  height: 11px;   /* half of 20px */
+  padding-top: 0.5px;
+}
+
+.bar-title.small {
+  font-size: 0.75rem;
+  margin-bottom: 0px;
+  font-weight: 500;
+}
+
+    .page-break {
+      page-break-after: always;
+    }
+
+.bar-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 12px;
+}
+
+.title-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.title-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #999; /* change per state if you want */
+}
+
+.title-arrow {
+  font-size: 1rem;
+  color: #000000;
+}
+
+    /* --- responsive adjustment for mobile --- */
+    @media (max-width: 600px) {
+      :root {
+        --middle-offset: 25%; /* 👈 smaller % on mobile */
+      }
+
+    .circle {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      margin-right: 4px;
+      flex-shrink: 0;
+    }
+
+    .right span {
+      text-align: right;
+      padding-right: 5px;
+    }
+
+      .row {
+        grid-template-columns: 55px auto 40px; /* tighter layout for small screens */
+      }
+
+.bar-container {
+  position: relative;
+  width: 16rem;
+  height: 15px;
+  border-radius: 1px;
+  padding-top: 0px;
+  overflow: hidden;
+}
+
+.bar-container.small {
+  height: 7px;   /* half of 20px */
+  padding-top: 0.5px;
+}
+
+.bar-wrapper + .bar-wrapper {
+  margin-top: 3px;   /* only affects the gap between bars */
+}
+
+.bar-title {
+  font-size: 0.85rem;
+  line-height: 1.2;
+  margin-bottom: 0px;
+  color: #333;
+  font-weight: 600;
+}
+
+.bar-title.small {
+  margin-top: 3px;
+}
+
+.title-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bar-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 6px;
+ margin-bottom: 2px;
+}
+
+.title-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #999; /* change per state if you want */
+}
+
+.title-arrow {
+  font-size: 1.25rem;
+  color: #000000;
+}
+
+    }
+  </style>
+</head>
+<body>
+
+{{#if LAB1}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #E4003B;"></div>
+      <span style="color: #E4003B; font-weight: bold;">LAB:</span>
+    </div>
+    <div class="middle">{{LAB1}}</div>
+    <div class="right"><span style="color: {{Colour_L}};"><i>{{L%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if SNP1}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #000000;"></div>
+      <span style="color: #000000; font-weight: bold;">SNP:</span>
+    </div>
+    <div class="middle">{{SNP1}}</div>
+    <div class="right"><span style="color: {{Colour_S}};"><i>{{S%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if CON1}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #0087DC;"></div>
+      <span style="color: #0087DC; font-weight: bold;">CON:</span>
+    </div>
+    <div class="middle">{{CON1}}</div>
+    <div class="right"><span style="color: {{Colour_C}};"><i>{{C%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if RFM1}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #23C7DF;"></div>
+      <span style="color: #23C7DF; font-weight: bold;">RFM:</span>
+    </div>
+    <div class="middle">{{RFM1}}</div>
+    <div class="right"><span style="color: {{Colour_R}};"><i>{{R%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if PLC1}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #005B54;"></div>
+      <span style="color: #005B54; font-weight: bold;">PLC:</span>
+    </div>
+    <div class="middle">{{PLC1}}</div>
+    <div class="right"><span style="color: {{Colour_P}};"><i>{{P%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if LDM1}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #FAA61A;"></div>
+      <span style="color: #FAA61A; font-weight: bold;">LDM:</span>
+    </div>
+    <div class="middle">{{LDM1}}</div>
+    <div class="right"><span style="color: {{Colour_D}};"><i>{{D%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if GRN1}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #6AB023;"></div>
+      <span style="color: #6AB023; font-weight: bold;">GRN:</span>
+    </div>
+    <div class="middle">{{GRN1}}</div>
+    <div class="right"><span style="color: {{Colour_G}};"><i>{{G%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if OTH1}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #999999;"></div>
+      <span style="color: #999999; font-weight: bold;">OTH:</span>
+    </div>
+    <div class="middle">{{OTH1}}</div>
+    <div class="right"><span style="color: {{Colour_O}};"><i>{{O%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+
+
+{{#if LAB2}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #E4003B;"></div>
+      <span style="color: #E4003B; font-weight: bold;">LAB:</span>
+    </div>
+    <div class="middle">{{LAB2}}</div>
+    <div class="right"><span style="color: {{Colour_L}};"><i>{{L%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if SNP2}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #000000;"></div>
+      <span style="color: #000000; font-weight: bold;">SNP:</span>
+    </div>
+    <div class="middle">{{SNP2}}</div>
+    <div class="right"><span style="color: {{Colour_S}};"><i>{{S%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if CON2}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #0087DC;"></div>
+      <span style="color: #0087DC; font-weight: bold;">CON:</span>
+    </div>
+    <div class="middle">{{CON2}}</div>
+    <div class="right"><span style="color: {{Colour_C}};"><i>{{C%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if RFM2}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #23C7DF;"></div>
+      <span style="color: #23C7DF; font-weight: bold;">RFM:</span>
+    </div>
+    <div class="middle">{{RFM2}}</div>
+    <div class="right"><span style="color: {{Colour_R}};"><i>{{R%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if PLC2}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #005B54;"></div>
+      <span style="color: #005B54; font-weight: bold;">PLC:</span>
+    </div>
+    <div class="middle">{{PLC2}}</div>
+    <div class="right"><span style="color: {{Colour_P}};"><i>{{P%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if LDM2}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #FAA61A;"></div>
+      <span style="color: #FAA61A; font-weight: bold;">LDM:</span>
+    </div>
+    <div class="middle">{{LDM2}}</div>
+    <div class="right"><span style="color: {{Colour_D}};"><i>{{D%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if GRN2}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #6AB023;"></div>
+      <span style="color: #6AB023; font-weight: bold;">GRN:</span>
+    </div>
+    <div class="middle">{{GRN2}}</div>
+    <div class="right"><span style="color: {{Colour_G}};"><i>{{G%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if OTH2}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #999999;"></div>
+      <span style="color: #999999; font-weight: bold;">OTH:</span>
+    </div>
+    <div class="middle">{{OTH2}}</div>
+    <div class="right"><span style="color: {{Colour_O}};"><i>{{O%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+
+
+{{#if LAB3}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #E4003B;"></div>
+      <span style="color: #E4003B; font-weight: bold;">LAB:</span>
+    </div>
+    <div class="middle">{{LAB3}}</div>
+    <div class="right"><span style="color: {{Colour_L}};"><i>{{L%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if SNP3}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #000000;"></div>
+      <span style="color: #000000; font-weight: bold;">SNP:</span>
+    </div>
+    <div class="middle">{{SNP3}}</div>
+    <div class="right"><span style="color: {{Colour_S}};"><i>{{S%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if CON3}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #0087DC;"></div>
+      <span style="color: #0087DC; font-weight: bold;">CON:</span>
+    </div>
+    <div class="middle">{{CON3}}</div>
+    <div class="right"><span style="color: {{Colour_C}};"><i>{{C%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if RFM3}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #23C7DF;"></div>
+      <span style="color: #23C7DF; font-weight: bold;">RFM:</span>
+    </div>
+    <div class="middle">{{RFM3}}</div>
+    <div class="right"><span style="color: {{Colour_R}};"><i>{{R%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if PLC3}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #005B54;"></div>
+      <span style="color: #005B54; font-weight: bold;">PLC:</span>
+    </div>
+    <div class="middle">{{PLC3}}</div>
+    <div class="right"><span style="color: {{Colour_P}};"><i>{{P%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if LDM3}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #FAA61A;"></div>
+      <span style="color: #FAA61A; font-weight: bold;">LDM:</span>
+    </div>
+    <div class="middle">{{LDM3}}</div>
+    <div class="right"><span style="color: {{Colour_D}};"><i>{{D%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if GRN3}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #6AB023;"></div>
+      <span style="color: #6AB023; font-weight: bold;">GRN:</span>
+    </div>
+    <div class="middle">{{GRN3}}</div>
+    <div class="right"><span style="color: {{Colour_G}};"><i>{{G%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if OTH3}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #999999;"></div>
+      <span style="color: #999999; font-weight: bold;">OTH:</span>
+    </div>
+    <div class="middle">{{OTH3}}</div>
+    <div class="right"><span style="color: {{Colour_O}};"><i>{{O%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+
+
+{{#if LAB4}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #E4003B;"></div>
+      <span style="color: #E4003B; font-weight: bold;">LAB:</span>
+    </div>
+    <div class="middle">{{LAB4}}</div>
+    <div class="right"><span style="color: {{Colour_L}};"><i>{{L%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if SNP4}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #000000;"></div>
+      <span style="color: #000000; font-weight: bold;">SNP:</span>
+    </div>
+    <div class="middle">{{SNP4}}</div>
+    <div class="right"><span style="color: {{Colour_S}};"><i>{{S%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if CON4}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #0087DC;"></div>
+      <span style="color: #0087DC; font-weight: bold;">CON:</span>
+    </div>
+    <div class="middle">{{CON4}}</div>
+    <div class="right"><span style="color: {{Colour_C}};"><i>{{C%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if RFM4}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #23C7DF;"></div>
+      <span style="color: #23C7DF; font-weight: bold;">RFM:</span>
+    </div>
+    <div class="middle">{{RFM4}}</div>
+    <div class="right"><span style="color: {{Colour_R}};"><i>{{R%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if PLC4}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #005B54;"></div>
+      <span style="color: #005B54; font-weight: bold;">PLC:</span>
+    </div>
+    <div class="middle">{{PLC4}}</div>
+    <div class="right"><span style="color: {{Colour_P}};"><i>{{P%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if LDM4}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #FAA61A;"></div>
+      <span style="color: #FAA61A; font-weight: bold;">LDM:</span>
+    </div>
+    <div class="middle">{{LDM4}}</div>
+    <div class="right"><span style="color: {{Colour_D}};"><i>{{D%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if GRN4}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #6AB023;"></div>
+      <span style="color: #6AB023; font-weight: bold;">GRN:</span>
+    </div>
+    <div class="middle">{{GRN4}}</div>
+    <div class="right"><span style="color: {{Colour_G}};"><i>{{G%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if OTH4}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #999999;"></div>
+      <span style="color: #999999; font-weight: bold;">OTH:</span>
+    </div>
+    <div class="middle">{{OTH4}}</div>
+    <div class="right"><span style="color: {{Colour_O}};"><i>{{O%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+
+
+{{#if LAB5}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #E4003B;"></div>
+      <span style="color: #E4003B; font-weight: bold;">LAB:</span>
+    </div>
+    <div class="middle">{{LAB5}}</div>
+    <div class="right"><span style="color: {{Colour_L}};"><i>{{L%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if SNP5}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #000000;"></div>
+      <span style="color: #000000; font-weight: bold;">SNP:</span>
+    </div>
+    <div class="middle">{{SNP5}}</div>
+    <div class="right"><span style="color: {{Colour_S}};"><i>{{S%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if CON5}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #0087DC;"></div>
+      <span style="color: #0087DC; font-weight: bold;">CON:</span>
+    </div>
+    <div class="middle">{{CON5}}</div>
+    <div class="right"><span style="color: {{Colour_C}};"><i>{{C%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if RFM5}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #23C7DF;"></div>
+      <span style="color: #23C7DF; font-weight: bold;">RFM:</span>
+    </div>
+    <div class="middle">{{RFM5}}</div>
+    <div class="right"><span style="color: {{Colour_R}};"><i>{{R%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if PLC5}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #005B54;"></div>
+      <span style="color: #005B54; font-weight: bold;">PLC:</span>
+    </div>
+    <div class="middle">{{PLC5}}</div>
+    <div class="right"><span style="color: {{Colour_P}};"><i>{{P%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if LDM5}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #FAA61A;"></div>
+      <span style="color: #FAA61A; font-weight: bold;">LDM:</span>
+    </div>
+    <div class="middle">{{LDM5}}</div>
+    <div class="right"><span style="color: {{Colour_D}};"><i>{{D%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if GRN5}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #6AB023;"></div>
+      <span style="color: #6AB023; font-weight: bold;">GRN:</span>
+    </div>
+    <div class="middle">{{GRN5}}</div>
+    <div class="right"><span style="color: {{Colour_G}};"><i>{{G%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if OTH5}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #999999;"></div>
+      <span style="color: #999999; font-weight: bold;">OTH:</span>
+    </div>
+    <div class="middle">{{OTH5}}</div>
+    <div class="right"><span style="color: {{Colour_O}};"><i>{{O%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+
+
+{{#if LAB6}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #E4003B;"></div>
+      <span style="color: #E4003B; font-weight: bold;">LAB:</span>
+    </div>
+    <div class="middle">{{LAB6}}</div>
+    <div class="right"><span style="color: {{Colour_L}};"><i>{{L%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if SNP6}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #000000;"></div>
+      <span style="color: #000000; font-weight: bold;">SNP:</span>
+    </div>
+    <div class="middle">{{SNP6}}</div>
+    <div class="right"><span style="color: {{Colour_S}};"><i>{{S%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if CON6}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #0087DC;"></div>
+      <span style="color: #0087DC; font-weight: bold;">CON:</span>
+    </div>
+    <div class="middle">{{CON6}}</div>
+    <div class="right"><span style="color: {{Colour_C}};"><i>{{C%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if RFM6}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #23C7DF;"></div>
+      <span style="color: #23C7DF; font-weight: bold;">RFM:</span>
+    </div>
+    <div class="middle">{{RFM6}}</div>
+    <div class="right"><span style="color: {{Colour_R}};"><i>{{R%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if PLC6}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #005B54;"></div>
+      <span style="color: #005B54; font-weight: bold;">PLC:</span>
+    </div>
+    <div class="middle">{{PLC6}}</div>
+    <div class="right"><span style="color: {{Colour_P}};"><i>{{P%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if LDM6}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #FAA61A;"></div>
+      <span style="color: #FAA61A; font-weight: bold;">LDM:</span>
+    </div>
+    <div class="middle">{{LDM6}}</div>
+    <div class="right"><span style="color: {{Colour_D}};"><i>{{D%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if GRN6}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #6AB023;"></div>
+      <span style="color: #6AB023; font-weight: bold;">GRN:</span>
+    </div>
+    <div class="middle">{{GRN6}}</div>
+    <div class="right"><span style="color: {{Colour_G}};"><i>{{G%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if OTH6}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #999999;"></div>
+      <span style="color: #999999; font-weight: bold;">OTH:</span>
+    </div>
+    <div class="middle">{{OTH6}}</div>
+    <div class="right"><span style="color: {{Colour_O}};"><i>{{O%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+
+
+{{#if LAB7}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #E4003B;"></div>
+      <span style="color: #E4003B; font-weight: bold;">LAB:</span>
+    </div>
+    <div class="middle">{{LAB7}}</div>
+    <div class="right"><span style="color: {{Colour_L}};"><i>{{L%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if SNP7}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #000000;"></div>
+      <span style="color: #000000; font-weight: bold;">SNP:</span>
+    </div>
+    <div class="middle">{{SNP7}}</div>
+    <div class="right"><span style="color: {{Colour_S}};"><i>{{S%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if CON7}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #0087DC;"></div>
+      <span style="color: #0087DC; font-weight: bold;">CON:</span>
+    </div>
+    <div class="middle">{{CON7}}</div>
+    <div class="right"><span style="color: {{Colour_C}};"><i>{{C%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if RFM7}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #23C7DF;"></div>
+      <span style="color: #23C7DF; font-weight: bold;">RFM:</span>
+    </div>
+    <div class="middle">{{RFM7}}</div>
+    <div class="right"><span style="color: {{Colour_R}};"><i>{{R%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if PLC7}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #005B54;"></div>
+      <span style="color: #005B54; font-weight: bold;">PLC:</span>
+    </div>
+    <div class="middle">{{PLC7}}</div>
+    <div class="right"><span style="color: {{Colour_P}};"><i>{{P%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if LDM7}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #FAA61A;"></div>
+      <span style="color: #FAA61A; font-weight: bold;">LDM:</span>
+    </div>
+    <div class="middle">{{LDM7}}</div>
+    <div class="right"><span style="color: {{Colour_D}};"><i>{{D%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if GRN7}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #6AB023;"></div>
+      <span style="color: #6AB023; font-weight: bold;">GRN:</span>
+    </div>
+    <div class="middle">{{GRN7}}</div>
+    <div class="right"><span style="color: {{Colour_G}};"><i>{{G%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if OTH7}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #999999;"></div>
+      <span style="color: #999999; font-weight: bold;">OTH:</span>
+    </div>
+    <div class="middle">{{OTH7}}</div>
+    <div class="right"><span style="color: {{Colour_O}};"><i>{{O%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+
+
+{{#if LAB8}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #E4003B;"></div>
+      <span style="color: #E4003B; font-weight: bold;">LAB:</span>
+    </div>
+    <div class="middle">{{LAB8}}</div>
+    <div class="right"><span style="color: {{Colour_L}};"><i>{{L%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if SNP8}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #000000;"></div>
+      <span style="color: #000000; font-weight: bold;">SNP:</span>
+    </div>
+    <div class="middle">{{SNP8}}</div>
+    <div class="right"><span style="color: {{Colour_S}};"><i>{{S%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if CON8}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #0087DC;"></div>
+      <span style="color: #0087DC; font-weight: bold;">CON:</span>
+    </div>
+    <div class="middle">{{CON8}}</div>
+    <div class="right"><span style="color: {{Colour_C}};"><i>{{C%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if RFM8}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #23C7DF;"></div>
+      <span style="color: #23C7DF; font-weight: bold;">RFM:</span>
+    </div>
+    <div class="middle">{{RFM8}}</div>
+    <div class="right"><span style="color: {{Colour_R}};"><i>{{R%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if PLC8}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #005B54;"></div>
+      <span style="color: #005B54; font-weight: bold;">PLC:</span>
+    </div>
+    <div class="middle">{{PLC8}}</div>
+    <div class="right"><span style="color: {{Colour_P}};"><i>{{P%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if LDM8}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #FAA61A;"></div>
+      <span style="color: #FAA61A; font-weight: bold;">LDM:</span>
+    </div>
+    <div class="middle">{{LDM8}}</div>
+    <div class="right"><span style="color: {{Colour_D}};"><i>{{D%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if GRN8}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #6AB023;"></div>
+      <span style="color: #6AB023; font-weight: bold;">GRN:</span>
+    </div>
+    <div class="middle">{{GRN8}}</div>
+    <div class="right"><span style="color: {{Colour_G}};"><i>{{G%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+{{#if OTH8}}
+  <div class="row page-break">
+    <div class="left">
+      <div class="circle" style="background-color: #999999;"></div>
+      <span style="color: #999999; font-weight: bold;">OTH:</span>
+    </div>
+    <div class="middle">{{OTH8}}</div>
+    <div class="right"><span style="color: {{Colour_O}};"><i>{{O%}}</i></span></div>
+  </div>
+  <div class="divider"></div>
+{{/if}}
+
+</body>
+</p>
+
+<div class="bar-wrapper">
+
+{{#if Now?}}
+  <div class="bar-title bar-title-row">
+   <span>Nowcast UK projection</span>
+
+    <span class="title-indicator">
+      <span class="title-dot" style="background-color:{{PrevColour}};"></span>
+      <span class="title-arrow">→</span>
+      <span class="title-dot" style="background-color:{{Colour}};"></span>
+    </span>
+  </div>
+{{/if}}
+
+{{#if Prev?}}
+  <div class="bar-title bar-title-row">
+    <span>GE2024</span>
+
+    <span class="title-indicator">
+      <span class="title-dot" style="background-color:{{PrevColour}};"></span>
+      <span class="title-arrow">→</span>
+      <span class="title-dot" style="background-color:{{Colour}};"></span>
+    </span>
+  </div>
+{{/if}}
+
+  <div class="bar-container">
+
+    <!-- Stacked bar -->
+    <div style="display: flex; height: 100%; width: 100%; position: relative; z-index: 1;">
+      <div style="width: {{PLC1}}; background-color: #005B54;"></div>
+      <div style="width: {{PLC2}}; background-color: #005B54;"></div>
+      <div style="width: {{PLC3}}; background-color: #005B54;"></div>
+      <div style="width: {{PLC4}}; background-color: #005B54;"></div>
+      <div style="width: {{PLC5}}; background-color: #005B54;"></div>
+      <div style="width: {{PLC6}}; background-color: #005B54;"></div>
+      <div style="width: {{PLC7}}; background-color: #005B54;"></div>
+      <div style="width: {{PLC8}}; background-color: #005B54;"></div>
+      <div style="width: {{GRN1}}; background-color: #6AB023;"></div>
+      <div style="width: {{GRN2}}; background-color: #6AB023;"></div>
+      <div style="width: {{GRN3}}; background-color: #6AB023;"></div>
+      <div style="width: {{GRN4}}; background-color: #6AB023;"></div>
+      <div style="width: {{GRN5}}; background-color: #6AB023;"></div>
+      <div style="width: {{GRN6}}; background-color: #6AB023;"></div>
+      <div style="width: {{GRN7}}; background-color: #6AB023;"></div>
+      <div style="width: {{GRN8}}; background-color: #6AB023;"></div>
+      <div style="width: {{SNP1}}; background-color: #FDF38E;"></div>
+      <div style="width: {{SNP2}}; background-color: #FDF38E;"></div>
+      <div style="width: {{SNP3}}; background-color: #FDF38E;"></div>
+      <div style="width: {{SNP4}}; background-color: #FDF38E;"></div>
+      <div style="width: {{SNP5}}; background-color: #FDF38E;"></div>
+      <div style="width: {{SNP6}}; background-color: #FDF38E;"></div>
+      <div style="width: {{SNP7}}; background-color: #FDF38E;"></div>
+      <div style="width: {{SNP8}}; background-color: #FDF38E;"></div>
+      <div style="width: {{LAB1}}; background-color: #E4003B;"></div>
+      <div style="width: {{LAB2}}; background-color: #E4003B;"></div>
+      <div style="width: {{LAB3}}; background-color: #E4003B;"></div>
+      <div style="width: {{LAB4}}; background-color: #E4003B;"></div>
+      <div style="width: {{LAB5}}; background-color: #E4003B;"></div>
+      <div style="width: {{LAB6}}; background-color: #E4003B;"></div>
+      <div style="width: {{LAB7}}; background-color: #E4003B;"></div>
+      <div style="width: {{LAB8}}; background-color: #E4003B;"></div>
+      <div style="width: {{LDM1}}; background-color: #FAA61A;"></div>
+      <div style="width: {{LDM2}}; background-color: #FAA61A;"></div>
+      <div style="width: {{LDM3}}; background-color: #FAA61A;"></div>
+      <div style="width: {{LDM4}}; background-color: #FAA61A;"></div>
+      <div style="width: {{LDM5}}; background-color: #FAA61A;"></div>
+      <div style="width: {{LDM6}}; background-color: #FAA61A;"></div>
+      <div style="width: {{LDM7}}; background-color: #FAA61A;"></div>
+      <div style="width: {{LDM8}}; background-color: #FAA61A;"></div>
+      <div style="width: {{OTH1}}; background-color: #DCDCDC;"></div>
+      <div style="width: {{OTH2}}; background-color: #DCDCDC;"></div>
+      <div style="width: {{OTH3}}; background-color: #DCDCDC;"></div>
+      <div style="width: {{OTH4}}; background-color: #DCDCDC;"></div>
+      <div style="width: {{OTH5}}; background-color: #DCDCDC;"></div>
+      <div style="width: {{OTH6}}; background-color: #DCDCDC;"></div>
+      <div style="width: {{OTH7}}; background-color: #DCDCDC;"></div>
+      <div style="width: {{OTH8}}; background-color: #DCDCDC;"></div>
+      <div style="width: {{CON1}}; background-color: #0087DC;"></div>
+      <div style="width: {{CON2}}; background-color: #0087DC;"></div>
+      <div style="width: {{CON3}}; background-color: #0087DC;"></div>
+      <div style="width: {{CON4}}; background-color: #0087DC;"></div>
+      <div style="width: {{CON5}}; background-color: #0087DC;"></div>
+      <div style="width: {{CON6}}; background-color: #0087DC;"></div>
+      <div style="width: {{CON7}}; background-color: #0087DC;"></div>
+      <div style="width: {{CON8}}; background-color: #0087DC;"></div>
+      <div style="width: {{RFM1}}; background-color: #24C7DE;"></div>
+      <div style="width: {{RFM2}}; background-color: #24C7DE;"></div>
+      <div style="width: {{RFM3}}; background-color: #24C7DE;"></div>
+      <div style="width: {{RFM4}}; background-color: #24C7DE;"></div>
+      <div style="width: {{RFM5}}; background-color: #24C7DE;"></div>
+      <div style="width: {{RFM6}}; background-color: #24C7DE;"></div>
+      <div style="width: {{RFM7}}; background-color: #24C7DE;"></div>
+      <div style="width: {{RFM8}}; background-color: #24C7DE;"></div>
+    </div>
+  </div>
+</div>
+
+<div class="bar-wrapper">
+
+  <div class="bar-container small">
+
+    <!-- Stacked bar -->
+    <div style="display: flex; height: 100%; width: 100%; position: relative; z-index: 1;">
+      <div style="width: {{PrevPLC}}; background-color: #005B54;"></div>
+      <div style="width: {{PrevGRN}}; background-color: #6AB023;"></div>
+      <div style="width: {{PrevSNP}}; background-color: #FDF38E;"></div>
+      <div style="width: {{PrevLAB}}; background-color: #E4003B;"></div>
+      <div style="width: {{PrevLDM}}; background-color: #FAA61A;"></div>
+      <div style="width: {{PrevOTH}}; background-color: #DCDCDC;"></div>
+      <div style="width: {{PrevCON}}; background-color: #0087DC;"></div>
+      <div style="width: {{PrevRFM}}; background-color: #24C7DE;"></div>
+  </div>
+</div>
+
+{{#if Now?}}
+  <div class="bar-title small">GE2024
+{{/if}}
+
+{{#if Disc}}
+      <i><span style="color: #550000; font-weight: bold;">⠀⠀[NOT A BY-ELECTION FORECAST]</span></i>
+{{/if}}
+
+{{#if Now?}}
+</div>
+{{/if}}
+
+{{#if Prev?}}
+  <div class="bar-title small">GE2019 (notional)</div>
+{{/if}}
