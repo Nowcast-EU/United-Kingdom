@@ -6,10 +6,6 @@ N/A - no Westminster polling</br> for Northern Ireland
 <head>
   <meta charset="UTF-8">
   <style>
-    :root {
-      --middle-offset: 35%; /* 👈 percentage instead of px */
-    }
-
     body {
       margin: 0;
       padding: 0;
@@ -18,39 +14,38 @@ N/A - no Westminster polling</br> for Northern Ireland
 
     .row {
       display: grid;
-      grid-template-columns: 60px auto 70px; /* fixed layout across devices */
+      grid-template-columns: 42px 45px auto 45px;
       align-items: center;
       padding: 1px 0;
       width: 100%;
+      line-height: 1.2;
     }
 
-.row {
-  line-height: 1.2;
-}
-
-    .left {
-      display: flex;
-      align-items: center;
-      text-align: left;
+    .label {
+      font-weight: bold;
       padding-left: 1px;
+    }
+
+    .vote {
+      text-align: left;
     }
 
     .middle {
       text-align: left;
-      padding-left: var(--middle-offset); /* scalable offset */
+      padding-left: 1px;
+      padding-right: 4px;
     }
 
     .right {
       text-align: right;
       padding-right: 2px;
+      font-variant-numeric: tabular-nums;
     }
 
-    .circle {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      margin-right: 4px;
-      flex-shrink: 0;
+    .right span {
+      display: inline-block;
+      width: 3.6em;
+      text-align: right;
     }
 
     .divider {
@@ -58,162 +53,153 @@ N/A - no Westminster polling</br> for Northern Ireland
       margin: 2px 0;
     }
 
-.right {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
+    .mini-bar {
+      height: 14px;
+      border-radius: 2px;
+      display: block;
+    }
 
-.right span {
-  display: inline-block;
-  width: 4.5em;
-  text-align: right;
-}
+    .bar-container {
+      position: relative;
+      width: 16rem;
+      height: 20px;
+      border-radius: 1px;
+      padding-top: 0px;
+      overflow: hidden;
+    }
 
-.bar-container {
-  position: relative;
-  width: 16rem;
-  height: 20px;
-  border-radius: 1px;
-  padding-top: 0px;
-  overflow: hidden;
-}
+    .bar-wrapper {
+      margin-top: 6px;
+    }
 
-.bar-wrapper {
-  margin-top: 6px;
-}
+    .bar-wrapper + .bar-wrapper {
+      margin-top: 5px;
+    }
 
-.bar-wrapper + .bar-wrapper {
-  margin-top: 5px;   /* only affects the gap between bars */
-}
+    .bar-title {
+      font-size: 0.85rem;
+      line-height: 2;
+      margin-bottom: 0px;
+      color: #333;
+      font-weight: 600;
+    }
 
+    .bar-container.small {
+      height: 11px;
+      padding-top: 0.5px;
+    }
 
-.bar-title {
-  font-size: 0.85rem;
-  line-height: 2;
-  margin-bottom: 0px;
-  color: #333;
-  font-weight: 600;
-}
-
-.bar-container.small {
-  height: 11px;   /* half of 20px */
-  padding-top: 0.5px;
-}
-
-.bar-title.small {
-  font-size: 0.75rem;
-  margin-bottom: 0px;
-  font-weight: 500;
-}
+    .bar-title.small {
+      font-size: 0.75rem;
+      margin-bottom: 0px;
+      font-weight: 500;
+    }
 
     .page-break {
       page-break-after: always;
     }
 
-.bar-title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-right: 12px;
-}
+    .bar-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-right: 12px;
+    }
 
-.title-indicator {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
+    .title-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
 
-.title-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: #999; /* change per state if you want */
-}
-
-.title-arrow {
-  font-size: 1rem;
-  color: #000000;
-}
-
-    /* --- responsive adjustment for mobile --- */
-    @media (max-width: 600px) {
-      :root {
-        --middle-offset: 25%; /* 👈 smaller % on mobile */
-      }
-
-    .circle {
-      width: 9px;
-      height: 9px;
+    .title-dot {
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
-      margin-right: 4px;
-      flex-shrink: 0;
+      background-color: #999;
     }
 
-    .right span {
-      text-align: right;
-      padding-right: 5px;
+    .title-arrow {
+      font-size: 1rem;
+      color: #000000;
     }
 
+    @media (max-width: 600px) {
       .row {
-        grid-template-columns: 55px auto 40px; /* tighter layout for small screens */
+        grid-template-columns: 37px 23px auto 29px;
       }
 
-.bar-container {
-  position: relative;
-  width: 16rem;
-  height: 15px;
-  border-radius: 1px;
-  padding-top: 0px;
-  overflow: hidden;
-}
+      .mini-bar {
+        height: 10px;
+      }
 
-.bar-container.small {
-  height: 7px;   /* half of 20px */
-  padding-top: 0.5px;
-}
+    .vote {
+      text-align: left;
+      margin-left: -8px;
+    }
 
-.bar-wrapper + .bar-wrapper {
-  margin-top: 3px;   /* only affects the gap between bars */
-}
+    .middle {
+      text-align: left;
+      padding-left: 2px;
+      padding-right: 4px;
+    }
 
-.bar-title {
-  font-size: 0.85rem;
-  line-height: 1.2;
-  margin-bottom: 0px;
-  color: #333;
-  font-weight: 600;
-}
+    .right {
+      text-align: right;
+      padding-right: 0px;
+      margin-left: -3px;
+      font-variant-numeric: tabular-nums;
+    }
 
-.bar-title.small {
-  margin-top: 3px;
-}
+      .right span {
+        text-align: right;
+        padding-right: 0px;
+        margin-right: 0px;
+      }
 
-.title-indicator {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
+      .bar-container {
+        width: 16rem;
+        height: 15px;
+      }
 
-.bar-title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-right: 6px;
- margin-bottom: 2px;
-}
+      .bar-container.small {
+        height: 7px;
+        padding-top: 0.5px;
+      }
 
-.title-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: #999; /* change per state if you want */
-}
+      .bar-wrapper + .bar-wrapper {
+        margin-top: 3px;
+      }
 
-.title-arrow {
-  font-size: 1.25rem;
-  color: #000000;
-}
+      .bar-title {
+        font-size: 0.85rem;
+        line-height: 1.2;
+        margin-bottom: 0px;
+        color: #333;
+        font-weight: 600;
+      }
 
+      .bar-title.small {
+        margin-top: 3px;
+      }
+
+      .title-indicator {
+        gap: 4px;
+      }
+
+      .bar-title-row {
+        padding-right: 6px;
+        margin-bottom: 2px;
+      }
+
+      .title-dot {
+        width: 8px;
+        height: 8px;
+      }
+
+      .title-arrow {
+        font-size: 1.25rem;
+      }
     }
   </style>
 </head>
@@ -221,11 +207,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if LAB1}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #E4003B;"></div>
-      <span style="color: #E4003B; font-weight: bold;">LAB:</span>
+    <div class="label">LAB:</div>
+    <div class="vote">{{LAB1}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #E4003B; width: {{LAB_bar}};"></div>
     </div>
-    <div class="middle">{{LAB1}}</div>
     <div class="right"><span style="color: {{Colour_L}};"><i>{{L%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -233,11 +219,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if SNP1}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #000000;"></div>
-      <span style="color: #000000; font-weight: bold;">SNP:</span>
+    <div class="label">SNP:</div>
+    <div class="vote">{{SNP1}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #FDF38E; width: {{SNP_bar}};"></div>
     </div>
-    <div class="middle">{{SNP1}}</div>
     <div class="right"><span style="color: {{Colour_S}};"><i>{{S%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -245,11 +231,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if CON1}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #0087DC;"></div>
-      <span style="color: #0087DC; font-weight: bold;">CON:</span>
+    <div class="label">CON:</div>
+    <div class="vote">{{CON1}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #0087DC; width: {{CON_bar}};"></div>
     </div>
-    <div class="middle">{{CON1}}</div>
     <div class="right"><span style="color: {{Colour_C}};"><i>{{C%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -257,11 +243,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if RFM1}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #23C7DF;"></div>
-      <span style="color: #23C7DF; font-weight: bold;">RFM:</span>
+    <div class="label">RFM:</div>
+    <div class="vote">{{RFM1}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #34D8EF; width: {{RFM_bar}};"></div>
     </div>
-    <div class="middle">{{RFM1}}</div>
     <div class="right"><span style="color: {{Colour_R}};"><i>{{R%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -269,11 +255,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if PLC1}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #005B54;"></div>
-      <span style="color: #005B54; font-weight: bold;">PLC:</span>
+    <div class="label">PLC:</div>
+    <div class="vote">{{PLC1}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #005B54; width: {{PLC_bar}};"></div>
     </div>
-    <div class="middle">{{PLC1}}</div>
     <div class="right"><span style="color: {{Colour_P}};"><i>{{P%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -281,11 +267,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if LDM1}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #FAA61A;"></div>
-      <span style="color: #FAA61A; font-weight: bold;">LDM:</span>
+    <div class="label">LDM:</div>
+    <div class="vote">{{LDM1}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #FAA61A; width: {{LDM_bar}};"></div>
     </div>
-    <div class="middle">{{LDM1}}</div>
     <div class="right"><span style="color: {{Colour_D}};"><i>{{D%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -293,11 +279,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if GRN1}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #6AB023;"></div>
-      <span style="color: #6AB023; font-weight: bold;">GRN:</span>
+    <div class="label">GRN:</div>
+    <div class="vote">{{GRN1}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #6AB023; width: {{GRN_bar}};"></div>
     </div>
-    <div class="middle">{{GRN1}}</div>
     <div class="right"><span style="color: {{Colour_G}};"><i>{{G%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -305,11 +291,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if OTH1}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #999999;"></div>
-      <span style="color: #999999; font-weight: bold;">OTH:</span>
+    <div class="label">OTH:</div>
+    <div class="vote">{{OTH1}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #999999; width: {{OTH_bar}};"></div>
     </div>
-    <div class="middle">{{OTH1}}</div>
     <div class="right"><span style="color: {{Colour_O}};"><i>{{O%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -319,11 +305,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if LAB2}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #E4003B;"></div>
-      <span style="color: #E4003B; font-weight: bold;">LAB:</span>
+    <div class="label">LAB:</div>
+    <div class="vote">{{LAB2}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #E4003B; width: {{LAB_bar}};"></div>
     </div>
-    <div class="middle">{{LAB2}}</div>
     <div class="right"><span style="color: {{Colour_L}};"><i>{{L%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -331,11 +317,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if SNP2}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #000000;"></div>
-      <span style="color: #000000; font-weight: bold;">SNP:</span>
+    <div class="label">SNP:</div>
+    <div class="vote">{{SNP2}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #FDF38E; width: {{SNP_bar}};"></div>
     </div>
-    <div class="middle">{{SNP2}}</div>
     <div class="right"><span style="color: {{Colour_S}};"><i>{{S%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -343,11 +329,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if CON2}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #0087DC;"></div>
-      <span style="color: #0087DC; font-weight: bold;">CON:</span>
+    <div class="label">CON:</div>
+    <div class="vote">{{CON2}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #0087DC; width: {{CON_bar}};"></div>
     </div>
-    <div class="middle">{{CON2}}</div>
     <div class="right"><span style="color: {{Colour_C}};"><i>{{C%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -355,11 +341,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if RFM2}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #23C7DF;"></div>
-      <span style="color: #23C7DF; font-weight: bold;">RFM:</span>
+    <div class="label">RFM:</div>
+    <div class="vote">{{RFM2}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #34D8EF; width: {{RFM_bar}};"></div>
     </div>
-    <div class="middle">{{RFM2}}</div>
     <div class="right"><span style="color: {{Colour_R}};"><i>{{R%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -367,11 +353,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if PLC2}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #005B54;"></div>
-      <span style="color: #005B54; font-weight: bold;">PLC:</span>
+    <div class="label">PLC:</div>
+    <div class="vote">{{PLC2}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #005B54; width: {{PLC_bar}};"></div>
     </div>
-    <div class="middle">{{PLC2}}</div>
     <div class="right"><span style="color: {{Colour_P}};"><i>{{P%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -379,11 +365,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if LDM2}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #FAA61A;"></div>
-      <span style="color: #FAA61A; font-weight: bold;">LDM:</span>
+    <div class="label">LDM:</div>
+    <div class="vote">{{LDM2}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #FAA61A; width: {{LDM_bar}};"></div>
     </div>
-    <div class="middle">{{LDM2}}</div>
     <div class="right"><span style="color: {{Colour_D}};"><i>{{D%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -391,11 +377,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if GRN2}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #6AB023;"></div>
-      <span style="color: #6AB023; font-weight: bold;">GRN:</span>
+    <div class="label">GRN:</div>
+    <div class="vote">{{GRN2}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #6AB023; width: {{GRN_bar}};"></div>
     </div>
-    <div class="middle">{{GRN2}}</div>
     <div class="right"><span style="color: {{Colour_G}};"><i>{{G%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -403,11 +389,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if OTH2}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #999999;"></div>
-      <span style="color: #999999; font-weight: bold;">OTH:</span>
+    <div class="label">OTH:</div>
+    <div class="vote">{{OTH2}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #999999; width: {{OTH_bar}};"></div>
     </div>
-    <div class="middle">{{OTH2}}</div>
     <div class="right"><span style="color: {{Colour_O}};"><i>{{O%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -417,11 +403,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if LAB3}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #E4003B;"></div>
-      <span style="color: #E4003B; font-weight: bold;">LAB:</span>
+    <div class="label">LAB:</div>
+    <div class="vote">{{LAB3}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #E4003B; width: {{LAB_bar}};"></div>
     </div>
-    <div class="middle">{{LAB3}}</div>
     <div class="right"><span style="color: {{Colour_L}};"><i>{{L%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -429,11 +415,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if SNP3}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #000000;"></div>
-      <span style="color: #000000; font-weight: bold;">SNP:</span>
+    <div class="label">SNP:</div>
+    <div class="vote">{{SNP3}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #FDF38E; width: {{SNP_bar}};"></div>
     </div>
-    <div class="middle">{{SNP3}}</div>
     <div class="right"><span style="color: {{Colour_S}};"><i>{{S%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -441,11 +427,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if CON3}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #0087DC;"></div>
-      <span style="color: #0087DC; font-weight: bold;">CON:</span>
+    <div class="label">CON:</div>
+    <div class="vote">{{CON3}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #0087DC; width: {{CON_bar}};"></div>
     </div>
-    <div class="middle">{{CON3}}</div>
     <div class="right"><span style="color: {{Colour_C}};"><i>{{C%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -453,11 +439,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if RFM3}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #23C7DF;"></div>
-      <span style="color: #23C7DF; font-weight: bold;">RFM:</span>
+    <div class="label">RFM:</div>
+    <div class="vote">{{RFM3}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #34D8EF; width: {{RFM_bar}};"></div>
     </div>
-    <div class="middle">{{RFM3}}</div>
     <div class="right"><span style="color: {{Colour_R}};"><i>{{R%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -465,11 +451,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if PLC3}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #005B54;"></div>
-      <span style="color: #005B54; font-weight: bold;">PLC:</span>
+    <div class="label">PLC:</div>
+    <div class="vote">{{PLC3}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #005B54; width: {{PLC_bar}};"></div>
     </div>
-    <div class="middle">{{PLC3}}</div>
     <div class="right"><span style="color: {{Colour_P}};"><i>{{P%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -477,11 +463,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if LDM3}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #FAA61A;"></div>
-      <span style="color: #FAA61A; font-weight: bold;">LDM:</span>
+    <div class="label">LDM:</div>
+    <div class="vote">{{LDM3}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #FAA61A; width: {{LDM_bar}};"></div>
     </div>
-    <div class="middle">{{LDM3}}</div>
     <div class="right"><span style="color: {{Colour_D}};"><i>{{D%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -489,11 +475,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if GRN3}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #6AB023;"></div>
-      <span style="color: #6AB023; font-weight: bold;">GRN:</span>
+    <div class="label">GRN:</div>
+    <div class="vote">{{GRN3}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #6AB023; width: {{GRN_bar}};"></div>
     </div>
-    <div class="middle">{{GRN3}}</div>
     <div class="right"><span style="color: {{Colour_G}};"><i>{{G%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -501,11 +487,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if OTH3}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #999999;"></div>
-      <span style="color: #999999; font-weight: bold;">OTH:</span>
+    <div class="label">OTH:</div>
+    <div class="vote">{{OTH3}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #999999; width: {{OTH_bar}};"></div>
     </div>
-    <div class="middle">{{OTH3}}</div>
     <div class="right"><span style="color: {{Colour_O}};"><i>{{O%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -515,11 +501,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if LAB4}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #E4003B;"></div>
-      <span style="color: #E4003B; font-weight: bold;">LAB:</span>
+    <div class="label">LAB:</div>
+    <div class="vote">{{LAB4}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #E4003B; width: {{LAB_bar}};"></div>
     </div>
-    <div class="middle">{{LAB4}}</div>
     <div class="right"><span style="color: {{Colour_L}};"><i>{{L%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -527,11 +513,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if SNP4}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #000000;"></div>
-      <span style="color: #000000; font-weight: bold;">SNP:</span>
+    <div class="label">SNP:</div>
+    <div class="vote">{{SNP4}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #FDF38E; width: {{SNP_bar}};"></div>
     </div>
-    <div class="middle">{{SNP4}}</div>
     <div class="right"><span style="color: {{Colour_S}};"><i>{{S%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -539,11 +525,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if CON4}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #0087DC;"></div>
-      <span style="color: #0087DC; font-weight: bold;">CON:</span>
+    <div class="label">CON:</div>
+    <div class="vote">{{CON4}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #0087DC; width: {{CON_bar}};"></div>
     </div>
-    <div class="middle">{{CON4}}</div>
     <div class="right"><span style="color: {{Colour_C}};"><i>{{C%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -551,11 +537,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if RFM4}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #23C7DF;"></div>
-      <span style="color: #23C7DF; font-weight: bold;">RFM:</span>
+    <div class="label">RFM:</div>
+    <div class="vote">{{RFM4}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #34D8EF; width: {{RFM_bar}};"></div>
     </div>
-    <div class="middle">{{RFM4}}</div>
     <div class="right"><span style="color: {{Colour_R}};"><i>{{R%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -563,11 +549,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if PLC4}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #005B54;"></div>
-      <span style="color: #005B54; font-weight: bold;">PLC:</span>
+    <div class="label">PLC:</div>
+    <div class="vote">{{PLC4}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #005B54; width: {{PLC_bar}};"></div>
     </div>
-    <div class="middle">{{PLC4}}</div>
     <div class="right"><span style="color: {{Colour_P}};"><i>{{P%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -575,11 +561,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if LDM4}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #FAA61A;"></div>
-      <span style="color: #FAA61A; font-weight: bold;">LDM:</span>
+    <div class="label">LDM:</div>
+    <div class="vote">{{LDM4}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #FAA61A; width: {{LDM_bar}};"></div>
     </div>
-    <div class="middle">{{LDM4}}</div>
     <div class="right"><span style="color: {{Colour_D}};"><i>{{D%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -587,11 +573,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if GRN4}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #6AB023;"></div>
-      <span style="color: #6AB023; font-weight: bold;">GRN:</span>
+    <div class="label">GRN:</div>
+    <div class="vote">{{GRN4}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #6AB023; width: {{GRN_bar}};"></div>
     </div>
-    <div class="middle">{{GRN4}}</div>
     <div class="right"><span style="color: {{Colour_G}};"><i>{{G%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -599,11 +585,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if OTH4}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #999999;"></div>
-      <span style="color: #999999; font-weight: bold;">OTH:</span>
+    <div class="label">OTH:</div>
+    <div class="vote">{{OTH4}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #999999; width: {{OTH_bar}};"></div>
     </div>
-    <div class="middle">{{OTH4}}</div>
     <div class="right"><span style="color: {{Colour_O}};"><i>{{O%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -613,11 +599,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if LAB5}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #E4003B;"></div>
-      <span style="color: #E4003B; font-weight: bold;">LAB:</span>
+    <div class="label">LAB:</div>
+    <div class="vote">{{LAB5}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #E4003B; width: {{LAB_bar}};"></div>
     </div>
-    <div class="middle">{{LAB5}}</div>
     <div class="right"><span style="color: {{Colour_L}};"><i>{{L%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -625,11 +611,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if SNP5}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #000000;"></div>
-      <span style="color: #000000; font-weight: bold;">SNP:</span>
+    <div class="label">SNP:</div>
+    <div class="vote">{{SNP5}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #FDF38E; width: {{SNP_bar}};"></div>
     </div>
-    <div class="middle">{{SNP5}}</div>
     <div class="right"><span style="color: {{Colour_S}};"><i>{{S%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -637,11 +623,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if CON5}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #0087DC;"></div>
-      <span style="color: #0087DC; font-weight: bold;">CON:</span>
+    <div class="label">CON:</div>
+    <div class="vote">{{CON5}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #0087DC; width: {{CON_bar}};"></div>
     </div>
-    <div class="middle">{{CON5}}</div>
     <div class="right"><span style="color: {{Colour_C}};"><i>{{C%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -649,11 +635,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if RFM5}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #23C7DF;"></div>
-      <span style="color: #23C7DF; font-weight: bold;">RFM:</span>
+    <div class="label">RFM:</div>
+    <div class="vote">{{RFM5}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #34D8EF; width: {{RFM_bar}};"></div>
     </div>
-    <div class="middle">{{RFM5}}</div>
     <div class="right"><span style="color: {{Colour_R}};"><i>{{R%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -661,11 +647,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if PLC5}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #005B54;"></div>
-      <span style="color: #005B54; font-weight: bold;">PLC:</span>
+    <div class="label">PLC:</div>
+    <div class="vote">{{PLC5}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #005B54; width: {{PLC_bar}};"></div>
     </div>
-    <div class="middle">{{PLC5}}</div>
     <div class="right"><span style="color: {{Colour_P}};"><i>{{P%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -673,11 +659,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if LDM5}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #FAA61A;"></div>
-      <span style="color: #FAA61A; font-weight: bold;">LDM:</span>
+    <div class="label">LDM:</div>
+    <div class="vote">{{LDM5}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #FAA61A; width: {{LDM_bar}};"></div>
     </div>
-    <div class="middle">{{LDM5}}</div>
     <div class="right"><span style="color: {{Colour_D}};"><i>{{D%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -685,11 +671,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if GRN5}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #6AB023;"></div>
-      <span style="color: #6AB023; font-weight: bold;">GRN:</span>
+    <div class="label">GRN:</div>
+    <div class="vote">{{GRN5}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #6AB023; width: {{GRN_bar}};"></div>
     </div>
-    <div class="middle">{{GRN5}}</div>
     <div class="right"><span style="color: {{Colour_G}};"><i>{{G%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -697,11 +683,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if OTH5}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #999999;"></div>
-      <span style="color: #999999; font-weight: bold;">OTH:</span>
+    <div class="label">OTH:</div>
+    <div class="vote">{{OTH5}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #999999; width: {{OTH_bar}};"></div>
     </div>
-    <div class="middle">{{OTH5}}</div>
     <div class="right"><span style="color: {{Colour_O}};"><i>{{O%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -711,11 +697,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if LAB6}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #E4003B;"></div>
-      <span style="color: #E4003B; font-weight: bold;">LAB:</span>
+    <div class="label">LAB:</div>
+    <div class="vote">{{LAB6}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #E4003B; width: {{LAB_bar}};"></div>
     </div>
-    <div class="middle">{{LAB6}}</div>
     <div class="right"><span style="color: {{Colour_L}};"><i>{{L%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -723,11 +709,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if SNP6}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #000000;"></div>
-      <span style="color: #000000; font-weight: bold;">SNP:</span>
+    <div class="label">SNP:</div>
+    <div class="vote">{{SNP6}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #FDF38E; width: {{SNP_bar}};"></div>
     </div>
-    <div class="middle">{{SNP6}}</div>
     <div class="right"><span style="color: {{Colour_S}};"><i>{{S%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -735,11 +721,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if CON6}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #0087DC;"></div>
-      <span style="color: #0087DC; font-weight: bold;">CON:</span>
+    <div class="label">CON:</div>
+    <div class="vote">{{CON6}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #0087DC; width: {{CON_bar}};"></div>
     </div>
-    <div class="middle">{{CON6}}</div>
     <div class="right"><span style="color: {{Colour_C}};"><i>{{C%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -747,11 +733,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if RFM6}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #23C7DF;"></div>
-      <span style="color: #23C7DF; font-weight: bold;">RFM:</span>
+    <div class="label">RFM:</div>
+    <div class="vote">{{RFM6}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #34D8EF; width: {{RFM_bar}};"></div>
     </div>
-    <div class="middle">{{RFM6}}</div>
     <div class="right"><span style="color: {{Colour_R}};"><i>{{R%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -759,11 +745,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if PLC6}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #005B54;"></div>
-      <span style="color: #005B54; font-weight: bold;">PLC:</span>
+    <div class="label">PLC:</div>
+    <div class="vote">{{PLC6}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #005B54; width: {{PLC_bar}};"></div>
     </div>
-    <div class="middle">{{PLC6}}</div>
     <div class="right"><span style="color: {{Colour_P}};"><i>{{P%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -771,11 +757,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if LDM6}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #FAA61A;"></div>
-      <span style="color: #FAA61A; font-weight: bold;">LDM:</span>
+    <div class="label">LDM:</div>
+    <div class="vote">{{LDM6}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #FAA61A; width: {{LDM_bar}};"></div>
     </div>
-    <div class="middle">{{LDM6}}</div>
     <div class="right"><span style="color: {{Colour_D}};"><i>{{D%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -783,11 +769,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if GRN6}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #6AB023;"></div>
-      <span style="color: #6AB023; font-weight: bold;">GRN:</span>
+    <div class="label">GRN:</div>
+    <div class="vote">{{GRN6}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #6AB023; width: {{GRN_bar}};"></div>
     </div>
-    <div class="middle">{{GRN6}}</div>
     <div class="right"><span style="color: {{Colour_G}};"><i>{{G%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -795,11 +781,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if OTH6}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #999999;"></div>
-      <span style="color: #999999; font-weight: bold;">OTH:</span>
+    <div class="label">OTH:</div>
+    <div class="vote">{{OTH6}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #999999; width: {{OTH_bar}};"></div>
     </div>
-    <div class="middle">{{OTH6}}</div>
     <div class="right"><span style="color: {{Colour_O}};"><i>{{O%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -809,11 +795,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if LAB7}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #E4003B;"></div>
-      <span style="color: #E4003B; font-weight: bold;">LAB:</span>
+    <div class="label">LAB:</div>
+    <div class="vote">{{LAB7}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #E4003B; width: {{LAB_bar}};"></div>
     </div>
-    <div class="middle">{{LAB7}}</div>
     <div class="right"><span style="color: {{Colour_L}};"><i>{{L%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -821,11 +807,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if SNP7}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #000000;"></div>
-      <span style="color: #000000; font-weight: bold;">SNP:</span>
+    <div class="label">SNP:</div>
+    <div class="vote">{{SNP7}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #FDF38E; width: {{SNP_bar}};"></div>
     </div>
-    <div class="middle">{{SNP7}}</div>
     <div class="right"><span style="color: {{Colour_S}};"><i>{{S%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -833,11 +819,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if CON7}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #0087DC;"></div>
-      <span style="color: #0087DC; font-weight: bold;">CON:</span>
+    <div class="label">CON:</div>
+    <div class="vote">{{CON7}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #0087DC; width: {{CON_bar}};"></div>
     </div>
-    <div class="middle">{{CON7}}</div>
     <div class="right"><span style="color: {{Colour_C}};"><i>{{C%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -845,11 +831,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if RFM7}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #23C7DF;"></div>
-      <span style="color: #23C7DF; font-weight: bold;">RFM:</span>
+    <div class="label">RFM:</div>
+    <div class="vote">{{RFM7}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #34D8EF; width: {{RFM_bar}};"></div>
     </div>
-    <div class="middle">{{RFM7}}</div>
     <div class="right"><span style="color: {{Colour_R}};"><i>{{R%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -857,11 +843,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if PLC7}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #005B54;"></div>
-      <span style="color: #005B54; font-weight: bold;">PLC:</span>
+    <div class="label">PLC:</div>
+    <div class="vote">{{PLC7}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #005B54; width: {{PLC_bar}};"></div>
     </div>
-    <div class="middle">{{PLC7}}</div>
     <div class="right"><span style="color: {{Colour_P}};"><i>{{P%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -869,11 +855,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if LDM7}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #FAA61A;"></div>
-      <span style="color: #FAA61A; font-weight: bold;">LDM:</span>
+    <div class="label">LDM:</div>
+    <div class="vote">{{LDM7}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #FAA61A; width: {{LDM_bar}};"></div>
     </div>
-    <div class="middle">{{LDM7}}</div>
     <div class="right"><span style="color: {{Colour_D}};"><i>{{D%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -881,11 +867,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if GRN7}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #6AB023;"></div>
-      <span style="color: #6AB023; font-weight: bold;">GRN:</span>
+    <div class="label">GRN:</div>
+    <div class="vote">{{GRN7}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #6AB023; width: {{GRN_bar}};"></div>
     </div>
-    <div class="middle">{{GRN7}}</div>
     <div class="right"><span style="color: {{Colour_G}};"><i>{{G%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -893,11 +879,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if OTH7}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #999999;"></div>
-      <span style="color: #999999; font-weight: bold;">OTH:</span>
+    <div class="label">OTH:</div>
+    <div class="vote">{{OTH7}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #999999; width: {{OTH_bar}};"></div>
     </div>
-    <div class="middle">{{OTH7}}</div>
     <div class="right"><span style="color: {{Colour_O}};"><i>{{O%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -907,11 +893,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if LAB8}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #E4003B;"></div>
-      <span style="color: #E4003B; font-weight: bold;">LAB:</span>
+    <div class="label">LAB:</div>
+    <div class="vote">{{LAB8}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #E4003B; width: {{LAB_bar}};"></div>
     </div>
-    <div class="middle">{{LAB8}}</div>
     <div class="right"><span style="color: {{Colour_L}};"><i>{{L%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -919,11 +905,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if SNP8}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #000000;"></div>
-      <span style="color: #000000; font-weight: bold;">SNP:</span>
+    <div class="label">SNP:</div>
+    <div class="vote">{{SNP8}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #FDF38E; width: {{SNP_bar}};"></div>
     </div>
-    <div class="middle">{{SNP8}}</div>
     <div class="right"><span style="color: {{Colour_S}};"><i>{{S%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -931,11 +917,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if CON8}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #0087DC;"></div>
-      <span style="color: #0087DC; font-weight: bold;">CON:</span>
+    <div class="label">CON:</div>
+    <div class="vote">{{CON8}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #0087DC; width: {{CON_bar}};"></div>
     </div>
-    <div class="middle">{{CON8}}</div>
     <div class="right"><span style="color: {{Colour_C}};"><i>{{C%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -943,11 +929,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if RFM8}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #23C7DF;"></div>
-      <span style="color: #23C7DF; font-weight: bold;">RFM:</span>
+    <div class="label">RFM:</div>
+    <div class="vote">{{RFM8}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #34D8EF; width: {{RFM_bar}};"></div>
     </div>
-    <div class="middle">{{RFM8}}</div>
     <div class="right"><span style="color: {{Colour_R}};"><i>{{R%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -955,11 +941,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if PLC8}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #005B54;"></div>
-      <span style="color: #005B54; font-weight: bold;">PLC:</span>
+    <div class="label">PLC:</div>
+    <div class="vote">{{PLC8}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #005B54; width: {{PLC_bar}};"></div>
     </div>
-    <div class="middle">{{PLC8}}</div>
     <div class="right"><span style="color: {{Colour_P}};"><i>{{P%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -967,11 +953,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if LDM8}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #FAA61A;"></div>
-      <span style="color: #FAA61A; font-weight: bold;">LDM:</span>
+    <div class="label">LDM:</div>
+    <div class="vote">{{LDM8}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #FAA61A; width: {{LDM_bar}};"></div>
     </div>
-    <div class="middle">{{LDM8}}</div>
     <div class="right"><span style="color: {{Colour_D}};"><i>{{D%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -979,11 +965,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if GRN8}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #6AB023;"></div>
-      <span style="color: #6AB023; font-weight: bold;">GRN:</span>
+    <div class="label">GRN:</div>
+    <div class="vote">{{GRN8}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #6AB023; width: {{GRN_bar}};"></div>
     </div>
-    <div class="middle">{{GRN8}}</div>
     <div class="right"><span style="color: {{Colour_G}};"><i>{{G%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -991,11 +977,11 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if OTH8}}
   <div class="row page-break">
-    <div class="left">
-      <div class="circle" style="background-color: #999999;"></div>
-      <span style="color: #999999; font-weight: bold;">OTH:</span>
+    <div class="label">OTH:</div>
+    <div class="vote">{{OTH8}}</div>
+    <div class="middle">
+      <div class="mini-bar" style="background-color: #999999; width: {{OTH_bar}};"></div>
     </div>
-    <div class="middle">{{OTH8}}</div>
     <div class="right"><span style="color: {{Colour_O}};"><i>{{O%}}</i></span></div>
   </div>
   <div class="divider"></div>
@@ -1008,8 +994,7 @@ N/A - no Westminster polling</br> for Northern Ireland
 
 {{#if Now?}}
   <div class="bar-title bar-title-row">
-   <span>Nowcast UK projection</span>
-
+    <span>Nowcast UK projection</span>
     <span class="title-indicator">
       <span class="title-dot" style="background-color:{{PrevColour}};"></span>
       <span class="title-arrow">→</span>
@@ -1021,7 +1006,6 @@ N/A - no Westminster polling</br> for Northern Ireland
 {{#if Prev?}}
   <div class="bar-title bar-title-row">
     <span>GE2024</span>
-
     <span class="title-indicator">
       <span class="title-dot" style="background-color:{{PrevColour}};"></span>
       <span class="title-arrow">→</span>
@@ -1031,8 +1015,6 @@ N/A - no Westminster polling</br> for Northern Ireland
 {{/if}}
 
   <div class="bar-container">
-
-    <!-- Stacked bar -->
     <div style="display: flex; height: 100%; width: 100%; position: relative; z-index: 1;">
       <div style="width: {{PLC1}}; background-color: #005B54;"></div>
       <div style="width: {{PLC2}}; background-color: #005B54;"></div>
@@ -1090,23 +1072,20 @@ N/A - no Westminster polling</br> for Northern Ireland
       <div style="width: {{CON6}}; background-color: #0087DC;"></div>
       <div style="width: {{CON7}}; background-color: #0087DC;"></div>
       <div style="width: {{CON8}}; background-color: #0087DC;"></div>
-      <div style="width: {{RFM1}}; background-color: #24C7DE;"></div>
-      <div style="width: {{RFM2}}; background-color: #24C7DE;"></div>
-      <div style="width: {{RFM3}}; background-color: #24C7DE;"></div>
-      <div style="width: {{RFM4}}; background-color: #24C7DE;"></div>
-      <div style="width: {{RFM5}}; background-color: #24C7DE;"></div>
-      <div style="width: {{RFM6}}; background-color: #24C7DE;"></div>
-      <div style="width: {{RFM7}}; background-color: #24C7DE;"></div>
-      <div style="width: {{RFM8}}; background-color: #24C7DE;"></div>
+      <div style="width: {{RFM1}}; background-color: #34D8EF;"></div>
+      <div style="width: {{RFM2}}; background-color: #34D8EF;"></div>
+      <div style="width: {{RFM3}}; background-color: #34D8EF;"></div>
+      <div style="width: {{RFM4}}; background-color: #34D8EF;"></div>
+      <div style="width: {{RFM5}}; background-color: #34D8EF;"></div>
+      <div style="width: {{RFM6}}; background-color: #34D8EF;"></div>
+      <div style="width: {{RFM7}}; background-color: #34D8EF;"></div>
+      <div style="width: {{RFM8}}; background-color: #34D8EF;"></div>
     </div>
   </div>
 </div>
 
 <div class="bar-wrapper">
-
   <div class="bar-container small">
-
-    <!-- Stacked bar -->
     <div style="display: flex; height: 100%; width: 100%; position: relative; z-index: 1;">
       <div style="width: {{PrevPLC}}; background-color: #005B54;"></div>
       <div style="width: {{PrevGRN}}; background-color: #6AB023;"></div>
@@ -1115,22 +1094,24 @@ N/A - no Westminster polling</br> for Northern Ireland
       <div style="width: {{PrevLDM}}; background-color: #FAA61A;"></div>
       <div style="width: {{PrevOTH}}; background-color: #DCDCDC;"></div>
       <div style="width: {{PrevCON}}; background-color: #0087DC;"></div>
-      <div style="width: {{PrevRFM}}; background-color: #24C7DE;"></div>
+      <div style="width: {{PrevRFM}}; background-color: #34D8EF;"></div>
+    </div>
   </div>
-</div>
 
 {{#if Now?}}
   <div class="bar-title small">GE2024
 {{/if}}
 
 {{#if Disc}}
-      <i><span style="color: #550000; font-weight: bold;">⠀⠀[NOT A BY-ELECTION FORECAST]</span></i>
+  <i><span style="color: #550000; font-weight: bold;">⠀⠀[NOT A BY-ELECTION FORECAST]</span></i>
 {{/if}}
 
 {{#if Now?}}
-</div>
+  </div>
 {{/if}}
 
 {{#if Prev?}}
   <div class="bar-title small">GE2019 (notional)</div>
 {{/if}}
+
+</div>
