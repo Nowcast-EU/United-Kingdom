@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Map Comparison</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: #fff;
+      padding: 2rem 1rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .map-container {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%; /* 16:9 */
+    }
+
+    .map-container iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 4px;
+    }
+
+    .controls {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 10;
+      display: flex;
+      gap: 6px;
+    }
+
+    .map-btn {
+      padding: 7px 16px;
+      border: 1.5px solid rgba(255,255,255,0.6);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.85);
+      color: #444;
+      font-size: 0.85rem;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      transition: all 0.15s;
+    }
+
+    .map-btn:hover {
+      background: rgba(255,255,255,0.95);
+    }
+
+    .map-btn.active {
+      background: #111;
+      color: #fff;
+      border-color: #111;
+    }
+
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="map-container">
+
+    <div class="controls">
+      <button class="map-btn active" onclick="showMap(0, this)">Estimates</button>
+      <button class="map-btn"        onclick="showMap(1, this)">Census data</button>
+    </div>
+
+    <!-- EDIT: Replace the src values with your Flourish embed URLs.
+         In Flourish, click Publish → Export & publish → Get embed code.
+         Copy only the src URL from the <iframe> tag and paste it below. -->
+    <iframe id="map-0" src="https://public.flourish.studio/visualisation/29149657/" allowfullscreen></iframe>
+    <iframe id="map-1" src="https://public.flourish.studio/visualisation/29193420/" allowfullscreen class="hidden"></iframe>
+
+  </div>
+
+  <script>
+    function showMap(idx, btn) {
+      document.querySelectorAll('.map-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      document.getElementById('map-0').classList.toggle('hidden', idx !== 0);
+      document.getElementById('map-1').classList.toggle('hidden', idx !== 1);
+    }
+  </script>
+
+</body>
+</html>
