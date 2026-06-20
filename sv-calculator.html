@@ -1,272 +1,338 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Supplementary Vote Calculator</title>
+
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    font-size: 13px;
-    background: #f5f5f4;
-    color: #1a1a1a;
-    padding: 24px 16px;
-    min-height: 100vh;
-  }
+@media (min-width: 768px) {
+  html { font-size: 80%; }
+}
 
-  h1 {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 4px;
-    color: #111;
-  }
+body {
+  font-family: Inter, system-ui, sans-serif;
+  background: #fff;
+  color: #0f172a;
+  margin: 0;
+  padding: 0 64px 40px 64px;
+  scrollbar-gutter: stable;
+  overflow-x: hidden;
+}
 
-  .subtitle {
-    font-size: 12px;
-    color: #666;
-    margin-bottom: 20px;
-  }
+@media (max-width: 768px) {
+  body { padding: 0 8px 24px 8px; }
+}
 
-  .sv-grid {
-    display: grid;
-    grid-template-columns: 260px 1fr;
-    gap: 16px;
-    align-items: start;
-    max-width: 1100px;
-  }
+h1, h2.subtitle {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  max-width: 100%;
+}
 
-  @media (max-width: 720px) {
-    .sv-grid { grid-template-columns: 1fr; }
-  }
+h1 {
+  font-weight: 600;
+  font-size: clamp(1.2rem, 4vw, 2rem);
+  line-height: 1.25;
+  margin-top: 24px;
+  margin-bottom: 4px;
+}
 
-  .panel {
-    background: #fff;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    overflow: hidden;
-  }
+h2.subtitle {
+  font-weight: 400;
+  color: #555;
+  font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+  margin-top: 0;
+  margin-bottom: 16px;
+}
 
-  .panel + .panel { margin-top: 12px; }
+/* ── Page layout: results left, sliders right on desktop ── */
+.page-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+  margin-top: 4px;
+}
 
-  .panel-title {
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .07em;
-    color: #888;
-    padding: 8px 12px;
-    border-bottom: 1px solid #eee;
-    background: #fafaf9;
-  }
+@media (max-width: 768px) {
+  .page-layout { grid-template-columns: 1fr; gap: 16px; }
+}
 
-  /* ── Tables ── */
-  table { border-collapse: collapse; width: 100%; }
-  th, td { padding: 5px 10px; text-align: right; }
-  th { font-size: 11px; font-weight: 600; color: #888; background: #fafaf9; }
-  td { color: #111; border-bottom: 1px solid #f0f0f0; }
-  tr:last-child td { border-bottom: none; }
-  .row-label { text-align: left; font-weight: 500; display: flex; align-items: center; gap: 6px; }
-  .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
-  .mono { font-family: "SF Mono", "Fira Code", Consolas, monospace; }
-  tfoot td { font-weight: 600; border-top: 2px solid #e0e0e0 !important; border-bottom: none; }
+/* ── Section headings ── */
+.section-label {
+  font-size: 0.78rem;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  margin-bottom: 4px;
+}
 
-  /* ── FP inputs ── */
-  .fp-input {
-    width: 60px;
-    font-size: 12px;
-    font-family: "SF Mono", "Fira Code", Consolas, monospace;
-    text-align: right;
-    padding: 3px 6px;
-    border: 1px solid #d0d0d0;
-    border-radius: 4px;
-    background: #fafaf9;
-    color: #111;
-  }
-  .fp-input:focus { outline: none; border-color: #4a90d9; background: #fff; }
-  .fp-input.auto { background: #f0f0f0; color: #888; cursor: default; }
-  .total-ok { color: #2a7a2a; }
-  .total-err { color: #c0392b; }
+/* ── Tables ── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0;
+  table-layout: fixed;
+}
 
-  /* ── Results ── */
-  .pct-winner { color: #2a7a2a; font-weight: 600; }
+th, td {
+  padding: 4px 6px;
+  border: 1px solid #e2e8f0;
+  text-align: left;
+  word-wrap: break-word;
+}
 
-  /* ── Matrix ── */
-  .matrix-wrap { overflow-x: auto; }
-  .mx-table { border-collapse: collapse; }
-  .mx-table th, .mx-table td {
-    padding: 4px 5px;
-    text-align: center;
-    font-size: 12px;
-    border: 1px solid #e8e8e8;
-    white-space: nowrap;
-    min-width: 36px;
-  }
-  .mx-table th {
-    background: #fafaf9;
-    font-size: 11px;
-    font-weight: 600;
-    color: #888;
-  }
-  .mx-table .from-label { text-align: left; min-width: 64px; }
-  .mx-diag { background: #1a1a1a !important; color: #1a1a1a !important; border-color: #1a1a1a !important; }
-  .mx-zero { color: #bbb; }
-  .mx-val { color: #fff; font-weight: 500; font-family: "SF Mono", "Fira Code", Consolas, monospace; }
-  .mx-non { background: #c0392b; color: #fff; font-weight: 500; font-family: "SF Mono", "Fira Code", Consolas, monospace; }
-  .mx-non-head { background: #c0392b !important; color: #fff !important; }
+th {
+  background: #f1f5f9;
+  font-weight: 650;
+  height: 28px;
+  text-align: center;
+  vertical-align: middle;
+}
 
-  /* ── Tabs ── */
-  .tab-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    padding: 8px 12px;
-    border-bottom: 1px solid #eee;
-    background: #fafaf9;
-  }
-  .tab-btn {
-    font-size: 11px;
-    font-weight: 600;
-    padding: 3px 10px;
-    border-radius: 20px;
-    border: 1px solid #d0d0d0;
-    background: transparent;
-    color: #666;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    transition: background 0.1s, color 0.1s;
-  }
-  .tab-btn:hover { background: #f0f0f0; }
-  .tab-btn.active { color: #fff; border-color: transparent; }
-  .tab-dot { width: 6px; height: 6px; border-radius: 50%; }
+td {
+  height: 30px;
+  vertical-align: middle;
+}
 
-  /* ── Sliders ── */
-  .slider-area { padding: 4px 0 4px; }
-  .slider-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 5px 12px;
-    border-bottom: 1px solid #f5f5f5;
-  }
-  .slider-row:last-of-type { border-bottom: none; }
-  .sl-lbl {
-    font-size: 12px;
-    color: #555;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    width: 120px;
-    flex-shrink: 0;
-  }
-  input[type="range"] {
-    flex: 1;
-    height: 4px;
-    accent-color: #4a90d9;
-    cursor: pointer;
-  }
-  input[type="range"]:disabled { opacity: 0.4; cursor: default; }
-  .sl-val {
-    font-size: 12px;
-    font-family: "SF Mono", "Fira Code", Consolas, monospace;
-    width: 36px;
-    text-align: right;
-    flex-shrink: 0;
-    font-weight: 500;
-  }
-  .sl-val.auto { color: #aaa; font-style: italic; font-weight: 400; }
+/* Party column with left colour bar */
+td.party-column {
+  font-weight: bold;
+  position: relative;
+  padding-left: 14px;
+  color: black;
+}
+td.party-column::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0;
+  width: 8px; height: 100%;
+  border-radius: 2px 0 0 2px;
+  background-color: var(--party-color);
+}
 
-  .slider-total {
-    display: flex;
-    justify-content: space-between;
-    padding: 6px 12px 8px;
-    font-size: 12px;
-    border-top: 1px solid #eee;
-    margin-top: 2px;
-    color: #888;
-  }
-  .slider-total .val { font-family: "SF Mono", "Fira Code", Consolas, monospace; font-weight: 600; }
+td.result-column {
+  font-weight: bold;
+  text-align: center;
+}
+td.result-column.winner {
+  color: #008500;
+}
 
-  /* ── Reset button ── */
-  .reset-btn {
-    margin-top: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    font-size: 12px;
-    padding: 7px 14px;
-    border-radius: 6px;
-    border: 1px solid #d0d0d0;
-    background: #fff;
-    color: #555;
-    cursor: pointer;
-    width: 100%;
-    transition: background 0.1s;
-  }
-  .reset-btn:hover { background: #f5f5f5; }
+tfoot td {
+  font-weight: bold;
+  text-align: center;
+  background: #f1f5f9;
+  height: 14px;
+  vertical-align: middle;
+}
+tfoot td:first-child { text-align: left; padding-left: 14px; }
+
+/* FP input cell */
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2px;
+}
+.input-wrapper input {
+  width: 52px;
+  padding: 3px 4px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  text-align: right;
+  font-size: inherit;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+.input-wrapper input:focus { outline: none; border-color: #3b82f6; }
+.input-wrapper input.auto {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: default;
+}
+.percent-sign { font-size: 0.85em; color: #64748b; }
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; }
+
+/* ── Buttons ── */
+.button-container {
+  display: flex;
+  gap: 0;
+  margin-top: 14px;
+  width: 100%;
+}
+
+button#reset {
+  background: #008500;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 600;
+  width: 100%;
+  transition: background 0.2s;
+}
+button#reset:hover { background: #005f00; }
+
+/* ── Total validity ── */
+.total-ok { color: #008500; font-weight: bold; }
+.total-err { color: #bb0000; font-weight: bold; }
+
+/* ── Sliders panel ── */
+.sliders-panel {
+  /* sits right of table on desktop, below on mobile */
+}
+
+/* Party tabs */
+.tab-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.tab-btn {
+  font-size: 0.78rem;
+  font-weight: 650;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid #cbd5e1;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+}
+.tab-btn:hover:not(.active) { background: #f1f5f9; }
+.tab-btn.active { color: #fff; border-color: transparent; }
+.tab-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+/* Slider rows */
+.slider-list { display: flex; flex-direction: column; gap: 0; }
+
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+.slider-row:last-of-type { border-bottom: none; }
+
+.sl-lbl {
+  font-size: 0.82rem;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 118px;
+  flex-shrink: 0;
+  font-weight: 500;
+}
+.sl-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+input[type="range"] {
+  flex: 1;
+  height: 4px;
+  accent-color: #3b82f6;
+  cursor: pointer;
+  min-width: 0;
+}
+input[type="range"]:disabled { opacity: 0.35; cursor: default; }
+
+.sl-val {
+  font-size: 0.82rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  width: 36px;
+  text-align: right;
+  flex-shrink: 0;
+  color: #0f172a;
+}
+.sl-val.auto { color: #94a3b8; font-weight: 400; font-style: italic; }
+
+.slider-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0 0;
+  margin-top: 4px;
+  border-top: 1px solid #e2e8f0;
+  font-size: 0.82rem;
+  color: #64748b;
+  font-weight: 600;
+}
+.slider-total .tot-val { font-variant-numeric: tabular-nums; }
+
+@media (max-width: 768px) {
+  table, th, td { font-size: 13px; }
+  .input-wrapper input { width: 46px; }
+}
+
+@media (max-width: 480px) {
+  table, th, td { font-size: 12px; }
+  .input-wrapper input { width: 40px; }
+}
+
 </style>
 </head>
 <body>
 
 <h1>Supplementary Vote Calculator</h1>
-<p class="subtitle">Enter first preference vote shares, then adjust second preference transfer rates using the matrix below.</p>
+<h2 class="subtitle">Enter first preference vote shares and adjust second preference transfer rates to project a result.</h2>
 
-<div class="sv-grid">
+<div class="page-layout">
 
-  <!-- LEFT COLUMN -->
+  <!-- LEFT: Results table -->
   <div>
-    <div class="panel">
-      <div class="panel-title">Round results</div>
-      <table>
-        <thead>
-          <tr>
-            <th style="text-align:left">Party</th>
-            <th>1st round</th>
-            <th>2nd round</th>
-            <th>% of round</th>
-          </tr>
-        </thead>
-        <tbody id="results-body"></tbody>
-      </table>
-    </div>
+    <div class="section-label">Results</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="text-align:left">Party</th>
+          <th>1st pref %</th>
+          <th>2nd round %</th>
+          <th>% of round</th>
+        </tr>
+      </thead>
+      <tbody id="results-body"></tbody>
+      <tfoot>
+        <tr>
+          <td>Total</td>
+          <td id="fp-total" style="text-align:center">100.0%</td>
+          <td></td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
 
-    <div class="panel">
-      <div class="panel-title">1st preference vote share</div>
-      <table>
-        <thead><tr><th style="text-align:left">Party</th><th>Share</th></tr></thead>
-        <tbody id="fp-body"></tbody>
-        <tfoot>
-          <tr>
-            <td style="text-align:left;font-size:11px;color:#888">Total</td>
-            <td style="text-align:right" class="mono" id="fp-total">100.0%</td>
-          </tr>
-        </tfoot>
-      </table>
+    <div class="button-container">
+      <button id="reset" onclick="resetAll()">↺ Reset to defaults</button>
     </div>
-
-    <button class="reset-btn" onclick="resetAll()">↺ Reset to defaults</button>
   </div>
 
-  <!-- RIGHT COLUMN -->
-  <div>
-    <div class="panel">
-      <div class="panel-title">Supplementary vote matrix</div>
-      <div class="matrix-wrap">
-        <table class="mx-table">
-          <thead id="mx-head"></thead>
-          <tbody id="mx-body"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-title">Adjust transfers from…</div>
-      <div class="tab-row" id="tab-bar"></div>
-      <div class="slider-area" id="slider-area"></div>
+  <!-- RIGHT: Sliders -->
+  <div class="sliders-panel">
+    <div class="section-label">2nd preference transfers from…</div>
+    <div class="tab-row" id="tab-bar"></div>
+    <div class="slider-list" id="slider-area"></div>
+    <div class="slider-total">
+      <span>Total</span>
+      <span class="tot-val" id="sl-total">100%</span>
     </div>
   </div>
 
@@ -311,7 +377,8 @@ let activeTab = 'RFM';
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 function getOth() {
-  return Math.max(0, 100 - PARTIES.filter(p => !p.auto).reduce((a, p) => a + (fpVotes[p.id] || 0), 0));
+  return Math.max(0, 100 - PARTIES.filter(p => !p.auto)
+    .reduce((a, p) => a + (fpVotes[p.id] || 0), 0));
 }
 
 function allFP() {
@@ -352,127 +419,92 @@ function partyName(id) {
   return (PARTIES.find(p => p.id === id) || {}).name || id;
 }
 
-// ── Render: FP table ───────────────────────────────────────────────────────
-
-function renderFP() {
-  const fp = allFP();
-  const body = document.getElementById('fp-body');
-  body.innerHTML = '';
-  PARTIES.forEach(p => {
-    const val = fp[p.id] || 0;
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><div class="row-label">
-        <span class="dot" style="background:${p.color}"></span>${p.id}
-      </div></td>
-      <td><input class="fp-input mono${p.auto ? ' auto' : ''}"
-        type="number" min="0" max="100" step="0.1"
-        value="${val.toFixed(1)}"${p.auto ? ' readonly' : ''}></td>`;
-    if (!p.auto) {
-      tr.querySelector('input').addEventListener('input', e => {
-        let v = parseFloat(e.target.value);
-        if (isNaN(v)) v = 0;
-        fpVotes[p.id] = v;
-        updateAll();
-      });
-    }
-    body.appendChild(tr);
-  });
-  const total = Object.values(fp).reduce((a, b) => a + b, 0);
-  const el = document.getElementById('fp-total');
-  el.textContent = total.toFixed(1) + '%';
-  el.className = 'mono ' + (Math.abs(total - 100) < 0.15 ? 'total-ok' : 'total-err');
-}
-
-// ── Render: Results table ─────────────────────────────────────────────────
+// ── Render: Results table (with inline FP inputs) ─────────────────────────
 
 function renderResults() {
   const fp = allFP();
   const { c1, c2, v1, v2 } = computeRound2();
   const tot = v1 + v2;
   const body = document.getElementById('results-body');
+
+  // Save any focused input id so we can restore focus after re-render
+  const focused = document.activeElement && document.activeElement.dataset.partyId;
+
   body.innerHTML = '';
+
   PARTIES.forEach(p => {
     const isTop = p.id === c1 || p.id === c2;
     const r2val = p.id === c1 ? v1 : p.id === c2 ? v2 : null;
     const pct = r2val !== null ? (r2val / tot * 100) : null;
     const winner = r2val !== null && r2val === Math.max(v1, v2);
+    const fpVal = fp[p.id] || 0;
+
     const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><div class="row-label">
-        <span class="dot" style="background:${p.color}"></span>${p.id}
-      </div></td>
-      <td class="mono">${(fp[p.id] || 0).toFixed(1)}%</td>
-      <td class="mono">${isTop ? r2val.toFixed(1) + '%' : '—'}</td>
-      <td class="mono${winner ? ' pct-winner' : ''}">${isTop ? pct.toFixed(1) + '%' : '—'}</td>`;
-    body.appendChild(tr);
-  });
-}
 
-// ── Render: Matrix ────────────────────────────────────────────────────────
+    // Party label cell
+    const partyTd = document.createElement('td');
+    partyTd.className = 'party-column';
+    partyTd.style.setProperty('--party-color', p.color);
+    partyTd.textContent = p.id;
+    tr.appendChild(partyTd);
 
-function renderMatrix() {
-  const COLS = [...PARTIES.map(p => p.id), 'NON'];
-  const head = document.getElementById('mx-head');
-  const body = document.getElementById('mx-body');
-  head.innerHTML = '';
-  body.innerHTML = '';
-
-  // Header row
-  const hr = document.createElement('tr');
-  const cornerTh = document.createElement('th');
-  cornerTh.className = 'from-label';
-  cornerTh.textContent = 'From / to';
-  hr.appendChild(cornerTh);
-  COLS.forEach(c => {
-    const th = document.createElement('th');
-    th.textContent = c === 'NON' ? 'N/V' : c;
-    if (c === 'NON') {
-      th.className = 'mx-non-head';
+    // 1st pref input cell
+    const fpTd = document.createElement('td');
+    const wrapper = document.createElement('div');
+    wrapper.className = 'input-wrapper';
+    const inp = document.createElement('input');
+    inp.type = 'number';
+    inp.min = 0; inp.max = 100; inp.step = 0.1;
+    inp.value = fpVal.toFixed(1);
+    inp.dataset.partyId = p.id;
+    if (p.auto) {
+      inp.className = 'auto';
+      inp.readOnly = true;
     } else {
-      th.style.borderTop = '2px solid ' + partyColor(c);
+      inp.addEventListener('change', e => {
+        let v = parseFloat(e.target.value);
+        if (isNaN(v)) v = 0;
+        fpVotes[p.id] = Math.max(0, Math.min(100, v));
+        updateAll();
+      });
     }
-    hr.appendChild(th);
-  });
-  head.appendChild(hr);
+    const pctSign = document.createElement('span');
+    pctSign.className = 'percent-sign';
+    pctSign.textContent = '%';
+    wrapper.appendChild(inp);
+    wrapper.appendChild(pctSign);
+    fpTd.appendChild(wrapper);
+    tr.appendChild(fpTd);
 
-  // Data rows
-  PARTIES.forEach(from => {
-    const tr = document.createElement('tr');
-    const labelTd = document.createElement('td');
-    labelTd.className = 'from-label';
-    labelTd.innerHTML = `<div class="row-label">
-      <span class="dot" style="background:${from.color}"></span>${from.id}
-    </div>`;
-    tr.appendChild(labelTd);
-    COLS.forEach(toId => {
-      const td = document.createElement('td');
-      if (toId === from.id) {
-        td.className = 'mx-diag';
-      } else {
-        const v = toId === 'NON'
-          ? (transfers[from.id]['NON'] || 0)
-          : (transfers[from.id][toId] || 0);
-        if (v > 0) {
-          if (toId === 'NON') {
-            td.className = 'mx-non';
-          } else {
-            td.className = 'mx-val';
-            td.style.background = partyColor(toId);
-          }
-          td.textContent = v + '%';
-        } else {
-          td.className = 'mx-zero';
-          td.textContent = '0%';
-        }
-      }
-      tr.appendChild(td);
-    });
+    // 2nd round absolute value cell
+    const r2Td = document.createElement('td');
+    r2Td.className = 'result-column';
+    r2Td.textContent = isTop ? r2val.toFixed(1) + '%' : '—';
+    tr.appendChild(r2Td);
+
+    // % of round cell
+    const pctTd = document.createElement('td');
+    pctTd.className = 'result-column' + (winner ? ' winner' : '');
+    pctTd.textContent = isTop ? pct.toFixed(1) + '%' : '—';
+    tr.appendChild(pctTd);
+
     body.appendChild(tr);
   });
+
+  // Update footer total
+  const totalVal = Object.values(fp).reduce((a, b) => a + b, 0);
+  const totEl = document.getElementById('fp-total');
+  totEl.textContent = totalVal.toFixed(1) + '%';
+  totEl.className = Math.abs(totalVal - 100) < 0.15 ? 'total-ok' : 'total-err';
+
+  // Restore focus
+  if (focused) {
+    const el = body.querySelector(`input[data-party-id="${focused}"]`);
+    if (el) { el.focus(); el.select(); }
+  }
 }
 
-// ── Render: Sliders ───────────────────────────────────────────────────────
+// ── Render: Tabs + sliders ────────────────────────────────────────────────
 
 function renderSliders() {
   // Tabs
@@ -482,7 +514,7 @@ function renderSliders() {
     const btn = document.createElement('button');
     btn.className = 'tab-btn' + (p.id === activeTab ? ' active' : '');
     if (p.id === activeTab) btn.style.background = p.color;
-    const dotColor = p.id === activeTab ? 'rgba(255,255,255,0.6)' : p.color;
+    const dotColor = p.id === activeTab ? 'rgba(255,255,255,0.65)' : p.color;
     btn.innerHTML = `<span class="tab-dot" style="background:${dotColor}"></span>${p.id}`;
     btn.addEventListener('click', () => { activeTab = p.id; renderSliders(); });
     tabBar.appendChild(btn);
@@ -491,41 +523,49 @@ function renderSliders() {
   // Slider rows
   const area = document.getElementById('slider-area');
   area.innerHTML = '';
+
   const toList = [
     ...PARTIES.filter(p => p.id !== activeTab),
     { id: 'NON', name: 'Non-vote (2nd)', color: '#c0392b' }
   ];
+
   toList.forEach(to => {
     const isNon = to.id === 'NON';
     const v = isNon
       ? (transfers[activeTab]['NON'] || 0)
       : (transfers[activeTab][to.id] || 0);
+
     const row = document.createElement('div');
     row.className = 'slider-row';
     row.dataset.toId = to.id;
-    row.innerHTML = `
-      <div class="sl-lbl">
-        <span class="dot" style="background:${to.color}"></span>
-        ${isNon ? 'Non-vote (2nd)' : to.name}
-      </div>
-      <input type="range" min="0" max="100" step="1" value="${v}"${isNon ? ' disabled' : ''}>
-      <span class="sl-val${isNon ? ' auto' : ''}" data-key="${to.id}">${v}%</span>`;
-    if (!isNon) {
-      const sl = row.querySelector('input');
+
+    const lbl = document.createElement('div');
+    lbl.className = 'sl-lbl';
+    lbl.innerHTML = `<span class="sl-dot" style="background:${to.color}"></span>${isNon ? 'Non-vote (2nd)' : to.name}`;
+
+    const sl = document.createElement('input');
+    sl.type = 'range'; sl.min = 0; sl.max = 100; sl.step = 1;
+    sl.value = v;
+    if (isNon) sl.disabled = true;
+    else {
       sl.addEventListener('input', () => {
         transfers[activeTab][to.id] = parseInt(sl.value);
         recalcNon(activeTab);
-        updateAll();
+        updateSliderDisplay();
+        updateResults();
       });
     }
+
+    const valSpan = document.createElement('span');
+    valSpan.className = 'sl-val' + (isNon ? ' auto' : '');
+    valSpan.dataset.key = to.id;
+    valSpan.textContent = v + '%';
+
+    row.appendChild(lbl);
+    row.appendChild(sl);
+    row.appendChild(valSpan);
     area.appendChild(row);
   });
-
-  // Total row
-  const totDiv = document.createElement('div');
-  totDiv.className = 'slider-total';
-  totDiv.innerHTML = `<span>Total</span><span class="val" id="sl-total"></span>`;
-  area.appendChild(totDiv);
 
   updateSliderDisplay();
 }
@@ -539,7 +579,7 @@ function updateSliderDisplay() {
       ? (transfers[activeTab]['NON'] || 0)
       : (transfers[activeTab][toId] || 0);
     total += v;
-    const sl = row.querySelector('input');
+    const sl = row.querySelector('input[type=range]');
     const valEl = row.querySelector('.sl-val');
     if (sl) sl.value = v;
     if (valEl) valEl.textContent = v + '%';
@@ -547,20 +587,18 @@ function updateSliderDisplay() {
   const totEl = document.getElementById('sl-total');
   if (totEl) {
     totEl.textContent = total + '%';
-    totEl.style.color = Math.abs(total - 100) < 1 ? '#2a7a2a' : '#c0392b';
+    totEl.style.color = Math.abs(total - 100) < 1 ? '#008500' : '#bb0000';
   }
 }
 
-// ── Master update ─────────────────────────────────────────────────────────
-
-function updateAll() {
-  renderFP();
+function updateResults() {
   renderResults();
-  renderMatrix();
-  updateSliderDisplay();
 }
 
-// ── Reset ─────────────────────────────────────────────────────────────────
+function updateAll() {
+  renderResults();
+  updateSliderDisplay();
+}
 
 function resetAll() {
   fpVotes = { ...DEFAULT_FP };
@@ -571,7 +609,6 @@ function resetAll() {
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────
-
 renderSliders();
 updateAll();
 </script>
