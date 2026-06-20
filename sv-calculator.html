@@ -259,18 +259,59 @@ button#reset:hover { background: #005f00; }
 }
 .sl-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
-/* Range slider with per-row accent colour via CSS var */
+/* Range slider — cross-browser track reset to kill browser default fills */
 input[type="range"] {
   flex: 1;
-  height: 4px;
-  accent-color: var(--sl-color, #3b82f6);
-  cursor: pointer;
   min-width: 0;
+  cursor: pointer;
+  /* reset everything */
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  height: 20px;          /* enough hit area */
+  padding: 0;
+  margin: 0;
+}
+/* Track: Webkit (Chrome, Safari, Edge) */
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: #d1d5db;
+}
+/* Track: Firefox */
+input[type="range"]::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: #d1d5db;
+  border: none;
+}
+/* Thumb: Webkit */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--sl-color, #3b82f6);
+  margin-top: -5px;      /* centre on the 4px track */
+  cursor: pointer;
+  border: none;
+}
+/* Thumb: Firefox */
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--sl-color, #3b82f6);
+  cursor: pointer;
+  border: none;
 }
 input[type="range"]:disabled {
   opacity: 0.35;
   cursor: default;
 }
+input[type="range"]:disabled::-webkit-slider-thumb { cursor: default; }
+input[type="range"]:disabled::-moz-range-thumb    { cursor: default; }
 
 .sl-val {
   font-size: 0.82rem;
@@ -570,15 +611,19 @@ function renderSliders() {
     } else {
       sl.addEventListener('input', () => {
         const desired = parseInt(sl.value);
-        // How much room do all OTHER manual sliders leave?
+        // Sum of every OTHER manual (non-NON) slider — don't touch their values
         const othersTotal = PARTIES.filter(p => p.id !== activeTab && p.id !== to.id)
           .reduce((a, p) => a + (transfers[activeTab][p.id] || 0), 0);
+        // If non-vote is already 0, this slider can't go higher than its current value
+        // (room freed only when othersTotal drops). Otherwise allow up to 100-others.
         const maxAllowed = Math.max(0, 100 - othersTotal);
         const clamped = Math.min(desired, maxAllowed);
-        // Snap the slider back if it was clamped
-        if (clamped !== desired) sl.value = clamped;
+        // Snap thumb back without affecting any other slider
+        sl.value = clamped;
         transfers[activeTab][to.id] = clamped;
+        // Recompute NON (auto) only
         recalcNon(activeTab);
+        // Refresh display values + NON slider position — no other slider's value changes
         updateSliderDisplay();
         renderResults();
       });
@@ -609,16 +654,10 @@ function updateSliderDisplay() {
     total += v;
     const sl = row.querySelector('input[type=range]');
     const valEl = row.querySelector('.sl-val');
-    if (sl && toId === 'NON') sl.value = v; // keep NON slider in sync
+    // Only sync the NON slider position (it's auto-calculated).
+    // Never touch other sliders' value/max — they move only when the user drags them.
+    if (sl && toId === 'NON') sl.value = v;
     if (valEl) valEl.textContent = v + '%';
-
-    // Dynamically cap each non-NON slider's max to prevent going over 100
-    if (sl && toId !== 'NON') {
-      const othersTotal = PARTIES.filter(p => p.id !== activeTab && p.id !== toId)
-        .reduce((a, p) => a + (transfers[activeTab][p.id] || 0), 0);
-      const maxAllowed = Math.max(0, 100 - othersTotal);
-      sl.max = maxAllowed;
-    }
   });
   const totEl = document.getElementById('sl-total');
   if (totEl) {
