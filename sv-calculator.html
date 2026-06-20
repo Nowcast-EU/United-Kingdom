@@ -49,17 +49,23 @@ h2.subtitle {
   margin-bottom: 16px;
 }
 
-/* ── Page layout: results left, sliders right on desktop ── */
+/* ── Page layout: 25% table / 75% sliders on desktop ── */
 .page-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 3fr;
   gap: 24px;
-  align-items: start;
+  align-items: stretch;   /* both columns stretch to the same height */
   margin-top: 4px;
 }
 
 @media (max-width: 768px) {
   .page-layout { grid-template-columns: 1fr; gap: 16px; }
+}
+
+/* Left column: flex column so button stays at bottom */
+.left-col {
+  display: flex;
+  flex-direction: column;
 }
 
 /* ── Section headings ── */
@@ -100,48 +106,36 @@ td {
   vertical-align: middle;
 }
 
-/* Party column with left colour bar */
+/* Party name cell — colour strip on the RIGHT edge */
 td.party-column {
   font-weight: bold;
   position: relative;
-  padding-left: 14px;
+  padding-right: 12px;   /* room for the strip on the right */
+  padding-left: 6px;
   color: black;
 }
-td.party-column::before {
+td.party-column::after {
   content: "";
   position: absolute;
-  left: 0; top: 0;
-  width: 8px; height: 100%;
-  border-radius: 2px 0 0 2px;
+  right: 0; top: 0;
+  width: 6px; height: 100%;
+  border-radius: 0 2px 2px 0;
   background-color: var(--party-color);
 }
 
-td.result-column {
-  font-weight: bold;
+/* Input cell — centred */
+td.input-cell {
   text-align: center;
 }
-td.result-column.winner {
-  color: #008500;
-}
 
-tfoot td {
-  font-weight: bold;
-  text-align: center;
-  background: #f1f5f9;
-  height: 14px;
-  vertical-align: middle;
-}
-tfoot td:first-child { text-align: left; padding-left: 14px; }
-
-/* FP input cell */
 .input-wrapper {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 2px;
 }
 .input-wrapper input {
-  width: 52px;
+  width: 48px;
   padding: 3px 4px;
   border: 1px solid #cbd5e1;
   border-radius: 4px;
@@ -162,12 +156,28 @@ input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 input[type=number] { -moz-appearance: textfield; }
 
-/* ── Buttons ── */
+td.result-column {
+  font-weight: bold;
+  text-align: center;
+}
+td.result-column.winner { color: #008500; }
+
+tfoot td {
+  font-weight: bold;
+  text-align: center;
+  background: #f1f5f9;
+  height: 14px;
+  vertical-align: middle;
+}
+tfoot td:first-child { text-align: left; padding-left: 6px; }
+
+.total-ok { color: #008500; font-weight: bold; }
+.total-err { color: #bb0000; font-weight: bold; }
+
+/* ── Reset button — pushed to bottom of left col ── */
 .button-container {
-  display: flex;
-  gap: 0;
-  margin-top: 14px;
-  width: 100%;
+  margin-top: auto;
+  padding-top: 14px;
 }
 
 button#reset {
@@ -185,16 +195,13 @@ button#reset {
 }
 button#reset:hover { background: #005f00; }
 
-/* ── Total validity ── */
-.total-ok { color: #008500; font-weight: bold; }
-.total-err { color: #bb0000; font-weight: bold; }
-
-/* ── Sliders panel ── */
+/* ── Sliders panel — fills height to match table col ── */
 .sliders-panel {
-  /* sits right of table on desktop, below on mobile */
+  display: flex;
+  flex-direction: column;
 }
 
-/* Party tabs */
+/* Tabs */
 .tab-row {
   display: flex;
   flex-wrap: wrap;
@@ -221,15 +228,22 @@ button#reset:hover { background: #005f00; }
 .tab-btn.active { color: #fff; border-color: transparent; }
 .tab-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
-/* Slider rows */
-.slider-list { display: flex; flex-direction: column; gap: 0; }
+/* Slider list stretches to fill remaining space */
+.slider-list {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  /* distribute rows evenly so they stretch to fill height */
+  justify-content: space-between;
+}
 
 .slider-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 5px 0;
+  padding: 4px 0;
   border-bottom: 1px solid #f1f5f9;
+  flex: 1;                /* each row grows equally */
 }
 .slider-row:last-of-type { border-bottom: none; }
 
@@ -239,20 +253,24 @@ button#reset:hover { background: #005f00; }
   display: flex;
   align-items: center;
   gap: 5px;
-  width: 118px;
+  width: 120px;
   flex-shrink: 0;
   font-weight: 500;
 }
 .sl-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
+/* Range slider with per-row accent colour via CSS var */
 input[type="range"] {
   flex: 1;
   height: 4px;
-  accent-color: #3b82f6;
+  accent-color: var(--sl-color, #3b82f6);
   cursor: pointer;
   min-width: 0;
 }
-input[type="range"]:disabled { opacity: 0.35; cursor: default; }
+input[type="range"]:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
 
 .sl-val {
   font-size: 0.82rem;
@@ -275,17 +293,20 @@ input[type="range"]:disabled { opacity: 0.35; cursor: default; }
   font-size: 0.82rem;
   color: #64748b;
   font-weight: 600;
+  flex-shrink: 0;
 }
 .slider-total .tot-val { font-variant-numeric: tabular-nums; }
 
 @media (max-width: 768px) {
   table, th, td { font-size: 13px; }
-  .input-wrapper input { width: 46px; }
+  .input-wrapper input { width: 42px; }
+  .slider-list { justify-content: flex-start; gap: 2px; }
+  .slider-row { flex: none; }
 }
 
 @media (max-width: 480px) {
   table, th, td { font-size: 12px; }
-  .input-wrapper input { width: 40px; }
+  .input-wrapper input { width: 38px; }
 }
 
 </style>
@@ -297,23 +318,23 @@ input[type="range"]:disabled { opacity: 0.35; cursor: default; }
 
 <div class="page-layout">
 
-  <!-- LEFT: Results table -->
-  <div>
+  <!-- LEFT 25%: Results table -->
+  <div class="left-col">
     <div class="section-label">Results</div>
     <table>
       <thead>
         <tr>
           <th style="text-align:left">Party</th>
-          <th>1st pref %</th>
-          <th>2nd round %</th>
-          <th>% of round</th>
+          <th>1st %</th>
+          <th>2nd rd</th>
+          <th>% rd</th>
         </tr>
       </thead>
       <tbody id="results-body"></tbody>
       <tfoot>
         <tr>
           <td>Total</td>
-          <td id="fp-total" style="text-align:center">100.0%</td>
+          <td id="fp-total">100.0%</td>
           <td></td>
           <td></td>
         </tr>
@@ -325,7 +346,7 @@ input[type="range"]:disabled { opacity: 0.35; cursor: default; }
     </div>
   </div>
 
-  <!-- RIGHT: Sliders -->
+  <!-- RIGHT 75%: Sliders -->
   <div class="sliders-panel">
     <div class="section-label">2nd preference transfers from…</div>
     <div class="tab-row" id="tab-bar"></div>
@@ -410,16 +431,14 @@ function recalcNon(fromId) {
   transfers[fromId]['NON'] = Math.max(0, 100 - manual);
 }
 
-function partyColor(id) {
-  return (PARTIES.find(p => p.id === id) || {}).color || '#888';
+// How much headroom is left for the activeTab (excluding NON which is auto)
+function headroom() {
+  const manual = PARTIES.filter(p => p.id !== activeTab)
+    .reduce((a, p) => a + (transfers[activeTab][p.id] || 0), 0);
+  return Math.max(0, 100 - manual);
 }
 
-function partyName(id) {
-  if (id === 'NON') return 'Non-vote (2nd)';
-  return (PARTIES.find(p => p.id === id) || {}).name || id;
-}
-
-// ── Render: Results table (with inline FP inputs) ─────────────────────────
+// ── Render: Results table ─────────────────────────────────────────────────
 
 function renderResults() {
   const fp = allFP();
@@ -427,9 +446,7 @@ function renderResults() {
   const tot = v1 + v2;
   const body = document.getElementById('results-body');
 
-  // Save any focused input id so we can restore focus after re-render
   const focused = document.activeElement && document.activeElement.dataset.partyId;
-
   body.innerHTML = '';
 
   PARTIES.forEach(p => {
@@ -441,15 +458,16 @@ function renderResults() {
 
     const tr = document.createElement('tr');
 
-    // Party label cell
+    // Party name — colour strip on right
     const partyTd = document.createElement('td');
     partyTd.className = 'party-column';
     partyTd.style.setProperty('--party-color', p.color);
     partyTd.textContent = p.id;
     tr.appendChild(partyTd);
 
-    // 1st pref input cell
+    // 1st pref input — centred
     const fpTd = document.createElement('td');
+    fpTd.className = 'input-cell';
     const wrapper = document.createElement('div');
     wrapper.className = 'input-wrapper';
     const inp = document.createElement('input');
@@ -476,13 +494,13 @@ function renderResults() {
     fpTd.appendChild(wrapper);
     tr.appendChild(fpTd);
 
-    // 2nd round absolute value cell
+    // 2nd round value
     const r2Td = document.createElement('td');
     r2Td.className = 'result-column';
     r2Td.textContent = isTop ? r2val.toFixed(1) + '%' : '—';
     tr.appendChild(r2Td);
 
-    // % of round cell
+    // % of round
     const pctTd = document.createElement('td');
     pctTd.className = 'result-column' + (winner ? ' winner' : '');
     pctTd.textContent = isTop ? pct.toFixed(1) + '%' : '—';
@@ -491,13 +509,11 @@ function renderResults() {
     body.appendChild(tr);
   });
 
-  // Update footer total
   const totalVal = Object.values(fp).reduce((a, b) => a + b, 0);
   const totEl = document.getElementById('fp-total');
   totEl.textContent = totalVal.toFixed(1) + '%';
   totEl.className = Math.abs(totalVal - 100) < 0.15 ? 'total-ok' : 'total-err';
 
-  // Restore focus
   if (focused) {
     const el = body.querySelector(`input[data-party-id="${focused}"]`);
     if (el) { el.focus(); el.select(); }
@@ -546,13 +562,25 @@ function renderSliders() {
     const sl = document.createElement('input');
     sl.type = 'range'; sl.min = 0; sl.max = 100; sl.step = 1;
     sl.value = v;
-    if (isNon) sl.disabled = true;
-    else {
+    // accent-color via CSS custom property on the element
+    sl.style.setProperty('--sl-color', to.color);
+
+    if (isNon) {
+      sl.disabled = true;
+    } else {
       sl.addEventListener('input', () => {
-        transfers[activeTab][to.id] = parseInt(sl.value);
+        const desired = parseInt(sl.value);
+        // How much room do all OTHER manual sliders leave?
+        const othersTotal = PARTIES.filter(p => p.id !== activeTab && p.id !== to.id)
+          .reduce((a, p) => a + (transfers[activeTab][p.id] || 0), 0);
+        const maxAllowed = Math.max(0, 100 - othersTotal);
+        const clamped = Math.min(desired, maxAllowed);
+        // Snap the slider back if it was clamped
+        if (clamped !== desired) sl.value = clamped;
+        transfers[activeTab][to.id] = clamped;
         recalcNon(activeTab);
         updateSliderDisplay();
-        updateResults();
+        renderResults();
       });
     }
 
@@ -581,18 +609,22 @@ function updateSliderDisplay() {
     total += v;
     const sl = row.querySelector('input[type=range]');
     const valEl = row.querySelector('.sl-val');
-    if (sl) sl.value = v;
+    if (sl && toId === 'NON') sl.value = v; // keep NON slider in sync
     if (valEl) valEl.textContent = v + '%';
+
+    // Dynamically cap each non-NON slider's max to prevent going over 100
+    if (sl && toId !== 'NON') {
+      const othersTotal = PARTIES.filter(p => p.id !== activeTab && p.id !== toId)
+        .reduce((a, p) => a + (transfers[activeTab][p.id] || 0), 0);
+      const maxAllowed = Math.max(0, 100 - othersTotal);
+      sl.max = maxAllowed;
+    }
   });
   const totEl = document.getElementById('sl-total');
   if (totEl) {
     totEl.textContent = total + '%';
     totEl.style.color = Math.abs(total - 100) < 1 ? '#008500' : '#bb0000';
   }
-}
-
-function updateResults() {
-  renderResults();
 }
 
 function updateAll() {
