@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supplementary Vote Calculator</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 13px;
+    background: #f5f5f4;
+    color: #1a1a1a;
+    padding: 24px 16px;
+    min-height: 100vh;
+  }
+
+  h1 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #111;
+  }
+
+  .subtitle {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 20px;
+  }
+
+  .sv-grid {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 16px;
+    align-items: start;
+    max-width: 1100px;
+  }
+
+  @media (max-width: 720px) {
+    .sv-grid { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .panel + .panel { margin-top: 12px; }
+
+  .panel-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: #888;
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+    background: #fafaf9;
+  }
+
+  /* ── Tables ── */
+  table { border-collapse: collapse; width: 100%; }
+  th, td { padding: 5px 10px; text-align: right; }
+  th { font-size: 11px; font-weight: 600; color: #888; background: #fafaf9; }
+  td { color: #111; border-bottom: 1px solid #f0f0f0; }
+  tr:last-child td { border-bottom: none; }
+  .row-label { text-align: left; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
+  .mono { font-family: "SF Mono", "Fira Code", Consolas, monospace; }
+  tfoot td { font-weight: 600; border-top: 2px solid #e0e0e0 !important; border-bottom: none; }
+
+  /* ── FP inputs ── */
+  .fp-input {
+    width: 60px;
+    font-size: 12px;
+    font-family: "SF Mono", "Fira Code", Consolas, monospace;
+    text-align: right;
+    padding: 3px 6px;
+    border: 1px solid #d0d0d0;
+    border-radius: 4px;
+    background: #fafaf9;
+    color: #111;
+  }
+  .fp-input:focus { outline: none; border-color: #4a90d9; background: #fff; }
+  .fp-input.auto { background: #f0f0f0; color: #888; cursor: default; }
+  .total-ok { color: #2a7a2a; }
+  .total-err { color: #c0392b; }
+
+  /* ── Results ── */
+  .pct-winner { color: #2a7a2a; font-weight: 600; }
+
+  /* ── Matrix ── */
+  .matrix-wrap { overflow-x: auto; }
+  .mx-table { border-collapse: collapse; }
+  .mx-table th, .mx-table td {
+    padding: 4px 5px;
+    text-align: center;
+    font-size: 12px;
+    border: 1px solid #e8e8e8;
+    white-space: nowrap;
+    min-width: 36px;
+  }
+  .mx-table th {
+    background: #fafaf9;
+    font-size: 11px;
+    font-weight: 600;
+    color: #888;
+  }
+  .mx-table .from-label { text-align: left; min-width: 64px; }
+  .mx-diag { background: #1a1a1a !important; color: #1a1a1a !important; border-color: #1a1a1a !important; }
+  .mx-zero { color: #bbb; }
+  .mx-val { color: #fff; font-weight: 500; font-family: "SF Mono", "Fira Code", Consolas, monospace; }
+  .mx-non { background: #c0392b; color: #fff; font-weight: 500; font-family: "SF Mono", "Fira Code", Consolas, monospace; }
+  .mx-non-head { background: #c0392b !important; color: #fff !important; }
+
+  /* ── Tabs ── */
+  .tab-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+    background: #fafaf9;
+  }
+  .tab-btn {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid #d0d0d0;
+    background: transparent;
+    color: #666;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: background 0.1s, color 0.1s;
+  }
+  .tab-btn:hover { background: #f0f0f0; }
+  .tab-btn.active { color: #fff; border-color: transparent; }
+  .tab-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* ── Sliders ── */
+  .slider-area { padding: 4px 0 4px; }
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px;
+    border-bottom: 1px solid #f5f5f5;
+  }
+  .slider-row:last-of-type { border-bottom: none; }
+  .sl-lbl {
+    font-size: 12px;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    width: 120px;
+    flex-shrink: 0;
+  }
+  input[type="range"] {
+    flex: 1;
+    height: 4px;
+    accent-color: #4a90d9;
+    cursor: pointer;
+  }
+  input[type="range"]:disabled { opacity: 0.4; cursor: default; }
+  .sl-val {
+    font-size: 12px;
+    font-family: "SF Mono", "Fira Code", Consolas, monospace;
+    width: 36px;
+    text-align: right;
+    flex-shrink: 0;
+    font-weight: 500;
+  }
+  .sl-val.auto { color: #aaa; font-style: italic; font-weight: 400; }
+
+  .slider-total {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 12px 8px;
+    font-size: 12px;
+    border-top: 1px solid #eee;
+    margin-top: 2px;
+    color: #888;
+  }
+  .slider-total .val { font-family: "SF Mono", "Fira Code", Consolas, monospace; font-weight: 600; }
+
+  /* ── Reset button ── */
+  .reset-btn {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 12px;
+    padding: 7px 14px;
+    border-radius: 6px;
+    border: 1px solid #d0d0d0;
+    background: #fff;
+    color: #555;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.1s;
+  }
+  .reset-btn:hover { background: #f5f5f5; }
+</style>
+</head>
+<body>
+
+<h1>Supplementary Vote Calculator</h1>
+<p class="subtitle">Enter first preference vote shares, then adjust second preference transfer rates using the matrix below.</p>
+
+<div class="sv-grid">
+
+  <!-- LEFT COLUMN -->
+  <div>
+    <div class="panel">
+      <div class="panel-title">Round results</div>
+      <table>
+        <thead>
+          <tr>
+            <th style="text-align:left">Party</th>
+            <th>1st round</th>
+            <th>2nd round</th>
+            <th>% of round</th>
+          </tr>
+        </thead>
+        <tbody id="results-body"></tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">1st preference vote share</div>
+      <table>
+        <thead><tr><th style="text-align:left">Party</th><th>Share</th></tr></thead>
+        <tbody id="fp-body"></tbody>
+        <tfoot>
+          <tr>
+            <td style="text-align:left;font-size:11px;color:#888">Total</td>
+            <td style="text-align:right" class="mono" id="fp-total">100.0%</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <button class="reset-btn" onclick="resetAll()">↺ Reset to defaults</button>
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div>
+    <div class="panel">
+      <div class="panel-title">Supplementary vote matrix</div>
+      <div class="matrix-wrap">
+        <table class="mx-table">
+          <thead id="mx-head"></thead>
+          <tbody id="mx-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Adjust transfers from…</div>
+      <div class="tab-row" id="tab-bar"></div>
+      <div class="slider-area" id="slider-area"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const PARTIES = [
+  { id: 'RFM', name: 'Reform',        color: '#12B6CF' },
+  { id: 'LAB', name: 'Labour',        color: '#CC2222' },
+  { id: 'GRN', name: 'Green',         color: '#02A95B' },
+  { id: 'CON', name: 'Conservative',  color: '#0087DC' },
+  { id: 'LDM', name: 'Lib Dem',       color: '#FAA61A' },
+  { id: 'WPB', name: 'Workers',       color: '#8B0000' },
+  { id: 'RES', name: 'Residents',     color: '#555555' },
+  { id: 'OTH', name: 'Other',         color: '#888888', auto: true },
+];
+
+const DEFAULT_FP = { RFM: 30.7, LAB: 23.6, GRN: 19.1, CON: 10.3, LDM: 9.5, WPB: 1.4, RES: 0.0 };
+
+function makeDefaultTransfers() {
+  const t = {};
+  PARTIES.forEach(f => {
+    t[f.id] = {};
+    PARTIES.forEach(to => { if (to.id !== f.id) t[f.id][to.id] = 0; });
+    t[f.id]['NON'] = 100;
+  });
+  t['RFM']['CON'] = 67; t['RFM']['NON'] = 33;
+  t['LAB']['GRN'] = 67; t['LAB']['NON'] = 33;
+  t['GRN']['LAB'] = 67; t['GRN']['NON'] = 33;
+  t['CON']['RFM'] = 67; t['CON']['NON'] = 33;
+  t['LDM']['LAB'] = 35; t['LDM']['GRN'] = 35; t['LDM']['NON'] = 30;
+  t['WPB']['NON'] = 100;
+  t['RES']['NON'] = 100;
+  t['OTH']['NON'] = 100;
+  return t;
+}
+
+let fpVotes = { ...DEFAULT_FP };
+let transfers = makeDefaultTransfers();
+let activeTab = 'RFM';
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+
+function getOth() {
+  return Math.max(0, 100 - PARTIES.filter(p => !p.auto).reduce((a, p) => a + (fpVotes[p.id] || 0), 0));
+}
+
+function allFP() {
+  return { ...fpVotes, OTH: getOth() };
+}
+
+function getTop2() {
+  const fp = allFP();
+  return Object.entries(fp).sort((a, b) => b[1] - a[1]).slice(0, 2).map(e => e[0]);
+}
+
+function computeRound2() {
+  const fp = allFP();
+  const [c1, c2] = getTop2();
+  let v1 = fp[c1], v2 = fp[c2];
+  PARTIES.forEach(from => {
+    if (from.id === c1 || from.id === c2) return;
+    const sh = (fp[from.id] || 0) / 100;
+    const tr = transfers[from.id] || {};
+    v1 += (tr[c1] || 0) / 100 * sh * 100;
+    v2 += (tr[c2] || 0) / 100 * sh * 100;
+  });
+  return { c1, c2, v1, v2 };
+}
+
+function recalcNon(fromId) {
+  const manual = PARTIES.filter(p => p.id !== fromId)
+    .reduce((a, p) => a + (transfers[fromId][p.id] || 0), 0);
+  transfers[fromId]['NON'] = Math.max(0, 100 - manual);
+}
+
+function partyColor(id) {
+  return (PARTIES.find(p => p.id === id) || {}).color || '#888';
+}
+
+function partyName(id) {
+  if (id === 'NON') return 'Non-vote (2nd)';
+  return (PARTIES.find(p => p.id === id) || {}).name || id;
+}
+
+// ── Render: FP table ───────────────────────────────────────────────────────
+
+function renderFP() {
+  const fp = allFP();
+  const body = document.getElementById('fp-body');
+  body.innerHTML = '';
+  PARTIES.forEach(p => {
+    const val = fp[p.id] || 0;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><div class="row-label">
+        <span class="dot" style="background:${p.color}"></span>${p.id}
+      </div></td>
+      <td><input class="fp-input mono${p.auto ? ' auto' : ''}"
+        type="number" min="0" max="100" step="0.1"
+        value="${val.toFixed(1)}"${p.auto ? ' readonly' : ''}></td>`;
+    if (!p.auto) {
+      tr.querySelector('input').addEventListener('input', e => {
+        let v = parseFloat(e.target.value);
+        if (isNaN(v)) v = 0;
+        fpVotes[p.id] = v;
+        updateAll();
+      });
+    }
+    body.appendChild(tr);
+  });
+  const total = Object.values(fp).reduce((a, b) => a + b, 0);
+  const el = document.getElementById('fp-total');
+  el.textContent = total.toFixed(1) + '%';
+  el.className = 'mono ' + (Math.abs(total - 100) < 0.15 ? 'total-ok' : 'total-err');
+}
+
+// ── Render: Results table ─────────────────────────────────────────────────
+
+function renderResults() {
+  const fp = allFP();
+  const { c1, c2, v1, v2 } = computeRound2();
+  const tot = v1 + v2;
+  const body = document.getElementById('results-body');
+  body.innerHTML = '';
+  PARTIES.forEach(p => {
+    const isTop = p.id === c1 || p.id === c2;
+    const r2val = p.id === c1 ? v1 : p.id === c2 ? v2 : null;
+    const pct = r2val !== null ? (r2val / tot * 100) : null;
+    const winner = r2val !== null && r2val === Math.max(v1, v2);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><div class="row-label">
+        <span class="dot" style="background:${p.color}"></span>${p.id}
+      </div></td>
+      <td class="mono">${(fp[p.id] || 0).toFixed(1)}%</td>
+      <td class="mono">${isTop ? r2val.toFixed(1) + '%' : '—'}</td>
+      <td class="mono${winner ? ' pct-winner' : ''}">${isTop ? pct.toFixed(1) + '%' : '—'}</td>`;
+    body.appendChild(tr);
+  });
+}
+
+// ── Render: Matrix ────────────────────────────────────────────────────────
+
+function renderMatrix() {
+  const COLS = [...PARTIES.map(p => p.id), 'NON'];
+  const head = document.getElementById('mx-head');
+  const body = document.getElementById('mx-body');
+  head.innerHTML = '';
+  body.innerHTML = '';
+
+  // Header row
+  const hr = document.createElement('tr');
+  const cornerTh = document.createElement('th');
+  cornerTh.className = 'from-label';
+  cornerTh.textContent = 'From / to';
+  hr.appendChild(cornerTh);
+  COLS.forEach(c => {
+    const th = document.createElement('th');
+    th.textContent = c === 'NON' ? 'N/V' : c;
+    if (c === 'NON') {
+      th.className = 'mx-non-head';
+    } else {
+      th.style.borderTop = '2px solid ' + partyColor(c);
+    }
+    hr.appendChild(th);
+  });
+  head.appendChild(hr);
+
+  // Data rows
+  PARTIES.forEach(from => {
+    const tr = document.createElement('tr');
+    const labelTd = document.createElement('td');
+    labelTd.className = 'from-label';
+    labelTd.innerHTML = `<div class="row-label">
+      <span class="dot" style="background:${from.color}"></span>${from.id}
+    </div>`;
+    tr.appendChild(labelTd);
+    COLS.forEach(toId => {
+      const td = document.createElement('td');
+      if (toId === from.id) {
+        td.className = 'mx-diag';
+      } else {
+        const v = toId === 'NON'
+          ? (transfers[from.id]['NON'] || 0)
+          : (transfers[from.id][toId] || 0);
+        if (v > 0) {
+          if (toId === 'NON') {
+            td.className = 'mx-non';
+          } else {
+            td.className = 'mx-val';
+            td.style.background = partyColor(toId);
+          }
+          td.textContent = v + '%';
+        } else {
+          td.className = 'mx-zero';
+          td.textContent = '0%';
+        }
+      }
+      tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  });
+}
+
+// ── Render: Sliders ───────────────────────────────────────────────────────
+
+function renderSliders() {
+  // Tabs
+  const tabBar = document.getElementById('tab-bar');
+  tabBar.innerHTML = '';
+  PARTIES.forEach(p => {
+    const btn = document.createElement('button');
+    btn.className = 'tab-btn' + (p.id === activeTab ? ' active' : '');
+    if (p.id === activeTab) btn.style.background = p.color;
+    const dotColor = p.id === activeTab ? 'rgba(255,255,255,0.6)' : p.color;
+    btn.innerHTML = `<span class="tab-dot" style="background:${dotColor}"></span>${p.id}`;
+    btn.addEventListener('click', () => { activeTab = p.id; renderSliders(); });
+    tabBar.appendChild(btn);
+  });
+
+  // Slider rows
+  const area = document.getElementById('slider-area');
+  area.innerHTML = '';
+  const toList = [
+    ...PARTIES.filter(p => p.id !== activeTab),
+    { id: 'NON', name: 'Non-vote (2nd)', color: '#c0392b' }
+  ];
+  toList.forEach(to => {
+    const isNon = to.id === 'NON';
+    const v = isNon
+      ? (transfers[activeTab]['NON'] || 0)
+      : (transfers[activeTab][to.id] || 0);
+    const row = document.createElement('div');
+    row.className = 'slider-row';
+    row.dataset.toId = to.id;
+    row.innerHTML = `
+      <div class="sl-lbl">
+        <span class="dot" style="background:${to.color}"></span>
+        ${isNon ? 'Non-vote (2nd)' : to.name}
+      </div>
+      <input type="range" min="0" max="100" step="1" value="${v}"${isNon ? ' disabled' : ''}>
+      <span class="sl-val${isNon ? ' auto' : ''}" data-key="${to.id}">${v}%</span>`;
+    if (!isNon) {
+      const sl = row.querySelector('input');
+      sl.addEventListener('input', () => {
+        transfers[activeTab][to.id] = parseInt(sl.value);
+        recalcNon(activeTab);
+        updateAll();
+      });
+    }
+    area.appendChild(row);
+  });
+
+  // Total row
+  const totDiv = document.createElement('div');
+  totDiv.className = 'slider-total';
+  totDiv.innerHTML = `<span>Total</span><span class="val" id="sl-total"></span>`;
+  area.appendChild(totDiv);
+
+  updateSliderDisplay();
+}
+
+function updateSliderDisplay() {
+  const rows = document.querySelectorAll('#slider-area .slider-row');
+  let total = 0;
+  rows.forEach(row => {
+    const toId = row.dataset.toId;
+    const v = toId === 'NON'
+      ? (transfers[activeTab]['NON'] || 0)
+      : (transfers[activeTab][toId] || 0);
+    total += v;
+    const sl = row.querySelector('input');
+    const valEl = row.querySelector('.sl-val');
+    if (sl) sl.value = v;
+    if (valEl) valEl.textContent = v + '%';
+  });
+  const totEl = document.getElementById('sl-total');
+  if (totEl) {
+    totEl.textContent = total + '%';
+    totEl.style.color = Math.abs(total - 100) < 1 ? '#2a7a2a' : '#c0392b';
+  }
+}
+
+// ── Master update ─────────────────────────────────────────────────────────
+
+function updateAll() {
+  renderFP();
+  renderResults();
+  renderMatrix();
+  updateSliderDisplay();
+}
+
+// ── Reset ─────────────────────────────────────────────────────────────────
+
+function resetAll() {
+  fpVotes = { ...DEFAULT_FP };
+  transfers = makeDefaultTransfers();
+  activeTab = 'RFM';
+  renderSliders();
+  updateAll();
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+
+renderSliders();
+updateAll();
+</script>
+</body>
+</html>
