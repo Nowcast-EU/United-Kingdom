@@ -564,12 +564,15 @@ inp.addEventListener('keydown', (e) => {
       fpVotes[p.id] = v;
       inp.value = v.toFixed(1);
     }
+  const allInputs = [...document.querySelectorAll('#results-body input[type=number]:not([readonly])')];
+    const idx = allInputs.indexOf(inp);
+    const nextPartyId = allInputs[idx + 1]?.dataset.partyId || allInputs[0]?.dataset.partyId;
     renderResults();
     updateSliderDisplay();
-    const allInputs = [...document.querySelectorAll('#results-body input[type=number]:not([readonly])')];
-    const idx = allInputs.indexOf(inp);
-    const next = allInputs[idx + 1] || allInputs[0];
-    if (next) next.focus();
+    if (nextPartyId) {
+      const nextEl = document.querySelector(`#results-body input[data-party-id="${nextPartyId}"]`);
+      if (nextEl) nextEl.focus();
+    }
   }
 });
     }
