@@ -531,12 +531,41 @@ function renderResults() {
       inp.className = 'auto';
       inp.readOnly = true;
     } else {
-      inp.addEventListener('change', e => {
-        let v = parseFloat(e.target.value);
-        if (isNaN(v)) v = 0;
-        fpVotes[p.id] = Math.max(0, Math.min(100, v));
-        updateAll();
-      });
+      let originalValue = inp.value;
+
+inp.addEventListener('focus', () => {
+  originalValue = inp.value;
+  inp.value = '';
+});
+
+inp.addEventListener('input', () => {
+  updateAll();
+});
+
+inp.addEventListener('blur', () => {
+  if (inp.value === '' || isNaN(parseFloat(inp.value))) {
+    inp.value = originalValue;
+  } else {
+    let v = Math.max(0, Math.min(100, parseFloat(inp.value)));
+    fpVotes[p.id] = v;
+    inp.value = v.toFixed(1);
+  }
+  updateAll();
+});
+
+inp.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    if (inp.value === '' || isNaN(parseFloat(inp.value))) {
+      inp.value = originalValue;
+    }
+    // Move to next input, looping back to top
+    const allInputs = [...document.querySelectorAll('#results-body input[type=number]:not([readonly])')];
+    const idx = allInputs.indexOf(inp);
+    const next = allInputs[idx + 1] || allInputs[0];
+    if (next) next.focus();
+  }
+});
     }
     const pctSign = document.createElement('span');
     pctSign.className = 'percent-sign';
