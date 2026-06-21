@@ -46,6 +46,13 @@ h1 {
   margin-bottom: 0px;
 }
 
+.mobile-logo { display: none; }
+
+@media (max-width: 768px) {
+  .desktop-logo { display: none; }
+  .mobile-logo { display: block; }
+}
+
 .header-logo {
   height: 32px;
   width: auto;
@@ -405,7 +412,8 @@ input[type="range"]:disabled::-moz-range-thumb    { cursor: default; }
 
 <div class="header-row">
   <h1>Supplementary Vote Calculator</h1>
-  <img src="https://github.com/Nowcast-EU/United-Kingdom/blob/main/TheMillLogo.png?raw=true" alt="Logo" class="header-logo" />
+  <img src="https://raw.githubusercontent.com/Nowcast-EU/United-Kingdom/refs/heads/main/TheMillLogo.png" />
+  <img src="https://raw.githubusercontent.com/Nowcast-EU/United-Kingdom/refs/heads/main/TheMillLogo_Mobile.png" />
 </div>
 
 <div class="page-layout">
