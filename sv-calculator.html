@@ -409,7 +409,7 @@ const PARTIES = [
   { id: 'LDM', name: 'Lib Dem',       color: '#FAA61A' },
   { id: 'WPB', name: 'Workers',       color: '#990000' },
   { id: 'RES', name: 'Restore',     color: '#000000' },
-  { id: 'OTH', name: 'Ind/Oth',         color: '#DCDCDC', auto: true },
+  { id: 'OTH', name: 'Ind/Oth',         color: '#999999', auto: true },
 ];
 
 const DEFAULT_FP = { RFM: 30.7, LAB: 23.6, GRN: 19.1, CON: 10.3, LDM: 9.5, WPB: 1.4, RES: 0.0 };
@@ -583,7 +583,7 @@ function renderSliders() {
 
 const toList = [
   ...PARTIES,
-  { id: 'NON', name: 'No 2nd vote', color: '#c0392b' }
+  { id: 'NON', name: 'No 2nd vote', color: '#999999' }
 ];
 
 toList.forEach(to => {
