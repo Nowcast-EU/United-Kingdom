@@ -30,12 +30,21 @@ body {
   body { padding: 0 8px 24px 8px; }
 }
 
-h1, h2.subtitle {
+h1 {
   display: block;
   margin-left: auto;
   margin-right: auto;
   text-align: center;
   max-width: 100%;
+}
+
+h2.subtitle {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: #94a3b8;
+  margin: 10px 0 0 0;
+  text-align: left;
+  font-style: italic;
 }
 
 h1 {
@@ -387,7 +396,6 @@ input[type="range"]:disabled::-moz-range-thumb    { cursor: default; }
   <div class="page-wrapper">
 
 <h1>Supplementary Vote Calculator</h1>
-<h2 class="subtitle">Enter first preference vote shares and adjust second preference transfer rates to project a result.</h2>
 
 <div class="page-layout">
 
@@ -424,6 +432,7 @@ input[type="range"]:disabled::-moz-range-thumb    { cursor: default; }
     <div class="section-label">2nd preference transfers from…</div>
     <div class="tab-row" id="tab-bar"></div>
     <div class="slider-list" id="slider-area"></div>
+    <h2 class="subtitle">Enter first preference vote shares and adjust second preference transfer rates to project a result.</h2>
   </div>
 
 </div>
