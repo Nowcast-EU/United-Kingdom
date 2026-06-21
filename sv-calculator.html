@@ -611,33 +611,30 @@ const v = isNon
     sl.type = 'range'; sl.min = 0; sl.max = 100; sl.step = 1;
     sl.value = v;
 
-  sl.dataset.dragging = 'false';
+ sl.dataset.dragging = 'false';
 
 sl.addEventListener('pointerdown', e => {
+
   const rect = sl.getBoundingClientRect();
 
-  // Position of thumb centre
-  const thumbSize = 14; // matches CSS thumb width
+  const thumbSize = 14;
   const pct = (sl.value - sl.min) / (sl.max - sl.min);
   const thumbX = thumbSize / 2 + pct * (rect.width - thumbSize);
 
-  // Pointer position relative to slider
   const clickX = e.clientX - rect.left;
 
-  // Only allow interaction if within 10px of thumb centre
-  if (Math.abs(clickX - thumbX) <= 10) {
+  // Allow dragging only if the touch starts on the thumb
+  if (Math.abs(clickX - thumbX) <= 12) {
     sl.dataset.dragging = 'true';
   } else {
     sl.dataset.dragging = 'false';
     e.preventDefault();
   }
+
 });
 
-sl.addEventListener('pointerup', () => {
-  sl.dataset.dragging = 'false';
-});
-
-  sl.addEventListener('pointercancel', () => {
+// Reset only after the finger leaves the control
+sl.addEventListener('change', () => {
   sl.dataset.dragging = 'false';
 });
   
