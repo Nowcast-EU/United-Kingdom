@@ -276,13 +276,13 @@ input[type="range"] {
 input[type="range"]::-webkit-slider-runnable-track {
   height: 4px;
   border-radius: 2px;
-  background: #d1d5db;
+  background: var(--track-bg, #d1d5db);
 }
 /* Track: Firefox */
 input[type="range"]::-moz-range-track {
   height: 4px;
   border-radius: 2px;
-  background: #d1d5db;
+  background: var(--track-bg, #d1d5db);
   border: none;
 }
 /* Thumb: Webkit */
@@ -613,6 +613,16 @@ const v = isNon
     // accent-color via CSS custom property on the element
     sl.style.setProperty('--sl-color', to.color);
 
+  const pct = v;
+sl.style.setProperty(
+  '--track-bg',
+  `linear-gradient(to right,
+    ${to.color} 0%,
+    ${to.color} ${pct}%,
+    #d1d5db ${pct}%,
+    #d1d5db 100%)`
+);
+
 if (isNon || isSelf) {
   sl.disabled = true;
   sl.value = 0;
@@ -629,6 +639,15 @@ if (isNon || isSelf) {
         // Snap thumb back without affecting any other slider
         sl.value = clamped;
         transfers[activeTab][to.id] = clamped;
+
+        sl.style.setProperty(
+  '--track-bg',
+  `linear-gradient(to right,
+    ${to.color} 0%,
+    ${to.color} ${clamped}%,
+    #d1d5db ${clamped}%,
+    #d1d5db 100%)`
+);
         // Recompute NON (auto) only
         recalcNon(activeTab);
         // Refresh display values + NON slider position — no other slider's value changes
@@ -668,8 +687,23 @@ function updateSliderDisplay() {
     const valEl = row.querySelector('.sl-val');
     // Only sync the NON slider position (it's auto-calculated).
     // Never touch other sliders' value/max — they move only when the user drags them.
-    if (sl && toId === 'NON') sl.value = v;
-    if (valEl) valEl.textContent = v + '%';
+if (sl) {
+  if (toId === 'NON') sl.value = v;
+
+  const colour = row.querySelector('.sl-dot').style.background;
+
+  sl.style.setProperty(
+    '--track-bg',
+    `linear-gradient(to right,
+      ${colour} 0%,
+      ${colour} ${v}%,
+      #d1d5db ${v}%,
+      #d1d5db 100%)`
+  );
+}
+
+if (valEl) valEl.textContent = v + '%';
+    
   });
   const totEl = document.getElementById('sl-total');
   if (totEl) {
