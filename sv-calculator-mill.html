@@ -593,31 +593,56 @@ function buildResultsTable() {
 
 function renderResults() {
   const fp = allFP();
-  const { c1, c2, v1, v2 } = computeRound2();
-  const tot = v1 + v2;
-
-  PARTIES.forEach(p => {
-    const isTop = p.id === c1 || p.id === c2;
-    const r2val = p.id === c1 ? v1 : p.id === c2 ? v2 : null;
-    const pct = r2val !== null ? (r2val / tot * 100) : null;
-    const winner = r2val !== null && r2val === Math.max(v1, v2);
-
-    const r2Td = document.querySelector(`[data-party-result="${p.id}"]`);
-    const pctTd = document.querySelector(`[data-party-pct="${p.id}"]`);
-
-    if (r2Td) r2Td.textContent = isTop ? r2val.toFixed(1) + '%' : '—';
-    if (pctTd) {
-      pctTd.textContent = isTop ? pct.toFixed(1) + '%' : '—';
-      pctTd.className = 'result-column' + (winner ? ' winner' : '');
-    }
-
-    if (p.auto) {
-      const inp = document.querySelector(`input[data-party-id="${p.id}"]`);
-      if (inp) inp.value = (fp[p.id] || 0).toFixed(1);
-    }
-  });
-
   const totalVal = Object.values(fp).reduce((a, b) => a + b, 0);
+
+  // Check for first-round majority (50%+1 of actual votes cast)
+  const firstRoundWinner = Object.entries(fp).find(([id, v]) => v > 50);
+
+  if (firstRoundWinner) {
+    const [winnerId, winnerVal] = firstRoundWinner;
+    PARTIES.forEach(p => {
+      const r2Td = document.querySelector(`[data-party-result="${p.id}"]`);
+      const pctTd = document.querySelector(`[data-party-pct="${p.id}"]`);
+      if (p.id === winnerId) {
+        if (r2Td) r2Td.textContent = winnerVal.toFixed(1) + '%';
+        if (pctTd) {
+          pctTd.textContent = '100.0%';
+          pctTd.className = 'result-column winner';
+        }
+      } else {
+        if (r2Td) r2Td.textContent = '—';
+        if (pctTd) {
+          pctTd.textContent = '—';
+          pctTd.className = 'result-column';
+        }
+      }
+      if (p.auto) {
+        const inp = document.querySelector(`input[data-party-id="${p.id}"]`);
+        if (inp) inp.value = (fp[p.id] || 0).toFixed(1);
+      }
+    });
+  } else {
+    const { c1, c2, v1, v2 } = computeRound2();
+    const tot = v1 + v2;
+    PARTIES.forEach(p => {
+      const isTop = p.id === c1 || p.id === c2;
+      const r2val = p.id === c1 ? v1 : p.id === c2 ? v2 : null;
+      const pct = r2val !== null ? (r2val / tot * 100) : null;
+      const winner = r2val !== null && r2val === Math.max(v1, v2);
+      const r2Td = document.querySelector(`[data-party-result="${p.id}"]`);
+      const pctTd = document.querySelector(`[data-party-pct="${p.id}"]`);
+      if (r2Td) r2Td.textContent = isTop ? r2val.toFixed(1) + '%' : '—';
+      if (pctTd) {
+        pctTd.textContent = isTop ? pct.toFixed(1) + '%' : '—';
+        pctTd.className = 'result-column' + (winner ? ' winner' : '');
+      }
+      if (p.auto) {
+        const inp = document.querySelector(`input[data-party-id="${p.id}"]`);
+        if (inp) inp.value = (fp[p.id] || 0).toFixed(1);
+      }
+    });
+  }
+
   const totEl = document.getElementById('fp-total');
   totEl.textContent = totalVal.toFixed(1) + '%';
   totEl.className = Math.abs(totalVal - 100) < 0.15 ? 'total-ok' : 'total-err';
