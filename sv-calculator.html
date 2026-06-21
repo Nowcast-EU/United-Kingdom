@@ -610,6 +610,37 @@ const v = isNon
     const sl = document.createElement('input');
     sl.type = 'range'; sl.min = 0; sl.max = 100; sl.step = 1;
     sl.value = v;
+
+  sl.dataset.dragging = 'false';
+
+sl.addEventListener('pointerdown', e => {
+  const rect = sl.getBoundingClientRect();
+
+  // Position of thumb centre
+  const thumbSize = 14; // matches CSS thumb width
+  const pct = (sl.value - sl.min) / (sl.max - sl.min);
+  const thumbX = thumbSize / 2 + pct * (rect.width - thumbSize);
+
+  // Pointer position relative to slider
+  const clickX = e.clientX - rect.left;
+
+  // Only allow interaction if within 10px of thumb centre
+  if (Math.abs(clickX - thumbX) <= 10) {
+    sl.dataset.dragging = 'true';
+  } else {
+    sl.dataset.dragging = 'false';
+    e.preventDefault();
+  }
+});
+
+sl.addEventListener('pointerup', () => {
+  sl.dataset.dragging = 'false';
+});
+
+  sl.addEventListener('pointercancel', () => {
+  sl.dataset.dragging = 'false';
+});
+  
     // accent-color via CSS custom property on the element
     sl.style.setProperty('--sl-color', to.color);
 
@@ -628,6 +659,11 @@ if (isNon || isSelf) {
   sl.value = 0;
 } else {
       sl.addEventListener('input', () => {
+        
+        if (sl.dataset.dragging !== 'true') {
+  sl.value = transfers[activeTab][to.id] || 0;
+  return;
+}
         const desired = parseInt(sl.value);
         // Sum of every OTHER manual (non-NON) slider — don't touch their values
         const othersTotal = PARTIES.filter(p => p.id !== activeTab && p.id !== to.id)
