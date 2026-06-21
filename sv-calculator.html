@@ -619,7 +619,7 @@ const v = isNon
 }
 
     const sl = document.createElement('input');
-    sl.type = 'range'; sl.min = 0; sl.max = 100; sl.step = 1;
+    sl.type = 'range'; sl.min = 0; sl.max = 100; sl.step = 0.1;
     sl.value = v;
 
  sl.dataset.dragging = 'false';
@@ -672,14 +672,14 @@ if (isNon || isSelf) {
   sl.value = transfers[activeTab][to.id] || 0;
   return;
 }
-        const desired = parseInt(sl.value);
+        const desired = parseFloat(sl.value);
         // Sum of every OTHER manual (non-NON) slider — don't touch their values
         const othersTotal = PARTIES.filter(p => p.id !== activeTab && p.id !== to.id)
           .reduce((a, p) => a + (transfers[activeTab][p.id] || 0), 0);
         // If non-vote is already 0, this slider can't go higher than its current value
         // (room freed only when othersTotal drops). Otherwise allow up to 100-others.
         const maxAllowed = Math.max(0, 100 - othersTotal);
-        const clamped = Math.min(desired, maxAllowed);
+        const clamped = Math.round(Math.min(desired, maxAllowed) * 10) / 10;
         // Snap thumb back without affecting any other slider
         sl.value = clamped;
         transfers[activeTab][to.id] = clamped;
