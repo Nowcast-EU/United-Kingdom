@@ -510,31 +510,19 @@ function headroom() {
 
 // ── Render: Results table ─────────────────────────────────────────────────
 
-function renderResults(focusPartyId = null) {
-  const fp = allFP();
-  const { c1, c2, v1, v2 } = computeRound2();
-  const tot = v1 + v2;
+function buildResultsTable() {
   const body = document.getElementById('results-body');
-
   body.innerHTML = '';
 
   PARTIES.forEach(p => {
-    const isTop = p.id === c1 || p.id === c2;
-    const r2val = p.id === c1 ? v1 : p.id === c2 ? v2 : null;
-    const pct = r2val !== null ? (r2val / tot * 100) : null;
-    const winner = r2val !== null && r2val === Math.max(v1, v2);
-    const fpVal = fp[p.id] || 0;
-
     const tr = document.createElement('tr');
 
-    // Party name — colour strip on right
     const partyTd = document.createElement('td');
     partyTd.className = 'party-column';
     partyTd.style.setProperty('--party-color', p.color);
     partyTd.textContent = p.id;
     tr.appendChild(partyTd);
 
-    // 1st pref input — centred
     const fpTd = document.createElement('td');
     fpTd.className = 'input-cell';
     const wrapper = document.createElement('div');
@@ -542,55 +530,11 @@ function renderResults(focusPartyId = null) {
     const inp = document.createElement('input');
     inp.type = 'number';
     inp.min = 0; inp.max = 100; inp.step = 0.1;
-    inp.value = fpVal.toFixed(1);
+    inp.value = (fpVotes[p.id] || 0).toFixed(1);
     inp.dataset.partyId = p.id;
     if (p.auto) {
       inp.className = 'auto';
       inp.readOnly = true;
-    } else {
-      let originalValue = inp.value;
-
-inp.addEventListener('focus', () => {
-  originalValue = inp.value;
-  inp.value = '';
-});
-
-inp.addEventListener('input', () => {
-  updateSliderDisplay();
-});
-
-inp.addEventListener('blur', () => {
-  if (inp.value === '' || isNaN(parseFloat(inp.value))) {
-    inp.value = originalValue;
-  } else {
-    let v = Math.max(0, Math.min(100, parseFloat(inp.value)));
-    fpVotes[p.id] = v;
-    inp.value = v.toFixed(1);
-  }
-  renderResults();
-  updateSliderDisplay();
-});
-
-inp.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    if (inp.value === '' || isNaN(parseFloat(inp.value))) {
-      inp.value = originalValue;
-    } else {
-      let v = Math.max(0, Math.min(100, parseFloat(inp.value)));
-      fpVotes[p.id] = v;
-      inp.value = v.toFixed(1);
-    }
-    updateSliderDisplay();
-    const allInputs = [...document.querySelectorAll('#results-body input[type=number]:not([readonly])')];
-    const idx = allInputs.indexOf(inp);
-    const next = allInputs[idx + 1] || allInputs[0];
-    if (next) {
-      next.focus();
-      next.select();
-    }
-  }
-});
     }
     const pctSign = document.createElement('span');
     pctSign.className = 'percent-sign';
@@ -600,31 +544,103 @@ inp.addEventListener('keydown', (e) => {
     fpTd.appendChild(wrapper);
     tr.appendChild(fpTd);
 
-    // 2nd round value
     const r2Td = document.createElement('td');
     r2Td.className = 'result-column';
-    r2Td.textContent = isTop ? r2val.toFixed(1) + '%' : '—';
+    r2Td.dataset.partyResult = p.id;
     tr.appendChild(r2Td);
 
-    // % of round
     const pctTd = document.createElement('td');
-    pctTd.className = 'result-column' + (winner ? ' winner' : '');
-    pctTd.textContent = isTop ? pct.toFixed(1) + '%' : '—';
+    pctTd.className = 'result-column';
+    pctTd.dataset.partyPct = p.id;
     tr.appendChild(pctTd);
 
     body.appendChild(tr);
+  });
+
+  attachInputBehaviour();
+}
+
+function renderResults() {
+  const fp = allFP();
+  const { c1, c2, v1, v2 } = computeRound2();
+  const tot = v1 + v2;
+
+  PARTIES.forEach(p => {
+    const isTop = p.id === c1 || p.id === c2;
+    const r2val = p.id === c1 ? v1 : p.id === c2 ? v2 : null;
+    const pct = r2val !== null ? (r2val / tot * 100) : null;
+    const winner = r2val !== null && r2val === Math.max(v1, v2);
+
+    const r2Td = document.querySelector(`[data-party-result="${p.id}"]`);
+    const pctTd = document.querySelector(`[data-party-pct="${p.id}"]`);
+
+    if (r2Td) r2Td.textContent = isTop ? r2val.toFixed(1) + '%' : '—';
+    if (pctTd) {
+      pctTd.textContent = isTop ? pct.toFixed(1) + '%' : '—';
+      pctTd.className = 'result-column' + (winner ? ' winner' : '');
+    }
+
+    if (p.auto) {
+      const inp = document.querySelector(`input[data-party-id="${p.id}"]`);
+      if (inp) inp.value = (fp[p.id] || 0).toFixed(1);
+    }
   });
 
   const totalVal = Object.values(fp).reduce((a, b) => a + b, 0);
   const totEl = document.getElementById('fp-total');
   totEl.textContent = totalVal.toFixed(1) + '%';
   totEl.className = Math.abs(totalVal - 100) < 0.15 ? 'total-ok' : 'total-err';
-
-const toFocus = focusPartyId || (document.activeElement && document.activeElement.dataset.partyId);
-if (toFocus) {
-  const el = body.querySelector(`input[data-party-id="${toFocus}"]`);
-  if (el) { el.focus(); el.select(); }
 }
+
+  function attachInputBehaviour() {
+  const inputs = [...document.querySelectorAll('#results-body input[type=number]:not([readonly])')];
+
+  inputs.forEach((inp, index) => {
+    let originalValue = inp.value;
+
+    inp.addEventListener('focus', () => {
+      originalValue = inp.value;
+      inp.value = '';
+    });
+
+    inp.addEventListener('input', () => {
+      updateSliderDisplay();
+    });
+
+    inp.addEventListener('blur', () => {
+      if (inp.value === '' || isNaN(parseFloat(inp.value))) {
+        inp.value = originalValue;
+      } else {
+        let v = Math.max(0, Math.min(100, parseFloat(inp.value)));
+        fpVotes[inp.dataset.partyId] = v;
+        inp.value = v.toFixed(1);
+      }
+      renderResults();
+      updateSliderDisplay();
+    });
+
+    inp.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (inp.value === '' || isNaN(parseFloat(inp.value))) {
+          inp.value = originalValue;
+        } else {
+          let v = Math.max(0, Math.min(100, parseFloat(inp.value)));
+          fpVotes[inp.dataset.partyId] = v;
+          inp.value = v.toFixed(1);
+        }
+        renderResults();
+        updateSliderDisplay();
+        if (inputs[index + 1]) {
+          inputs[index + 1].focus();
+          inputs[index + 1].select();
+        } else {
+          inputs[0].focus();
+          inputs[0].select();
+        }
+      }
+    });
+  });
 }
 
 // ── Render: Tabs + sliders ────────────────────────────────────────────────
@@ -816,11 +832,16 @@ function resetAll() {
   fpVotes = { ...DEFAULT_FP };
   transfers = makeDefaultTransfers();
   activeTab = 'RFM';
+  const inputs = document.querySelectorAll('#results-body input[type=number]:not([readonly])');
+  inputs.forEach(inp => {
+    inp.value = (fpVotes[inp.dataset.partyId] || 0).toFixed(1);
+  });
   renderSliders();
   updateAll();
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────
+buildResultsTable();
 renderSliders();
 updateAll();
 </script>
