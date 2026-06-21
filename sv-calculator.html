@@ -307,7 +307,7 @@ input[type="range"]::-moz-range-thumb {
   border: none;
 }
 input[type="range"]:disabled {
-  opacity: 0.35;
+  opacity: 0.45;
   cursor: default;
 }
 input[type="range"]:disabled::-webkit-slider-thumb { cursor: default; }
@@ -581,16 +581,19 @@ function renderSliders() {
   const area = document.getElementById('slider-area');
   area.innerHTML = '';
 
-  const toList = [
-    ...PARTIES.filter(p => p.id !== activeTab),
-    { id: 'NON', name: 'No 2nd vote', color: '#c0392b' }
-  ];
+const toList = [
+  ...PARTIES,
+  { id: 'NON', name: 'No 2nd vote', color: '#c0392b' }
+];
 
-  toList.forEach(to => {
-    const isNon = to.id === 'NON';
-    const v = isNon
-      ? (transfers[activeTab]['NON'] || 0)
-      : (transfers[activeTab][to.id] || 0);
+toList.forEach(to => {
+  const isNon = to.id === 'NON';
+  const isSelf = to.id === activeTab;
+const v = isNon
+  ? (transfers[activeTab]['NON'] || 0)
+  : isSelf
+    ? 0
+    : (transfers[activeTab][to.id] || 0);
 
     const row = document.createElement('div');
     row.className = 'slider-row';
@@ -600,15 +603,20 @@ function renderSliders() {
     lbl.className = 'sl-lbl';
     lbl.innerHTML = `<span class="sl-dot" style="background:${to.color}"></span>${isNon ? 'No 2nd vote' : to.name}`;
 
+  if (isSelf) {
+  lbl.style.opacity = '0.45';
+}
+
     const sl = document.createElement('input');
     sl.type = 'range'; sl.min = 0; sl.max = 100; sl.step = 1;
     sl.value = v;
     // accent-color via CSS custom property on the element
     sl.style.setProperty('--sl-color', to.color);
 
-    if (isNon) {
-      sl.disabled = true;
-    } else {
+if (isNon || isSelf) {
+  sl.disabled = true;
+  sl.value = 0;
+} else {
       sl.addEventListener('input', () => {
         const desired = parseInt(sl.value);
         // Sum of every OTHER manual (non-NON) slider — don't touch their values
@@ -633,6 +641,10 @@ function renderSliders() {
     valSpan.className = 'sl-val' + (isNon ? ' auto' : '');
     valSpan.dataset.key = to.id;
     valSpan.textContent = v + '%';
+
+  if (isSelf) {
+  valSpan.style.opacity = '0.45';
+}
 
     row.appendChild(lbl);
     row.appendChild(sl);
