@@ -498,7 +498,7 @@ function renderResults() {
   const tot = v1 + v2;
   const body = document.getElementById('results-body');
 
-  const focused = document.activeElement && document.activeElement.dataset.partyId;
+ function renderResults(focusPartyId = null) {
   body.innerHTML = '';
 
   PARTIES.forEach(p => {
@@ -564,15 +564,11 @@ inp.addEventListener('keydown', (e) => {
       fpVotes[p.id] = v;
       inp.value = v.toFixed(1);
     }
-  const allInputs = [...document.querySelectorAll('#results-body input[type=number]:not([readonly])')];
+const allInputs = [...document.querySelectorAll('#results-body input[type=number]:not([readonly])')];
     const idx = allInputs.indexOf(inp);
     const nextPartyId = allInputs[idx + 1]?.dataset.partyId || allInputs[0]?.dataset.partyId;
-    renderResults();
+    renderResults(nextPartyId);
     updateSliderDisplay();
-    if (nextPartyId) {
-      const nextEl = document.querySelector(`#results-body input[data-party-id="${nextPartyId}"]`);
-      if (nextEl) nextEl.focus();
-    }
   }
 });
     }
@@ -604,10 +600,11 @@ inp.addEventListener('keydown', (e) => {
   totEl.textContent = totalVal.toFixed(1) + '%';
   totEl.className = Math.abs(totalVal - 100) < 0.15 ? 'total-ok' : 'total-err';
 
-  if (focused) {
-    const el = body.querySelector(`input[data-party-id="${focused}"]`);
-    if (el) { el.focus(); el.select(); }
-  }
+const toFocus = focusPartyId || (document.activeElement && document.activeElement.dataset.partyId);
+if (toFocus) {
+  const el = body.querySelector(`input[data-party-id="${toFocus}"]`);
+  if (el) { el.focus(); el.select(); }
+}
 }
 
 // ── Render: Tabs + sliders ────────────────────────────────────────────────
