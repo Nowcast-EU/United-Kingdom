@@ -704,7 +704,7 @@ if (isNon || isSelf) {
     const valSpan = document.createElement('span');
     valSpan.className = 'sl-val' + (isNon ? ' auto' : '');
     valSpan.dataset.key = to.id;
-    valSpan.textContent = v + '%';
+    valSpan.textContent = Math.round(v) + '%';
 
   if (isSelf) {
   valSpan.style.opacity = '0.45';
@@ -747,7 +747,7 @@ if (sl) {
   );
 }
 
-if (valEl) valEl.textContent = v.toFixed(1) + '%';
+if (valEl) valEl.textContent = Math.round(v) + '%';
     
   });
 
