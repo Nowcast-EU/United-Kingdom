@@ -583,7 +583,7 @@ function renderSliders() {
 
   const toList = [
     ...PARTIES.filter(p => p.id !== activeTab),
-    { id: 'NON', name: 'Non-vote (2nd)', color: '#c0392b' }
+    { id: 'NON', name: 'No 2nd vote', color: '#c0392b' }
   ];
 
   toList.forEach(to => {
@@ -598,7 +598,7 @@ function renderSliders() {
 
     const lbl = document.createElement('div');
     lbl.className = 'sl-lbl';
-    lbl.innerHTML = `<span class="sl-dot" style="background:${to.color}"></span>${isNon ? 'Non-vote (2nd)' : to.name}`;
+    lbl.innerHTML = `<span class="sl-dot" style="background:${to.color}"></span>${isNon ? 'No 2nd vote' : to.name}`;
 
     const sl = document.createElement('input');
     sl.type = 'range'; sl.min = 0; sl.max = 100; sl.step = 1;
