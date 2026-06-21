@@ -480,14 +480,14 @@ function makeDefaultTransfers() {
     PARTIES.forEach(to => { if (to.id !== f.id) t[f.id][to.id] = 0; });
     t[f.id]['NON'] = 100;
   });
-  t['RFM']['CON'] = 67; t['RFM']['NON'] = 33;
-  t['LAB']['GRN'] = 67; t['LAB']['NON'] = 33;
-  t['GRN']['LAB'] = 67; t['GRN']['NON'] = 33;
-  t['CON']['RFM'] = 67; t['CON']['NON'] = 33;
-  t['LDM']['LAB'] = 35; t['LDM']['GRN'] = 35; t['LDM']['NON'] = 30;
-  t['WPB']['NON'] = 100;
-  t['RES']['NON'] = 100;
-  t['OTH']['NON'] = 100;
+  t['RFM']['LAB'] = 2;  t['RFM']['GRN'] = 1;  t['RFM']['CON'] = 50; t['RFM']['LDM'] = 2;  t['RFM']['WPB'] = 3;  t['RFM']['RES'] = 20; t['RFM']['OTH'] = 0;  t['RFM']['NON'] = 22;
+  t['LAB']['RFM'] = 2;  t['LAB']['GRN'] = 45; t['LAB']['CON'] = 5;  t['LAB']['LDM'] = 30; t['LAB']['WPB'] = 5;  t['LAB']['RES'] = 0;  t['LAB']['OTH'] = 0;  t['LAB']['NON'] = 13;
+  t['GRN']['RFM'] = 1;  t['GRN']['LAB'] = 55; t['GRN']['CON'] = 2;  t['GRN']['LDM'] = 15; t['GRN']['WPB'] = 10; t['GRN']['RES'] = 0;  t['GRN']['OTH'] = 0;  t['GRN']['NON'] = 17;
+  t['CON']['RFM'] = 50; t['CON']['LAB'] = 5;  t['CON']['GRN'] = 2;  t['CON']['LDM'] = 25; t['CON']['WPB'] = 0;  t['CON']['RES'] = 4;  t['CON']['OTH'] = 0;  t['CON']['NON'] = 14;
+  t['LDM']['RFM'] = 1;  t['LDM']['LAB'] = 50; t['LDM']['GRN'] = 25; t['LDM']['CON'] = 5;  t['LDM']['WPB'] = 1;  t['LDM']['RES'] = 2;  t['LDM']['OTH'] = 0;  t['LDM']['NON'] = 16;
+  t['WPB']['RFM'] = 2;  t['WPB']['LAB'] = 25; t['WPB']['GRN'] = 45; t['WPB']['CON'] = 5;  t['WPB']['LDM'] = 5;  t['WPB']['RES'] = 0;  t['WPB']['OTH'] = 0;  t['WPB']['NON'] = 18;
+  t['RES']['RFM'] = 50; t['RES']['LAB'] = 0;  t['RES']['GRN'] = 0;  t['RES']['CON'] = 10; t['RES']['LDM'] = 0;  t['RES']['WPB'] = 0;  t['RES']['OTH'] = 0;  t['RES']['NON'] = 40;
+  t['OTH']['RFM'] = 0;  t['OTH']['LAB'] = 0;  t['OTH']['GRN'] = 0;  t['OTH']['CON'] = 0;  t['OTH']['LDM'] = 0;  t['OTH']['WPB'] = 0;  t['OTH']['RES'] = 0;  t['OTH']['NON'] = 100;
   return t;
 }
 
