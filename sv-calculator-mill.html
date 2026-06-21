@@ -859,7 +859,6 @@ function updateAll() {
 function resetAll() {
   fpVotes = { ...DEFAULT_FP };
   transfers = makeDefaultTransfers();
-  activeTab = 'RFM';
   const inputs = document.querySelectorAll('#results-body input[type=number]:not([readonly])');
   inputs.forEach(inp => {
     inp.value = (fpVotes[inp.dataset.partyId] || 0).toFixed(1);
