@@ -264,7 +264,16 @@ button#reset:hover { background: #005f00; }
 }
 .sl-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
-  
+  @media (min-width: 769px) {
+  .tab-btn {
+    font-size: 0.92rem;
+    padding: 5px 14px;
+  }
+  .sl-lbl {
+    font-size: 0.96rem;
+    width: 140px;
+  }
+}
 
 /* Range slider — cross-browser track reset to kill browser default fills */
 input[type="range"] {
