@@ -539,7 +539,7 @@ inp.addEventListener('focus', () => {
 });
 
 inp.addEventListener('input', () => {
-  updateAll();
+  updateSliderDisplay();
 });
 
 inp.addEventListener('blur', () => {
@@ -550,7 +550,8 @@ inp.addEventListener('blur', () => {
     fpVotes[p.id] = v;
     inp.value = v.toFixed(1);
   }
-  updateAll();
+  renderResults();
+  updateSliderDisplay();
 });
 
 inp.addEventListener('keydown', (e) => {
@@ -558,8 +559,13 @@ inp.addEventListener('keydown', (e) => {
     e.preventDefault();
     if (inp.value === '' || isNaN(parseFloat(inp.value))) {
       inp.value = originalValue;
+    } else {
+      let v = Math.max(0, Math.min(100, parseFloat(inp.value)));
+      fpVotes[p.id] = v;
+      inp.value = v.toFixed(1);
     }
-    // Move to next input, looping back to top
+    renderResults();
+    updateSliderDisplay();
     const allInputs = [...document.querySelectorAll('#results-body input[type=number]:not([readonly])')];
     const idx = allInputs.indexOf(inp);
     const next = allInputs[idx + 1] || allInputs[0];
