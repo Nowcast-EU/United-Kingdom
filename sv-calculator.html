@@ -31,11 +31,23 @@ body {
 }
 
 h1 {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  text-align: center;
-  max-width: 100%;
+  margin: 0;
+  text-align: left;
+}
+
+  .header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+.header-logo {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 h2.subtitle {
@@ -395,7 +407,10 @@ input[type="range"]:disabled::-moz-range-thumb    { cursor: default; }
 
   <div class="page-wrapper">
 
-<h1>Supplementary Vote Calculator</h1>
+<div class="header-row">
+  <h1>Supplementary Vote Calculator</h1>
+  <img src="https://raw.githubusercontent.com/Nowcast-EU/United-Kingdom/refs/heads/main/NowcastUKlogo.png" alt="Logo" class="header-logo" />
+</div>
 
 <div class="page-layout">
 
