@@ -586,6 +586,10 @@ const allInputs = [...document.querySelectorAll('#results-body input[type=number
     const nextPartyId = allInputs[idx + 1]?.dataset.partyId || allInputs[0]?.dataset.partyId;
     renderResults(nextPartyId);
     updateSliderDisplay();
+    setTimeout(() => {
+      const el = document.querySelector(`#results-body input[data-party-id="${nextPartyId}"]`);
+      if (el) { el.focus(); el.select(); }
+    }, 50);
   }
 });
     }
