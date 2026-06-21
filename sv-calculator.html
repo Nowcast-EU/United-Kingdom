@@ -366,9 +366,9 @@ input[type="range"]:disabled::-moz-range-thumb    { cursor: default; }
       <thead>
         <tr>
           <th style="text-align:left">Party</th>
-          <th>1st Round</th>
-          <th>2nd Round</th>
-          <th>% of Round</th>
+          <th>1st round</th>
+          <th>2nd round</th>
+          <th>% of round</th>
         </tr>
       </thead>
       <tbody id="results-body"></tbody>
@@ -402,14 +402,14 @@ input[type="range"]:disabled::-moz-range-thumb    { cursor: default; }
 
 <script>
 const PARTIES = [
-  { id: 'RFM', name: 'Reform',        color: '#12B6CF' },
-  { id: 'LAB', name: 'Labour',        color: '#CC2222' },
-  { id: 'GRN', name: 'Green',         color: '#02A95B' },
+  { id: 'RFM', name: 'Reform',        color: '#34D8EF' },
+  { id: 'LAB', name: 'Labour',        color: '#E4003B' },
+  { id: 'GRN', name: 'Green',         color: '#6AB023' },
   { id: 'CON', name: 'Conservative',  color: '#0087DC' },
   { id: 'LDM', name: 'Lib Dem',       color: '#FAA61A' },
-  { id: 'WPB', name: 'Workers',       color: '#8B0000' },
-  { id: 'RES', name: 'Residents',     color: '#555555' },
-  { id: 'OTH', name: 'Other',         color: '#888888', auto: true },
+  { id: 'WPB', name: 'Workers',       color: '#990000' },
+  { id: 'RES', name: 'Restore',     color: '#000000' },
+  { id: 'OTH', name: 'Ind/Oth',         color: '#DCDCDC', auto: true },
 ];
 
 const DEFAULT_FP = { RFM: 30.7, LAB: 23.6, GRN: 19.1, CON: 10.3, LDM: 9.5, WPB: 1.4, RES: 0.0 };
