@@ -492,13 +492,12 @@ function headroom() {
 
 // ── Render: Results table ─────────────────────────────────────────────────
 
-function renderResults() {
+function renderResults(focusPartyId = null) {
   const fp = allFP();
   const { c1, c2, v1, v2 } = computeRound2();
   const tot = v1 + v2;
   const body = document.getElementById('results-body');
 
- function renderResults(focusPartyId = null) {
   body.innerHTML = '';
 
   PARTIES.forEach(p => {
