@@ -22,7 +22,7 @@ body {
 }
 
 .page-wrapper {
-  max-width: 1000px;      /* adjust to taste */
+  max-width: 1000px;
   margin: 0 auto;
 }
 
@@ -78,7 +78,6 @@ h2.subtitle {
   font-style: italic;
 }
 
-/* ── Page layout: 25% table / 75% sliders on desktop ── */
 .page-layout {
   display: grid;
   grid-template-columns: 1.5fr 3fr;
@@ -91,13 +90,11 @@ h2.subtitle {
   .page-layout { grid-template-columns: 1fr; gap: 16px; }
 }
 
-/* Left column: flex column so button stays at bottom */
 .left-col {
   display: flex;
   flex-direction: column;
 }
 
-/* ── Section headings ── */
 .section-label {
   font-size: 0.78rem;
   font-weight: 650;
@@ -107,7 +104,6 @@ h2.subtitle {
   margin-bottom: 4px;
 }
 
-/* ── Tables ── */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -135,7 +131,6 @@ td {
   vertical-align: middle;
 }
 
-/* Party name cell — colour strip on the RIGHT edge */
 td.party-column {
   font-weight: bold;
   position: relative;
@@ -153,7 +148,6 @@ td.party-column::after {
   background-color: var(--party-color);
 }
 
-/* Input cell — centred */
 td.input-cell {
   text-align: center;
 }
@@ -204,7 +198,6 @@ tfoot td:first-child { text-align: left; padding-left: 6px; }
 .total-ok { color: #008500; font-weight: bold; }
 .total-err { color: #bb0000; font-weight: bold; }
 
-/* ── Reset button — pushed to bottom of left col ── */
 .button-container {
   margin-top: auto;
   padding-top: 14px;
@@ -225,13 +218,11 @@ button#reset {
 }
 button#reset:hover { background: #da085c; }
 
-/* ── Sliders panel — fills height to match table col ── */
 .sliders-panel {
   display: flex;
   flex-direction: column;
 }
 
-/* Tabs */
 .tab-row {
   display: flex;
   flex-wrap: wrap;
@@ -258,12 +249,11 @@ button#reset:hover { background: #da085c; }
 .tab-btn.active { color: #fff; border-color: transparent; }
 .tab-dot { width: 8px; height: 8px; min-width: 8px; min-height: 8px; border-radius: 50%; flex-shrink: 0; }
 
-/* Slider list stretches to fill remaining space */
 .slider-list {
   display: flex;
   flex-direction: column;
   flex: 1;
-  /* distribute rows evenly so they stretch to fill height */
+
   justify-content: space-between;
 }
 
@@ -273,7 +263,7 @@ button#reset:hover { background: #da085c; }
   gap: 8px;
   padding: 4px 0;
   border-bottom: 1px solid #f1f5f9;
-  flex: 1;                /* each row grows equally */
+  flex: 1;               
 }
 .slider-row:last-of-type { border-bottom: none; }
 
@@ -309,27 +299,26 @@ button#reset:hover { background: #da085c; }
   }
 }
 
-/* Range slider — cross-browser track reset to kill browser default fills */
 input[type="range"] {
   flex: 1;
   min-width: 0;
   cursor: default;
-  /* reset everything */
+
   -webkit-appearance: none;
   appearance: none;
   background: transparent;
-  height: 20px;          /* enough hit area */
+  height: 20px;      
   padding: 0;
   margin: 0;
 }
-/* Track: Webkit (Chrome, Safari, Edge) */
+
 input[type="range"]::-webkit-slider-runnable-track {
   height: 4px;
   border-radius: 2px;
   background: var(--track-bg, #d1d5db);
   cursor: default;
 }
-/* Track: Firefox */
+
 input[type="range"]::-moz-range-track {
   height: 4px;
   border-radius: 2px;
@@ -337,7 +326,7 @@ input[type="range"]::-moz-range-track {
   border: none;
   cursor: default;
 }
-/* Thumb: Webkit */
+
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
@@ -345,11 +334,11 @@ input[type="range"]::-webkit-slider-thumb {
   height: 14px;
   border-radius: 50%;
   background: var(--sl-color, #3b82f6);
-  margin-top: -5px;      /* centre on the 4px track */
+  margin-top: -5px; 
   cursor: pointer;
   border: none;
 }
-/* Thumb: Firefox */
+
 input[type="range"]::-moz-range-thumb {
   width: 14px;
   height: 14px;
@@ -421,7 +410,6 @@ input[type="range"]:disabled::-moz-range-thumb    { cursor: default; }
 
 <div class="page-layout">
 
-  <!-- LEFT 25%:  table -->
   <div class="left-col">
     <div class="section-label">Results (user generated)</div>
     <table>
@@ -449,7 +437,6 @@ input[type="range"]:disabled::-moz-range-thumb    { cursor: default; }
     </div>
   </div>
 
-  <!-- RIGHT 75%: Sliders -->
   <div class="sliders-panel">
     <div class="section-label">2nd preference transfers from…</div>
     <div class="tab-row" id="tab-bar"></div>
@@ -495,8 +482,6 @@ let fpVotes = { ...DEFAULT_FP };
 let transfers = makeDefaultTransfers();
 let activeTab = 'RFM';
 
-// ── Helpers ────────────────────────────────────────────────────────────────
-
 function getOth() {
   return Math.max(0, 100 - PARTIES.filter(p => !p.auto)
     .reduce((a, p) => a + (fpVotes[p.id] || 0), 0));
@@ -532,14 +517,11 @@ function recalcNon(fromId) {
   Math.round(Math.max(0, 100 - manual) * 10) / 10;
 }
 
-// How much headroom is left for the activeTab (excluding NON which is auto)
 function headroom() {
   const manual = PARTIES.filter(p => p.id !== activeTab)
     .reduce((a, p) => a + (transfers[activeTab][p.id] || 0), 0);
   return Math.max(0, 100 - manual);
 }
-
-// ── Render: Results table ─────────────────────────────────────────────────
 
 function buildResultsTable() {
   const body = document.getElementById('results-body');
@@ -595,7 +577,6 @@ function renderResults() {
   const fp = allFP();
   const totalVal = Object.values(fp).reduce((a, b) => a + b, 0);
 
-  // Check for first-round majority (50%+1 of actual votes cast)
   const firstRoundWinner = Object.entries(fp).find(([id, v]) => v > 50);
 
   if (firstRoundWinner) {
@@ -699,10 +680,8 @@ function renderResults() {
   });
 }
 
-// ── Render: Tabs + sliders ────────────────────────────────────────────────
-
 function renderSliders() {
-  // Tabs
+
   const tabBar = document.getElementById('tab-bar');
   tabBar.innerHTML = '';
   PARTIES.forEach(p => {
@@ -715,7 +694,6 @@ function renderSliders() {
     tabBar.appendChild(btn);
   });
 
-  // Slider rows
   const area = document.getElementById('slider-area');
   area.innerHTML = '';
 
@@ -761,7 +739,6 @@ sl.addEventListener('pointerdown', e => {
 
   const clickX = e.clientX - rect.left;
 
-  // Allow dragging only if the touch starts on the thumb
   if (Math.abs(clickX - thumbX) <= 12) {
     sl.dataset.dragging = 'true';
   } else {
@@ -771,12 +748,10 @@ sl.addEventListener('pointerdown', e => {
 
 });
 
-// Reset only after the finger leaves the control
 sl.addEventListener('change', () => {
   sl.dataset.dragging = 'false';
 });
   
-    // accent-color via CSS custom property on the element
     sl.style.setProperty('--sl-color', to.color);
 
   const pct = v;
@@ -800,14 +775,13 @@ if (isNon || isSelf) {
   return;
 }
         const desired = parseFloat(sl.value);
-        // Sum of every OTHER manual (non-NON) slider — don't touch their values
+
         const othersTotal = PARTIES.filter(p => p.id !== activeTab && p.id !== to.id)
           .reduce((a, p) => a + (transfers[activeTab][p.id] || 0), 0);
-        // If non-vote is already 0, this slider can't go higher than its current value
-        // (room freed only when othersTotal drops). Otherwise allow up to 100-others.
+
         const maxAllowed = Math.max(0, 100 - othersTotal);
         const clamped = Math.round(Math.min(desired, maxAllowed) * 10) / 10;
-        // Snap thumb back without affecting any other slider
+
         sl.value = clamped;
         transfers[activeTab][to.id] = clamped;
 
@@ -819,9 +793,9 @@ if (isNon || isSelf) {
     #d1d5db ${clamped}%,
     #d1d5db 100%)`
 );
-        // Recompute NON (auto) only
+
         recalcNon(activeTab);
-        // Refresh display values + NON slider position — no other slider's value changes
+
         updateSliderDisplay();
         renderResults();
       });
@@ -856,8 +830,7 @@ function updateSliderDisplay() {
     total += v;
     const sl = row.querySelector('input[type=range]');
     const valEl = row.querySelector('.sl-val');
-    // Only sync the NON slider position (it's auto-calculated).
-    // Never touch other sliders' value/max — they move only when the user drags them.
+
 if (sl) {
   if (toId === 'NON') sl.value = v;
 
@@ -895,7 +868,6 @@ function resetAll() {
   updateAll();
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────
 buildResultsTable();
 renderSliders();
 updateAll();
