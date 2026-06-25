@@ -885,6 +885,21 @@ updateAll();
 
 </div>
 </div>
+
+  <script>
+  function postHeight() {
+    window.parent.postMessage({
+      type: 'sv-calc-height',
+      height: document.body.scrollHeight
+    }, '*');
+  }
+  window.addEventListener('load', postHeight);
+  window.addEventListener('resize', postHeight);
+
+  // Also fire after any user interaction that might change height
+  const observer = new ResizeObserver(postHeight);
+  observer.observe(document.body);
+</script>
   
 </body>
 </html>
