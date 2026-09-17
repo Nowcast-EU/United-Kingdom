@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projection — Nowcast UK</title>
+<style>
+  :root {
+    --bg: #FAFAF8;
+    --ink: #1A1E23;
+    --ink-soft: #4A4F57;
+    --muted: #8A8F98;
+    --divider: #E2E2DE;
+    --accent-soft: #E7ECF3;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 24px 16px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    line-height: 1.5;
+  }
+  h2 { font-size: 1.3rem; margin: 0 0 4px; }
+  h3 { font-size: 1rem; margin: 0 0 12px; }
+  .wip-note { color: var(--muted); font-size: 0.85rem; margin: 0 0 20px; }
+
+  /* ---------------- layout ---------------- */
+  .module-grid {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    grid-template-areas: "map builder";
+    gap: 20px;
+    max-width: 1000px;
+  }
+
+  @media (max-width: 780px) {
+    .module-grid {
+      grid-template-columns: 1fr;
+      grid-template-areas: "map" "builder";
+    }
+  }
+
+  /* ---------------- map panel ---------------- */
+  .map-panel {
+    grid-area: map;
+    aspect-ratio: 3 / 4;        /* portrait, locked at every breakpoint */
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .map-placeholder {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background:
+      repeating-linear-gradient(135deg, var(--accent-soft) 0 10px, transparent 10px 20px),
+      #fff;
+    border: 1px solid var(--divider);
+    color: var(--muted);
+    text-align: center;
+    padding: 16px;
+  }
+
+  .map-placeholder strong { color: var(--ink-soft); font-size: 0.95rem; }
+  .map-placeholder span { font-size: 0.78rem; }
+
+  /* ---------------- builder panel ---------------- */
+  .builder-panel {
+    grid-area: builder;
+    display: flex;
+    flex-direction: column;
+    height: 100%;              /* stretches to match .map-panel's row height on desktop */
+    min-height: 0;
+  }
+
+  @media (max-width: 780px) {
+    .builder-panel { height: auto; }
+  }
+
+  .party-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .party-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border: 1px solid var(--divider);
+    background: #fff;
+    border-radius: 999px;
+    cursor: pointer;
+    color: var(--ink-soft);
+  }
+
+  .party-btn .swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex: none;
+  }
+
+  .party-btn[aria-pressed="true"] {
+    border-color: var(--ink);
+    color: var(--ink);
+    background: var(--accent-soft);
+  }
+
+  .fill-bar-wrap {
+    flex: 1;
+    min-height: 160px;
+    position: relative;
+    border: 1px solid var(--divider);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .fill-bar {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column-reverse;   /* desktop: fills bottom-up */
+  }
+
+  @media (max-width: 780px) {
+    .fill-bar { flex-direction: row; }  /* mobile: fills left-to-right */
+  }
+
+  .fill-segment {
+    flex-grow: 0;
+    flex-shrink: 0;
+  }
+
+  .majority-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(var(--majority-pct, 50) * 1%);
+    height: 2px;
+    background: var(--ink);
+  }
+
+  .majority-line::after {
+    content: "majority";
+    position: absolute;
+    right: 4px;
+    bottom: 4px;
+    font-size: 0.68rem;
+    color: var(--muted);
+    background: rgba(255,255,255,0.85);
+    padding: 0 4px;
+    border-radius: 3px;
+  }
+
+  @media (max-width: 780px) {
+    .majority-line {
+      left: calc(var(--majority-pct, 50) * 1%);
+      right: auto;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      height: auto;
+    }
+    .majority-line::after {
+      right: auto;
+      left: 4px;
+      bottom: auto;
+      top: 4px;
+    }
+  }
+
+  .builder-status {
+    margin-top: 10px;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+
+  .builder-status strong { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<h2>Seat projection</h2>
+<p class="wip-note">Work in progress — placeholder party/seat figures, placeholder map. Swap the map placeholder for the real constituency map once it's ready; keep its aspect-ratio matched to the real map's proportions.</p>
+
+<div class="module-grid">
+
+  <div class="map-panel">
+    <div class="map-placeholder">
+      <strong>UK constituency map</strong>
+      <span>placeholder — portrait, locked aspect-ratio</span>
+    </div>
+  </div>
+
+  <div class="builder-panel">
+    <h3>Coalition builder</h3>
+    <div class="party-list" id="partyList"></div>
+    <div class="fill-bar-wrap">
+      <div class="fill-bar" id="fillBar"></div>
+      <div class="majority-line" id="majorityLine"></div>
+    </div>
+    <p class="builder-status" id="builderStatus"></p>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  // Placeholder data — replace with the real projection once available.
+  var TOTAL_SEATS = 650;
+  var MAJORITY = 326;
+
+  var parties = [
+    { id: 'lab', name: 'Labour', seats: 240, color: '#d50000' },
+    { id: 'con', name: 'Conservative', seats: 180, color: '#0087dc' },
+    { id: 'ref', name: 'Reform UK', seats: 60, color: '#12b6cf' },
+    { id: 'ld', name: 'Lib Dem', seats: 65, color: '#faa61a' },
+    { id: 'snp', name: 'SNP', seats: 30, color: '#fdf38e' },
+    { id: 'grn', name: 'Green', seats: 8, color: '#6ab023' },
+    { id: 'dup', name: 'DUP', seats: 8, color: '#d46a4c' },
+    { id: 'sf', name: 'Sinn Féin', seats: 7, color: '#326760' },
+    { id: 'pc', name: 'Plaid Cymru', seats: 4, color: '#005b54' },
+    { id: 'oth', name: 'Other', seats: 48, color: '#9a9a9a' }
+  ];
+
+  var selectedOrder = []; // party ids in the order they were selected
+  var partyListEl = document.getElementById('partyList');
+  var fillBarEl = document.getElementById('fillBar');
+  var statusEl = document.getElementById('builderStatus');
+
+  document.getElementById('majorityLine').style.setProperty(
+    '--majority-pct',
+    (MAJORITY / TOTAL_SEATS * 100).toFixed(2)
+  );
+
+  function partyById(id) {
+    return parties.filter(function (p) { return p.id === id; })[0];
+  }
+
+  function render() {
+    // party buttons
+    partyListEl.innerHTML = '';
+    parties.forEach(function (p) {
+      var btn = document.createElement('button');
+      btn.className = 'party-btn';
+      btn.type = 'button';
+      btn.setAttribute('aria-pressed', selectedOrder.indexOf(p.id) !== -1);
+      btn.innerHTML =
+        '<span class="swatch" style="background:' + p.color + '"></span>' +
+        p.name + ' (' + p.seats + ')';
+      btn.addEventListener('click', function () { toggle(p.id); });
+      partyListEl.appendChild(btn);
+    });
+
+    // fill bar segments, in selection order
+    fillBarEl.innerHTML = '';
+    selectedOrder.forEach(function (id) {
+      var p = partyById(id);
+      var seg = document.createElement('div');
+      seg.className = 'fill-segment';
+      seg.style.flexBasis = (p.seats / TOTAL_SEATS * 100) + '%';
+      seg.style.background = p.color;
+      seg.title = p.name + ': ' + p.seats + ' seats';
+      fillBarEl.appendChild(seg);
+    });
+
+    // status text
+    var total = selectedOrder.reduce(function (sum, id) {
+      return sum + partyById(id).seats;
+    }, 0);
+
+    if (total === 0) {
+      statusEl.innerHTML = 'Select parties to build a coalition.';
+    } else if (total >= MAJORITY) {
+      statusEl.innerHTML =
+        '<strong>Majority reached</strong> — ' + total + ' / ' + TOTAL_SEATS + ' seats.';
+    } else {
+      statusEl.innerHTML =
+        '<strong>' + total + '</strong> / ' + TOTAL_SEATS + ' seats selected — ' +
+        (MAJORITY - total) + ' short of a majority (' + MAJORITY + ').';
+    }
+  }
+
+  function toggle(id) {
+    var idx = selectedOrder.indexOf(id);
+    if (idx === -1) {
+      selectedOrder.push(id);
+    } else {
+      selectedOrder.splice(idx, 1);
+    }
+    render();
+    sendHeight();
+  }
+
+  render();
+
+  // ---------------- report height to the parent site ----------------
+  // See module-resize-snippet.html for the general version of this.
+  function sendHeight() {
+    var h = document.documentElement.scrollHeight;
+    window.parent.postMessage({ sender: 'nowcast-module', height: h }, '*');
+  }
+  window.addEventListener('load', sendHeight);
+  window.addEventListener('resize', sendHeight);
+  if ('ResizeObserver' in window) {
+    new ResizeObserver(sendHeight).observe(document.body);
+  }
+  sendHeight();
+})();
+</script>
+
+</body>
+</html>
