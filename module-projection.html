@@ -241,16 +241,20 @@
   // Placeholder data — replace with the real projection once available.
 
   var parties = [
-    { id: 'lab', name: 'Labour', seats: 240, color: '#d50000' },
-    { id: 'con', name: 'Conservative', seats: 180, color: '#0087dc' },
-    { id: 'ref', name: 'Reform UK', seats: 60, color: '#12b6cf' },
-    { id: 'ld', name: 'Lib Dem', seats: 65, color: '#faa61a' },
-    { id: 'snp', name: 'SNP', seats: 30, color: '#fdf38e' },
-    { id: 'grn', name: 'Green', seats: 8, color: '#6ab023' },
-    { id: 'dup', name: 'DUP', seats: 8, color: '#d46a4c' },
-    { id: 'sf', name: 'Sinn Féin', seats: 7, color: '#326760' },
-    { id: 'pc', name: 'Plaid Cymru', seats: 4, color: '#005b54' },
-    { id: 'oth', name: 'Other', seats: 48, color: '#9a9a9a' }
+    { id: 'lab', name: 'LAB', seats: 258, color: '#E4003B' },
+    { id: 'con', name: 'CON', seats: 113, color: '#0087dc' },
+    { id: 'ref', name: 'RFM', seats: 127, color: '#34D8EF' },
+    { id: 'ld', name: 'LDM', seats: 70, color: '#faa61a' },
+    { id: 'snp', name: 'SNP', seats: 39, color: '#fdf38e' },
+    { id: 'grn', name: 'GRN', seats: 8, color: '#6ab023' },
+    { id: 'dup', name: 'DUP', seats: 3, color: '#d46a4c' },
+    { id: 'sf', name: 'SFN', seats: 7, color: '#326760' },
+    { id: 'pc', name: 'PLC', seats: 12, color: '#005b54' },
+    { id: 'uup', name: 'UUP', seats: 4, color: '#3399ff' },
+    { id: 'sdl', name: 'SDL', seats: 2, color: '#2aa82c' },
+    { id: 'tuv', name: 'TUV', seats: 1, color: '#0C3A6A' },
+    { id: 'res', name: 'RES', seats: 1, color: '#000055' },
+    { id: 'oth', name: 'OTH', seats: 5, color: '#999999' }
   ];
 
   var TOTAL_SEATS = 650;
@@ -306,7 +310,7 @@ var counterEl = document.getElementById('builderCounter');
     });
 
    document.getElementById('builderNote').textContent =
-  "Functional majority = (" + getFunctionalMajority() + " as Sinn Féin don't take their seats in parliament)";
+  "Functional majority = " + getFunctionalMajority() + ", as Sinn Féin don't take their seats in parliament";
 
     // status text
     var total = selectedOrder.reduce(function (sum, id) {
