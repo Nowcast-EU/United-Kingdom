@@ -231,7 +231,7 @@
 </div>
 <div class="party-list" id="partyList"></div>
 <p class="builder-counter" id="builderCounter"></p>
-<p class="builder-note">Majority = 326 seats</p>
+<p class="builder-note" id="builderNote">Majority = 326 seats</p>
   </div>
 
 </div>
@@ -239,8 +239,6 @@
 <script>
 (function () {
   // Placeholder data — replace with the real projection once available.
-  var TOTAL_SEATS = 650;
-  var MAJORITY = 326;
 
   var parties = [
     { id: 'lab', name: 'Labour', seats: 240, color: '#d50000' },
@@ -254,6 +252,17 @@
     { id: 'pc', name: 'Plaid Cymru', seats: 4, color: '#005b54' },
     { id: 'oth', name: 'Other', seats: 48, color: '#9a9a9a' }
   ];
+
+  var TOTAL_SEATS = 650;
+var MAJORITY = 326;
+var NON_SITTING_IDS = ['sf']; // parties whose seats don't count toward a working majority
+
+function getFunctionalMajority() {
+  var nonSittingSeats = parties
+    .filter(function (p) { return NON_SITTING_IDS.indexOf(p.id) !== -1; })
+    .reduce(function (sum, p) { return sum + p.seats; }, 0);
+  return Math.floor((TOTAL_SEATS - nonSittingSeats) / 2) + 1;
+}
 
   var selectedOrder = []; // party ids in the order they were selected
   var partyListEl = document.getElementById('partyList');
@@ -295,6 +304,9 @@ var counterEl = document.getElementById('builderCounter');
       seg.title = p.name + ': ' + p.seats + ' seats';
       fillBarEl.appendChild(seg);
     });
+
+    document.getElementById('builderNote').textContent =
+  'Majority = 326 seats (' + getFunctionalMajority() + ' functional, excl. Sinn Féin)';
 
     // status text
     var total = selectedOrder.reduce(function (sum, id) {
