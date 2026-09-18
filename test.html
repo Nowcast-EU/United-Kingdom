@@ -124,6 +124,7 @@
   .module-frame {
   height: 400px;
   transition: height 0.15s ease;
+  overflow: hidden;
 }
 
   footer {
@@ -235,6 +236,8 @@
   // Resizes each module iframe to match the height its own page reports.
 (function () {
   var frames = Array.prototype.slice.call(document.querySelectorAll('.module-frame'));
+
+   frames.forEach(function (f) { f.setAttribute('scrolling', 'no'); });
 
   window.addEventListener('message', function (event) {
     var data = event.data;
