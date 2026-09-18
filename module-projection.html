@@ -282,10 +282,15 @@ var counterEl = document.getElementById('builderCounter');
     return parties.filter(function (p) { return p.id === id; })[0];
   }
 
-  function render() {
-    // party buttons
-    partyListEl.innerHTML = '';
-    parties.forEach(function (p) {
+function render() {
+  // party buttons, sorted by seats (most to least), then alphabetically by name
+  var sortedParties = parties.slice().sort(function (a, b) {
+    if (b.seats !== a.seats) return b.seats - a.seats;
+    return a.name.localeCompare(b.name);
+  });
+
+  partyListEl.innerHTML = '';
+  sortedParties.forEach(function (p) {
       var btn = document.createElement('button');
       btn.className = 'party-btn';
       btn.type = 'button';
