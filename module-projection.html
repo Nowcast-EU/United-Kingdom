@@ -84,39 +84,47 @@
     .builder-panel { height: auto; }
   }
 
-  .party-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 12px;
-  }
+.party-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 12px;
+}
 
-  .party-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 10px;
-    font-size: 0.82rem;
-    font-weight: 600;
-    border: 1px solid var(--divider);
-    background: #fff;
-    border-radius: 999px;
-    cursor: pointer;
-    color: var(--ink-soft);
-  }
+ .party-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  font-weight: normal;
+  border: 1px solid var(--divider);
+  background: #f3f3f3;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  opacity: 0.6;
+  transition: all 0.25s ease;
+}
 
-  .party-btn .swatch {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    flex: none;
-  }
+.party-btn:hover { transform: translateY(-1px); }
 
-  .party-btn[aria-pressed="true"] {
-    border-color: var(--ink);
-    color: var(--ink);
-    background: var(--accent-soft);
-  }
+.party-btn .swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  flex: none;
+}
+
+.party-btn[aria-pressed="true"] {
+  opacity: 1;
+  background: #fff;
+  border-color: #999;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  font-weight: bold;
+  color: var(--ink);
+}
 
   .fill-bar-wrap {
     flex: 1;
@@ -139,19 +147,20 @@
     .fill-bar { flex-direction: row; }  /* mobile: fills left-to-right */
   }
 
-  .fill-segment {
-    flex-grow: 0;
-    flex-shrink: 0;
-  }
+.fill-segment {
+  flex-grow: 0;
+  flex-shrink: 0;
+  transition: flex-basis 0.6s ease;
+}
 
-  .majority-line {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: calc(var(--majority-pct, 50) * 1%);
-    height: 2px;
-    background: var(--ink);
-  }
+.majority-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--majority-pct, 50) * 1%);
+  height: 2px;
+  background: repeating-linear-gradient(to right, var(--ink) 0, var(--ink) 5px, transparent 5px, transparent 10px);
+}
 
   .majority-line::after {
     content: "majority";
@@ -166,14 +175,15 @@
   }
 
   @media (max-width: 780px) {
-    .majority-line {
-      left: calc(var(--majority-pct, 50) * 1%);
-      right: auto;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      height: auto;
-    }
+.majority-line {
+  left: calc(var(--majority-pct, 50) * 1%);
+  right: auto;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  height: auto;
+  background: repeating-linear-gradient(to bottom, var(--ink) 0, var(--ink) 5px, transparent 5px, transparent 10px);
+}
     .majority-line::after {
       right: auto;
       left: 4px;
@@ -182,13 +192,19 @@
     }
   }
 
-  .builder-status {
-    margin-top: 10px;
-    font-size: 0.85rem;
-    color: var(--ink-soft);
-  }
+.builder-counter {
+  font-size: 1.3rem;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 10px;
+}
 
-  .builder-status strong { color: var(--ink); }
+.builder-note {
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 2px;
+}
 </style>
 </head>
 <body>
@@ -208,13 +224,14 @@
   </div>
 
   <div class="builder-panel">
-    <h3>Coalition builder</h3>
-    <div class="party-list" id="partyList"></div>
-    <div class="fill-bar-wrap">
-      <div class="fill-bar" id="fillBar"></div>
-      <div class="majority-line" id="majorityLine"></div>
-    </div>
-    <p class="builder-status" id="builderStatus"></p>
+<h3>Coalition builder</h3>
+<div class="fill-bar-wrap">
+  <div class="fill-bar" id="fillBar"></div>
+  <div class="majority-line" id="majorityLine"></div>
+</div>
+<div class="party-list" id="partyList"></div>
+<p class="builder-counter" id="builderCounter"></p>
+<p class="builder-note">Majority = 326 seats</p>
   </div>
 
 </div>
@@ -241,7 +258,7 @@
   var selectedOrder = []; // party ids in the order they were selected
   var partyListEl = document.getElementById('partyList');
   var fillBarEl = document.getElementById('fillBar');
-  var statusEl = document.getElementById('builderStatus');
+var counterEl = document.getElementById('builderCounter');
 
   document.getElementById('majorityLine').style.setProperty(
     '--majority-pct',
@@ -284,16 +301,8 @@
       return sum + partyById(id).seats;
     }, 0);
 
-    if (total === 0) {
-      statusEl.innerHTML = 'Select parties to build a coalition.';
-    } else if (total >= MAJORITY) {
-      statusEl.innerHTML =
-        '<strong>Majority reached</strong> — ' + total + ' / ' + TOTAL_SEATS + ' seats.';
-    } else {
-      statusEl.innerHTML =
-        '<strong>' + total + '</strong> / ' + TOTAL_SEATS + ' seats selected — ' +
-        (MAJORITY - total) + ' short of a majority (' + MAJORITY + ').';
-    }
+counterEl.textContent = total + ' / ' + TOTAL_SEATS;
+counterEl.style.color = total >= MAJORITY ? '#2BA84A' : 'var(--ink)';
   }
 
   function toggle(id) {
