@@ -139,33 +139,13 @@
 .fill-bar {
   position: absolute;
   inset: 6px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: var(--dot-gap, 3px);
+  width: calc(100% - 12px);
+  height: calc(100% - 12px);
+  display: block;
 }
-
-.fill-bar.orientation-portrait { flex-direction: column; }
-.fill-bar.orientation-landscape { flex-direction: row; }
-
-.dot-line {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: var(--dot-gap, 3px);
-}
-
-.fill-bar.orientation-portrait .dot-line { flex-direction: row; }
-.fill-bar.orientation-landscape .dot-line { flex-direction: column; }
 
 .seat-dot {
-  width: var(--dot-size, 8px);
-  height: var(--dot-size, 8px);
-  box-sizing: border-box;
-  border-radius: 0;
-  background: var(--divider);
-  flex: none;
-  transition: background 0.25s ease;
+  transition: fill 0.25s ease;
 }
 
   @media (max-width: 780px) {
@@ -203,7 +183,7 @@
   <div class="builder-panel">
 <h3>Coalition builder</h3>
 <div class="fill-bar-wrap">
-  <div class="fill-bar" id="fillBar"></div>
+  <svg class="fill-bar" id="fillBar" xmlns="http://www.w3.org/2000/svg"></svg>
 </div>
 <div class="party-list" id="partyList"></div>
 <p class="builder-counter" id="builderCounter"></p>
@@ -266,24 +246,18 @@ function computeGridLayout(alongDim, acrossDim, count, gap) {
   return best;
 }
 
+var SVG_NS = 'http://www.w3.org/2000/svg';
+
 function buildDotGrid() {
   var w = fillBarEl.clientWidth;
   var h = fillBarEl.clientHeight;
   if (w < 1 || h < 1) return;
 
-  // Portrait (taller than wide): lines are horizontal rows, stacked top-to-bottom.
-  // Landscape (wider than tall): lines are vertical columns, stacked left-to-right.
   var orientation = h >= w ? 'portrait' : 'landscape';
   var layout = orientation === 'portrait'
     ? computeGridLayout(w, h, TOTAL_SEATS, DOT_GAP)
     : computeGridLayout(h, w, TOTAL_SEATS, DOT_GAP);
 
-fillBarEl.style.setProperty('--dot-size', Math.floor(layout.size) + 'px');
-fillBarEl.style.setProperty('--dot-gap', DOT_GAP + 'px');
-  fillBarEl.className = 'fill-bar orientation-' + orientation;
-
-  // Work out each line's length, putting the partial line first (top) in
-  // portrait mode, and last (right) in landscape mode.
   var remainder = TOTAL_SEATS % layout.lineLength;
   var fullLines = remainder === 0 ? layout.lineCount : layout.lineCount - 1;
   var lineLengths = [];
@@ -305,21 +279,41 @@ fillBarEl.style.setProperty('--dot-gap', DOT_GAP + 'px');
     }
   });
 
+  // 1 SVG unit = 1 CSS pixel — everything below is drawn in exact pixel coordinates.
+  fillBarEl.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+  fillBarEl.setAttribute('width', w);
+  fillBarEl.setAttribute('height', h);
   fillBarEl.innerHTML = '';
+
+  var dotSize = layout.size;
+  var gap = DOT_GAP;
+  var lineCount = lineLengths.length;
+  var lineSpan = lineCount * dotSize + (lineCount - 1) * gap;
+  var crossStart = (orientation === 'portrait' ? h : w) / 2 - lineSpan / 2;
+
   var offset = 0;
-  lineLengths.forEach(function (len) {
+  lineLengths.forEach(function (len, lineIndex) {
     var lineSeats = seats.slice(offset, offset + len);
     offset += len;
-    var lineEl = document.createElement('div');
-    lineEl.className = 'dot-line' + (len < layout.lineLength ? ' dot-line-partial' : '');
-    lineSeats.forEach(function (seat) {
-      var dot = document.createElement('div');
-      dot.className = 'seat-dot';
-      if (seat.color) dot.style.background = seat.color;
-      dot.title = seat.name;
-      lineEl.appendChild(dot);
+
+    var lineSpanAlong = len * dotSize + (len - 1) * gap;
+    var alongStart = (orientation === 'portrait' ? w : h) / 2 - lineSpanAlong / 2;
+    var crossPos = crossStart + lineIndex * (dotSize + gap);
+
+    lineSeats.forEach(function (seat, dotIndex) {
+      var alongPos = alongStart + dotIndex * (dotSize + gap);
+      var rect = document.createElementNS(SVG_NS, 'rect');
+      rect.setAttribute('x', orientation === 'portrait' ? alongPos : crossPos);
+      rect.setAttribute('y', orientation === 'portrait' ? crossPos : alongPos);
+      rect.setAttribute('width', dotSize);
+      rect.setAttribute('height', dotSize);
+      rect.setAttribute('class', 'seat-dot');
+      rect.setAttribute('fill', seat.color || 'var(--divider)');
+      var title = document.createElementNS(SVG_NS, 'title');
+      title.textContent = seat.name;
+      rect.appendChild(title);
+      fillBarEl.appendChild(rect);
     });
-    fillBarEl.appendChild(lineEl);
   });
 }
   
