@@ -136,60 +136,28 @@
     background: #fff;
   }
 
-  .fill-bar {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column-reverse;   /* desktop: fills bottom-up */
-  }
-
-  @media (max-width: 780px) {
-    .fill-bar { flex-direction: row; }  /* mobile: fills left-to-right */
-  }
-
-.fill-segment {
-  flex-grow: 0;
-  flex-shrink: 0;
-  transition: flex-basis 0.6s ease;
-}
-
-.majority-line {
+.fill-bar {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: calc(var(--majority-pct, 50) * 1%);
-  height: 2px;
-  background: repeating-linear-gradient(to right, var(--ink) 0, var(--ink) 5px, transparent 5px, transparent 10px);
+  inset: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 3px;
+  padding: 6px;
+  overflow-y: auto;
 }
 
-  .majority-line::after {
-    content: "majority";
-    position: absolute;
-    right: 4px;
-    bottom: 4px;
-    font-size: 0.68rem;
-    color: var(--muted);
-    background: rgba(255,255,255,0.85);
-    padding: 0 4px;
-    border-radius: 3px;
-  }
+.seat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--divider);
+  flex: none;
+  transition: background 0.25s ease;
+}
 
   @media (max-width: 780px) {
-.majority-line {
-  left: calc(var(--majority-pct, 50) * 1%);
-  right: auto;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  height: auto;
-  background: repeating-linear-gradient(to bottom, var(--ink) 0, var(--ink) 5px, transparent 5px, transparent 10px);
-}
-    .majority-line::after {
-      right: auto;
-      left: 4px;
-      bottom: auto;
-      top: 4px;
-    }
+
   }
 
 .builder-counter {
@@ -224,7 +192,6 @@
 <h3>Coalition builder</h3>
 <div class="fill-bar-wrap">
   <div class="fill-bar" id="fillBar"></div>
-  <div class="majority-line" id="majorityLine"></div>
 </div>
 <div class="party-list" id="partyList"></div>
 <p class="builder-counter" id="builderCounter"></p>
@@ -270,11 +237,6 @@ function getFunctionalMajority() {
   var fillBarEl = document.getElementById('fillBar');
 var counterEl = document.getElementById('builderCounter');
 
-  document.getElementById('majorityLine').style.setProperty(
-    '--majority-pct',
-    (MAJORITY / TOTAL_SEATS * 100).toFixed(2)
-  );
-
   function partyById(id) {
     return parties.filter(function (p) { return p.id === id; })[0];
   }
@@ -299,17 +261,18 @@ function render() {
       partyListEl.appendChild(btn);
     });
 
-    // fill bar segments, in selection order
-    fillBarEl.innerHTML = '';
-    selectedOrder.forEach(function (id) {
-      var p = partyById(id);
-      var seg = document.createElement('div');
-      seg.className = 'fill-segment';
-      seg.style.flexBasis = (p.seats / TOTAL_SEATS * 100) + '%';
-      seg.style.background = p.color;
-      seg.title = p.name + ': ' + p.seats + ' seats';
-      fillBarEl.appendChild(seg);
-    });
+// seat dots, grouped by party in the same sorted order as the buttons
+fillBarEl.innerHTML = '';
+sortedParties.forEach(function (p) {
+  var isActive = selectedOrder.indexOf(p.id) !== -1;
+  for (var i = 0; i < p.seats; i++) {
+    var dot = document.createElement('div');
+    dot.className = 'seat-dot';
+    dot.style.background = isActive ? p.color : '';
+    dot.title = p.name;
+    fillBarEl.appendChild(dot);
+  }
+});
 
    document.getElementById('builderNote').textContent =
   "Functional majority = " + getFunctionalMajority() + ", as Sinn Féin don't take their seats in parliament";
