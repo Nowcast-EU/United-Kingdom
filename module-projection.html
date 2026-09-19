@@ -23,7 +23,15 @@
     line-height: 1.5;
   }
   h2 { font-size: 1.3rem; margin: 0 0 4px; }
-  h3 { font-size: 1rem; margin: 0 0 12px; }
+  
+  h3 { font-size: 1rem; margin: 0; }
+
+.builder-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
   .wip-note { color: var(--muted); font-size: 0.85rem; margin: 0 0 20px; }
 
   /* ---------------- layout ---------------- */
@@ -153,10 +161,9 @@
   }
 
 .builder-counter {
-  font-size: 1.3rem;
+  font-size: 1rem;
   font-weight: bold;
-  text-align: center;
-  margin-top: 10px;
+  margin: 0;
 }
 
 .builder-note {
@@ -181,12 +188,14 @@
   </div>
 
   <div class="builder-panel">
-<h3>Coalition builder</h3>
+<div class="builder-header">
+  <h3>Coalition builder</h3>
+  <p class="builder-counter" id="builderCounter"></p>
+</div>
 <div class="fill-bar-wrap">
   <svg class="fill-bar" id="fillBar" xmlns="http://www.w3.org/2000/svg"></svg>
 </div>
 <div class="party-list" id="partyList"></div>
-<p class="builder-counter" id="builderCounter"></p>
 <p class="builder-note" id="builderNote">Majority = 326 seats</p>
   </div>
 
