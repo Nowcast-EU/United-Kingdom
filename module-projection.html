@@ -140,8 +140,9 @@
   position: absolute;
   inset: 6px;
   display: flex;
-  justify-content: space-evenly;
+  justify-content: center;
   align-items: center;
+  gap: var(--dot-gap, 3px);
 }
 
 .fill-bar.orientation-portrait { flex-direction: column; }
@@ -149,17 +150,13 @@
 
 .dot-line {
   display: flex;
-  justify-content: space-evenly;
+  justify-content: center;
   align-items: center;
+  gap: var(--dot-gap, 3px);
 }
 
 .fill-bar.orientation-portrait .dot-line { flex-direction: row; }
 .fill-bar.orientation-landscape .dot-line { flex-direction: column; }
-
-.dot-line.dot-line-partial {
-  justify-content: center;
-  gap: 3px;
-}
 
 .seat-dot {
   width: var(--dot-size, 8px);
@@ -280,7 +277,8 @@ function buildDotGrid() {
     ? computeGridLayout(w, h, TOTAL_SEATS, DOT_GAP)
     : computeGridLayout(h, w, TOTAL_SEATS, DOT_GAP);
 
-  fillBarEl.style.setProperty('--dot-size', Math.floor(layout.size) + 'px');
+fillBarEl.style.setProperty('--dot-size', Math.floor(layout.size) + 'px');
+fillBarEl.style.setProperty('--dot-gap', DOT_GAP + 'px');
   fillBarEl.className = 'fill-bar orientation-' + orientation;
 
   // Work out each line's length, putting the partial line first (top) in
