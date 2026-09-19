@@ -260,24 +260,28 @@ function buildDotGrid() {
 
   var remainder = TOTAL_SEATS % layout.lineLength;
   var fullLines = remainder === 0 ? layout.lineCount : layout.lineCount - 1;
-  var lineLengths = [];
-  if (remainder === 0) {
-    for (var i = 0; i < layout.lineCount; i++) lineLengths.push(layout.lineLength);
-  } else if (orientation === 'portrait') {
-    lineLengths.push(remainder);
-    for (var i2 = 0; i2 < fullLines; i2++) lineLengths.push(layout.lineLength);
-  } else {
-    for (var i3 = 0; i3 < fullLines; i3++) lineLengths.push(layout.lineLength);
-    lineLengths.push(remainder);
-  }
+var lineLengths = [];
+if (remainder === 0) {
+  for (var i = 0; i < layout.lineCount; i++) lineLengths.push(layout.lineLength);
+} else {
+  for (var i2 = 0; i2 < fullLines; i2++) lineLengths.push(layout.lineLength);
+  lineLengths.push(remainder);
+}
 
-  var seats = [];
-  sortedParties.forEach(function (p) {
-    var isActive = selectedOrder.indexOf(p.id) !== -1;
-    for (var s = 0; s < p.seats; s++) {
-      seats.push({ color: isActive ? p.color : null, name: p.name });
+var seats = [];
+selectedOrder.forEach(function (id) {
+  var p = partyById(id);
+  for (var s = 0; s < p.seats; s++) {
+    seats.push({ color: p.color, name: p.name });
+  }
+});
+sortedParties.forEach(function (p) {
+  if (selectedOrder.indexOf(p.id) === -1) {
+    for (var s2 = 0; s2 < p.seats; s2++) {
+      seats.push({ color: null, name: p.name });
     }
-  });
+  }
+});
 
   // 1 SVG unit = 1 CSS pixel — everything below is drawn in exact pixel coordinates.
   fillBarEl.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
@@ -291,14 +295,18 @@ function buildDotGrid() {
   var lineSpan = lineCount * dotSize + (lineCount - 1) * gap;
   var crossStart = (orientation === 'portrait' ? h : w) / 2 - lineSpan / 2;
 
-  var offset = 0;
-  lineLengths.forEach(function (len, lineIndex) {
-    var lineSeats = seats.slice(offset, offset + len);
-    offset += len;
+var offset = 0;
+lineLengths.forEach(function (len, lineIndex) {
+  var lineSeats = seats.slice(offset, offset + len);
+  offset += len;
 
-    var lineSpanAlong = len * dotSize + (len - 1) * gap;
-    var alongStart = (orientation === 'portrait' ? w : h) / 2 - lineSpanAlong / 2;
-    var crossPos = crossStart + lineIndex * (dotSize + gap);
+  var lineSpanAlong = len * dotSize + (len - 1) * gap;
+  var alongStart = (orientation === 'portrait' ? w : h) / 2 - lineSpanAlong / 2;
+  // Portrait fills bottom-to-top, so line 0 (the first seats in the array)
+  // needs to render at the bottom — flip its position along the cross axis.
+  // Landscape already fills left-to-right with line 0 at the left, so it's untouched.
+  var crossIndex = orientation === 'portrait' ? (lineCount - 1 - lineIndex) : lineIndex;
+  var crossPos = crossStart + crossIndex * (dotSize + gap);
 
     lineSeats.forEach(function (seat, dotIndex) {
       var alongPos = alongStart + dotIndex * (dotSize + gap);
