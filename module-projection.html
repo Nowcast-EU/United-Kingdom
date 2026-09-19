@@ -182,6 +182,14 @@
   text-align: center;
   margin-top: 2px;
 }
+
+  .majority-line {
+  stroke: #000;
+  stroke-width: 2;
+  stroke-dasharray: 5 4;
+  pointer-events: none;
+}
+  
 </style>
 </head>
 <body>
@@ -291,6 +299,14 @@ function buildDotGrid() {
     lineLengths.push(remainder);
   }
 
+    var halfwaySeat = TOTAL_SEATS / 2;
+  var majorityLineIndex = 0;
+  var cumulativeSeats = 0;
+  for (var li = 0; li < lineLengths.length; li++) {
+    cumulativeSeats += lineLengths[li];
+    if (cumulativeSeats >= halfwaySeat) { majorityLineIndex = li; break; }
+  }
+
   fillBarEl.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
   fillBarEl.setAttribute('width', w);
   fillBarEl.setAttribute('height', h);
@@ -304,12 +320,17 @@ function buildDotGrid() {
   var lineCount = lineLengths.length;
   var lineSpan = lineCount * dotSize + (lineCount - 1) * gap;
   var crossStart = (orientation === 'portrait' ? h : w) / 2 - lineSpan / 2;
+  var majorityLinePos = 0;
 
   lineLengths.forEach(function (len, lineIndex) {
     var lineSpanAlong = len * dotSize + (len - 1) * gap;
     var alongStart = (orientation === 'portrait' ? w : h) / 2 - lineSpanAlong / 2;
     var crossIndex = orientation === 'portrait' ? (lineCount - 1 - lineIndex) : lineIndex;
     var crossPos = crossStart + crossIndex * (dotSize + gap);
+
+    if (lineIndex === majorityLineIndex) {
+      majorityLinePos = crossPos + dotSize / 2;
+    }
 
     for (var dotIndex = 0; dotIndex < len; dotIndex++) {
       var alongPos = alongStart + dotIndex * (dotSize + gap);
@@ -327,6 +348,21 @@ function buildDotGrid() {
       dotLineIndex.push(lineIndex);
     }
   });
+
+  var majorityLine = document.createElementNS(SVG_NS, 'line');
+  if (orientation === 'portrait') {
+    majorityLine.setAttribute('x1', 0);
+    majorityLine.setAttribute('x2', w);
+    majorityLine.setAttribute('y1', majorityLinePos);
+    majorityLine.setAttribute('y2', majorityLinePos);
+  } else {
+    majorityLine.setAttribute('y1', 0);
+    majorityLine.setAttribute('y2', h);
+    majorityLine.setAttribute('x1', majorityLinePos);
+    majorityLine.setAttribute('x2', majorityLinePos);
+  }
+  majorityLine.setAttribute('class', 'majority-line');
+  fillBarEl.appendChild(majorityLine);
 
   updateDotFills();
 }
