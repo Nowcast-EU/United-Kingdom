@@ -307,6 +307,7 @@ function buildDotGrid() {
       rect.setAttribute('y', orientation === 'portrait' ? crossPos : alongPos);
       rect.setAttribute('width', dotSize);
       rect.setAttribute('height', dotSize);
+      rect.setAttribute('rx', dotSize / 2);
       rect.setAttribute('class', 'seat-dot');
       rect.setAttribute('fill', seat.color || 'var(--divider)');
       var title = document.createElementNS(SVG_NS, 'title');
