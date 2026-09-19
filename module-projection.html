@@ -140,17 +140,23 @@
   position: absolute;
   inset: 6px;
   display: flex;
-  flex-direction: column;
   justify-content: space-evenly;
   align-items: stretch;
 }
 
-.dot-row {
+.fill-bar.orientation-portrait { flex-direction: column; }
+.fill-bar.orientation-landscape { flex-direction: row; }
+
+.dot-line {
   display: flex;
   justify-content: space-evenly;
+  align-items: stretch;
 }
 
-  .dot-row.dot-row-partial {
+.fill-bar.orientation-portrait .dot-line { flex-direction: row; }
+.fill-bar.orientation-landscape .dot-line { flex-direction: column; }
+
+.dot-line.dot-line-partial {
   justify-content: center;
   gap: 3px;
 }
@@ -245,17 +251,18 @@ var sortedParties = [];
 
   var DOT_GAP = 3; // keep this in sync with the gap value in the .fill-bar CSS rule
 
-function computeGridLayout(width, height, count, gap) {
-  // Try every possible column count and keep whichever gives the largest
-  // dot size that still fits the box on both axes (width-bound or height-bound).
-  var best = { size: 0, cols: 1, rows: count };
-  for (var cols = 1; cols <= count; cols++) {
-    var rows = Math.ceil(count / cols);
-    var sizeByWidth = (width - (cols - 1) * gap) / cols;
-    var sizeByHeight = (height - (rows - 1) * gap) / rows;
-    var size = Math.min(sizeByWidth, sizeByHeight);
+function computeGridLayout(alongDim, acrossDim, count, gap) {
+  // "along" = the dimension each line runs across; "across" = the dimension
+  // lines are stacked along. Try every line length, keep the largest dot size
+  // that fits both dimensions.
+  var best = { size: 0, lineLength: 1, lineCount: count };
+  for (var lineLength = 1; lineLength <= count; lineLength++) {
+    var lineCount = Math.ceil(count / lineLength);
+    var sizeAlong = (alongDim - (lineLength - 1) * gap) / lineLength;
+    var sizeAcross = (acrossDim - (lineCount - 1) * gap) / lineCount;
+    var size = Math.min(sizeAlong, sizeAcross);
     if (size > best.size) {
-      best = { size: size, cols: cols, rows: rows };
+      best = { size: size, lineLength: lineLength, lineCount: lineCount };
     }
   }
   return best;
@@ -266,31 +273,55 @@ function buildDotGrid() {
   var h = fillBarEl.clientHeight;
   if (w < 1 || h < 1) return;
 
-  var layout = computeGridLayout(w, h, TOTAL_SEATS, DOT_GAP);
+  // Portrait (taller than wide): lines are horizontal rows, stacked top-to-bottom.
+  // Landscape (wider than tall): lines are vertical columns, stacked left-to-right.
+  var orientation = h >= w ? 'portrait' : 'landscape';
+  var layout = orientation === 'portrait'
+    ? computeGridLayout(w, h, TOTAL_SEATS, DOT_GAP)
+    : computeGridLayout(h, w, TOTAL_SEATS, DOT_GAP);
+
   fillBarEl.style.setProperty('--dot-size', layout.size + 'px');
+  fillBarEl.className = 'fill-bar orientation-' + orientation;
+
+  // Work out each line's length, putting the partial line first (top) in
+  // portrait mode, and last (right) in landscape mode.
+  var remainder = TOTAL_SEATS % layout.lineLength;
+  var fullLines = remainder === 0 ? layout.lineCount : layout.lineCount - 1;
+  var lineLengths = [];
+  if (remainder === 0) {
+    for (var i = 0; i < layout.lineCount; i++) lineLengths.push(layout.lineLength);
+  } else if (orientation === 'portrait') {
+    lineLengths.push(remainder);
+    for (var i2 = 0; i2 < fullLines; i2++) lineLengths.push(layout.lineLength);
+  } else {
+    for (var i3 = 0; i3 < fullLines; i3++) lineLengths.push(layout.lineLength);
+    lineLengths.push(remainder);
+  }
 
   var seats = [];
   sortedParties.forEach(function (p) {
     var isActive = selectedOrder.indexOf(p.id) !== -1;
-    for (var i = 0; i < p.seats; i++) {
+    for (var s = 0; s < p.seats; s++) {
       seats.push({ color: isActive ? p.color : null, name: p.name });
     }
   });
 
   fillBarEl.innerHTML = '';
-  for (var r = 0; r < layout.rows; r++) {
-    var rowSeats = seats.slice(r * layout.cols, (r + 1) * layout.cols);
-    var rowEl = document.createElement('div');
-    rowEl.className = 'dot-row' + (rowSeats.length < layout.cols ? ' dot-row-partial' : '');
-    rowSeats.forEach(function (seat) {
+  var offset = 0;
+  lineLengths.forEach(function (len) {
+    var lineSeats = seats.slice(offset, offset + len);
+    offset += len;
+    var lineEl = document.createElement('div');
+    lineEl.className = 'dot-line' + (len < layout.lineLength ? ' dot-line-partial' : '');
+    lineSeats.forEach(function (seat) {
       var dot = document.createElement('div');
       dot.className = 'seat-dot';
       if (seat.color) dot.style.background = seat.color;
       dot.title = seat.name;
-      rowEl.appendChild(dot);
+      lineEl.appendChild(dot);
     });
-    fillBarEl.appendChild(rowEl);
-  }
+    fillBarEl.appendChild(lineEl);
+  });
 }
   
   var partyListEl = document.getElementById('partyList');
