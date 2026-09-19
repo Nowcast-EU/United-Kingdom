@@ -153,7 +153,17 @@
 }
 
 .seat-dot {
-  transition: fill 0.25s ease;
+  fill: transparent;
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(0);
+  transition: transform 0.35s ease, fill 0.35s ease;
+  transition-delay: var(--dot-delay, 0s);
+}
+
+.seat-dot.seat-dot-filled {
+  fill: var(--dot-color, var(--divider));
+  transform: scale(1);
 }
 
   @media (max-width: 780px) {
@@ -235,6 +245,8 @@ function getFunctionalMajority() {
 
 var selectedOrder = []; // party ids in the order they were selected
 var sortedParties = [];
+var dotElements = [];
+var ROW_DELAY = 0.03; // seconds of stagger between each row/column as it appears
 
   var DOT_GAP = 3; // keep this in sync with the gap value in the .fill-bar CSS rule
 
@@ -269,34 +281,19 @@ function buildDotGrid() {
 
   var remainder = TOTAL_SEATS % layout.lineLength;
   var fullLines = remainder === 0 ? layout.lineCount : layout.lineCount - 1;
-var lineLengths = [];
-if (remainder === 0) {
-  for (var i = 0; i < layout.lineCount; i++) lineLengths.push(layout.lineLength);
-} else {
-  for (var i2 = 0; i2 < fullLines; i2++) lineLengths.push(layout.lineLength);
-  lineLengths.push(remainder);
-}
-
-var seats = [];
-selectedOrder.forEach(function (id) {
-  var p = partyById(id);
-  for (var s = 0; s < p.seats; s++) {
-    seats.push({ color: p.color, name: p.name });
+  var lineLengths = [];
+  if (remainder === 0) {
+    for (var i = 0; i < layout.lineCount; i++) lineLengths.push(layout.lineLength);
+  } else {
+    for (var i2 = 0; i2 < fullLines; i2++) lineLengths.push(layout.lineLength);
+    lineLengths.push(remainder);
   }
-});
-sortedParties.forEach(function (p) {
-  if (selectedOrder.indexOf(p.id) === -1) {
-    for (var s2 = 0; s2 < p.seats; s2++) {
-      seats.push({ color: null, name: p.name });
-    }
-  }
-});
 
-  // 1 SVG unit = 1 CSS pixel — everything below is drawn in exact pixel coordinates.
   fillBarEl.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
   fillBarEl.setAttribute('width', w);
   fillBarEl.setAttribute('height', h);
   fillBarEl.innerHTML = '';
+  dotElements = [];
 
   var dotSize = layout.size;
   var gap = DOT_GAP;
@@ -304,20 +301,14 @@ sortedParties.forEach(function (p) {
   var lineSpan = lineCount * dotSize + (lineCount - 1) * gap;
   var crossStart = (orientation === 'portrait' ? h : w) / 2 - lineSpan / 2;
 
-var offset = 0;
-lineLengths.forEach(function (len, lineIndex) {
-  var lineSeats = seats.slice(offset, offset + len);
-  offset += len;
+  lineLengths.forEach(function (len, lineIndex) {
+    var lineSpanAlong = len * dotSize + (len - 1) * gap;
+    var alongStart = (orientation === 'portrait' ? w : h) / 2 - lineSpanAlong / 2;
+    var crossIndex = orientation === 'portrait' ? (lineCount - 1 - lineIndex) : lineIndex;
+    var crossPos = crossStart + crossIndex * (dotSize + gap);
+    var delay = crossIndex * ROW_DELAY;
 
-  var lineSpanAlong = len * dotSize + (len - 1) * gap;
-  var alongStart = (orientation === 'portrait' ? w : h) / 2 - lineSpanAlong / 2;
-  // Portrait fills bottom-to-top, so line 0 (the first seats in the array)
-  // needs to render at the bottom — flip its position along the cross axis.
-  // Landscape already fills left-to-right with line 0 at the left, so it's untouched.
-  var crossIndex = orientation === 'portrait' ? (lineCount - 1 - lineIndex) : lineIndex;
-  var crossPos = crossStart + crossIndex * (dotSize + gap);
-
-    lineSeats.forEach(function (seat, dotIndex) {
+    for (var dotIndex = 0; dotIndex < len; dotIndex++) {
       var alongPos = alongStart + dotIndex * (dotSize + gap);
       var rect = document.createElementNS(SVG_NS, 'rect');
       rect.setAttribute('x', orientation === 'portrait' ? alongPos : crossPos);
@@ -326,12 +317,42 @@ lineLengths.forEach(function (len, lineIndex) {
       rect.setAttribute('height', dotSize);
       rect.setAttribute('rx', dotSize / 2);
       rect.setAttribute('class', 'seat-dot');
-      rect.setAttribute('fill', seat.color || 'var(--divider)');
+      rect.style.setProperty('--dot-delay', delay.toFixed(3) + 's');
       var title = document.createElementNS(SVG_NS, 'title');
-      title.textContent = seat.name;
       rect.appendChild(title);
       fillBarEl.appendChild(rect);
-    });
+      dotElements.push(rect);
+    }
+  });
+
+  updateDotFills();
+}
+
+  function updateDotFills() {
+  if (!dotElements.length) return;
+
+  var seats = [];
+  selectedOrder.forEach(function (id) {
+    var p = partyById(id);
+    for (var s = 0; s < p.seats; s++) {
+      seats.push({ color: p.color, name: p.name });
+    }
+  });
+  var filledCount = seats.length;
+  sortedParties.forEach(function (p) {
+    if (selectedOrder.indexOf(p.id) === -1) {
+      for (var s2 = 0; s2 < p.seats; s2++) {
+        seats.push({ color: null, name: p.name });
+      }
+    }
+  });
+
+  dotElements.forEach(function (dot, i) {
+    var seat = seats[i];
+    var isFilled = i < filledCount;
+    dot.classList.toggle('seat-dot-filled', isFilled);
+    if (isFilled) dot.style.setProperty('--dot-color', seat.color);
+    dot.querySelector('title').textContent = seat.name;
   });
 }
   
@@ -363,7 +384,7 @@ function render() {
       partyListEl.appendChild(btn);
     });
 
-  buildDotGrid();
+updateDotFills();
 
    document.getElementById('builderNote').textContent =
   "Functional majority = " + getFunctionalMajority() + ", as Sinn Féin don't take their seats in parliament";
@@ -388,9 +409,10 @@ counterEl.style.color = total >= MAJORITY ? '#2BA84A' : 'var(--ink)';
     sendHeight();
   }
 
-  render();
+render();
+buildDotGrid();
 
-  // ---------------- report height to the parent site ----------------
+// ---------------- report height to the parent site ----------------
   // See module-resize-snippet.html for the general version of this.
   function sendHeight() {
     var h = document.documentElement.scrollHeight;
