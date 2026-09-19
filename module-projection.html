@@ -138,21 +138,19 @@
 
 .fill-bar {
   position: absolute;
-  inset: 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-content: flex-start;
+  inset: 6px;
+  display: grid;
+  justify-content: center;
+  align-content: center;
   gap: 3px;
-  padding: 6px;
-  overflow-y: auto;
+  grid-auto-rows: var(--dot-size, 8px);
 }
 
 .seat-dot {
-  width: 8px;
-  height: 8px;
+  width: var(--dot-size, 8px);
+  height: var(--dot-size, 8px);
   border-radius: 50%;
   background: var(--divider);
-  flex: none;
   transition: background 0.25s ease;
 }
 
@@ -233,6 +231,36 @@ function getFunctionalMajority() {
 }
 
   var selectedOrder = []; // party ids in the order they were selected
+
+  var DOT_GAP = 3; // keep this in sync with the gap value in the .fill-bar CSS rule
+
+function computeGridLayout(width, height, count, gap) {
+  var lo = 1, hi = Math.max(1, Math.min(width, height));
+  var best = 1;
+  while (lo <= hi) {
+    var mid = Math.floor((lo + hi) / 2);
+    var cols = Math.floor((width + gap) / (mid + gap));
+    var rows = Math.floor((height + gap) / (mid + gap));
+    if (cols > 0 && rows > 0 && cols * rows >= count) {
+      best = mid;
+      lo = mid + 1;
+    } else {
+      hi = mid - 1;
+    }
+  }
+  var cols = Math.max(1, Math.floor((width + gap) / (best + gap)));
+  return { size: best, cols: cols };
+}
+
+function layoutDots() {
+  var w = fillBarEl.clientWidth;
+  var h = fillBarEl.clientHeight;
+  if (w < 1 || h < 1) return;
+  var layout = computeGridLayout(w, h, TOTAL_SEATS, DOT_GAP);
+  fillBarEl.style.setProperty('--dot-size', layout.size + 'px');
+  fillBarEl.style.gridTemplateColumns = 'repeat(' + layout.cols + ', var(--dot-size))';
+}
+  
   var partyListEl = document.getElementById('partyList');
   var fillBarEl = document.getElementById('fillBar');
 var counterEl = document.getElementById('builderCounter');
@@ -274,6 +302,8 @@ sortedParties.forEach(function (p) {
   }
 });
 
+  layoutDots();
+
    document.getElementById('builderNote').textContent =
   "Functional majority = " + getFunctionalMajority() + ", as Sinn Féin don't take their seats in parliament";
 
@@ -305,12 +335,13 @@ counterEl.style.color = total >= MAJORITY ? '#2BA84A' : 'var(--ink)';
     var h = document.documentElement.scrollHeight;
     window.parent.postMessage({ sender: 'nowcast-module', height: h }, '*');
   }
-  window.addEventListener('load', sendHeight);
-  window.addEventListener('resize', sendHeight);
-  if ('ResizeObserver' in window) {
-    new ResizeObserver(sendHeight).observe(document.body);
-  }
-  sendHeight();
+window.addEventListener('load', sendHeight);
+window.addEventListener('resize', function () { sendHeight(); layoutDots(); });
+if ('ResizeObserver' in window) {
+  new ResizeObserver(sendHeight).observe(document.body);
+  new ResizeObserver(layoutDots).observe(fillBarEl);
+}
+sendHeight();
 })();
 </script>
 
