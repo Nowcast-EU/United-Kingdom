@@ -150,11 +150,6 @@
   justify-content: space-evenly;
 }
 
-.dot-row.dot-row-partial {
-  justify-content: center;
-  gap: 3px;
-}
-
 .seat-dot {
   width: var(--dot-size, 8px);
   height: var(--dot-size, 8px);
@@ -245,19 +240,28 @@ var sortedParties = [];
 
   var DOT_GAP = 3; // keep this in sync with the gap value in the .fill-bar CSS rule
 
+function getDivisors(n) {
+  var divisors = [];
+  for (var i = 1; i <= n; i++) {
+    if (n % i === 0) divisors.push(i);
+  }
+  return divisors;
+}
+
 function computeGridLayout(width, height, count, gap) {
-  // Try every possible column count and keep whichever gives the largest
-  // dot size that still fits the box on both axes (width-bound or height-bound).
+  // Only consider column counts that divide count exactly, so rows * cols
+  // always equals count precisely — no partial row is ever possible.
+  var divisors = getDivisors(count);
   var best = { size: 0, cols: 1, rows: count };
-  for (var cols = 1; cols <= count; cols++) {
-    var rows = Math.ceil(count / cols);
+  divisors.forEach(function (cols) {
+    var rows = count / cols;
     var sizeByWidth = (width - (cols - 1) * gap) / cols;
     var sizeByHeight = (height - (rows - 1) * gap) / rows;
     var size = Math.min(sizeByWidth, sizeByHeight);
     if (size > best.size) {
       best = { size: size, cols: cols, rows: rows };
     }
-  }
+  });
   return best;
 }
 
@@ -281,7 +285,7 @@ function buildDotGrid() {
   for (var r = 0; r < layout.rows; r++) {
     var rowSeats = seats.slice(r * layout.cols, (r + 1) * layout.cols);
     var rowEl = document.createElement('div');
-    rowEl.className = 'dot-row' + (rowSeats.length < layout.cols ? ' dot-row-partial' : '');
+    rowEl.className = 'dot-row';
     rowSeats.forEach(function (seat) {
       var dot = document.createElement('div');
       dot.className = 'seat-dot';
