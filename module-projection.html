@@ -139,11 +139,20 @@
 .fill-bar {
   position: absolute;
   inset: 6px;
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: stretch;
+}
+
+.dot-row {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.dot-row.dot-row-partial {
   justify-content: center;
-  align-content: center;
   gap: 3px;
-  grid-auto-rows: var(--dot-size, 8px);
 }
 
 .seat-dot {
@@ -151,6 +160,7 @@
   height: var(--dot-size, 8px);
   border-radius: 50%;
   background: var(--divider);
+  flex: none;
   transition: background 0.25s ease;
 }
 
@@ -230,35 +240,57 @@ function getFunctionalMajority() {
   return Math.floor((TOTAL_SEATS - nonSittingSeats) / 2) + 1;
 }
 
-  var selectedOrder = []; // party ids in the order they were selected
+var selectedOrder = []; // party ids in the order they were selected
+var sortedParties = [];
 
   var DOT_GAP = 3; // keep this in sync with the gap value in the .fill-bar CSS rule
 
 function computeGridLayout(width, height, count, gap) {
-  var lo = 1, hi = Math.max(1, Math.min(width, height));
-  var best = 1;
-  while (lo <= hi) {
-    var mid = Math.floor((lo + hi) / 2);
-    var cols = Math.floor((width + gap) / (mid + gap));
-    var rows = Math.floor((height + gap) / (mid + gap));
-    if (cols > 0 && rows > 0 && cols * rows >= count) {
-      best = mid;
-      lo = mid + 1;
-    } else {
-      hi = mid - 1;
+  // Try every possible column count and keep whichever gives the largest
+  // dot size that still fits the box on both axes (width-bound or height-bound).
+  var best = { size: 0, cols: 1, rows: count };
+  for (var cols = 1; cols <= count; cols++) {
+    var rows = Math.ceil(count / cols);
+    var sizeByWidth = (width - (cols - 1) * gap) / cols;
+    var sizeByHeight = (height - (rows - 1) * gap) / rows;
+    var size = Math.min(sizeByWidth, sizeByHeight);
+    if (size > best.size) {
+      best = { size: size, cols: cols, rows: rows };
     }
   }
-  var cols = Math.max(1, Math.floor((width + gap) / (best + gap)));
-  return { size: best, cols: cols };
+  return best;
 }
 
-function layoutDots() {
+function buildDotGrid() {
   var w = fillBarEl.clientWidth;
   var h = fillBarEl.clientHeight;
   if (w < 1 || h < 1) return;
+
   var layout = computeGridLayout(w, h, TOTAL_SEATS, DOT_GAP);
   fillBarEl.style.setProperty('--dot-size', layout.size + 'px');
-  fillBarEl.style.gridTemplateColumns = 'repeat(' + layout.cols + ', var(--dot-size))';
+
+  var seats = [];
+  sortedParties.forEach(function (p) {
+    var isActive = selectedOrder.indexOf(p.id) !== -1;
+    for (var i = 0; i < p.seats; i++) {
+      seats.push({ color: isActive ? p.color : null, name: p.name });
+    }
+  });
+
+  fillBarEl.innerHTML = '';
+  for (var r = 0; r < layout.rows; r++) {
+    var rowSeats = seats.slice(r * layout.cols, (r + 1) * layout.cols);
+    var rowEl = document.createElement('div');
+    rowEl.className = 'dot-row' + (rowSeats.length < layout.cols ? ' dot-row-partial' : '');
+    rowSeats.forEach(function (seat) {
+      var dot = document.createElement('div');
+      dot.className = 'seat-dot';
+      if (seat.color) dot.style.background = seat.color;
+      dot.title = seat.name;
+      rowEl.appendChild(dot);
+    });
+    fillBarEl.appendChild(rowEl);
+  }
 }
   
   var partyListEl = document.getElementById('partyList');
@@ -271,7 +303,7 @@ var counterEl = document.getElementById('builderCounter');
 
 function render() {
   // party buttons, sorted by seats (most to least), then alphabetically by name
-  var sortedParties = parties.slice().sort(function (a, b) {
+  sortedParties = parties.slice().sort(function (a, b) {
     if (b.seats !== a.seats) return b.seats - a.seats;
     return a.name.localeCompare(b.name);
   });
@@ -289,20 +321,7 @@ function render() {
       partyListEl.appendChild(btn);
     });
 
-// seat dots, grouped by party in the same sorted order as the buttons
-fillBarEl.innerHTML = '';
-sortedParties.forEach(function (p) {
-  var isActive = selectedOrder.indexOf(p.id) !== -1;
-  for (var i = 0; i < p.seats; i++) {
-    var dot = document.createElement('div');
-    dot.className = 'seat-dot';
-    dot.style.background = isActive ? p.color : '';
-    dot.title = p.name;
-    fillBarEl.appendChild(dot);
-  }
-});
-
-  layoutDots();
+  buildDotGrid();
 
    document.getElementById('builderNote').textContent =
   "Functional majority = " + getFunctionalMajority() + ", as Sinn Féin don't take their seats in parliament";
@@ -336,10 +355,10 @@ counterEl.style.color = total >= MAJORITY ? '#2BA84A' : 'var(--ink)';
     window.parent.postMessage({ sender: 'nowcast-module', height: h }, '*');
   }
 window.addEventListener('load', sendHeight);
-window.addEventListener('resize', function () { sendHeight(); layoutDots(); });
+window.addEventListener('resize', function () { sendHeight(); buildDotGrid(); });
 if ('ResizeObserver' in window) {
   new ResizeObserver(sendHeight).observe(document.body);
-  new ResizeObserver(layoutDots).observe(fillBarEl);
+  new ResizeObserver(buildDotGrid).observe(fillBarEl);
 }
 sendHeight();
 })();
