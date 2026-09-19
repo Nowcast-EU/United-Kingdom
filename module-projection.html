@@ -246,6 +246,8 @@ function getFunctionalMajority() {
 var selectedOrder = []; // party ids in the order they were selected
 var sortedParties = [];
 var dotElements = [];
+var dotLineIndex = []; // which line (in fill order) each dot in dotElements belongs to
+var previousFilledCount = 0;
 var ROW_DELAY = 0.01; // seconds of stagger between each row/column as it appears
 
   var DOT_GAP = 3; // keep this in sync with the gap value in the .fill-bar CSS rule
@@ -294,6 +296,8 @@ function buildDotGrid() {
   fillBarEl.setAttribute('height', h);
   fillBarEl.innerHTML = '';
   dotElements = [];
+  dotLineIndex = [];
+  previousFilledCount = 0;
 
   var dotSize = layout.size;
   var gap = DOT_GAP;
@@ -306,7 +310,6 @@ function buildDotGrid() {
     var alongStart = (orientation === 'portrait' ? w : h) / 2 - lineSpanAlong / 2;
     var crossIndex = orientation === 'portrait' ? (lineCount - 1 - lineIndex) : lineIndex;
     var crossPos = crossStart + crossIndex * (dotSize + gap);
-    var delay = crossIndex * ROW_DELAY;
 
     for (var dotIndex = 0; dotIndex < len; dotIndex++) {
       var alongPos = alongStart + dotIndex * (dotSize + gap);
@@ -317,18 +320,18 @@ function buildDotGrid() {
       rect.setAttribute('height', dotSize);
       rect.setAttribute('rx', dotSize / 2);
       rect.setAttribute('class', 'seat-dot');
-      rect.style.setProperty('--dot-delay', delay.toFixed(3) + 's');
       var title = document.createElementNS(SVG_NS, 'title');
       rect.appendChild(title);
       fillBarEl.appendChild(rect);
       dotElements.push(rect);
+      dotLineIndex.push(lineIndex);
     }
   });
 
   updateDotFills();
 }
 
-  function updateDotFills() {
+function updateDotFills() {
   if (!dotElements.length) return;
 
   var seats = [];
@@ -347,13 +350,28 @@ function buildDotGrid() {
     }
   });
 
+  // Only the dots between the old and new fill boundary actually changed —
+  // cascade their delay outward from that boundary, not from the start of the bar.
+  var rangeStart = Math.min(previousFilledCount, filledCount);
+  var rangeEnd = Math.max(previousFilledCount, filledCount);
+  var startLineIndex = dotLineIndex[Math.min(rangeStart, dotLineIndex.length - 1)];
+
   dotElements.forEach(function (dot, i) {
     var seat = seats[i];
     var isFilled = i < filledCount;
     dot.classList.toggle('seat-dot-filled', isFilled);
     if (isFilled) dot.style.setProperty('--dot-color', seat.color);
     dot.querySelector('title').textContent = seat.name;
+
+    if (i >= rangeStart && i < rangeEnd) {
+      var delay = (dotLineIndex[i] - startLineIndex) * ROW_DELAY;
+      dot.style.setProperty('--dot-delay', Math.max(delay, 0).toFixed(3) + 's');
+    } else {
+      dot.style.setProperty('--dot-delay', '0s');
+    }
   });
+
+  previousFilledCount = filledCount;
 }
   
   var partyListEl = document.getElementById('partyList');
