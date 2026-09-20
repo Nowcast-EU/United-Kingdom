@@ -38,8 +38,8 @@ body {
   /* ---------------- layout ---------------- */
   .module-grid {
     display: grid;
-    grid-template-columns: 1fr 240px;
-    grid-template-areas: "map builder";
+    grid-template-columns: 1fr ;
+    grid-template-areas: "map" "builder";
     gap: 20px;
     max-width: 1250px;
     margin: 0 auto;
@@ -87,22 +87,10 @@ body {
   grid-area: builder;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: auto;
   min-height: 0;
   min-width: 0;
 }
-
-  @media (max-width: 780px) {
-    .builder-panel { height: auto; }
-
-    .fill-bar-wrap {
-  flex: none;
-  min-height: 0;
-  aspect-ratio: 4.5 / 1;
-  width: 100%;
-}
-    
-  }
 
 .party-list {
   display: grid;
@@ -148,15 +136,16 @@ body {
   color: var(--ink);
 }
 
-  .fill-bar-wrap {
-    flex: 1;
-    min-height: 160px;
-    position: relative;
-    border: 1px solid var(--divider);
-    border-radius: 8px;
-    overflow: hidden;
-    background: #fff;
-  }
+.fill-bar-wrap {
+  flex: none;
+  aspect-ratio: 3.5 / 1;
+  width: 100%;
+  position: relative;
+  border: 1px solid var(--divider);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
 
 .fill-bar {
   position: absolute;
