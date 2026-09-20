@@ -321,20 +321,20 @@ padding: 48px var(--gutter);
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     // Scrolls the tab strip just enough to show the active tab and the one after it.
-    function revealTab(activeTab) {
+     function revealTab(activeTab) {
       var next = activeTab.nextElementSibling || activeTab; // last tab: reveal itself
       var box = tabsEl.getBoundingClientRect();
+      var a = activeTab.getBoundingClientRect();
+      var n = next.getBoundingClientRect();
       var pad = 12;
-      var right = next.getBoundingClientRect().right;
-      var left = activeTab.getBoundingClientRect().left;
       var delta = 0;
 
-      if (right > box.right - pad) {
-        // next tab is cut off on the right: scroll right, but never hide the active tab
-        delta = Math.min(right - (box.right - pad), left - (box.left + pad));
-      } else if (left < box.left + pad) {
-        // active tab is cut off on the left (e.g. scrolling back up the page)
-        delta = left - (box.left + pad);
+      if (n.right > box.right - pad) {
+        // next tab is cut off on the right: scroll right, but keep the active tab's right edge in view
+        delta = Math.min(n.right - (box.right - pad), a.right - (box.left + pad));
+      } else if (a.left < box.left + pad) {
+        // active tab is cut off on the left (scrolling back up the page)
+        delta = a.left - (box.left + pad);
       }
 
       if (delta) {
