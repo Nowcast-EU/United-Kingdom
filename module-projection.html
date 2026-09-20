@@ -241,10 +241,7 @@ body {
   grid-template-columns: 100px 1fr 100px;
   align-items: center;
   gap: 20px;
-  padding: 20px;
-  border: 1px solid var(--divider);
-  border-radius: 10px;
-  background: #fff;
+  padding: 20px 0;
 }
 
 .h2h-portrait {
@@ -310,10 +307,22 @@ body {
   transform: translateX(-1px);
 }
 
-  .h2h-list {
+.h2h-list {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;
+  position: relative;
+}
+
+.h2h-list::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: var(--divider);
+  transform: translateX(-0.5px);
 }
 
 @media (max-width: 780px) {
@@ -332,6 +341,11 @@ body {
     height: 48px;
     font-size: 0.6rem;
   }
+
+  .h2h-list::before {
+  display: none;
+}
+  
 }
   
 </style>
