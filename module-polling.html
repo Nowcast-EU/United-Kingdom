@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nowcast UK: GB polling averages</title>
+<style>
+  :root {
+    --nc-page: #f3f4f6;
+    --nc-bg: #ffffff;
+    --nc-fg: #1a1d23;
+    --nc-muted: #5e6673;
+    --nc-grid: #e7e9ed;
+    --nc-border: #d9dde3;
+    --nc-hover: #f0f2f5;
+    --nc-focus: #2358d6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --nc-page: #0d0f13;
+      --nc-bg: #14171c;
+      --nc-fg: #eceef2;
+      --nc-muted: #9aa3b0;
+      --nc-grid: #262b33;
+      --nc-border: #2f353e;
+      --nc-hover: #1c2027;
+      --nc-focus: #7ea6ff;
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  /* Page chrome for standalone preview only. When embedding, drop these body rules
+     and the module will inherit your site's font. */
+  body {
+    margin: 0;
+    padding: 24px 12px;
+    background: var(--nc-page);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  /* ---------- Module ---------- */
+  .nc-module {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 20px 20px 16px;
+    background: var(--nc-bg);
+    color: var(--nc-fg);
+    border: 1px solid var(--nc-border);
+    border-radius: 8px;
+    font-family: inherit;
+    line-height: 1.4;
+  }
+
+  .nc-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .nc-head h2 {
+    margin: 0;
+    font-size: 1.3rem;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .nc-sub { margin: 4px 0 0; color: var(--nc-muted); font-size: 0.9rem; }
+  .nc-badge {
+    flex: none;
+    padding: 3px 8px;
+    border: 1px solid var(--nc-muted);
+    border-radius: 4px;
+    color: var(--nc-muted);
+    font-size: 0.78rem;
+  }
+
+  /* Party readout: doubles as the legend and as show/hide buttons */
+  .nc-readout-label { min-height: 1.3em; margin-bottom: 6px; color: var(--nc-muted); font-size: 0.85rem; }
+  .nc-keys {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+    gap: 4px 10px;
+    margin: 0 0 12px;
+    padding: 0;
+    list-style: none;
+  }
+  .nc-key {
+    display: block;
+    width: 100%;
+    padding: 6px 4px 6px 0;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    border-top: 3px solid var(--c);
+    cursor: pointer;
+  }
+  .nc-key:hover { background: var(--nc-hover); }
+  .nc-key.is-off { opacity: 0.4; }
+  .nc-name { display: block; color: var(--nc-muted); font-size: 0.82rem; }
+  .nc-val { display: block; font-size: 1.6rem; font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; }
+  .nc-chg { display: block; color: var(--nc-muted); font-size: 0.78rem; font-variant-numeric: tabular-nums; }
+
+  /* Controls */
+  .nc-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-bottom: 8px; font-size: 0.85rem; }
+  .nc-seg { display: inline-flex; border: 1px solid var(--nc-border); border-radius: 6px; overflow: hidden; }
+  .nc-seg button { padding: 5px 12px; font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  .nc-seg button + button { border-left: 1px solid var(--nc-border); }
+  .nc-seg button[aria-pressed="true"] { background: var(--nc-fg); color: var(--nc-bg); }
+  .nc-controls label { display: inline-flex; align-items: center; gap: 6px; color: var(--nc-muted); }
+  .nc-controls select {
+    padding: 3px 6px;
+    font: inherit;
+    color: var(--nc-fg);
+    background: var(--nc-bg);
+    border: 1px solid var(--nc-border);
+    border-radius: 4px;
+  }
+  .nc-module button:focus-visible,
+  .nc-module select:focus-visible,
+  .nc-module input:focus-visible { outline: 2px solid var(--nc-focus); outline-offset: 2px; }
+
+  /* Chart */
+  .nc-chart { position: relative; height: 440px; }
+  .nc-chart canvas { touch-action: pan-y; }
+  .nc-foot { margin: 10px 0 0; color: var(--nc-muted); font-size: 0.78rem; }
+  .nc-error { padding: 16px; border: 1px solid var(--nc-border); border-radius: 6px; color: var(--nc-fg); }
+
+  @media (max-width: 600px) {
+    .nc-module { padding: 14px 12px 12px; }
+    .nc-chart { height: 320px; }
+  }
+</style>
+</head>
+<body>
+
+<section class="nc-module" id="nc-polling" aria-labelledby="nc-title">
+  <header class="nc-head">
+    <div>
+      <h2 id="nc-title">GB voting intention</h2>
+      <p class="nc-sub" id="nc-sub"></p>
+    </div>
+    <span class="nc-badge" id="nc-demo" hidden>Demo data</span>
+  </header>
+
+  <div class="nc-readout-label" id="nc-readout-label" aria-live="off"></div>
+  <div class="nc-keys" id="nc-keys"></div>
+
+  <div class="nc-controls">
+    <div class="nc-seg" id="nc-ranges" role="group" aria-label="Date range"></div>
+    <label><input type="checkbox" id="nc-show-polls" checked> Show individual polls</label>
+    <label>Averaging window
+      <select id="nc-window">
+        <option value="7">7 days</option>
+        <option value="14">14 days</option>
+        <option value="21">21 days</option>
+        <option value="28">28 days</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="nc-chart" id="nc-chart">
+    <canvas id="nc-canvas" role="img" aria-label="Line chart of GB voting intention polling averages"></canvas>
+  </div>
+
+  <p class="nc-foot" id="nc-foot"></p>
+</section>
+
+<!-- Chart.js 4.5.0 (UMD build) from cdnjs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ==========================================================================
+     1. CONFIG
+     ========================================================================== */
+  const CONFIG = {
+    windowDays: 14,          // rolling window for the average
+    dedupePollster: true,    // true = only each pollster's latest poll inside the window counts
+    minPolls: 1,             // minimum polls needed in the window to plot a point
+    changeDays: 28,          // "change" figure compares against this many days earlier
+    defaultRange: 'ALL',     // 'ALL' or one of the ids below
+    ranges: [
+      { id: '3M',  label: '3 months', days: 91 },
+      { id: '6M',  label: '6 months', days: 182 },
+      { id: '1Y',  label: '1 year',   days: 365 },
+      { id: 'ALL', label: 'All',      days: null }
+    ],
+    // Vertical marker lines. Dates are YYYY-MM-DD.
+    events: [
+      { date: '2024-07-04', label: 'General election' }
+    ],
+    sourceNote: 'Poll data: add source and link here.'
+  };
+
+  // Order here is only the fallback: parties are re-sorted by latest average on load.
+  // Colours must be 6-digit hex (they are converted to rgba for the poll dots).
+  // `aliases` are the column headings the parser will accept (case-insensitive).
+  const PARTIES = [
+    { key: 'ref', label: 'Reform UK',    colour: '#12b6cf', aliases: ['ref', 'reform', 'reform uk'] },
+    { key: 'lab', label: 'Labour',       colour: '#e4003b', aliases: ['lab', 'labour'] },
+    { key: 'con', label: 'Conservative', colour: '#0087dc', aliases: ['con', 'conservative', 'conservatives'] },
+    { key: 'grn', label: 'Green',        colour: '#02a95b', aliases: ['grn', 'green', 'greens'] },
+    { key: 'ld',  label: 'Lib Dem',      colour: '#faa61a', aliases: ['ld', 'lib dem', 'lib dems', 'libdem', 'liberal democrats'] },
+    { key: 'snp', label: 'SNP',          colour: '#e5b800', aliases: ['snp'] }
+  ];
+  const DATE_ALIASES = ['date', 'fieldwork end', 'fieldwork end date', 'end date', 'fieldwork'];
+  const POLLSTER_ALIASES = ['pollster', 'company', 'firm', 'polling company'];
+
+  /* ==========================================================================
+     2. DATA: paste your poll table between the backticks.
+        - Copy straight from Excel / Google Sheets (tab-separated), or use CSV.
+        - First row must be headings. Needs a date column; party columns are
+          matched by the aliases above; blank cells are fine (e.g. no SNP figure).
+        - Dates: 2025-03-14 or 14/03/2025.
+        - Leave empty to load generated demo data.
+     ========================================================================== */
+  const RAW_POLLS = `
+
+`;
+
+  /* PURE-START (no DOM access below this line until PURE-END) */
+
+  const DAY = 86400000;
+
+  function parseDate(s) {
+    s = String(s == null ? '' : s).trim();
+    let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (m) return Date.UTC(+m[1], +m[2] - 1, +m[3]);
+    m = s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})$/);
+    if (m) {
+      let y = +m[3];
+      if (y < 100) y += 2000;
+      return Date.UTC(y, +m[2] - 1, +m[1]);
+    }
+    const t = Date.parse(s + ' UTC');   // e.g. "14 Mar 2025"
+    return isNaN(t) ? null : t;
+  }
+
+  /* Turns the pasted table into the array the chart uses:
+       [{ t: <ms since epoch, UTC midnight>, pollster: 'X', v: { con: 20, lab: 27, ref: 29, ... } }, ...]
+     sorted oldest to newest. Missing figures are null. */
+  function parsePolls(raw, parties) {
+    const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    if (lines.length < 2) return { polls: [], skipped: 0 };
+
+    const delim = lines[0].indexOf('\t') !== -1 ? '\t' : ',';
+    const clean = c => c.trim().replace(/^"|"$/g, '').trim();
+    const header = lines[0].split(delim).map(c => clean(c).toLowerCase());
+
+    const dateCol = header.findIndex(h => DATE_ALIASES.indexOf(h) !== -1);
+    if (dateCol < 0) throw new Error('No date column found. The first row needs a heading such as "Date".');
+    const pollsterCol = header.findIndex(h => POLLSTER_ALIASES.indexOf(h) !== -1);
+    const partyCol = {};
+    parties.forEach(p => { partyCol[p.key] = header.findIndex(h => p.aliases.indexOf(h) !== -1); });
+
+    const polls = [];
+    let skipped = 0;
+    lines.slice(1).forEach(line => {
+      const cells = line.split(delim).map(clean);
+      const t = parseDate(cells[dateCol]);
+      if (t === null) { skipped++; return; }
+      const poll = { t: t, pollster: pollsterCol >= 0 ? (cells[pollsterCol] || '') : '', v: {} };
+      let any = false;
+      parties.forEach(p => {
+        const i = partyCol[p.key];
+        const n = i >= 0 ? parseFloat(String(cells[i]).replace('%', '')) : NaN;
+        poll.v[p.key] = isNaN(n) ? null : n;
+        if (!isNaN(n)) any = true;
+      });
+      if (any) polls.push(poll); else skipped++;
+    });
+    polls.sort((a, b) => a.t - b.t);
+    return { polls: polls, skipped: skipped };
+  }
+
+  /* Daily rolling average. For each day, looks back `windowDays` and averages the polls
+     inside that window (optionally only the latest poll per pollster).
+     Returns { days: [ms...], series: { partyKey: [value | null ...] } } */
+  function computeAverages(polls, parties, opts) {
+    const w = opts.windowDays * DAY;
+    const first = polls[0].t;
+    const last = polls[polls.length - 1].t;
+    const days = [];
+    for (let t = first; t <= last; t += DAY) days.push(t);
+
+    const series = {};
+    parties.forEach(p => { series[p.key] = new Array(days.length).fill(null); });
+
+    let lo = 0, hi = 0;
+    days.forEach((d, i) => {
+      while (hi < polls.length && polls[hi].t <= d) hi++;
+      while (lo < hi && polls[lo].t <= d - w) lo++;
+      parties.forEach(p => {
+        const seen = new Map();
+        for (let j = lo; j < hi; j++) {
+          const v = polls[j].v[p.key];
+          if (v == null) continue;
+          const key = (opts.dedupePollster && polls[j].pollster) ? polls[j].pollster : j;
+          seen.set(key, v);   // later polls overwrite earlier ones from the same pollster
+        }
+        let sum = 0;
+        seen.forEach(v => { sum += v; });
+        series[p.key][i] = seen.size >= opts.minPolls ? sum / seen.size : null;
+      });
+    });
+    return { days: days, series: series };
+  }
+
+  /* Generated placeholder data so the template has something to show. Not real polling. */
+  function makeDemoData() {
+    let seed = 42;
+    const rnd = () => {           // mulberry32
+      seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+    const anchors = [
+      [0.0, { con: 24, lab: 34, ref: 15, ld: 12, grn: 7,  snp: 3 }],
+      [0.4, { con: 20, lab: 28, ref: 24, ld: 12, grn: 10, snp: 3 }],
+      [1.0, { con: 18, lab: 22, ref: 28, ld: 13, grn: 13, snp: 3 }]
+    ];
+    const at = (f, key) => {
+      for (let i = 1; i < anchors.length; i++) {
+        if (f <= anchors[i][0]) {
+          const a = anchors[i - 1], b = anchors[i];
+          const k = (f - a[0]) / (b[0] - a[0]);
+          return a[1][key] + (b[1][key] - a[1][key]) * k;
+        }
+      }
+      return anchors[anchors.length - 1][1][key];
+    };
+    const pollsters = ['Pollster A', 'Pollster B', 'Pollster C', 'Pollster D'];
+    const start = Date.UTC(2024, 6, 8);
+    const end = Date.UTC(2026, 8, 18);
+    const out = [];
+    for (let t = start; t <= end; t += (1 + Math.floor(rnd() * 3)) * DAY) {
+      const f = (t - start) / (end - start);
+      const v = {};
+      Object.keys(anchors[0][1]).forEach(key => {
+        const noise = (rnd() + rnd() + rnd() - 1.5) * 2.6;
+        v[key] = Math.max(1, Math.round(at(f, key) + noise));
+      });
+      out.push({ t: t, pollster: pollsters[Math.floor(rnd() * pollsters.length)], v: v });
+    }
+    return out;
+  }
+
+  /* PURE-END */
+
+  /* Exposed for testing in Node; harmless in the browser. */
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { parseDate, parsePolls, computeAverages, makeDemoData, PARTIES, DAY };
+    return;
+  }
+
+  /* ==========================================================================
+     3. STATE + PREPARATION
+     ========================================================================== */
+  const root = document.getElementById('nc-polling');
+  const $ = id => document.getElementById(id);
+
+  function showError(msg) {
+    $('nc-chart').innerHTML = '<div class="nc-error"></div>';
+    $('nc-chart').firstChild.textContent = msg;
+    $('nc-keys').hidden = true;
+  }
+
+  let polls = [];
+  let skipped = 0;
+  let isDemo = false;
+  try {
+    if (RAW_POLLS.trim()) {
+      const parsed = parsePolls(RAW_POLLS, PARTIES);
+      polls = parsed.polls;
+      skipped = parsed.skipped;
+    } else {
+      polls = makeDemoData();
+      isDemo = true;
+    }
+    if (!polls.length) throw new Error('No valid poll rows found. Check the date column and that party columns match the headings in PARTIES.');
+  } catch (err) {
+    showError(err.message);
+    return;
+  }
+  if (skipped) console.warn('[nowcast] ' + skipped + ' row(s) skipped: unreadable date or no party figures.');
+
+  const ACTIVE = PARTIES.filter(p => polls.some(o => o.v[p.key] != null));
+  const state = { range: CONFIG.defaultRange, showPolls: true, hoverIdx: null, visible: {} };
+  ACTIVE.forEach(p => { state.visible[p.key] = true; });
+
+  let avg = computeAverages(polls, ACTIVE, CONFIG);
+  const lastIdx0 = avg.days.length - 1;
+  ACTIVE.sort((a, b) => {
+    const va = avg.series[a.key][lastIdx0], vb = avg.series[b.key][lastIdx0];
+    return (vb == null ? -1 : vb) - (va == null ? -1 : va);
+  });
+  const n = ACTIVE.length;
+
+  const EVENTS = CONFIG.events
+    .map(e => ({ t: parseDate(e.date), label: e.label }))
+    .filter(e => e.t !== null);
+
+  /* ==========================================================================
+     4. HELPERS
+     ========================================================================== */
+  const fmtDate = t => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  const fmtMonth = t => new Date(t).toLocaleDateString('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+  const rgba = (hex, a) => {
+    const v = parseInt(hex.slice(1), 16);
+    return 'rgba(' + ((v >> 16) & 255) + ',' + ((v >> 8) & 255) + ',' + (v & 255) + ',' + a + ')';
+  };
+  const readTheme = () => {
+    const cs = getComputedStyle(root);
+    const g = name => cs.getPropertyValue(name).trim();
+    return { fg: g('--nc-fg'), muted: g('--nc-muted'), grid: g('--nc-grid'), bg: g('--nc-bg') };
+  };
+  let T = readTheme();
+  const FONT = getComputedStyle(root).fontFamily;
+  Chart.defaults.font.family = FONT;
+  Chart.defaults.font.size = 12;
+
+  function toXY(days, values) {
+    const out = [];
+    for (let i = 0; i < days.length; i++) {
+      if (values[i] != null) out.push({ x: days[i], y: values[i] });
+    }
+    return out;
+  }
+
+  /* Month-start ticks, thinned according to how much time is on screen. */
+  function buildMonthTicks(scale) {
+    const spanDays = (scale.max - scale.min) / DAY;
+    const step = spanDays <= 130 ? 1 : spanDays <= 400 ? 3 : spanDays <= 1300 ? 6 : 12;
+    const d = new Date(scale.min);
+    let y = d.getUTCFullYear(), m = d.getUTCMonth();
+    const ticks = [];
+    let cur = Date.UTC(y, m, 1);
+    while (cur <= scale.max) {
+      if (cur >= scale.min && m % step === 0) ticks.push({ value: cur });
+      m++;
+      if (m > 11) { m = 0; y++; }
+      cur = Date.UTC(y, m, 1);
+    }
+    scale.ticks = ticks;
+  }
+
+  function rangeBounds() {
+    const r = CONFIG.ranges.find(x => x.id === state.range) || CONFIG.ranges[CONFIG.ranges.length - 1];
+    const first = avg.days[0], last = avg.days[avg.days.length - 1];
+    return { min: r.days ? Math.max(first, last - r.days * DAY) : first, max: last };
+  }
+
+  /* Y axis: always from 0, top rounded up to the next 5 above the largest visible value. */
+  function fitY(min, max) {
+    let top = 0;
+    ACTIVE.forEach(p => {
+      if (!state.visible[p.key]) return;
+      avg.days.forEach((d, k) => {
+        const v = avg.series[p.key][k];
+        if (d >= min && d <= max && v != null && v > top) top = v;
+      });
+      if (state.showPolls) {
+        polls.forEach(o => {
+          const v = o.v[p.key];
+          if (o.t >= min && o.t <= max && v != null && v > top) top = v;
+        });
+      }
+    });
+    chart.options.scales.y.max = Math.max(10, Math.ceil((top + 1) / 5) * 5);
+  }
+
+  /* ==========================================================================
+     5. BUILD UI: party readout + range buttons
+     ========================================================================== */
+  const keyEls = {};
+  ACTIVE.forEach(p => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'nc-key';
+    b.style.setProperty('--c', p.colour);
+    b.setAttribute('aria-pressed', 'true');
+    b.innerHTML = '<span class="nc-name"></span><span class="nc-val"></span><span class="nc-chg"></span>';
+    b.querySelector('.nc-name').textContent = p.label;
+    b.addEventListener('click', () => {
+      state.visible[p.key] = !state.visible[p.key];
+      b.classList.toggle('is-off', !state.visible[p.key]);
+      b.setAttribute('aria-pressed', String(state.visible[p.key]));
+      applyVisibility();
+    });
+    $('nc-keys').appendChild(b);
+    keyEls[p.key] = { val: b.querySelector('.nc-val'), chg: b.querySelector('.nc-chg') };
+  });
+
+  const rangeBtns = CONFIG.ranges.map(r => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = r.label;
+    b.dataset.id = r.id;
+    b.setAttribute('aria-pressed', String(r.id === state.range));
+    b.addEventListener('click', () => {
+      state.range = r.id;
+      rangeBtns.forEach(x => x.setAttribute('aria-pressed', String(x.dataset.id === r.id)));
+      applyRange();
+    });
+    $('nc-ranges').appendChild(b);
+    return b;
+  });
+
+  const windowSel = $('nc-window');
+  if (![].some.call(windowSel.options, o => +o.value === CONFIG.windowDays)) {
+    const o = document.createElement('option');
+    o.value = CONFIG.windowDays;
+    o.textContent = CONFIG.windowDays + ' days';
+    windowSel.appendChild(o);
+  }
+  windowSel.value = String(CONFIG.windowDays);
+  windowSel.addEventListener('change', () => { CONFIG.windowDays = +windowSel.value; refresh(); });
+
+  $('nc-show-polls').addEventListener('change', e => { state.showPolls = e.target.checked; applyVisibility(); });
+  $('nc-demo').hidden = !isDemo;
+
+  /* ==========================================================================
+     6. CHART
+     ========================================================================== */
+  const overlay = {
+    id: 'ncOverlay',
+    // Event markers sit behind the data
+    beforeDatasetsDraw(c) {
+      const ctx = c.ctx, a = c.chartArea, x = c.scales.x;
+      ctx.save();
+      ctx.font = '12px ' + FONT;
+      ctx.textBaseline = 'top';
+      EVENTS.forEach(ev => {
+        if (ev.t < x.min || ev.t > x.max) return;
+        const px = x.getPixelForValue(ev.t);
+        ctx.strokeStyle = T.muted;
+        ctx.globalAlpha = 0.7;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = T.muted;
+        const flip = px + 6 + ctx.measureText(ev.label).width > a.right;
+        ctx.textAlign = flip ? 'right' : 'left';
+        ctx.fillText(ev.label, flip ? px - 6 : px + 6, a.top - 15);
+      });
+      ctx.restore();
+    },
+    // Hover crosshair and dots sit on top
+    afterDatasetsDraw(c) {
+      if (state.hoverIdx == null) return;
+      const ctx = c.ctx, a = c.chartArea, x = c.scales.x, y = c.scales.y;
+      const px = x.getPixelForValue(avg.days[state.hoverIdx]);
+      if (px < a.left || px > a.right) return;
+      ctx.save();
+      ctx.strokeStyle = T.muted;
+      ctx.globalAlpha = 0.6;
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke();
+      ctx.globalAlpha = 1;
+      ACTIVE.forEach(p => {
+        if (!state.visible[p.key]) return;
+        const v = avg.series[p.key][state.hoverIdx];
+        if (v == null) return;
+        ctx.beginPath();
+        ctx.arc(px, y.getPixelForValue(v), 4.5, 0, Math.PI * 2);
+        ctx.fillStyle = p.colour;
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = T.bg;
+        ctx.stroke();
+      });
+      ctx.restore();
+    }
+  };
+
+  const datasets = [
+    // 0..n-1: rolling averages (drawn on top)
+    ...ACTIVE.map(p => ({
+      type: 'line', label: p.label, data: [], parsing: false, normalized: true,
+      borderColor: p.colour, backgroundColor: p.colour, borderWidth: 2.5,
+      pointRadius: 0, pointHoverRadius: 0, tension: 0.2, spanGaps: true, order: 1
+    })),
+    // n..2n-1: individual polls (faint dots underneath)
+    ...ACTIVE.map(p => ({
+      type: 'scatter', label: p.label + ' (polls)', parsing: false, normalized: true,
+      data: polls.filter(o => o.v[p.key] != null).map(o => ({ x: o.t, y: o.v[p.key] })),
+      backgroundColor: rgba(p.colour, 0.3), borderColor: 'transparent',
+      pointRadius: 2.3, pointHoverRadius: 2.3, order: 2
+    }))
+  ];
+
+  const canvas = $('nc-canvas');
+  const chart = new Chart(canvas, {
+    type: 'line',
+    data: { datasets: datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 250 },
+      events: [],                                   // hover is handled below, not by Chart.js
+      layout: { padding: { top: 18, right: 8 } },
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      scales: {
+        x: {
+          type: 'linear', min: avg.days[0], max: avg.days[avg.days.length - 1],
+          grid: { color: T.grid, drawTicks: false },
+          border: { color: T.grid },
+          ticks: { color: T.muted, maxRotation: 0, autoSkip: false, padding: 8, callback: v => fmtMonth(v) },
+          afterBuildTicks: buildMonthTicks
+        },
+        y: {
+          min: 0, max: 40,
+          grid: { color: T.grid },
+          border: { display: false },
+          ticks: { color: T.muted, stepSize: 5, padding: 6, callback: v => v + '%' }
+        }
+      }
+    },
+    plugins: [overlay]
+  });
+
+  /* ==========================================================================
+     7. UPDATE FUNCTIONS
+     ========================================================================== */
+  function applyRange() {
+    const b = rangeBounds();
+    chart.options.scales.x.min = b.min;
+    chart.options.scales.x.max = b.max;
+    fitY(b.min, b.max);
+    chart.update();
+  }
+
+  function applyVisibility() {
+    ACTIVE.forEach((p, i) => {
+      chart.setDatasetVisibility(i, state.visible[p.key]);
+      chart.setDatasetVisibility(n + i, state.visible[p.key] && state.showPolls);
+    });
+    const b = rangeBounds();
+    fitY(b.min, b.max);
+    chart.update();
+  }
+
+  function renderReadout() {
+    const idx = state.hoverIdx == null ? avg.days.length - 1 : state.hoverIdx;
+    $('nc-readout-label').textContent =
+      (state.hoverIdx == null ? 'Latest average, ' : 'Average on ') + fmtDate(avg.days[idx]) +
+      '. Change compares with ' + CONFIG.changeDays + ' days earlier.';
+    const prevIdx = idx - CONFIG.changeDays;
+    ACTIVE.forEach(p => {
+      const cur = avg.series[p.key][idx];
+      const prev = prevIdx >= 0 ? avg.series[p.key][prevIdx] : null;
+      keyEls[p.key].val.textContent = cur == null ? '–' : cur.toFixed(1) + '%';
+      let chg = '';
+      if (cur != null && prev != null) {
+        const d = cur - prev;
+        chg = Math.abs(d) < 0.05 ? '– 0.0' : (d > 0 ? '▲ ' : '▼ ') + Math.abs(d).toFixed(1);
+      }
+      keyEls[p.key].chg.textContent = chg || '\u00a0';
+    });
+  }
+
+  function renderText() {
+    const last = avg.days.length - 1;
+    $('nc-sub').textContent = 'Rolling ' + CONFIG.windowDays + '-day average of GB polls since ' + fmtMonth(avg.days[0]);
+    let foot = polls.length + ' polls, fieldwork ending ' + fmtDate(avg.days[0]) + ' to ' + fmtDate(avg.days[last]) + '. ' +
+      'Lines are the rolling average' + (CONFIG.dedupePollster ? ', using each pollster\u2019s latest poll in the window' : '') +
+      '; dots are individual polls. ' + CONFIG.sourceNote;
+    if (skipped) foot += ' ' + skipped + ' unreadable row' + (skipped === 1 ? ' was' : 's were') + ' skipped.';
+    if (isDemo) foot += ' Demo data: paste your poll table into RAW_POLLS to replace it.';
+    $('nc-foot').textContent = foot;
+
+    canvas.setAttribute('aria-label', 'Line chart of GB voting intention polling averages. Latest: ' +
+      ACTIVE.map(p => {
+        const v = avg.series[p.key][last];
+        return p.label + ' ' + (v == null ? 'no data' : v.toFixed(1) + '%');
+      }).join(', ') + '.');
+  }
+
+  function refresh() {
+    avg = computeAverages(polls, ACTIVE, CONFIG);
+    ACTIVE.forEach((p, i) => { chart.data.datasets[i].data = toXY(avg.days, avg.series[p.key]); });
+    state.hoverIdx = null;
+    applyRange();
+    renderReadout();
+    renderText();
+  }
+
+  /* ==========================================================================
+     8. HOVER / TOUCH SCRUBBING
+     ========================================================================== */
+  function clearHover() {
+    if (state.hoverIdx == null) return;
+    state.hoverIdx = null;
+    renderReadout();
+    chart.draw();
+  }
+  canvas.addEventListener('pointermove', e => {
+    const r = canvas.getBoundingClientRect();
+    const px = e.clientX - r.left;
+    const a = chart.chartArea;
+    if (px < a.left || px > a.right) { clearHover(); return; }
+    const t = chart.scales.x.getValueForPixel(px);
+    let i = Math.round((t - avg.days[0]) / DAY);
+    i = Math.max(0, Math.min(avg.days.length - 1, i));
+    if (i !== state.hoverIdx) {
+      state.hoverIdx = i;
+      renderReadout();
+      chart.draw();
+    }
+  });
+  canvas.addEventListener('pointerleave', clearHover);
+  canvas.addEventListener('pointercancel', clearHover);
+
+  /* Follow light/dark changes */
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  const onScheme = () => requestAnimationFrame(() => {
+    T = readTheme();
+    const s = chart.options.scales;
+    s.x.grid.color = T.grid; s.x.border.color = T.grid; s.x.ticks.color = T.muted;
+    s.y.grid.color = T.grid; s.y.ticks.color = T.muted;
+    chart.update('none');
+  });
+  if (mq.addEventListener) mq.addEventListener('change', onScheme);
+
+  /* ==========================================================================
+     9. GO
+     ========================================================================== */
+  refresh();
+
+  // Handy for iterating from the browser console
+  window.NowcastPolling = { chart: chart, polls: polls, config: CONFIG, refresh: refresh };
+})();
+</script>
+</body>
+</html>
