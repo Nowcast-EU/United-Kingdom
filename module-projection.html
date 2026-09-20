@@ -224,9 +224,10 @@ body {
   pointer-events: none;
 }
 
-  .h2h-section {
+.h2h-section {
   max-width: 1000px;
-  margin-top: 32px;
+  width: 100%;
+  margin: 32px auto 0;
 }
 
 .h2h-subtitle {
@@ -240,8 +241,10 @@ body {
   grid-template-columns: 100px 1fr 100px;
   align-items: center;
   gap: 20px;
-  padding: 20px 0;
-  border-bottom: 1px solid var(--divider);
+  padding: 20px;
+  border: 1px solid var(--divider);
+  border-radius: 10px;
+  background: #fff;
 }
 
 .h2h-portrait {
@@ -307,9 +310,28 @@ body {
   transform: translateX(-1px);
 }
 
-@media (max-width: 600px) {
-  .h2h-card { grid-template-columns: 1fr; text-align: center; }
-  .h2h-portrait { display: none; }
+  .h2h-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 780px) {
+  .h2h-list {
+    grid-template-columns: 1fr;
+  }
+
+  .h2h-card {
+    grid-template-columns: 56px 1fr 56px;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .h2h-portrait {
+    width: 48px;
+    height: 48px;
+    font-size: 0.6rem;
+  }
 }
   
 </style>
@@ -615,6 +637,21 @@ sendHeight();
   // ---- Add new head-to-head matchups here ----
   var h2hData = [
     {
+      partyA: { name: 'Labour', shortName: 'LAB', color: '#d50000', seats: 53, votePct: 39.8 },
+      partyB: { name: 'Reform UK', shortName: 'RFM', color: '#12b6cf', seats: 6, votePct: 26.8 }
+    }
+
+        {
+      partyA: { name: 'Labour', shortName: 'LAB', color: '#d50000', seats: 53, votePct: 39.8 },
+      partyB: { name: 'Reform UK', shortName: 'RFM', color: '#12b6cf', seats: 6, votePct: 26.8 }
+    }
+
+      {
+      partyA: { name: 'Labour', shortName: 'LAB', color: '#d50000', seats: 53, votePct: 39.8 },
+      partyB: { name: 'Reform UK', shortName: 'RFM', color: '#12b6cf', seats: 6, votePct: 26.8 }
+    }
+
+      {
       partyA: { name: 'Labour', shortName: 'LAB', color: '#d50000', seats: 53, votePct: 39.8 },
       partyB: { name: 'Reform UK', shortName: 'RFM', color: '#12b6cf', seats: 6, votePct: 26.8 }
     }
