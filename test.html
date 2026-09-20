@@ -110,7 +110,9 @@
     border-radius: 6px;
     white-space: nowrap;
   }
-  .tab:hover { background: var(--accent-soft); color: var(--ink); }
+@media (hover: hover) {
+    .tab:hover { background: var(--accent-soft); color: var(--ink); }
+}
   .tab.is-active { color: var(--accent); }
   .tab.is-active::after {
     content: "";
