@@ -55,6 +55,42 @@
     flex: 1;
   }
   .tabs::-webkit-scrollbar { display: none; }
+
+  .brand {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--ink);
+    font-weight: 700;
+    font-size: 1rem;
+    white-space: nowrap;
+}
+.brand-logo {
+    height: 32px;
+    width: auto;
+    display: block;
+}
+
+  @media (max-width: 600px) {
+    :root { --topbar-h: 86px; }
+
+    .topbar-inner {
+      height: auto;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+    }
+
+    .brand {
+      padding: 8px 0 4px;
+      /* justify-content: center; */
+    }
+
+    .tabs { flex: none; }
+}
+  
   .tab {
     flex: none;
     position: relative;
@@ -140,6 +176,14 @@ padding: 48px var(--gutter);
 
 <header class="topbar">
   <div class="topbar-inner">
+
+    <div class="topbar-inner">
+    <a class="brand" href="#projection">
+      <img src="https://raw.githubusercontent.com/Nowcast-EU/United-Kingdom/refs/heads/main/NowcastUKlogo.png" alt="Nowcast UK" class="brand-logo">
+      <span class="brand-name">Nowcast UK</span>
+    </a>
+      
+    <nav class="tabs" aria-label="Section navigation" id="tabs">
     <nav class="tabs" aria-label="Section navigation" id="tabs">
       <a class="tab" href="#projection" data-slug="projection">Projection</a>
       <a class="tab" href="#polling" data-slug="polling">Polling</a>
