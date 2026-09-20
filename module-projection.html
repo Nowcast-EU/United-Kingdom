@@ -355,6 +355,43 @@ body {
 }
   
 }
+
+  @media (max-width: 500px) {
+  .h2h-list {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+.h2h-card {
+  grid-template-columns: 76px 1fr 76px;
+  gap: 12px;
+  padding: 16px 2px;
+}
+
+  .h2h-numbers {
+  margin-bottom: 4px;
+}
+
+.h2h-portrait {
+  width: 68px;
+  height: 68px;
+  font-size: 0.68rem;
+}
+
+  .h2h-list::before {
+  display: none;
+}
+
+  .h2h-number-group {
+  font-size: 1.2rem;
+  gap: 4px;
+}
+
+.h2h-pct {
+  font-size: 0.8rem;
+}
+  
+}
   
 </style>
 </head>
