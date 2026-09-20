@@ -93,37 +93,35 @@ body {
 }
 
 .party-list {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
   margin-top: 12px;
 }
 
 .party-btn {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 4px 4px;
-  font-size: 0.62rem;
+  gap: 6px;
+  padding: 4px 8px;
+  font-size: 0.74rem;
   font-weight: normal;
   border: 1px solid var(--divider);
   background: #f3f3f3;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   color: var(--ink-soft);
   opacity: 0.6;
   transition: all 0.25s ease;
-  white-space: nowrap;
-  overflow: hidden;
 }
 
 .party-btn:hover { transform: translateY(-1px); }
 
 .party-btn .swatch {
-  width: 8px;
-  height: 8px;
-  border-radius: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
   flex: none;
 }
 
@@ -138,7 +136,7 @@ body {
 
 .fill-bar-wrap {
   flex: none;
-  aspect-ratio: 3.5 / 1;
+  aspect-ratio: 5.5 / 1;
   width: 100%;
   position: relative;
   border: 1px solid var(--divider);
@@ -168,32 +166,6 @@ body {
   fill: var(--dot-color, var(--divider));
   transform: scale(1);
 }
-
-  @media (max-width: 780px) {
-
-      .party-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-  }
-
-  .party-btn {
-    justify-content: flex-start;
-    padding: 4px 8px;
-    font-size: 0.74rem;
-    gap: 6px;
-    white-space: normal;
-    overflow: visible;
-  }
-
-  .party-btn .swatch {
-    width: 10px;
-    height: 10px;
-    border-radius: 3px;
-  }
-
-  }
 
 .builder-counter {
   font-size: 1rem;
