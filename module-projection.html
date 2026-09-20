@@ -260,6 +260,12 @@ body {
   overflow: hidden;
 }
 
+  .h2h-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .h2h-numbers {
   display: flex;
   justify-content: space-between;
@@ -704,7 +710,7 @@ sendHeight();
       var card = document.createElement('div');
       card.className = 'h2h-card';
       card.innerHTML =
-        '<div class="h2h-portrait">' + a.shortName + '</div>' +
+'<div class="h2h-portrait">' + (a.photoUrl ? '<img src="' + a.photoUrl + '" alt="' + a.name + '">' : a.shortName) + '</div>' +
         '<div class="h2h-middle">' +
           '<div class="h2h-numbers">' +
             '<div class="h2h-number-group">' +
@@ -729,7 +735,7 @@ sendHeight();
             '<div class="h2h-center-line"></div>' +
           '</div>' +
         '</div>' +
-        '<div class="h2h-portrait">' + b.shortName + '</div>';
+'<div class="h2h-portrait">' + (b.photoUrl ? '<img src="' + b.photoUrl + '" alt="' + b.name + '">' : b.shortName) + '</div>';
       listEl.appendChild(card);
     });
   }
