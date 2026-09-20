@@ -223,6 +223,94 @@ body {
   stroke-width: 1.5;
   pointer-events: none;
 }
+
+  .h2h-section {
+  max-width: 1000px;
+  margin-top: 32px;
+}
+
+.h2h-subtitle {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 0 0 20px;
+}
+
+.h2h-card {
+  display: grid;
+  grid-template-columns: 100px 1fr 100px;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--divider);
+}
+
+.h2h-portrait {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  overflow: hidden;
+}
+
+.h2h-numbers {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.h2h-number-group {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.h2h-number-group.align-end { justify-content: flex-end; }
+
+.h2h-pct {
+  font-style: italic;
+  font-weight: normal;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+.h2h-bars {
+  position: relative;
+}
+
+.h2h-bar-vote,
+.h2h-bar-seats {
+  display: flex;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.h2h-bar-vote { height: 8px; margin-bottom: 4px; }
+.h2h-bar-seats { height: 22px; }
+
+.h2h-center-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  background: #000;
+  transform: translateX(-1px);
+}
+
+@media (max-width: 600px) {
+  .h2h-card { grid-template-columns: 1fr; text-align: center; }
+  .h2h-portrait { display: none; }
+}
   
 </style>
 </head>
@@ -252,6 +340,12 @@ body {
   </div>
 
 </div>
+
+  <section class="h2h-section">
+  <h2>Head to Head — Who Has The Edge Under FPTP?</h2>
+  <p class="h2h-subtitle">Aggregate of seats where both parties are in first or second place</p>
+  <div class="h2h-list" id="h2hList"></div>
+</section>
 
 <script>
 (function () {
@@ -513,6 +607,70 @@ if ('ResizeObserver' in window) {
   new ResizeObserver(buildDotGrid).observe(fillBarEl);
 }
 sendHeight();
+})();
+</script>
+
+  <script>
+(function () {
+  // ---- Add new head-to-head matchups here ----
+  var h2hData = [
+    {
+      partyA: { name: 'Labour', shortName: 'LAB', color: '#d50000', seats: 53, votePct: 39.8 },
+      partyB: { name: 'Reform UK', shortName: 'RFM', color: '#12b6cf', seats: 6, votePct: 26.8 }
+    }
+    // Add more matchups by copying the object above, e.g.:
+    // {
+    //   partyA: { name: 'Conservative', shortName: 'CON', color: '#0087dc', seats: 40, votePct: 24.1 },
+    //   partyB: { name: 'Lib Dem', shortName: 'LDM', color: '#faa61a', seats: 15, votePct: 18.3 }
+    // }
+  ];
+
+  var listEl = document.getElementById('h2hList');
+
+  function renderH2H() {
+    listEl.innerHTML = '';
+    h2hData.forEach(function (matchup) {
+      var a = matchup.partyA;
+      var b = matchup.partyB;
+      var seatTotal = a.seats + b.seats;
+      var seatShareA = seatTotal > 0 ? (a.seats / seatTotal * 100) : 50;
+      var seatShareB = 100 - seatShareA;
+      var voteGrey = Math.max(0, 100 - a.votePct - b.votePct);
+
+      var card = document.createElement('div');
+      card.className = 'h2h-card';
+      card.innerHTML =
+        '<div class="h2h-portrait">' + a.shortName + '</div>' +
+        '<div class="h2h-middle">' +
+          '<div class="h2h-numbers">' +
+            '<div class="h2h-number-group">' +
+              '<span>' + a.seats + '</span>' +
+              '<span class="h2h-pct">(' + a.votePct.toFixed(1) + '%)</span>' +
+            '</div>' +
+            '<div class="h2h-number-group align-end">' +
+              '<span class="h2h-pct">(' + b.votePct.toFixed(1) + '%)</span>' +
+              '<span>' + b.seats + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="h2h-bars">' +
+            '<div class="h2h-bar-vote">' +
+              '<div style="flex:0 0 ' + a.votePct + '%; background:' + a.color + ';"></div>' +
+              '<div style="flex:0 0 ' + voteGrey + '%; background:var(--divider);"></div>' +
+              '<div style="flex:0 0 ' + b.votePct + '%; background:' + b.color + ';"></div>' +
+            '</div>' +
+            '<div class="h2h-bar-seats">' +
+              '<div style="flex:0 0 ' + seatShareA + '%; background:' + a.color + ';"></div>' +
+              '<div style="flex:0 0 ' + seatShareB + '%; background:' + b.color + ';"></div>' +
+            '</div>' +
+            '<div class="h2h-center-line"></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="h2h-portrait">' + b.shortName + '</div>';
+      listEl.appendChild(card);
+    });
+  }
+
+  renderH2H();
 })();
 </script>
 
