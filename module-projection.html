@@ -62,6 +62,14 @@ body {
   border-radius: 10px;
   overflow: hidden;
   min-width: 0;
+  position: relative;
+}
+
+  .map-scale-wrap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: top left;
 }
 
   .map-placeholder {
@@ -417,14 +425,16 @@ body {
 
 <div class="module-grid">
 
-  <div class="map-panel">
-<iframe
-  src="https://flo.uri.sh/visualisation/26928540/embed"
-  style="width:100%;height:100%;border:0;display:block;"
-  frameborder="0"
-  scrolling="no">
-</iframe>
+<div class="map-panel">
+  <div class="map-scale-wrap" id="mapScaleWrap">
+    <iframe
+      src="https://flo.uri.sh/visualisation/XXXXXXX/embed"
+      style="width:100%;height:100%;border:0;display:block;"
+      frameborder="0"
+      scrolling="no">
+    </iframe>
   </div>
+</div>
 
   <div class="builder-panel">
 <div class="builder-header">
@@ -445,6 +455,30 @@ body {
   <p class="h2h-subtitle">Aggregate of seats where both parties are in either first or second place</p>
   <div class="h2h-list" id="h2hList"></div>
 </section>
+
+  <script>
+(function () {
+  var FLOURISH_BASE_WIDTH = 740; // the width Flourish's popup text looked correct at
+  var panel = document.querySelector('.map-panel');
+  var wrap = document.getElementById('mapScaleWrap');
+
+  function scaleMap() {
+    var panelWidth = panel.clientWidth;
+    var panelHeight = panel.clientHeight;
+    if (panelWidth < 1 || panelHeight < 1) return;
+    var scale = panelWidth / FLOURISH_BASE_WIDTH;
+    wrap.style.width = FLOURISH_BASE_WIDTH + 'px';
+    wrap.style.height = (panelHeight / scale) + 'px';
+    wrap.style.transform = 'scale(' + scale + ')';
+  }
+
+  scaleMap();
+  window.addEventListener('resize', scaleMap);
+  if ('ResizeObserver' in window) {
+    new ResizeObserver(scaleMap).observe(panel);
+  }
+})();
+</script>
 
 <script>
 (function () {
