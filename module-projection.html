@@ -612,7 +612,9 @@ counterEl.style.color = total >= MAJORITY ? '#2BA84A' : 'var(--ink)';
   }
 
 render();
-buildDotGrid();
+requestAnimationFrame(function () {
+  requestAnimationFrame(buildDotGrid);
+});
 
 // ---------------- report height to the parent site ----------------
   // See module-resize-snippet.html for the general version of this.
