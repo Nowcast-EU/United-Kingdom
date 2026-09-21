@@ -1103,9 +1103,10 @@ const state = {
   }
 
 function rangeBounds() {
+  const bufferDays = 45;   // ~1.5 months of empty space after the latest poll
   return {
-    min: parseDate(CONFIG.startDate),   // always the election date, even though polls start later
-    max: avg.days[avg.days.length - 1]
+    min: parseDate(CONFIG.startDate),
+    max: avg.days[avg.days.length - 1] + bufferDays * DAY
   };
 }
 
