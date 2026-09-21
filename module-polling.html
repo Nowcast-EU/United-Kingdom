@@ -69,10 +69,19 @@
   /* Controls */
   .nc-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 16px; margin-bottom: 8px; font-size: 0.85rem; }
   .nc-controls label.is-disabled { opacity: 0.4; }
-  .nc-seg { display: inline-flex; border: 1px solid var(--nc-border); border-radius: 6px; overflow: hidden; }
-  .nc-seg button { padding: 5px 12px; font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
-  .nc-seg button + button { border-left: 1px solid var(--nc-border); }
-  .nc-seg button[aria-pressed="true"] { background: var(--nc-fg); color: var(--nc-bg); }
+  .nc-view-toggle { display: inline-flex; gap: 14px; }
+  .nc-view-btn {
+    padding: 2px 0;
+    font: inherit;
+    color: var(--nc-muted);
+    background: none;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+  }
+  .nc-view-btn:hover { color: var(--nc-fg); }
+  .nc-view-btn[aria-pressed="true"] { color: var(--nc-fg); border-bottom-color: var(--nc-fg); }
+  .nc-divider { width: 1px; height: 16px; background: var(--nc-border); }
   .nc-controls label { display: inline-flex; align-items: center; gap: 6px; color: var(--nc-muted); }
   .nc-controls select {
     padding: 3px 6px;
@@ -105,10 +114,11 @@
   <div class="nc-keys" id="nc-keys"></div>
 
 <div class="nc-controls">
-  <div class="nc-seg" id="nc-view" role="group" aria-label="Chart view">
-    <button type="button" data-view="polling" aria-pressed="true">Polling average</button>
-    <button type="button" data-view="seats" aria-pressed="false">Seat projections</button>
+  <div class="nc-view-toggle" id="nc-view" role="group" aria-label="Chart view">
+    <button type="button" class="nc-view-btn" data-view="seats" aria-pressed="false">Seat projections</button>
+    <button type="button" class="nc-view-btn" data-view="polling" aria-pressed="true">Polling average</button>
   </div>
+  <span class="nc-divider" aria-hidden="true"></span>
   <label id="nc-show-polls-label"><input type="checkbox" id="nc-show-polls" checked> Show individual polls</label>
   <label id="nc-show-margin-label"><input type="checkbox" id="nc-show-margin"> Show margin of uncertainty</label>
 </div>
