@@ -691,7 +691,7 @@ function applyVisibility() {
   function renderText() {
     const last = avg.days.length - 1;
     let foot = polls.length + ' polls, fieldwork ending ' + fmtDate(avg.days[0]) + ' to ' + fmtDate(avg.days[last]) + '. ' +
-      'Lines are the rolling average' + (CONFIG.dedupePollster ? ', using each pollster\u2019s latest poll in the window' : '') +
+      'Lines are the rollings average' + (CONFIG.dedupePollster ? ', using each pollster\u2019s latest poll in the window' : '') +
       '; dots are individual polls. ' + CONFIG.sourceNote;
     if (skipped) foot += ' ' + skipped + ' unreadable row' + (skipped === 1 ? ' was' : 's were') + ' skipped.';
     if (isDemo) foot += ' Demo data: paste your poll table into RAW_POLLS to replace it.';
