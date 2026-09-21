@@ -140,12 +140,12 @@
   // Colours must be 6-digit hex (they are converted to rgba for the poll dots).
   // `aliases` are the column headings the parser will accept (case-insensitive).
   const PARTIES = [
-    { key: 'ref', label: 'Reform UK',    colour: '#34D8EF', aliases: ['ref', 'rfm', 'reform uk'] },
-    { key: 'lab', label: 'Labour',       colour: '#e4003b', aliases: ['lab', 'labour'] },
-    { key: 'con', label: 'Conservative', colour: '#0087dc', aliases: ['con', 'conservative', 'conservatives'] },
-    { key: 'grn', label: 'Green',        colour: '#6AB023', aliases: ['grn', 'green', 'greens'] },
-    { key: 'ld',  label: 'Lib Dem',      colour: '#faa61a', aliases: ['ld', 'lib dem', 'lib dems', 'ldm', 'liberal democrats'] },
-    { key: 'snp', label: 'SNP',          colour: '#FDF38E', aliases: ['snp'] }
+    { key: 'ref', label: 'Reform UK',    colour: '#34D8EF', aliases: ['ref', 'rfm', 'reform uk'], result: 14.7 },
+    { key: 'lab', label: 'Labour',       colour: '#e4003b', aliases: ['lab', 'labour'], result: 34.6 },
+    { key: 'con', label: 'Conservative', colour: '#0087dc', aliases: ['con', 'conservative', 'conservatives'], result: 24.4 },
+    { key: 'grn', label: 'Green',        colour: '#6AB023', aliases: ['grn', 'green', 'greens'], result: 6.9 },
+    { key: 'ld',  label: 'Lib Dem',      colour: '#faa61a', aliases: ['ld', 'lib dem', 'lib dems', 'ldm', 'liberal democrats'], result: 12.6 },
+    { key: 'snp', label: 'SNP',          colour: '#FDF38E', aliases: ['snp'], result: null }
   ];
   const DATE_ALIASES = ['date', 'fieldwork end', 'fieldwork end date', 'end date', 'fieldwork'];
   const POLLSTER_ALIASES = ['pollster', 'company', 'firm', 'polling company'];
@@ -1103,13 +1103,9 @@ const state = {
   }
 
 function rangeBounds() {
-  const first = avg.days[0];
-  const last = avg.days[avg.days.length - 1];
-  const start = parseDate(CONFIG.startDate);
-
   return {
-    min: Math.max(first, start),
-    max: last
+    min: parseDate(CONFIG.startDate),   // always the election date, even though polls start later
+    max: avg.days[avg.days.length - 1]
   };
 }
 
@@ -1189,10 +1185,10 @@ $('nc-show-margin').addEventListener('change', e => {
       EVENTS.forEach(ev => {
         if (ev.t < x.min || ev.t > x.max) return;
         const px = x.getPixelForValue(ev.t);
-        ctx.strokeStyle = T.muted;
-        ctx.globalAlpha = 0.7;
-        ctx.lineWidth = 1;
-        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = T.fg;
+        ctx.globalAlpha = 1;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([]);
         ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke();
         ctx.setLineDash([]);
         ctx.globalAlpha = 1;
@@ -1204,9 +1200,28 @@ $('nc-show-margin').addEventListener('change', e => {
       ctx.restore();
     },
     // Hover crosshair and dots sit on top
-    afterDatasetsDraw(c) {
-      if (state.hoverIdx == null) return;
+      afterDatasetsDraw(c) {
       const ctx = c.ctx, a = c.chartArea, x = c.scales.x, y = c.scales.y;
+
+      // Actual general election result for each party, sitting on the election-date line
+      const geT = parseDate(CONFIG.startDate);
+      if (geT >= x.min && geT <= x.max) {
+        const gx = x.getPixelForValue(geT);
+        ACTIVE.forEach(p => {
+          if (!state.visible[p.key] || p.result == null) return;
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(gx, y.getPixelForValue(p.result), 6, 0, Math.PI * 2);
+          ctx.fillStyle = p.colour;
+          ctx.fill();
+          ctx.lineWidth = 2.5;
+          ctx.strokeStyle = T.fg;
+          ctx.stroke();
+          ctx.restore();
+        });
+      }
+
+      if (state.hoverIdx == null) return;
       const px = x.getPixelForValue(avg.days[state.hoverIdx]);
       if (px < a.left || px > a.right) return;
       ctx.save();
@@ -1307,7 +1322,7 @@ $('nc-show-margin').addEventListener('change', e => {
           min: 0, max: 40,
           grid: { color: T.grid },
           border: { display: false },
-          ticks: { color: T.muted, stepSize: 5, padding: 6, callback: v => v + '%' }
+          ticks: { color: T.muted, stepSize: 5, padding: 12, callback: v => v + '%' }
         }
       }
     },
