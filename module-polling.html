@@ -1113,7 +1113,8 @@ function rangeBounds() {
   };
 }
 
-  /* Y axis: always from 0, top rounded up to the next 5 above the largest visible value. */
+  /* Y axis: always from 0, top rounded up to the next 5 above the largest visible value.
+     Individual polls always count, so the axis is identical in both display modes. */
   function fitY(min, max) {
     let top = 0;
     ACTIVE.forEach(p => {
@@ -1122,27 +1123,10 @@ function rangeBounds() {
         const v = avg.series[p.key][k];
         if (d >= min && d <= max && v != null && v > top) top = v;
       });
- if (state.showPolls) {
-  polls.forEach(o => {
-    const v = o.v[p.key];
-    if (o.t >= min && o.t <= max && v != null && v > top) top = v;
-  });
-}
-
-if (state.showMargin) {
-  avg.days.forEach((d, k) => {
-    const uncertainty = avg.uncertainty[p.key][k];
-
-    if (
-      d >= min &&
-      d <= max &&
-      uncertainty != null &&
-      uncertainty.upper > top
-    ) {
-      top = uncertainty.upper;
-    }
-  });
-}
+      polls.forEach(o => {
+        const v = o.v[p.key];
+        if (o.t >= min && o.t <= max && v != null && v > top) top = v;
+      });
     });
     chart.options.scales.y.max = Math.max(10, Math.ceil((top + 1) / 5) * 5);
   }
