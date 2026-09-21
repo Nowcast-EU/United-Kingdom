@@ -34,20 +34,18 @@
      and the module will inherit your site's font. */
   body {
     margin: 0;
-    padding: 24px 12px;
-    background: var(--nc-page);
+    padding: 0;
+    background: var(--nc-bg);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
 
   /* ---------- Module ---------- */
   .nc-module {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 20px 20px 16px;
-    background: var(--nc-bg);
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    background: none;
     color: var(--nc-fg);
-    border: 1px solid var(--nc-border);
-    border-radius: 8px;
     font-family: inherit;
     line-height: 1.4;
   }
@@ -130,7 +128,6 @@
   .nc-error { padding: 16px; border: 1px solid var(--nc-border); border-radius: 6px; color: var(--nc-fg); }
 
   @media (max-width: 600px) {
-    .nc-module { padding: 14px 12px 12px; }
     .nc-chart { height: 320px; }
   }
 </style>
@@ -606,7 +603,7 @@
       maintainAspectRatio: false,
       animation: { duration: 250 },
       events: [],                                   // hover is handled below, not by Chart.js
-      layout: { padding: { top: 18, right: 8 } },
+      layout: { padding: { top: 18, right: 0 } },
       plugins: { legend: { display: false }, tooltip: { enabled: false } },
       scales: {
         x: {
