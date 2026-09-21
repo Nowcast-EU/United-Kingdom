@@ -105,7 +105,7 @@
 
 <div class="nc-controls">
   <label><input type="checkbox" id="nc-show-polls" checked> Show individual polls</label>
-  <label><input type="checkbox" id="nc-show-margin"> Show margin of error</label>
+  <label><input type="checkbox" id="nc-show-margin"> Show margin of uncertainty</label>
 </div>
 
   <div class="nc-chart" id="nc-chart">
@@ -126,7 +126,6 @@
      ========================================================================== */
   const CONFIG = {
     kernelSigma: 15,          // rolling window for the average
-    marginPercent: 0.10,
     minPolls: 1,             // minimum polls needed in the window to plot a point
     changeDays: 28,          // "change" figure compares against this many days earlier
     startDate: '2024-07-04',
@@ -772,7 +771,6 @@ const partyCol = {};
      inside that window (optionally only the latest poll per pollster).
      Returns { days: [ms...], series: { partyKey: [value | null ...] } } */
 function computeAverages(polls, parties, opts) {
-
   const sigma = opts.kernelSigma;
   const twoSigmaSq = 2 * sigma * sigma;
 
@@ -786,46 +784,176 @@ function computeAverages(polls, parties, opts) {
   }
 
   const series = {};
+  const uncertainty = {};
 
   parties.forEach(p => {
     series[p.key] = new Array(days.length).fill(null);
+    uncertainty[p.key] = new Array(days.length).fill(null);
 
     days.forEach((day, i) => {
 
-      let weightedSum = 0;
-      let totalWeight = 0;
+      const observations = [];
 
       polls.forEach(poll => {
-
         const value = poll.v[p.key];
 
         if (value == null) return;
         if (!poll.sampleSize || poll.sampleSize <= 0) return;
 
-        const daysDiff =
-          (poll.t - day) / DAY;
+        const daysDiff = (poll.t - day) / DAY;
 
-        const gaussian =
-          Math.exp(
-            -(daysDiff * daysDiff) /
-            twoSigmaSq
-          );
+        const gaussian = Math.exp(
+          -(daysDiff * daysDiff) / twoSigmaSq
+        );
 
-        const weight =
-          gaussian * poll.sampleSize;
+        const weight = gaussian * poll.sampleSize;
 
-        weightedSum += value * weight;
-        totalWeight += weight;
+        observations.push({
+          value,
+          sampleSize: poll.sampleSize,
+          gaussian,
+          weight
+        });
       });
 
-      series[p.key][i] =
+      if (observations.length === 0) return;
+
+      // --------------------------------
+      // 1. Calculate the smoothed average
+      // --------------------------------
+
+      let weightedSum = 0;
+      let totalWeight = 0;
+
+      observations.forEach(o => {
+        weightedSum += o.value * o.weight;
+        totalWeight += o.weight;
+      });
+
+      const average = weightedSum / totalWeight;
+
+      series[p.key][i] = average;
+
+
+      // --------------------------------
+      // 2. Effective sample size
+      // --------------------------------
+
+      let sumW = 0;
+      let sumW2OverN = 0;
+
+      observations.forEach(o => {
+        sumW += o.weight;
+        sumW2OverN +=
+          (o.weight * o.weight) / o.sampleSize;
+      });
+
+      const effectiveSample =
+        sumW2OverN > 0
+          ? (sumW * sumW) / sumW2OverN
+          : 0;
+
+
+      // --------------------------------
+      // 3. Effective number of polls
+      // --------------------------------
+
+      let sumG = 0;
+      let sumG2 = 0;
+
+      observations.forEach(o => {
+        sumG += o.gaussian;
+        sumG2 += o.gaussian * o.gaussian;
+      });
+
+      const effectivePolls =
+        sumG2 > 0
+          ? (sumG * sumG) / sumG2
+          : 0;
+
+
+      // --------------------------------
+      // 4. How much the polls disagree
+      // --------------------------------
+
+      let varianceNumerator = 0;
+
+      observations.forEach(o => {
+        varianceNumerator +=
+          o.weight *
+          Math.pow(o.value - average, 2);
+      });
+
+      const pollVariance =
         totalWeight > 0
-          ? weightedSum / totalWeight
-          : null;
+          ? varianceNumerator / totalWeight
+          : 0;
+
+      const pollSD = Math.sqrt(pollVariance);
+
+
+      // --------------------------------
+      // 5. Uncertainty from poll disagreement
+      // --------------------------------
+
+      const pollSE =
+        effectivePolls > 1
+          ? pollSD / Math.sqrt(effectivePolls)
+          : 0;
+
+
+      // --------------------------------
+      // 6. Sampling uncertainty
+      // --------------------------------
+
+      const pShare = average / 100;
+
+      const samplingVariance =
+        effectiveSample > 0
+          ? (pShare * (1 - pShare) / effectiveSample) * 10000
+          : 0;
+
+
+      // --------------------------------
+      // 7. Combine the uncertainties
+      // --------------------------------
+
+      const totalVariance =
+        Math.pow(pollSE, 2) +
+        samplingVariance;
+
+      const totalSE = Math.sqrt(totalVariance);
+
+
+      // --------------------------------
+      // 8. 95% uncertainty interval
+      // --------------------------------
+
+      const margin = 1.96 * totalSE;
+
+      const upper =
+        Math.min(100, average + margin);
+
+      const lower =
+        Math.max(0, average - margin);
+
+
+      uncertainty[p.key][i] = {
+        upper,
+        lower,
+        se: totalSE,
+        effectiveSample,
+        effectivePolls
+      };
+
     });
   });
 
-  return { days, series };
+  return {
+    days,
+    series,
+    uncertainty
+  };
 }
 
   /* Generated placeholder data so the template has something to show. Not real polling. */
@@ -1003,15 +1131,15 @@ function rangeBounds() {
 
 if (state.showMargin) {
   avg.days.forEach((d, k) => {
-    const v = avg.series[p.key][k];
+    const uncertainty = avg.uncertainty[p.key][k];
 
     if (
       d >= min &&
       d <= max &&
-      v != null &&
-      v * (1 + CONFIG.marginPercent) > top
+      uncertainty != null &&
+      uncertainty.upper > top
     ) {
-      top = v * (1 + CONFIG.marginPercent);
+      top = uncertainty.upper;
     }
   });
 }
@@ -1130,7 +1258,7 @@ $('nc-show-margin').addEventListener('change', e => {
     // n..2n-1: upper margin-of-error boundaries
 ...ACTIVE.map(p => ({
   type: 'line',
-  label: p.label + ' (margin upper)',
+  label: p.label + ' (uncertainty upper)',
   data: [],
   parsing: false,
   normalized: true,
@@ -1148,7 +1276,7 @@ $('nc-show-margin').addEventListener('change', e => {
 // 2n..3n-1: lower margin-of-error boundaries
 ...ACTIVE.map((p, i) => ({
   type: 'line',
-  label: p.label + ' (margin lower)',
+  label: p.label + ' (uncertainty lower)',
   data: [],
   parsing: false,
   normalized: true,
@@ -1289,17 +1417,17 @@ function refresh() {
     // Average line
     chart.data.datasets[i].data = toXY(avg.days, values);
 
-    // Upper margin boundary
-    chart.data.datasets[n + i].data = toXY(
-      avg.days,
-      values.map(v => v == null ? null : v * (1 + CONFIG.marginPercent))
-    );
+// Upper uncertainty boundary
+chart.data.datasets[n + i].data = toXY(
+  avg.days,
+  avg.uncertainty[p.key].map(u => u == null ? null : u.upper)
+);
 
-    // Lower margin boundary
-    chart.data.datasets[2 * n + i].data = toXY(
-      avg.days,
-      values.map(v => v == null ? null : v * (1 - CONFIG.marginPercent))
-    );
+// Lower uncertainty boundary
+chart.data.datasets[2 * n + i].data = toXY(
+  avg.days,
+  avg.uncertainty[p.key].map(u => u == null ? null : u.lower)
+);
   });
 
 state.hoverIdx = null;
