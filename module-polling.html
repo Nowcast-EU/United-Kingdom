@@ -67,7 +67,8 @@
   .nc-chg { display: block; color: var(--nc-muted); font-size: 0.78rem; font-variant-numeric: tabular-nums; }
 
   /* Controls */
-  .nc-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-bottom: 8px; font-size: 0.85rem; }
+  .nc-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 16px; margin-bottom: 8px; font-size: 0.85rem; }
+  .nc-controls label.is-disabled { opacity: 0.4; }
   .nc-seg { display: inline-flex; border: 1px solid var(--nc-border); border-radius: 6px; overflow: hidden; }
   .nc-seg button { padding: 5px 12px; font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
   .nc-seg button + button { border-left: 1px solid var(--nc-border); }
@@ -104,8 +105,12 @@
   <div class="nc-keys" id="nc-keys"></div>
 
 <div class="nc-controls">
-  <label><input type="checkbox" id="nc-show-polls" checked> Show individual polls</label>
-  <label><input type="checkbox" id="nc-show-margin"> Show margin of uncertainty</label>
+  <div class="nc-seg" id="nc-view" role="group" aria-label="Chart view">
+    <button type="button" data-view="polling" aria-pressed="true">Polling average</button>
+    <button type="button" data-view="seats" aria-pressed="false">Seat projections</button>
+  </div>
+  <label id="nc-show-polls-label"><input type="checkbox" id="nc-show-polls" checked> Show individual polls</label>
+  <label id="nc-show-margin-label"><input type="checkbox" id="nc-show-margin"> Show margin of uncertainty</label>
 </div>
 
   <div class="nc-chart" id="nc-chart">
@@ -140,12 +145,12 @@
   // Colours must be 6-digit hex (they are converted to rgba for the poll dots).
   // `aliases` are the column headings the parser will accept (case-insensitive).
   const PARTIES = [
-    { key: 'ref', label: 'Reform UK',    colour: '#34D8EF', aliases: ['ref', 'rfm', 'reform uk'], result: 14.7 },
-    { key: 'lab', label: 'Labour',       colour: '#e4003b', aliases: ['lab', 'labour'], result: 34.6 },
-    { key: 'con', label: 'Conservative', colour: '#0087dc', aliases: ['con', 'conservative', 'conservatives'], result: 24.4 },
-    { key: 'grn', label: 'Green',        colour: '#6AB023', aliases: ['grn', 'green', 'greens'], result: 6.9 },
-    { key: 'ld',  label: 'Lib Dem',      colour: '#faa61a', aliases: ['ld', 'lib dem', 'lib dems', 'ldm', 'liberal democrats'], result: 12.6 },
-    { key: 'snp', label: 'SNP',          colour: '#FDF38E', aliases: ['snp'], result: null }
+    { key: 'ref', label: 'Reform UK',    colour: '#34D8EF', aliases: ['ref', 'rfm', 'reform uk'], result: 14.7, seatResult: 5 },
+    { key: 'lab', label: 'Labour',       colour: '#e4003b', aliases: ['lab', 'labour'], result: 34.6, seatResult: 411 },
+    { key: 'con', label: 'Conservative', colour: '#0087dc', aliases: ['con', 'conservative', 'conservatives'], result: 24.4, seatResult: 121 },
+    { key: 'grn', label: 'Green',        colour: '#6AB023', aliases: ['grn', 'green', 'greens'], result: 6.9, seatResult: 4 },
+    { key: 'ld',  label: 'Lib Dem',      colour: '#faa61a', aliases: ['ld', 'lib dem', 'lib dems', 'ldm', 'liberal democrats'], result: 12.6, seatResult: 72 },
+    { key: 'snp', label: 'SNP',          colour: '#FDF38E', aliases: ['snp'], result: null, seatResult: 9 }
   ];
   const DATE_ALIASES = ['date', 'fieldwork end', 'fieldwork end date', 'end date', 'fieldwork'];
   const POLLSTER_ALIASES = ['pollster', 'company', 'firm', 'polling company'];
@@ -159,6 +164,61 @@
         - Dates: 2025-03-14 or 14/03/2025.
         - Leave empty to load generated demo data.
      ========================================================================== */
+  /* Seat projection table: Date + one seat-count column per party (same headings/aliases as RAW_POLLS).
+     Paste roughly-fortnightly Nowcast UK projections here. Leave empty until you have real data. */
+  const RAW_SEATS = `
+
+Date	LAB	CON	RFM	LDM	GRN	SNP
+15/09/2026	258	113	127	70	8	39
+30/08/2026	237	100	158	69	9	39
+15/08/2026	238	109	148	69	9	39
+30/07/2026	225	97	167	71	11	39
+15/07/2026	127	88	245	80	27	43
+30/06/2026	107	76	274	81	23	46
+15/06/2026	79	57	309	81	33	46
+30/05/2026	77	57	307	81	37	46
+15/05/2026	61	52	318	81	47	46
+30/04/2026	69	60	304	81	50	45
+15/04/2026	66	71	294	80	53	45
+30/03/2026	77	64	294	81	53	41
+15/03/2026	76	56	312	81	44	41
+28/02/2026	93	56	316	79	26	41
+15/02/2026	94	49	327	79	24	38
+30/01/2026	96	56	307	81	25	45
+15/01/2026	76	57	325	80	26	45
+30/12/2025	81	57	322	80	26	45
+15/12/2025	80	56	325	80	24	45
+30/11/2025	71	44	342	80	31	44
+15/11/2025	66	40	350	81	31	44
+30/10/2025	72	40	351	80	25	45
+15/10/2025	90	36	351	81	13	43
+30/09/2025	95	31	344	86	12	43
+15/09/2025	101	28	344	84	10	44
+30/08/2025	95	31	343	86	10	46
+15/08/2025	116	29	331	85	8	41
+30/07/2025	118	35	325	87	10	39
+15/07/2025	154	35	287	88	8	41
+30/06/2025	179	44	265	83	7	35
+15/06/2025	178	29	277	87	7	35
+30/05/2025	160	28	291	87	7	40
+15/05/2025	165	31	283	87	7	40
+30/04/2025	193	86	216	82	7	30
+15/04/2025	227	128	139	83	7	30
+30/03/2025	214	123	162	78	7	30
+15/03/2025	231	102	162	79	6	34
+30/02/2025	209	100	187	78	6	34
+15/02/2025	212	99	185	78	6	34
+30/01/2025	221	123	155	74	7	34
+15/01/2025	240	159	105	71	6	34
+30/12/2024	275	174	56	70	4	37
+30/11/2024	286	207	16	67	4	37
+30/10/2024	346	163	14	73	4	18
+30/09/2024	378	141	5	74	4	13
+30/08/2024	401	120	6	72	4	9
+15/07/2024	411	121	5	72	4	9
+
+`;
+  
   const RAW_POLLS = `
 
   Sample	Date	LAB	CON	RFM	LDM	GRN
@@ -1035,12 +1095,26 @@ function computeAverages(polls, parties, opts) {
   }
   if (skipped) console.warn('[nowcast] ' + skipped + ' row(s) skipped: unreadable date or no party figures.');
 
+    let seatRows = [];
+  let seatsSkipped = 0;
+  try {
+    if (RAW_SEATS.trim()) {
+      const parsedSeats = parsePolls(RAW_SEATS, PARTIES);
+      seatRows = parsedSeats.polls;
+      seatsSkipped = parsedSeats.skipped;
+    }
+  } catch (err) {
+    console.warn('[nowcast] seat projection data could not be parsed: ' + err.message);
+  }
+
   const ACTIVE = PARTIES.filter(p => polls.some(o => o.v[p.key] != null));
   
 const state = {
+  view: 'polling',        // 'polling' or 'seats'
   showPolls: true,
   showMargin: false,
-  hoverIdx: null,
+  hoverIdx: null,          // index into avg.days, used in polling view
+  hoverSeatIdx: null,      // index into seatRows, used in seats view
   visible: {}
 };
   
@@ -1128,6 +1202,16 @@ function rangeBounds() {
     chart.options.scales.y.max = Math.max(10, Math.ceil((top + 1) / 5) * 5);
   }
 
+    /* Y axis for seat mode: 0 to the next round number above the highest visible projection. */
+  function fitYSeats() {
+    let top = 0;
+    ACTIVE.forEach(p => {
+      if (!state.visible[p.key]) return;
+      seatRows.forEach(o => { const v = o.v[p.key]; if (v != null && v > top) top = v; });
+    });
+    chart.options.scales.y.max = Math.max(10, Math.ceil((top + 20) / 25) * 25);
+  }
+
   /* ==========================================================================
      5. BUILD UI: party readout + range buttons
      ========================================================================== */
@@ -1160,12 +1244,38 @@ function rangeBounds() {
     applyVisibility();
   });
 
+    const viewBtns = Array.prototype.slice.call($('nc-view').querySelectorAll('button'));
+  viewBtns.forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.view === state.view) return;
+    state.view = b.dataset.view;
+    viewBtns.forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    switchView();
+  }));
+
+  function switchView() {
+    const seats = state.view === 'seats';
+    $('nc-show-polls').disabled = seats;
+    $('nc-show-margin').disabled = seats;
+    $('nc-show-polls-label').classList.toggle('is-disabled', seats);
+    $('nc-show-margin-label').classList.toggle('is-disabled', seats);
+
+    chart.options.scales.y.ticks.callback = seats ? (v => v) : (v => v + '%');
+    if (seats) { delete chart.options.scales.y.ticks.stepSize; }
+    else { chart.options.scales.y.ticks.stepSize = 5; }
+
+    state.hoverIdx = null;
+    state.hoverSeatIdx = null;
+
+    applyVisibility();
+    renderReadout();
+    renderText();
+  }
+
   /* ==========================================================================
      6. CHART
      ========================================================================== */
   const overlay = {
     id: 'ncOverlay',
-    // Event markers sit behind the data
     beforeDatasetsDraw(c) {
       const ctx = c.ctx, a = c.chartArea, x = c.scales.x;
       ctx.save();
@@ -1179,17 +1289,14 @@ function rangeBounds() {
         ctx.lineWidth = 2;
         ctx.setLineDash([]);
         ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.globalAlpha = 1;
-        ctx.fillStyle = T.muted;
+        ctx.fillStyle = T.fg;
         const flip = px + 6 + ctx.measureText(ev.label).width > a.right;
         ctx.textAlign = flip ? 'right' : 'left';
         ctx.fillText(ev.label, flip ? px - 6 : px + 6, a.top - 15);
       });
       ctx.restore();
     },
-    // Hover crosshair and dots sit on top
-      afterDatasetsDraw(c) {
+    afterDatasetsDraw(c) {
       const ctx = c.ctx, a = c.chartArea, x = c.scales.x, y = c.scales.y;
 
       // Actual general election result for each party, sitting on the election-date line
@@ -1197,10 +1304,11 @@ function rangeBounds() {
       if (geT >= x.min && geT <= x.max) {
         const gx = x.getPixelForValue(geT);
         ACTIVE.forEach(p => {
-          if (!state.visible[p.key] || p.result == null) return;
+          const resultVal = state.view === 'seats' ? p.seatResult : p.result;
+          if (!state.visible[p.key] || resultVal == null) return;
           ctx.save();
           ctx.beginPath();
-          ctx.arc(gx, y.getPixelForValue(p.result), 6, 0, Math.PI * 2);
+          ctx.arc(gx, y.getPixelForValue(resultVal), 6, 0, Math.PI * 2);
           ctx.fillStyle = p.colour;
           ctx.fill();
           ctx.lineWidth = 2.5;
@@ -1208,6 +1316,33 @@ function rangeBounds() {
           ctx.stroke();
           ctx.restore();
         });
+      }
+
+      if (state.view === 'seats') {
+        if (state.hoverSeatIdx == null || !seatRows.length) return;
+        const row = seatRows[state.hoverSeatIdx];
+        const px = x.getPixelForValue(row.t);
+        if (px < a.left || px > a.right) return;
+        ctx.save();
+        ctx.strokeStyle = T.muted;
+        ctx.globalAlpha = 0.6;
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke();
+        ctx.globalAlpha = 1;
+        ACTIVE.forEach(p => {
+          if (!state.visible[p.key]) return;
+          const v = row.v[p.key];
+          if (v == null) return;
+          ctx.beginPath();
+          ctx.arc(px, y.getPixelForValue(v), 4.5, 0, Math.PI * 2);
+          ctx.fillStyle = p.colour;
+          ctx.fill();
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = T.bg;
+          ctx.stroke();
+        });
+        ctx.restore();
+        return;
       }
 
       if (state.hoverIdx == null) return;
@@ -1279,12 +1414,19 @@ function rangeBounds() {
   order: 3
 })),
     
-// 3n..4n-1: individual polls (faint dots underneath)
+    // 3n..4n-1: individual polls (faint dots underneath)
     ...ACTIVE.map(p => ({
       type: 'scatter', label: p.label + ' (polls)', parsing: false, normalized: true,
       data: polls.filter(o => o.v[p.key] != null).map(o => ({ x: o.t, y: o.v[p.key] })),
-      backgroundColor: rgba(p.colour, 0.1), borderColor: 'transparent',
+      backgroundColor: rgba(p.colour, 0.12), borderColor: 'transparent',
       pointRadius: 2.3, pointHoverRadius: 2.3, order: 2
+    })),
+
+    // 4n..5n-1: seat projections — straight lines between actual projection dates, no smoothing
+    ...ACTIVE.map(p => ({
+      type: 'line', label: p.label + ' (seats)', data: [], parsing: false, normalized: true, hidden: true,
+      borderColor: p.colour, backgroundColor: p.colour, borderWidth: 2.5,
+      pointRadius: 3, pointHoverRadius: 3, tension: 0, spanGaps: true, order: 1
     }))
   ];
 
@@ -1330,38 +1472,54 @@ function rangeBounds() {
   }
 
 function applyVisibility() {
+  const seats = state.view === 'seats';
   ACTIVE.forEach((p, i) => {
-    // Average line
-    chart.setDatasetVisibility(
-      i,
-      state.visible[p.key]
-    );
-
-    // Upper margin boundary
-    chart.setDatasetVisibility(
-      n + i,
-      state.visible[p.key] && state.showMargin
-    );
-
-    // Lower margin boundary
-    chart.setDatasetVisibility(
-      2 * n + i,
-      state.visible[p.key] && state.showMargin
-    );
-
-    // Individual polls
-    chart.setDatasetVisibility(
-      3 * n + i,
-      state.visible[p.key] && state.showPolls
-    );
+    const on = state.visible[p.key];
+    chart.setDatasetVisibility(i, on && !seats);                              // average line
+    chart.setDatasetVisibility(n + i, on && !seats && state.showMargin);      // upper band
+    chart.setDatasetVisibility(2 * n + i, on && !seats && state.showMargin);  // lower band
+    chart.setDatasetVisibility(3 * n + i, on && !seats && state.showPolls);   // poll dots
+    chart.setDatasetVisibility(4 * n + i, on && seats);                       // seat line
   });
-
-  const b = rangeBounds();
-  fitY(b.min, b.max);
+  if (seats) {
+    fitYSeats();
+  } else {
+    const b = rangeBounds();
+    fitY(b.min, b.max);
+  }
   chart.update();
 }
 
   function renderReadout() {
+    if (state.view === 'seats') {
+      if (!seatRows.length) {
+        $('nc-readout-label').textContent = 'No seat projection data yet.';
+        ACTIVE.forEach(p => { keyEls[p.key].val.textContent = '–'; keyEls[p.key].chg.textContent = '\u00a0'; });
+        return;
+      }
+      const idx = state.hoverSeatIdx == null ? seatRows.length - 1 : state.hoverSeatIdx;
+      $('nc-readout-label').textContent =
+        (state.hoverSeatIdx == null ? 'Latest projection, ' : 'Projection for ') + fmtDate(seatRows[idx].t) +
+        '. Change compares with the 2024 general election result.';
+      ACTIVE.forEach(p => {
+        const cur = seatRows[idx].v[p.key];
+        keyEls[p.key].val.textContent = cur == null ? '–' : Math.round(cur);
+        let chg = '';
+        if (cur != null && p.seatResult != null) {
+          const d = Math.round(cur) - p.seatResult;
+          if (d === 0) {
+            chg = '– 0';
+          } else {
+            const up = d > 0;
+            const colour = up ? '#008500' : '#bb0000';
+            chg = '<span style="color:' + colour + '">' + (up ? '▲' : '▼') + '</span> ' + Math.abs(d);
+          }
+        }
+        keyEls[p.key].chg.innerHTML = chg || '\u00a0';
+      });
+      return;
+    }
+
     const idx = state.hoverIdx == null ? avg.days.length - 1 : state.hoverIdx;
     $('nc-readout-label').textContent =
       (state.hoverIdx == null ? 'Latest average, ' : 'Average on ') + fmtDate(avg.days[idx]) +
@@ -1385,10 +1543,30 @@ function applyVisibility() {
   }
 
   function renderText() {
+    if (state.view === 'seats') {
+      if (!seatRows.length) {
+        $('nc-foot').textContent = 'No seat projection data yet. Paste your projection table into RAW_SEATS.';
+        canvas.setAttribute('aria-label', 'Seat projection chart: no data yet.');
+        return;
+      }
+      const last = seatRows.length - 1;
+      $('nc-foot').textContent = seatRows.length + ' seat projections, ' + fmtDate(seatRows[0].t) + ' to ' + fmtDate(seatRows[last].t) +
+        '. Straight lines connect each projection directly; there is no smoothing or uncertainty band in this view. ' + CONFIG.sourceNote;
+      canvas.setAttribute('aria-label', 'Line chart of Nowcast UK seat projections. Latest: ' +
+        ACTIVE.map(p => {
+          const v = seatRows[last].v[p.key];
+          return p.label + ' ' + (v == null ? 'no data' : Math.round(v) + ' seats');
+        }).join(', ') + '.');
+      return;
+    }
+
     const last = avg.days.length - 1;
     let foot = polls.length + ' polls, fieldwork ending ' + fmtDate(avg.days[0]) + ' to ' + fmtDate(avg.days[last]) + '. ' +
-      'Lines are the rollings average' + (CONFIG.dedupePollster ? ', using each pollster\u2019s latest poll in the window' : '') +
-      '; dots are individual polls. ' + CONFIG.sourceNote;
+      'Lines are a smoothed average that weights polls by sample size and by how close they are in time (Gaussian kernel, ' + CONFIG.kernelSigma + '-day standard deviation). ' +
+      (state.showMargin
+        ? 'Shaded bands show a 95% uncertainty range combining sampling error with disagreement between polls. '
+        : state.showPolls ? 'Dots are individual polls. ' : '') +
+      CONFIG.sourceNote;
     if (skipped) foot += ' ' + skipped + ' unreadable row' + (skipped === 1 ? ' was' : 's were') + ' skipped.';
     if (isDemo) foot += ' Demo data: paste your poll table into RAW_POLLS to replace it.';
     $('nc-foot').textContent = foot;
@@ -1422,6 +1600,12 @@ chart.data.datasets[2 * n + i].data = toXY(
 );
   });
 
+      ACTIVE.forEach((p, i) => {
+      chart.data.datasets[4 * n + i].data = seatRows
+        .filter(o => o.v[p.key] != null)
+        .map(o => ({ x: o.t, y: o.v[p.key] }));
+    });
+
 state.hoverIdx = null;
 applyRange();
 applyVisibility();
@@ -1433,8 +1617,13 @@ renderText();
      8. HOVER / TOUCH SCRUBBING
      ========================================================================== */
   function clearHover() {
-    if (state.hoverIdx == null) return;
-    state.hoverIdx = null;
+    if (state.view === 'seats') {
+      if (state.hoverSeatIdx == null) return;
+      state.hoverSeatIdx = null;
+    } else {
+      if (state.hoverIdx == null) return;
+      state.hoverIdx = null;
+    }
     renderReadout();
     chart.draw();
   }
@@ -1444,6 +1633,22 @@ renderText();
     const a = chart.chartArea;
     if (px < a.left || px > a.right) { clearHover(); return; }
     const t = chart.scales.x.getValueForPixel(px);
+
+    if (state.view === 'seats') {
+      if (!seatRows.length) return;
+      let best = 0, bestDist = Infinity;
+      seatRows.forEach((row, k) => {
+        const d = Math.abs(row.t - t);
+        if (d < bestDist) { bestDist = d; best = k; }
+      });
+      if (best !== state.hoverSeatIdx) {
+        state.hoverSeatIdx = best;
+        renderReadout();
+        chart.draw();
+      }
+      return;
+    }
+
     let i = Math.round((t - avg.days[0]) / DAY);
     i = Math.max(0, Math.min(avg.days.length - 1, i));
     if (i !== state.hoverIdx) {
