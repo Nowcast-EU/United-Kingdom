@@ -7,25 +7,13 @@
 <style>
   :root {
     --nc-page: #f3f4f6;
-    --nc-bg: #ffffff;
+    --nc-bg: #f8faf9;
     --nc-fg: #1a1d23;
     --nc-muted: #5e6673;
     --nc-grid: #e7e9ed;
     --nc-border: #d9dde3;
     --nc-hover: #f0f2f5;
     --nc-focus: #2358d6;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --nc-page: #0d0f13;
-      --nc-bg: #14171c;
-      --nc-fg: #eceef2;
-      --nc-muted: #9aa3b0;
-      --nc-grid: #262b33;
-      --nc-border: #2f353e;
-      --nc-hover: #1c2027;
-      --nc-focus: #7ea6ff;
-    }
   }
 
   * { box-sizing: border-box; }
@@ -48,30 +36,6 @@
     color: var(--nc-fg);
     font-family: inherit;
     line-height: 1.4;
-  }
-
-  .nc-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 14px;
-  }
-  .nc-head h2 {
-    margin: 0;
-    font-size: 1.3rem;
-    line-height: 1.2;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-  }
-  .nc-sub { margin: 4px 0 0; color: var(--nc-muted); font-size: 0.9rem; }
-  .nc-badge {
-    flex: none;
-    padding: 3px 8px;
-    border: 1px solid var(--nc-muted);
-    border-radius: 4px;
-    color: var(--nc-muted);
-    font-size: 0.78rem;
   }
 
   /* Party readout: doubles as the legend and as show/hide buttons */
@@ -134,14 +98,7 @@
 </head>
 <body>
 
-<section class="nc-module" id="nc-polling" aria-labelledby="nc-title">
-  <header class="nc-head">
-    <div>
-      <h2 id="nc-title">GB voting intention</h2>
-      <p class="nc-sub" id="nc-sub"></p>
-    </div>
-    <span class="nc-badge" id="nc-demo" hidden>Demo data</span>
-  </header>
+<section class="nc-module" id="nc-polling" aria-label="GB voting intention polling average">
 
   <div class="nc-readout-label" id="nc-readout-label" aria-live="off"></div>
   <div class="nc-keys" id="nc-keys"></div>
@@ -198,12 +155,12 @@
   // Colours must be 6-digit hex (they are converted to rgba for the poll dots).
   // `aliases` are the column headings the parser will accept (case-insensitive).
   const PARTIES = [
-    { key: 'ref', label: 'Reform UK',    colour: '#12b6cf', aliases: ['ref', 'reform', 'reform uk'] },
+    { key: 'ref', label: 'Reform UK',    colour: '#34D8EF', aliases: ['ref', 'reform', 'reform uk'] },
     { key: 'lab', label: 'Labour',       colour: '#e4003b', aliases: ['lab', 'labour'] },
     { key: 'con', label: 'Conservative', colour: '#0087dc', aliases: ['con', 'conservative', 'conservatives'] },
-    { key: 'grn', label: 'Green',        colour: '#02a95b', aliases: ['grn', 'green', 'greens'] },
+    { key: 'grn', label: 'Green',        colour: '#6AB023', aliases: ['grn', 'green', 'greens'] },
     { key: 'ld',  label: 'Lib Dem',      colour: '#faa61a', aliases: ['ld', 'lib dem', 'lib dems', 'libdem', 'liberal democrats'] },
-    { key: 'snp', label: 'SNP',          colour: '#e5b800', aliases: ['snp'] }
+    { key: 'snp', label: 'SNP',          colour: '#FDF38E', aliases: ['snp'] }
   ];
   const DATE_ALIASES = ['date', 'fieldwork end', 'fieldwork end date', 'end date', 'fieldwork'];
   const POLLSTER_ALIASES = ['pollster', 'company', 'firm', 'polling company'];
@@ -520,7 +477,6 @@
   windowSel.addEventListener('change', () => { CONFIG.windowDays = +windowSel.value; refresh(); });
 
   $('nc-show-polls').addEventListener('change', e => { state.showPolls = e.target.checked; applyVisibility(); });
-  $('nc-demo').hidden = !isDemo;
 
   /* ==========================================================================
      6. CHART
@@ -666,7 +622,6 @@
 
   function renderText() {
     const last = avg.days.length - 1;
-    $('nc-sub').textContent = 'Rolling ' + CONFIG.windowDays + '-day average of GB polls since ' + fmtMonth(avg.days[0]);
     let foot = polls.length + ' polls, fieldwork ending ' + fmtDate(avg.days[0]) + ' to ' + fmtDate(avg.days[last]) + '. ' +
       'Lines are the rolling average' + (CONFIG.dedupePollster ? ', using each pollster\u2019s latest poll in the window' : '') +
       '; dots are individual polls. ' + CONFIG.sourceNote;
