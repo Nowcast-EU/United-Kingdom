@@ -1365,15 +1365,13 @@ function applyVisibility() {
     const idx = state.hoverIdx == null ? avg.days.length - 1 : state.hoverIdx;
     $('nc-readout-label').textContent =
       (state.hoverIdx == null ? 'Latest average, ' : 'Average on ') + fmtDate(avg.days[idx]) +
-      '. Change compares with ' + CONFIG.changeDays + ' days earlier.';
-    const prevIdx = idx - CONFIG.changeDays;
+      '. Change compares with the 2024 general election result.';
     ACTIVE.forEach(p => {
       const cur = avg.series[p.key][idx];
-      const prev = prevIdx >= 0 ? avg.series[p.key][prevIdx] : null;
       keyEls[p.key].val.textContent = cur == null ? '–' : cur.toFixed(1) + '%';
       let chg = '';
-      if (cur != null && prev != null) {
-        const d = cur - prev;
+      if (cur != null && p.result != null) {
+        const d = cur - p.result;
         chg = Math.abs(d) < 0.05 ? '– 0.0' : (d > 0 ? '▲ ' : '▼ ') + Math.abs(d).toFixed(1);
       }
       keyEls[p.key].chg.textContent = chg || '\u00a0';
