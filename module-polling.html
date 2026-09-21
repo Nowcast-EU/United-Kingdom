@@ -570,7 +570,7 @@ $('nc-show-margin').addEventListener('change', e => {
 })),
 
 // 2n..3n-1: lower margin-of-error boundaries
-...ACTIVE.map(p => ({
+...ACTIVE.map((p, i) => ({
   type: 'line',
   label: p.label + ' (margin lower)',
   data: [],
@@ -583,7 +583,7 @@ $('nc-show-margin').addEventListener('change', e => {
   pointHoverRadius: 0,
   tension: 0.2,
   spanGaps: true,
-  fill: '-1',
+  fill: { target: n + i },
   order: 3
 })),
     
@@ -726,10 +726,11 @@ function refresh() {
     );
   });
 
-  state.hoverIdx = null;
-  applyRange();
-  renderReadout();
-  renderText();
+state.hoverIdx = null;
+applyRange();
+applyVisibility();
+renderReadout();
+renderText();
 }
 
   /* ==========================================================================
