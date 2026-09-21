@@ -1151,26 +1151,14 @@ function rangeBounds() {
   });
 
   $('nc-show-polls').addEventListener('change', e => {
-  state.showPolls = e.target.checked;
+    state.showPolls = e.target.checked;
+    applyVisibility();
+  });
 
-  if (state.showPolls) {
-    state.showMargin = false;
-    $('nc-show-margin').checked = false;
-  }
-
-  applyVisibility();
-});
-
-$('nc-show-margin').addEventListener('change', e => {
-  state.showMargin = e.target.checked;
-
-  if (state.showMargin) {
-    state.showPolls = false;
-    $('nc-show-polls').checked = false;
-  }
-
-  applyVisibility();
-});
+  $('nc-show-margin').addEventListener('change', e => {
+    state.showMargin = e.target.checked;
+    applyVisibility();
+  });
 
   /* ==========================================================================
      6. CHART
@@ -1295,7 +1283,7 @@ $('nc-show-margin').addEventListener('change', e => {
     ...ACTIVE.map(p => ({
       type: 'scatter', label: p.label + ' (polls)', parsing: false, normalized: true,
       data: polls.filter(o => o.v[p.key] != null).map(o => ({ x: o.t, y: o.v[p.key] })),
-      backgroundColor: rgba(p.colour, 0.3), borderColor: 'transparent',
+      backgroundColor: rgba(p.colour, 0.1), borderColor: 'transparent',
       pointRadius: 2.3, pointHoverRadius: 2.3, order: 2
     }))
   ];
