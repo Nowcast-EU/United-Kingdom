@@ -734,6 +734,15 @@
 
   // Handy for iterating from the browser console
   window.NowcastPolling = { chart: chart, polls: polls, config: CONFIG, refresh: refresh };
+
+    // Report height to the parent page (matches the listener in the main site)
+  if (window.parent !== window) {
+    const postHeight = () => window.parent.postMessage(
+      { sender: 'nowcast-module', height: Math.ceil(root.getBoundingClientRect().height) }, '*');
+    new ResizeObserver(postHeight).observe(root);
+    postHeight();
+  }
+  
 })();
 </script>
 </body>
