@@ -105,6 +105,7 @@
 
 <div class="nc-controls">
   <label><input type="checkbox" id="nc-show-polls" checked> Show individual polls</label>
+  <label><input type="checkbox" id="nc-show-margin"> Show margin of error</label>
 </div>
 
   <div class="nc-chart" id="nc-chart">
@@ -125,6 +126,7 @@
      ========================================================================== */
   const CONFIG = {
     windowDays: 15,          // rolling window for the average
+    marginPercent: 0.10,
     dedupePollster: true,    // true = only each pollster's latest poll inside the window counts
     minPolls: 1,             // minimum polls needed in the window to plot a point
     changeDays: 28,          // "change" figure compares against this many days earlier
@@ -330,7 +332,14 @@
   if (skipped) console.warn('[nowcast] ' + skipped + ' row(s) skipped: unreadable date or no party figures.');
 
   const ACTIVE = PARTIES.filter(p => polls.some(o => o.v[p.key] != null));
-  const state = { showPolls: true, hoverIdx: null, visible: {} };
+  
+const state = {
+  showPolls: true,
+  showMargin: false,
+  hoverIdx: null,
+  visible: {}
+};
+  
   ACTIVE.forEach(p => { state.visible[p.key] = true; });
 
   let avg = computeAverages(polls, ACTIVE, CONFIG);
@@ -409,12 +418,27 @@ function rangeBounds() {
         const v = avg.series[p.key][k];
         if (d >= min && d <= max && v != null && v > top) top = v;
       });
-      if (state.showPolls) {
-        polls.forEach(o => {
-          const v = o.v[p.key];
-          if (o.t >= min && o.t <= max && v != null && v > top) top = v;
-        });
-      }
+ if (state.showPolls) {
+  polls.forEach(o => {
+    const v = o.v[p.key];
+    if (o.t >= min && o.t <= max && v != null && v > top) top = v;
+  });
+}
+
+if (state.showMargin) {
+  avg.days.forEach((d, k) => {
+    const v = avg.series[p.key][k];
+
+    if (
+      d >= min &&
+      d <= max &&
+      v != null &&
+      v * (1 + CONFIG.marginPercent) > top
+    ) {
+      top = v * (1 + CONFIG.marginPercent);
+    }
+  });
+}
     });
     chart.options.scales.y.max = Math.max(10, Math.ceil((top + 1) / 5) * 5);
   }
@@ -441,7 +465,27 @@ function rangeBounds() {
     keyEls[p.key] = { val: b.querySelector('.nc-val'), chg: b.querySelector('.nc-chg') };
   });
 
-  $('nc-show-polls').addEventListener('change', e => { state.showPolls = e.target.checked; applyVisibility(); });
+  $('nc-show-polls').addEventListener('change', e => {
+  state.showPolls = e.target.checked;
+
+  if (state.showPolls) {
+    state.showMargin = false;
+    $('nc-show-margin').checked = false;
+  }
+
+  applyVisibility();
+});
+
+$('nc-show-margin').addEventListener('change', e => {
+  state.showMargin = e.target.checked;
+
+  if (state.showMargin) {
+    state.showPolls = false;
+    $('nc-show-polls').checked = false;
+  }
+
+  applyVisibility();
+});
 
   /* ==========================================================================
      6. CHART
@@ -506,7 +550,44 @@ function rangeBounds() {
       borderColor: p.colour, backgroundColor: p.colour, borderWidth: 2.5,
       pointRadius: 0, pointHoverRadius: 0, tension: 0.2, spanGaps: true, order: 1
     })),
-    // n..2n-1: individual polls (faint dots underneath)
+
+    // n..2n-1: upper margin-of-error boundaries
+...ACTIVE.map(p => ({
+  type: 'line',
+  label: p.label + ' (margin upper)',
+  data: [],
+  parsing: false,
+  normalized: true,
+  borderColor: 'transparent',
+  backgroundColor: rgba(p.colour, 0.12),
+  borderWidth: 0,
+  pointRadius: 0,
+  pointHoverRadius: 0,
+  tension: 0.2,
+  spanGaps: true,
+  fill: false,
+  order: 3
+})),
+
+// 2n..3n-1: lower margin-of-error boundaries
+...ACTIVE.map(p => ({
+  type: 'line',
+  label: p.label + ' (margin lower)',
+  data: [],
+  parsing: false,
+  normalized: true,
+  borderColor: 'transparent',
+  backgroundColor: rgba(p.colour, 0.12),
+  borderWidth: 0,
+  pointRadius: 0,
+  pointHoverRadius: 0,
+  tension: 0.2,
+  spanGaps: true,
+  fill: '-1',
+  order: 3
+})),
+    
+// 3n..4n-1: individual polls (faint dots underneath)
     ...ACTIVE.map(p => ({
       type: 'scatter', label: p.label + ' (polls)', parsing: false, normalized: true,
       data: polls.filter(o => o.v[p.key] != null).map(o => ({ x: o.t, y: o.v[p.key] })),
@@ -556,15 +637,37 @@ function rangeBounds() {
     chart.update();
   }
 
-  function applyVisibility() {
-    ACTIVE.forEach((p, i) => {
-      chart.setDatasetVisibility(i, state.visible[p.key]);
-      chart.setDatasetVisibility(n + i, state.visible[p.key] && state.showPolls);
-    });
-    const b = rangeBounds();
-    fitY(b.min, b.max);
-    chart.update();
-  }
+function applyVisibility() {
+  ACTIVE.forEach((p, i) => {
+    // Average line
+    chart.setDatasetVisibility(
+      i,
+      state.visible[p.key]
+    );
+
+    // Upper margin boundary
+    chart.setDatasetVisibility(
+      n + i,
+      state.visible[p.key] && state.showMargin
+    );
+
+    // Lower margin boundary
+    chart.setDatasetVisibility(
+      2 * n + i,
+      state.visible[p.key] && state.showMargin
+    );
+
+    // Individual polls
+    chart.setDatasetVisibility(
+      3 * n + i,
+      state.visible[p.key] && state.showPolls
+    );
+  });
+
+  const b = rangeBounds();
+  fitY(b.min, b.max);
+  chart.update();
+}
 
   function renderReadout() {
     const idx = state.hoverIdx == null ? avg.days.length - 1 : state.hoverIdx;
@@ -601,14 +704,33 @@ function rangeBounds() {
       }).join(', ') + '.');
   }
 
-  function refresh() {
-    avg = computeAverages(polls, ACTIVE, CONFIG);
-    ACTIVE.forEach((p, i) => { chart.data.datasets[i].data = toXY(avg.days, avg.series[p.key]); });
-    state.hoverIdx = null;
-    applyRange();
-    renderReadout();
-    renderText();
-  }
+function refresh() {
+  avg = computeAverages(polls, ACTIVE, CONFIG);
+
+  ACTIVE.forEach((p, i) => {
+    const values = avg.series[p.key];
+
+    // Average line
+    chart.data.datasets[i].data = toXY(avg.days, values);
+
+    // Upper margin boundary
+    chart.data.datasets[n + i].data = toXY(
+      avg.days,
+      values.map(v => v == null ? null : v * (1 + CONFIG.marginPercent))
+    );
+
+    // Lower margin boundary
+    chart.data.datasets[2 * n + i].data = toXY(
+      avg.days,
+      values.map(v => v == null ? null : v * (1 - CONFIG.marginPercent))
+    );
+  });
+
+  state.hoverIdx = null;
+  applyRange();
+  renderReadout();
+  renderText();
+}
 
   /* ==========================================================================
      8. HOVER / TOUCH SCRUBBING
