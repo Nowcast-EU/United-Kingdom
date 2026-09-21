@@ -125,7 +125,7 @@
      1. CONFIG
      ========================================================================== */
   const CONFIG = {
-    windowDays: 15,          // rolling window for the average
+    kernelSigma: 15,          // rolling window for the average
     marginPercent: 0.10,
     minPolls: 1,             // minimum polls needed in the window to plot a point
     changeDays: 28,          // "change" figure compares against this many days earlier
@@ -771,51 +771,62 @@ const partyCol = {};
   /* Daily rolling average. For each day, looks back `windowDays` and averages the polls
      inside that window (optionally only the latest poll per pollster).
      Returns { days: [ms...], series: { partyKey: [value | null ...] } } */
-  function computeAverages(polls, parties, opts) {
-    const w = opts.windowDays * DAY;
-    const first = polls[0].t;
-    const last = polls[polls.length - 1].t;
-    const days = [];
-    for (let t = first; t <= last; t += DAY) days.push(t);
+function computeAverages(polls, parties, opts) {
 
-    const series = {};
-    parties.forEach(p => { series[p.key] = new Array(days.length).fill(null); });
+  const sigma = opts.kernelSigma;
+  const twoSigmaSq = 2 * sigma * sigma;
 
-    let lo = 0, hi = 0;
-    days.forEach((d, i) => {
-      while (hi < polls.length && polls[hi].t <= d) hi++;
-      while (lo < hi && polls[lo].t <= d - w) lo++;
-      parties.forEach(p => {
-        const seen = new Map();
+  const first = polls[0].t;
+  const last = polls[polls.length - 1].t;
 
-for (let j = lo; j < hi; j++) {
-  const v = polls[j].v[p.key];
-  if (v == null) continue;
+  const days = [];
 
-  const key = j;
-
-seen.set(key, {
-  value: v,
-  sampleSize: polls[j].sampleSize
-});
-}
-       let weightedSum = 0;
-let totalSample = 0;
-
-seen.forEach((poll, key) => {
-  if (poll.value == null || poll.sampleSize == null || poll.sampleSize <= 0) return;
-  weightedSum += poll.value * poll.sampleSize;
-  totalSample += poll.sampleSize;
-});
-
-series[p.key][i] =
-  seen.size >= opts.minPolls && totalSample > 0
-    ? weightedSum / totalSample
-    : null;
-      });
-    });
-    return { days: days, series: series };
+  for (let d = first; d <= last; d += DAY) {
+    days.push(d);
   }
+
+  const series = {};
+
+  parties.forEach(p => {
+    series[p.key] = new Array(days.length).fill(null);
+
+    days.forEach((day, i) => {
+
+      let weightedSum = 0;
+      let totalWeight = 0;
+
+      polls.forEach(poll => {
+
+        const value = poll.v[p.key];
+
+        if (value == null) return;
+        if (!poll.sampleSize || poll.sampleSize <= 0) return;
+
+        const daysDiff =
+          (poll.t - day) / DAY;
+
+        const gaussian =
+          Math.exp(
+            -(daysDiff * daysDiff) /
+            twoSigmaSq
+          );
+
+        const weight =
+          gaussian * poll.sampleSize;
+
+        weightedSum += value * weight;
+        totalWeight += weight;
+      });
+
+      series[p.key][i] =
+        totalWeight > 0
+          ? weightedSum / totalWeight
+          : null;
+    });
+  });
+
+  return { days, series };
+}
 
   /* Generated placeholder data so the template has something to show. Not real polling. */
   function makeDemoData() {
