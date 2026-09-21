@@ -103,18 +103,9 @@
   <div class="nc-readout-label" id="nc-readout-label" aria-live="off"></div>
   <div class="nc-keys" id="nc-keys"></div>
 
-  <div class="nc-controls">
-    <div class="nc-seg" id="nc-ranges" role="group" aria-label="Date range"></div>
-    <label><input type="checkbox" id="nc-show-polls" checked> Show individual polls</label>
-    <label>Averaging window
-      <select id="nc-window">
-        <option value="7">7 days</option>
-        <option value="14">14 days</option>
-        <option value="21">21 days</option>
-        <option value="28">28 days</option>
-      </select>
-    </label>
-  </div>
+<div class="nc-controls">
+  <label><input type="checkbox" id="nc-show-polls" checked> Show individual polls</label>
+</div>
 
   <div class="nc-chart" id="nc-chart">
     <canvas id="nc-canvas" role="img" aria-label="Line chart of GB voting intention polling averages"></canvas>
@@ -133,17 +124,11 @@
      1. CONFIG
      ========================================================================== */
   const CONFIG = {
-    windowDays: 14,          // rolling window for the average
+    windowDays: 15,          // rolling window for the average
     dedupePollster: true,    // true = only each pollster's latest poll inside the window counts
     minPolls: 1,             // minimum polls needed in the window to plot a point
     changeDays: 28,          // "change" figure compares against this many days earlier
-    defaultRange: 'ALL',     // 'ALL' or one of the ids below
-    ranges: [
-      { id: '3M',  label: '3 months', days: 91 },
-      { id: '6M',  label: '6 months', days: 182 },
-      { id: '1Y',  label: '1 year',   days: 365 },
-      { id: 'ALL', label: 'All',      days: null }
-    ],
+    startDate: '2024-07-04',
     // Vertical marker lines. Dates are YYYY-MM-DD.
     events: [
       { date: '2024-07-04', label: 'General election' }
@@ -345,7 +330,7 @@
   if (skipped) console.warn('[nowcast] ' + skipped + ' row(s) skipped: unreadable date or no party figures.');
 
   const ACTIVE = PARTIES.filter(p => polls.some(o => o.v[p.key] != null));
-  const state = { range: CONFIG.defaultRange, showPolls: true, hoverIdx: null, visible: {} };
+  const state = { showPolls: true, hoverIdx: null, visible: {} };
   ACTIVE.forEach(p => { state.visible[p.key] = true; });
 
   let avg = computeAverages(polls, ACTIVE, CONFIG);
@@ -404,11 +389,16 @@
     scale.ticks = ticks;
   }
 
-  function rangeBounds() {
-    const r = CONFIG.ranges.find(x => x.id === state.range) || CONFIG.ranges[CONFIG.ranges.length - 1];
-    const first = avg.days[0], last = avg.days[avg.days.length - 1];
-    return { min: r.days ? Math.max(first, last - r.days * DAY) : first, max: last };
-  }
+function rangeBounds() {
+  const first = avg.days[0];
+  const last = avg.days[avg.days.length - 1];
+  const start = parseDate(CONFIG.startDate);
+
+  return {
+    min: Math.max(first, start),
+    max: last
+  };
+}
 
   /* Y axis: always from 0, top rounded up to the next 5 above the largest visible value. */
   function fitY(min, max) {
@@ -450,31 +440,6 @@
     $('nc-keys').appendChild(b);
     keyEls[p.key] = { val: b.querySelector('.nc-val'), chg: b.querySelector('.nc-chg') };
   });
-
-  const rangeBtns = CONFIG.ranges.map(r => {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.textContent = r.label;
-    b.dataset.id = r.id;
-    b.setAttribute('aria-pressed', String(r.id === state.range));
-    b.addEventListener('click', () => {
-      state.range = r.id;
-      rangeBtns.forEach(x => x.setAttribute('aria-pressed', String(x.dataset.id === r.id)));
-      applyRange();
-    });
-    $('nc-ranges').appendChild(b);
-    return b;
-  });
-
-  const windowSel = $('nc-window');
-  if (![].some.call(windowSel.options, o => +o.value === CONFIG.windowDays)) {
-    const o = document.createElement('option');
-    o.value = CONFIG.windowDays;
-    o.textContent = CONFIG.windowDays + ' days';
-    windowSel.appendChild(o);
-  }
-  windowSel.value = String(CONFIG.windowDays);
-  windowSel.addEventListener('change', () => { CONFIG.windowDays = +windowSel.value; refresh(); });
 
   $('nc-show-polls').addEventListener('change', e => { state.showPolls = e.target.checked; applyVisibility(); });
 
