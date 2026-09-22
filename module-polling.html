@@ -1337,9 +1337,11 @@ function rangeBounds() {
           ctx.lineWidth = 0.8;
           ctx.beginPath(); ctx.moveTo(a.left, py); ctx.lineTo(a.right, py); ctx.stroke();
           ctx.setLineDash([]);
-          ctx.fillStyle = '#999999';
-          ctx.textAlign = 'left';
-          ctx.fillText('Majority', a.left + 4, py - 15);
+          if (c.width > 600) {
+            ctx.fillStyle = '#999999';
+            ctx.textAlign = 'left';
+            ctx.fillText('Majority', a.left + 4, py - 15);
+          }
         }
       }
       ctx.restore();
@@ -1355,7 +1357,7 @@ function rangeBounds() {
           const resultVal = state.view === 'seats' ? p.seatResult : p.result;
           if (!state.visible[p.key] || resultVal == null) return;
           const cy = y.getPixelForValue(resultVal);
-          const r = 6;
+          const r = c.width <= 600 ? 4 : 6;
           ctx.save();
           ctx.beginPath();
           ctx.moveTo(gx, cy - r);
