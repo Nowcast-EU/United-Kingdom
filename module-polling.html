@@ -96,13 +96,12 @@
   .nc-module input:focus-visible { outline: 2px solid var(--nc-focus); outline-offset: 2px; }
 
   /* Chart */
-  .nc-chart { position: relative; height: 440px; }
+  .nc-chart { position: relative; aspect-ratio: 5 / 3; }
   .nc-chart canvas { touch-action: pan-y; }
-  .nc-foot { margin: 10px 0 0; color: var(--nc-muted); font-size: 0.78rem; }
   .nc-error { padding: 16px; border: 1px solid var(--nc-border); border-radius: 6px; color: var(--nc-fg); }
 
   @media (max-width: 600px) {
-    .nc-chart { height: 320px; }
+    .nc-chart { aspect-ratio: 5 / 3; }
   }
 </style>
 </head>
@@ -127,7 +126,6 @@
     <canvas id="nc-canvas" role="img" aria-label="Line chart of GB voting intention polling averages"></canvas>
   </div>
 
-  <p class="nc-foot" id="nc-foot"></p>
 </section>
 
 <!-- Chart.js 4.5.0 (UMD build) from cdnjs -->
@@ -1579,13 +1577,10 @@ function applyVisibility(instant) {
   function renderText() {
     if (state.view === 'seats') {
       if (!seatRows.length) {
-        $('nc-foot').textContent = 'No seat projection data yet. Paste your projection table into RAW_SEATS.';
         canvas.setAttribute('aria-label', 'Seat projection chart: no data yet.');
         return;
       }
       const last = seatRows.length - 1;
-      $('nc-foot').textContent = seatRows.length + ' seat projections, ' + fmtDate(seatRows[0].t) + ' to ' + fmtDate(seatRows[last].t) +
-        '. Straight lines connect each projection directly; there is no smoothing or uncertainty band in this view. ' + CONFIG.sourceNote;
       canvas.setAttribute('aria-label', 'Line chart of Nowcast UK seat projections. Latest: ' +
         ACTIVE.map(p => {
           const v = seatRows[last].v[p.key];
@@ -1595,16 +1590,6 @@ function applyVisibility(instant) {
     }
 
     const last = avg.days.length - 1;
-    let foot = polls.length + ' polls, fieldwork ending ' + fmtDate(avg.days[0]) + ' to ' + fmtDate(avg.days[last]) + '. ' +
-      'Lines are a smoothed average that weights polls by sample size and by how close they are in time (Gaussian kernel, ' + CONFIG.kernelSigma + '-day standard deviation). ' +
-      (state.showMargin
-        ? 'Shaded bands show a 95% uncertainty range combining sampling error with disagreement between polls. '
-        : state.showPolls ? 'Dots are individual polls. ' : '') +
-      CONFIG.sourceNote;
-    if (skipped) foot += ' ' + skipped + ' unreadable row' + (skipped === 1 ? ' was' : 's were') + ' skipped.';
-    if (isDemo) foot += ' Demo data: paste your poll table into RAW_POLLS to replace it.';
-    $('nc-foot').textContent = foot;
-
     canvas.setAttribute('aria-label', 'Line chart of GB voting intention polling averages. Latest: ' +
       ACTIVE.map(p => {
         const v = avg.series[p.key][last];
