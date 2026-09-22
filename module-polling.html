@@ -1482,8 +1482,8 @@ function rangeBounds() {
     ...ACTIVE.map(p => ({
       type: 'line', label: p.label + ' (seats)', data: [], parsing: false, normalized: true, hidden: true,
       borderColor: p.colour, backgroundColor: p.colour,
-      borderWidth: ctx => ctx.chart.width <= 600 ? 0.8 : 2.5,
-      pointRadius: ctx => ctx.chart.width <= 600 ? 1 : 2,
+      borderWidth: ctx => ctx.chart.width <= 600 ? 1.25 : 2.5,
+      pointRadius: ctx => ctx.chart.width <= 600 ? 1.25 : 2,
       pointHoverRadius: ctx => ctx.chart.width <= 600 ? 1 : 2,
       tension: 0, spanGaps: true, order: 1
     }))
