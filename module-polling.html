@@ -1677,9 +1677,7 @@ renderText();
     renderReadout();
     chart.draw();
   }
-  canvas.addEventListener('pointermove', e => {
-    const r = canvas.getBoundingClientRect();
-    const px = e.clientX - r.left;
+  function updateHoverFromPixel(px) {
     const a = chart.chartArea;
     if (px < a.left || px > a.right) { clearHover(); return; }
     const t = chart.scales.x.getValueForPixel(px);
@@ -1706,9 +1704,36 @@ renderText();
       renderReadout();
       chart.draw();
     }
+  }
+
+  canvas.addEventListener('pointermove', e => {
+    const r = canvas.getBoundingClientRect();
+    updateHoverFromPixel(e.clientX - r.left);
   });
-  canvas.addEventListener('pointerleave', clearHover);
-  canvas.addEventListener('pointercancel', clearHover);
+
+  // Touch: a tap sets the highlighter immediately, rather than waiting for a drag
+  canvas.addEventListener('pointerdown', e => {
+    if (e.pointerType !== 'touch') return;   // mouse/pen already handled by pointermove
+    const r = canvas.getBoundingClientRect();
+    updateHoverFromPixel(e.clientX - r.left);
+  });
+
+  // Mouse/pen still clear on leaving the chart; touch is left alone here (see below)
+  canvas.addEventListener('pointerleave', e => {
+    if (e.pointerType === 'touch') return;
+    clearHover();
+  });
+  canvas.addEventListener('pointercancel', e => {
+    if (e.pointerType === 'touch') return;
+    clearHover();
+  });
+
+  // Touch: clear only when the person taps outside the chart entirely
+  document.addEventListener('pointerdown', e => {
+    if (e.pointerType !== 'touch') return;
+    if (canvas.contains(e.target)) return;   // taps on the canvas are handled above
+    clearHover();
+  });
 
   /* Follow light/dark changes */
   const mq = window.matchMedia('(prefers-color-scheme: dark)');
