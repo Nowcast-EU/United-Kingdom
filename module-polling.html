@@ -1385,12 +1385,13 @@ function rangeBounds() {
         ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke();
         ctx.globalAlpha = 1;
+        const hoverR = c.width <= 600 ? 3 : 4.5;
         ACTIVE.forEach(p => {
           if (!state.visible[p.key]) return;
           const v = row.v[p.key];
           if (v == null) return;
           ctx.beginPath();
-          ctx.arc(px, y.getPixelForValue(v), 4.5, 0, Math.PI * 2);
+          ctx.arc(px, y.getPixelForValue(v), hoverR, 0, Math.PI * 2);
           ctx.fillStyle = p.colour;
           ctx.fill();
           ctx.lineWidth = 2;
@@ -1410,12 +1411,13 @@ function rangeBounds() {
       ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke();
       ctx.globalAlpha = 1;
+      const hoverR = c.width <= 600 ? 3 : 4.5;
       ACTIVE.forEach(p => {
         if (!state.visible[p.key]) return;
         const v = avg.series[p.key][state.hoverIdx];
         if (v == null) return;
         ctx.beginPath();
-        ctx.arc(px, y.getPixelForValue(v), 4.5, 0, Math.PI * 2);
+        ctx.arc(px, y.getPixelForValue(v), hoverR, 0, Math.PI * 2);
         ctx.fillStyle = p.colour;
         ctx.fill();
         ctx.lineWidth = 2;
