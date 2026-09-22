@@ -146,7 +146,7 @@
     startDate: '2024-07-04',
     // Vertical marker lines. Dates are YYYY-MM-DD.
     events: [
-      { date: '2024-07-04', label: 'General election' }
+      { date: '2024-07-04', label: 'GE2024' }
     ],
     sourceNote: 'Poll data: add source and link here.'
   };
@@ -1557,9 +1557,10 @@ function applyVisibility(instant) {
         return;
       }
       const idx = state.hoverSeatIdx == null ? seatRows.length - 1 : state.hoverSeatIdx;
-      $('nc-readout-label').textContent =
-        (state.hoverSeatIdx == null ? 'Latest projection, ' : 'Projection for ') + fmtDate(seatRows[idx].t) +
-        '. Change compares with the 2024 general election result.';
+      $('nc-readout-label').innerHTML =
+        (state.hoverSeatIdx == null ? 'Latest projection, ' : 'Projection for ') +
+        '<strong>' + fmtDate(seatRows[idx].t) + '</strong>' +
+        '• Changes compared to the 2024 general election.';
       ACTIVE.forEach(p => {
         const cur = seatRows[idx].v[p.key];
         keyEls[p.key].val.textContent = cur == null ? '–' : Math.round(cur);
@@ -1580,9 +1581,10 @@ function applyVisibility(instant) {
     }
 
     const idx = state.hoverIdx == null ? avg.days.length - 1 : state.hoverIdx;
-    $('nc-readout-label').textContent =
-      (state.hoverIdx == null ? 'Latest average, ' : 'Average on ') + fmtDate(avg.days[idx]) +
-      '. Change compares with the 2024 general election result.';
+    $('nc-readout-label').innerHTML =
+      (state.hoverIdx == null ? 'Latest polling, ' : 'Polling averages on ') +
+      '<strong>' + fmtDate(avg.days[idx]) + '</strong>' +
+      '• Changes compared to the 2024 general election.';
     ACTIVE.forEach(p => {
       const cur = avg.series[p.key][idx];
       keyEls[p.key].val.textContent = cur == null ? '–' : cur.toFixed(1) + '%';
