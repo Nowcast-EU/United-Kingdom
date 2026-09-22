@@ -1324,9 +1324,9 @@ function rangeBounds() {
         ctx.setLineDash([]);
         ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke();
         ctx.fillStyle = T.fg;
-        const flip = px + 6 + ctx.measureText(ev.label).width > a.right;
+        const flip = px + ctx.measureText(ev.label).width > a.right;
         ctx.textAlign = flip ? 'right' : 'left';
-        ctx.fillText(ev.label, flip ? px - 6 : px + 6, a.top - 15);
+        ctx.fillText(ev.label, flip ? px - 6 : px, a.top - 15);
       });
 
       if (state.view === 'seats') {
