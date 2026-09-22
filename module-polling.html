@@ -1562,7 +1562,7 @@ function applyVisibility(instant) {
       $('nc-readout-label').innerHTML =
         (state.hoverSeatIdx == null ? 'Latest projection, ' : 'Projection for ') +
         '<strong>' + fmtDate(seatRows[idx].t) + '</strong>' +
-        ' • Changes compared to the 2024 general election.';
+        ' • Changes compared to the 2024 general election in Great Britain.';
       ACTIVE.forEach(p => {
         const cur = seatRows[idx].v[p.key];
         keyEls[p.key].val.textContent = cur == null ? '–' : Math.round(cur);
@@ -1586,7 +1586,7 @@ function applyVisibility(instant) {
     $('nc-readout-label').innerHTML =
       (state.hoverIdx == null ? 'Latest polling, ' : 'Polling averages on ') +
       '<strong>' + fmtDate(avg.days[idx]) + '</strong>' +
-      ' • Changes compared to the 2024 general election.';
+      ' • Changes compared to the 2024 general election in Great Britain.';
     ACTIVE.forEach(p => {
       const cur = avg.series[p.key][idx];
       keyEls[p.key].val.textContent = cur == null ? '–' : cur.toFixed(1) + '%';
