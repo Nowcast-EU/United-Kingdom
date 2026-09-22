@@ -136,20 +136,16 @@
   .nc-leader-name { font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
 
   .nc-leader-bar {
-    position: relative;
+    display: flex;
     height: 8px;
-    background: var(--nc-grid);   /* this shows through as the "don't know" colour, unfilled */
+    background: var(--nc-grid);   /* fallback, in case the three segments don't quite sum to 100% */
     border-radius: 4px;
     overflow: hidden;
     margin-bottom: 6px;
   }
-  .nc-bar-disapprove, .nc-bar-approve { position: absolute; top: 0; bottom: 0; }
-  .nc-bar-disapprove { right: 50%; background: #bb0000; }
-  .nc-bar-approve    { left: 50%;  background: #008500; }
-  .nc-bar-mid {
-    position: absolute; top: 0; bottom: 0; left: 50%; width: 1px;
-    background: var(--nc-fg); opacity: 0.4;
-  }
+  .nc-bar-approve    { background: #008500; }
+  .nc-bar-dontknow   { background: var(--nc-grid); }
+  .nc-bar-disapprove { background: #bb0000; }
   .nc-leader-net { font-size: 0.95rem; font-weight: 700; }
 
   @media (max-width: 700px) {
@@ -1895,9 +1891,9 @@ renderText();
           '<div class="nc-leader-photo">' + photoHtml + '</div>' +
           '<div class="nc-leader-name">' + l.name + '</div>' +
           '<div class="nc-leader-bar">' +
-             '<div class="nc-bar-disapprove" style="width:' + l.disapprove + '%"></div>' +
             '<div class="nc-bar-approve" style="width:' + l.approve + '%"></div>' +
-            '<div class="nc-bar-mid"></div>' +
+            '<div class="nc-bar-dontknow" style="width:' + l.dontKnow + '%"></div>' +
+            '<div class="nc-bar-disapprove" style="width:' + l.disapprove + '%"></div>' +
           '</div>' +
           '<div class="nc-leader-net" style="color:' + netColour + '">' + netTxt + '</div>' +
         '</div>';
