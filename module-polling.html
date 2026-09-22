@@ -139,6 +139,7 @@
      ========================================================================== */
   const CONFIG = {
     kernelSigma: 15,          // rolling window for the average
+    majorityThreshold: 325,
     bandScale: 1.4,           // visual widening of the uncertainty band; 1 = true 95% interval
     minPolls: 1,             // minimum polls needed in the window to plot a point
     changeDays: 28,          // "change" figure compares against this many days earlier
@@ -1310,7 +1311,7 @@ function rangeBounds() {
   const overlay = {
     id: 'ncOverlay',
     beforeDatasetsDraw(c) {
-      const ctx = c.ctx, a = c.chartArea, x = c.scales.x;
+      const ctx = c.ctx, a = c.chartArea, x = c.scales.x, y = c.scales.y;
       ctx.save();
       ctx.font = '12px ' + FONT;
       ctx.textBaseline = 'top';
@@ -1327,6 +1328,20 @@ function rangeBounds() {
         ctx.textAlign = flip ? 'right' : 'left';
         ctx.fillText(ev.label, flip ? px - 6 : px + 6, a.top - 15);
       });
+
+      if (state.view === 'seats') {
+        const py = y.getPixelForValue(CONFIG.majorityThreshold);
+        if (py >= a.top && py <= a.bottom) {
+          ctx.strokeStyle = '#999999';
+          ctx.globalAlpha = 1;
+          ctx.lineWidth = 0.8;
+          ctx.beginPath(); ctx.moveTo(a.left, py); ctx.lineTo(a.right, py); ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle = '#999999';
+          ctx.textAlign = 'left';
+          ctx.fillText('Majority', a.left + 4, py - 15);
+        }
+      }
       ctx.restore();
     },
     afterDatasetsDraw(c) {
