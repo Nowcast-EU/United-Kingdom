@@ -1300,7 +1300,7 @@ function rangeBounds() {
     state.hoverIdx = null;
     state.hoverSeatIdx = null;
 
-    applyVisibility();
+    applyVisibility(true);
     renderReadout();
     renderText();
   }
@@ -1505,7 +1505,7 @@ function rangeBounds() {
     chart.update();
   }
 
-function applyVisibility() {
+function applyVisibility(instant) {
   const seats = state.view === 'seats';
   ACTIVE.forEach((p, i) => {
     const on = state.visible[p.key];
@@ -1521,7 +1521,7 @@ function applyVisibility() {
     const b = rangeBounds();
     fitY(b.min, b.max);
   }
-  chart.update();
+  chart.update(instant ? 'none' : undefined);
 }
 
   function renderReadout() {
