@@ -1318,7 +1318,7 @@ function rangeBounds() {
         const px = x.getPixelForValue(ev.t);
         ctx.strokeStyle = T.fg;
         ctx.globalAlpha = 1;
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 1;
         ctx.setLineDash([]);
         ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke();
         ctx.fillStyle = T.fg;
@@ -1338,13 +1338,19 @@ function rangeBounds() {
         ACTIVE.forEach(p => {
           const resultVal = state.view === 'seats' ? p.seatResult : p.result;
           if (!state.visible[p.key] || resultVal == null) return;
+          const cy = y.getPixelForValue(resultVal);
+          const r = 6;
           ctx.save();
           ctx.beginPath();
-          ctx.arc(gx, y.getPixelForValue(resultVal), 6, 0, Math.PI * 2);
+          ctx.moveTo(gx, cy - r);
+          ctx.lineTo(gx + r, cy);
+          ctx.lineTo(gx, cy + r);
+          ctx.lineTo(gx - r, cy);
+          ctx.closePath();
           ctx.fillStyle = p.colour;
           ctx.fill();
-          ctx.lineWidth = 2.5;
-          ctx.strokeStyle = T.fg;
+          ctx.lineWidth = 1.5;
+          ctx.strokeStyle = '#ffffff';
           ctx.stroke();
           ctx.restore();
         });
