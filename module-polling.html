@@ -120,7 +120,7 @@
     <button type="button" class="nc-view-btn" data-view="polling" aria-pressed="true">Polling average</button>
   </div>
   <label id="nc-show-polls-label"><input type="checkbox" id="nc-show-polls" checked> Show individual polls</label>
-  <label id="nc-show-margin-label"><input type="checkbox" id="nc-show-margin"> Show margin of uncertainty</label>
+  <label id="nc-show-margin-label"><input type="checkbox" id="nc-show-margin" checked> Show margin of uncertainty</label>
 </div>
 
   <div class="nc-chart" id="nc-chart">
@@ -1146,7 +1146,7 @@ function computeAverages(polls, parties, opts) {
 const state = {
   view: 'polling',        // 'polling' or 'seats'
   showPolls: true,
-  showMargin: false,
+  showMargin: true,
   hoverIdx: null,          // index into avg.days, used in polling view
   hoverSeatIdx: null,      // index into seatRows, used in seats view
   visible: {}
