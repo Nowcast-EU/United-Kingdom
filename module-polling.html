@@ -122,6 +122,7 @@
     gap: 16px 12px;
   }
   .nc-leader { text-align: center; }
+  .nc-leader-grid > .nc-leader:not(:first-child) { border-left: 1px solid var(--nc-border); }
   .nc-leader-photo {
     width: 72px; height: 72px;
     margin: 0 auto 8px;
@@ -137,11 +138,12 @@
 
   .nc-leader-bar {
     display: flex;
+    width: 85%;
+    margin: 0 auto 6px;
     height: 8px;
     background: var(--nc-grid);   /* fallback, in case the three segments don't quite sum to 100% */
     border-radius: 4px;
     overflow: hidden;
-    margin-bottom: 6px;
   }
   .nc-bar-approve    { background: #008500; }
   .nc-bar-dontknow   { background: var(--nc-grid); }
@@ -151,6 +153,15 @@
   @media (max-width: 700px) {
     .nc-extra { grid-template-columns: 1fr; }
     .nc-divider-v { display: none; }
+    .nc-leader-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .nc-leader-grid > .nc-leader {
+      flex: 0 1 calc(33.333% - 8px);
+      min-width: 84px;
+    }
   }
   
 </style>
