@@ -1521,9 +1521,13 @@ function rangeBounds() {
           min: 0, max: 40,
           grid: { color: T.grid },
           border: { display: false },
-          ticks: { color: T.muted, stepSize: 5, padding: 8, font: { size: 11 }, callback: v => v + '%' },
+          ticks: {
+            color: T.muted, stepSize: 5, padding: 8,
+            font: ctx => ({ size: ctx.chart.width <= 600 ? 11 : 13 }),
+            callback: v => v + '%'
+          },
           afterFit: scale => {
-            const trim = scale.chart.width <= 600 ? 4 : 10;
+            const trim = scale.chart.width <= 600 ? 4 : 2;
             scale.width = Math.max(24, scale.width - trim);
           }
         }
