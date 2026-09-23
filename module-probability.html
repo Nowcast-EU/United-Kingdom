@@ -1292,7 +1292,7 @@ let histChart;
 function renderHistogram() {
   const stats = partyStats[activeParty];
   const partyColor = PARTIES.find(p => p.key === activeParty).color;
-  const bins = buildBins(stats.sorted, 80);
+  const bins = buildBins(stats.sorted, 40);
   const labels = bins.map(b => `${Math.round(b.from)}`);
 
   let highlightIdx = -1;
