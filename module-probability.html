@@ -1236,10 +1236,14 @@ const ciChart = new Chart(ciCtx, {
     indexAxis: 'y',
     responsive: true,
     maintainAspectRatio: false,
-    scales: {
-      x: { title: { display: true, text: 'Seats' }, beginAtZero: true },
-      y: { grid: { display: false } },
-    },
+scales: {
+  x: {
+    title: { display: true, text: 'Seats' },
+    min: 0,
+    max: 400
+  },
+  y: { grid: { display: false } },
+},
     plugins: {
       legend: { display: true, labels: { filter: (item) => item.text !== 'Selected run' || selectedRun } },
       tooltip: {
@@ -1260,19 +1264,25 @@ const ciChart = new Chart(ciCtx, {
 // HISTOGRAM CHART (per-party, with bin highlight + line for selected run)
 // ============================================================
 function buildBins(vals, binCount = 20) {
-  const min = Math.min(...vals), max = Math.max(...vals);
-  const width = (max - min) / binCount || 1;
+  const min = 0;
+  const max = 400;
+  const width = (max - min) / binCount;
+
   const bins = Array.from({ length: binCount }, (_, i) => ({
     from: min + i * width,
     to: min + (i + 1) * width,
     count: 0,
   }));
+
   vals.forEach(v => {
     let idx = Math.floor((v - min) / width);
+
     if (idx >= binCount) idx = binCount - 1;
     if (idx < 0) idx = 0;
+
     bins[idx].count++;
   });
+
   return bins;
 }
 
@@ -1282,7 +1292,7 @@ let histChart;
 function renderHistogram() {
   const stats = partyStats[activeParty];
   const partyColor = PARTIES.find(p => p.key === activeParty).color;
-  const bins = buildBins(stats.sorted, 22);
+  const bins = buildBins(stats.sorted, 80);
   const labels = bins.map(b => `${Math.round(b.from)}`);
 
   let highlightIdx = -1;
@@ -1338,10 +1348,18 @@ function renderHistogram() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      scales: {
-        x: { title: { display: true, text: 'Seats (bin start)' }, ticks: { maxTicksLimit: 10 } },
-        y: { title: { display: true, text: 'Number of runs' }, beginAtZero: true },
-      },
+scales: {
+  x: {
+    title: { display: true, text: 'Seats' },
+    min: 0,
+    max: 400,
+    ticks: { maxTicksLimit: 10 }
+  },
+  y: {
+    title: { display: true, text: 'Number of runs' },
+    beginAtZero: true
+  },
+},
       plugins: {
         legend: { display: false },
         annotation: { annotations: annotation },
