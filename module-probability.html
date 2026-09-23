@@ -169,9 +169,9 @@
 <div class="chart-controls">
 
   <div class="tabs">
-    <button class="tab-btn active" data-view="ci">Confidence</button>
+    <button class="tab-btn" data-view="ci">Confidence</button>
     <span class="tab-divider"></span>
-    <button class="tab-btn" data-view="hist">Histogram</button>
+    <button class="tab-btn active" data-view="hist">Histogram</button>
   </div>
 
   <div class="party-select" id="partyChips"></div>
@@ -182,14 +182,12 @@
 
   <div class="main-panel">
 
-    <div class="panel" id="ci-panel">
+    <div class="panel" id="ci-panel" style="display:none;">
       <div class="chart-box tall"><canvas id="ciChart"></canvas></div>
-      <p class="note">Bars show the 10th&ndash;90th percentile range across all runs; the tick marks the median. The dark diamond marks a selected run, if any.</p>
     </div>
 
-    <div class="panel" id="hist-panel" style="display:none;">
+    <div class="panel" id="hist-panel">
       <div class="chart-box"><canvas id="histChart"></canvas></div>
-      <p class="note">The highlighted bin and dashed line mark a selected run, if any.</p>
     </div>
 
   </div>
@@ -1504,7 +1502,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-  document.getElementById('partyChips').style.display = 'none';
+  document.getElementById('partyChips').style.display = 'flex';
 
 // ============================================================
 // RUN SELECTION
@@ -1563,6 +1561,8 @@ document.getElementById('randomRunBtn').addEventListener('click', () => {
 
   applySelectedRun();
 });
+
+applySelectedRun();
 
 // ============================================================
 // IFRAME HEIGHT MESSAGING
