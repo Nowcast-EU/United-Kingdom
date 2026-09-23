@@ -1339,6 +1339,7 @@ function renderHistogram() {
         label: `${PARTIES.find(p => p.key === activeParty).label} seats (distribution)`,
         data: bins.map(b => b.count),
         backgroundColor: colors,
+        borderColor: #FFFFFF,
         borderRadius: 2,
         barPercentage: 1.0,
         categoryPercentage: 1.0,
