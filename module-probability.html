@@ -1315,7 +1315,7 @@ scales: {
 },
     plugins: {
       legend: { display: false },
-      tooltip: { enabled: false },
+      : { enabled: false },
     },
   },
 });
@@ -1435,15 +1435,7 @@ x: {
       plugins: {
         legend: { display: false },
         annotation: { annotations: annotation },
-        tooltip: {
-          callbacks: {
-            label: (ctx) => `${bins[ctx.dataIndex].count} of 1000 runs`,
-            title: (items) => {
-              const b = bins[items[0].dataIndex];
-              return `${Math.round(b.from)}–${Math.round(b.to)} seats`;
-            },
-          },
-        },
+      tooltip: { enabled: false },
       },
     },
   });
