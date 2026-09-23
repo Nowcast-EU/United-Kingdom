@@ -45,6 +45,13 @@
   margin-bottom:14px;
 }
 
+  .run-options{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-bottom:14px;
+}
+
 @media (max-width:700px){
   .content-grid{
     grid-template-columns:1fr;
@@ -117,24 +124,29 @@
 
   </div>
 
-  <div class="panel run-panel">
-    <h2 style="font-size:1rem;">View a single run</h2>
+<div class="panel run-panel">
+  <h2 style="font-size:1rem;">View a single run</h2>
 
-    <div class="run-row">
-      <label for="runInput" style="font-size:0.85rem;">Run</label>
-      <input type="number" id="runInput" min="1" max="1000" value="58">
-      <button class="action" id="showRunBtn">Show run</button>
-      <button class="action secondary" id="randomRunBtn">Randomise</button>
-      <button class="action secondary" id="clearRunBtn">Clear</button>
-    </div>
-
-    <div id="runResult"></div>
+  <div class="run-options">
+    <button class="action" id="defaultRunBtn">Default</button>
+    <button class="action secondary" id="randomRunBtn">Random</button>
   </div>
+
+  <div id="runResult"></div>
+</div>>
 
 </div>
 </div>
 
 <script>
+
+  const DEFAULT_RUN = {
+  LAB: 258,
+  CON: 113,
+  RFM: 127,
+  LDM: 70,
+  GRN: 8
+};
 
    const SIMULATIONS = [
 
@@ -1173,7 +1185,10 @@ PARTIES.forEach(p => {
   };
 });
 
-let selectedRun = null; // run object or null
+let selectedRun = {
+  ...DEFAULT_RUN,
+  run: 'default'
+};
 let activeParty = PARTIES[0].key;
 
 // ============================================================
@@ -1383,7 +1398,6 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 // ============================================================
 // RUN SELECTION
 // ============================================================
-const runInput = document.getElementById('runInput');
 const runResult = document.getElementById('runResult');
 
 function applySelectedRun() {
@@ -1391,6 +1405,7 @@ function applySelectedRun() {
   ciChart.data.datasets[2].data = selectedRun
     ? PARTIES.map((p, i) => ({ x: selectedRun[p.key], y: i }))
     : [];
+
   ciChart.update();
 
   // Histogram
@@ -1401,42 +1416,42 @@ function applySelectedRun() {
     runResult.innerHTML = '<p class="placeholder">No run selected.</p>';
     return;
   }
-const rows = PARTIES.map(p => `
-  <tr>
-    <td><span class="swatch" style="background:${p.color}"></span>${p.label}</td>
-    <td class="num">${selectedRun[p.key]}</td>
-  </tr>`).join('');
+
+  const rows = PARTIES.map(p => `
+    <tr>
+      <td><span class="swatch" style="background:${p.color}"></span>${p.label}</td>
+      <td class="num">${selectedRun[p.key]}</td>
+    </tr>`).join('');
+
   runResult.innerHTML = `
     <table class="run-table">
-      <thead><tr><th>Party</th><th style="text-align:right;">Seats</th></tr></thead>
+      <thead>
+        <tr>
+          <th>Party</th>
+          <th style="text-align:right;">Seats</th>
+        </tr>
+      </thead>
       <tbody>${rows}</tbody>
     </table>`;
+
   sendHeight();
 }
 
-document.getElementById('showRunBtn').addEventListener('click', () => {
-  let n = parseInt(runInput.value, 10);
-  if (!n || n < 1) n = 1;
-  if (n > SIMULATIONS.length) n = SIMULATIONS.length;
-  runInput.value = n;
-  selectedRun = SIMULATIONS.find(r => r.run === n) || SIMULATIONS[n - 1];
+document.getElementById('defaultRunBtn').addEventListener('click', () => {
+  selectedRun = {
+    ...DEFAULT_RUN,
+    run: 'default'
+  };
+
   applySelectedRun();
 });
 
 document.getElementById('randomRunBtn').addEventListener('click', () => {
-  const n = 1 + Math.floor(Math.random() * SIMULATIONS.length);
-  runInput.value = n;
-  selectedRun = SIMULATIONS.find(r => r.run === n) || SIMULATIONS[n - 1];
+  const randomIndex = Math.floor(Math.random() * SIMULATIONS.length);
+  selectedRun = SIMULATIONS[randomIndex];
+
   applySelectedRun();
 });
-
-document.getElementById('clearRunBtn').addEventListener('click', () => {
-  selectedRun = null;
-  applySelectedRun();
-});
-
-// Init with default run (58) to match the brief
-document.getElementById('showRunBtn').click();
 
 // ============================================================
 // IFRAME HEIGHT MESSAGING
