@@ -1272,7 +1272,7 @@ const ciChart = new Chart(ciCtx, {
       {
         label: '10th–90th percentile',
         data: PARTIES.map(p => [partyStats[p.key].p10, partyStats[p.key].p90]),
-        backgroundColor: PARTIES.map(p => p.color + '55'),
+        backgroundColor: PARTIES.map(p => p.color),
         borderColor: PARTIES.map(p => p.color),
         borderWidth: 1,
         borderSkipped: false,
