@@ -1302,7 +1302,7 @@ function renderHistogram() {
     if (highlightIdx === -1) highlightIdx = bins.length - 1;
   }
 
-  const colors = bins.map((_, i) => i === highlightIdx ? '#1a1a1a' : partyColor + '77');
+  const colors = bins.map((_, i) => i === highlightIdx ? partyColor : partyColor);
 
   const annotation = selectedRun ? {
     line1: {
