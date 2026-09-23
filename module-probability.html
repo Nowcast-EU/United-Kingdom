@@ -1293,7 +1293,7 @@ function renderHistogram() {
   const stats = partyStats[activeParty];
   const partyColor = PARTIES.find(p => p.key === activeParty).color;
   const bins = buildBins(stats.sorted, 40);
-  const labels = bins.map(b => `${Math.round(b.from)}`);
+  const labels = bins.map(b => Math.round(b.from));
 
   let highlightIdx = -1;
   if (selectedRun) {
@@ -1323,8 +1323,11 @@ function renderHistogram() {
   } : {};
 
   if (histChart) {
-    histChart.data.labels = labels;
-    histChart.data.datasets[0].data = bins.map(b => b.count);
+histChart.data.labels = labels;
+histChart.data.datasets[0].data = bins.map(b => ({
+  x: (b.from + b.to) / 2,
+  y: b.count
+}));
     histChart.data.datasets[0].backgroundColor = colors;
     histChart.options.plugins.annotation.annotations = annotation;
     histChart.update();
@@ -1337,7 +1340,10 @@ function renderHistogram() {
       labels,
 datasets: [{
   label: `${PARTIES.find(p => p.key === activeParty).label} seats (distribution)`,
-  data: bins.map(b => b.count),
+data: bins.map(b => ({
+  x: (b.from + b.to) / 2,
+  y: b.count
+})),
   backgroundColor: colors,
   borderColor: '#fff',
   borderWidth: 1,
@@ -1350,12 +1356,13 @@ datasets: [{
       responsive: true,
       maintainAspectRatio: false,
 scales: {
-  x: {
-    title: { display: true, text: 'Seats' },
-    min: 0,
-    max: 400,
-    ticks: { maxTicksLimit: 10 }
-  },
+x: {
+  type: 'linear',
+  title: { display: true, text: 'Seats' },
+  min: 0,
+  max: 400,
+  ticks: { maxTicksLimit: 10 }
+},
   y: {
     title: { display: true, text: 'Number of runs' },
     beginAtZero: true
