@@ -1267,7 +1267,7 @@ const ciCtx = document.getElementById('ciChart').getContext('2d');
 const ciChart = new Chart(ciCtx, {
   type: 'bar',
   data: {
-    labels: PARTIES.map(p => p.label),
+    labels: PARTIES.map(p => p.key),
     datasets: [
       {
         label: '10th–90th percentile',
@@ -1528,7 +1528,7 @@ function applySelectedRun() {
 
   const rows = PARTIES.map(p => `
     <tr>
-      <td><span class="swatch" style="background:${p.color}"></span>${p.label}</td>
+      <td><span class="swatch" style="background:${p.color}"></span>${p.key}</td>
       <td class="num">${selectedRun[p.key]}</td>
     </tr>`).join('');
 
