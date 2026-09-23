@@ -1269,6 +1269,15 @@ const ciChart = new Chart(ciCtx, {
   data: {
     labels: PARTIES.map(p => p.key),
     datasets: [
+                  {
+        label: '10th–90th percentile',
+        data: PARTIES.map(p => [partyStats[p.key].p10, partyStats[p.key].p90]),
+        backgroundColor: PARTIES.map(p => p.color),
+        borderColor: PARTIES.map(p => p.color),
+        borderWidth: 1,
+        borderSkipped: false,
+        borderRadius: 4,
+      },
       {
         type: 'scatter',
         label: 'Median',
@@ -1288,15 +1297,6 @@ const ciChart = new Chart(ciCtx, {
         pointStyle: 'rectRot',
         pointRadius: 7,
         pointHoverRadius: 7,
-      },
-            {
-        label: '10th–90th percentile',
-        data: PARTIES.map(p => [partyStats[p.key].p10, partyStats[p.key].p90]),
-        backgroundColor: PARTIES.map(p => p.color),
-        borderColor: PARTIES.map(p => p.color),
-        borderWidth: 1,
-        borderSkipped: false,
-        borderRadius: 4,
       },
     ],
   },
