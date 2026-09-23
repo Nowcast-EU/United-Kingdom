@@ -30,6 +30,39 @@
   .chart-box{position:relative;height:280px;}
   .chart-box.tall{height:320px;}
 
+  .content-grid{
+  display:grid;
+  grid-template-columns:5fr 1fr;
+  gap:14px;
+  align-items:start;
+}
+
+.main-panel{
+  min-width:0;
+}
+
+.run-panel{
+  margin-bottom:14px;
+}
+
+@media (max-width:700px){
+  .content-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+  @media (min-width:701px){
+  .run-panel .run-row{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .run-panel .run-row input,
+  .run-panel .run-row button{
+    width:100%;
+  }
+}
+
   .party-select{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
   .party-chip{
     padding:5px 10px;border-radius:14px;border:1px solid var(--line);
@@ -67,19 +100,26 @@
     <button class="tab-btn" data-view="hist">Histogram</button>
   </div>
 
-  <div class="panel" id="ci-panel">
-    <div class="chart-box tall"><canvas id="ciChart"></canvas></div>
-    <p class="note">Bars show the 10th&ndash;90th percentile range across all runs; the tick marks the median. The dark diamond marks a selected run, if any.</p>
+<div class="content-grid">
+
+  <div class="main-panel">
+
+    <div class="panel" id="ci-panel">
+      <div class="chart-box tall"><canvas id="ciChart"></canvas></div>
+      <p class="note">Bars show the 10th&ndash;90th percentile range across all runs; the tick marks the median. The dark diamond marks a selected run, if any.</p>
+    </div>
+
+    <div class="panel" id="hist-panel" style="display:none;">
+      <div class="party-select" id="partyChips"></div>
+      <div class="chart-box"><canvas id="histChart"></canvas></div>
+      <p class="note">The highlighted bin and dashed line mark a selected run, if any.</p>
+    </div>
+
   </div>
 
-  <div class="panel" id="hist-panel" style="display:none;">
-    <div class="party-select" id="partyChips"></div>
-    <div class="chart-box"><canvas id="histChart"></canvas></div>
-    <p class="note">The highlighted bin and dashed line mark a selected run, if any.</p>
-  </div>
-
-  <div class="panel">
+  <div class="panel run-panel">
     <h2 style="font-size:1rem;">View a single run</h2>
+
     <div class="run-row">
       <label for="runInput" style="font-size:0.85rem;">Run</label>
       <input type="number" id="runInput" min="1" max="1000" value="58">
@@ -87,8 +127,11 @@
       <button class="action secondary" id="randomRunBtn">Randomise</button>
       <button class="action secondary" id="clearRunBtn">Clear</button>
     </div>
+
     <div id="runResult"></div>
   </div>
+
+</div>
 </div>
 
 <script>
@@ -1343,12 +1386,6 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 const runInput = document.getElementById('runInput');
 const runResult = document.getElementById('runResult');
 
-function rankNote(key, value) {
-  const sorted = partyStats[key].sorted;
-  const below = sorted.filter(v => v < value).length;
-  return `more favourable to ${PARTIES.find(p => p.key === key).label} than ${below} of ${sorted.length - 1} other runs`;
-}
-
 function applySelectedRun() {
   // CI chart marker
   ciChart.data.datasets[2].data = selectedRun
@@ -1364,15 +1401,14 @@ function applySelectedRun() {
     runResult.innerHTML = '<p class="placeholder">No run selected.</p>';
     return;
   }
-  const rows = PARTIES.map(p => `
-    <tr>
-      <td><span class="swatch" style="background:${p.color}"></span>${p.label}</td>
-      <td class="num">${selectedRun[p.key]}</td>
-      <td class="note" style="padding-left:6px;">${rankNote(p.key, selectedRun[p.key])}</td>
-    </tr>`).join('');
+const rows = PARTIES.map(p => `
+  <tr>
+    <td><span class="swatch" style="background:${p.color}"></span>${p.label}</td>
+    <td class="num">${selectedRun[p.key]}</td>
+  </tr>`).join('');
   runResult.innerHTML = `
     <table class="run-table">
-      <thead><tr><th>Party</th><th style="text-align:right;">Seats</th><th></th></tr></thead>
+      <thead><tr><th>Party</th><th style="text-align:right;">Seats</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
   sendHeight();
