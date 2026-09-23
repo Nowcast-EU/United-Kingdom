@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nowcast UK — Election Probability Module</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js"></script>
+<style>
+  :root{
+    --lab:#DC241f; --con:#0087DC; --rfm:#12B6CF; --ldm:#FAA61A; --grn:#02A95B;
+    --ink:#1a1a1a; --muted:#666; --line:#e2e2e2; --bg:#fff; --panel:#f7f7f8;
+    --accent:#1a1a1a;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;padding:16px;background:var(--bg);color:var(--ink);}
+  .wrap{max-width:820px;margin:0 auto;}
+  h2{font-size:1.15rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:0.85rem;margin:0 0 16px;}
+
+  .tabs{display:flex;gap:6px;margin-bottom:14px;}
+  .tab-btn{
+    flex:1;padding:8px 10px;border:1px solid var(--line);background:var(--panel);
+    border-radius:6px;font-size:0.85rem;cursor:pointer;color:var(--ink);
+  }
+  .tab-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+  .panel{border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:14px;background:var(--bg);}
+  .chart-box{position:relative;height:280px;}
+  .chart-box.tall{height:320px;}
+
+  .party-select{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+  .party-chip{
+    padding:5px 10px;border-radius:14px;border:1px solid var(--line);
+    font-size:0.78rem;cursor:pointer;background:var(--panel);color:var(--ink);
+  }
+  .party-chip.active{color:#fff;border-color:transparent;}
+
+  .run-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .run-row input[type=number]{
+    width:80px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;font-size:0.9rem;
+  }
+  button.action{
+    padding:6px 12px;border:1px solid var(--ink);background:var(--ink);color:#fff;
+    border-radius:6px;font-size:0.85rem;cursor:pointer;
+  }
+  button.action.secondary{background:#fff;color:var(--ink);}
+  button.action:hover{opacity:0.85;}
+
+  table.run-table{width:100%;border-collapse:collapse;margin-top:12px;font-size:0.85rem;}
+  table.run-table th, table.run-table td{padding:6px 8px;text-align:left;border-bottom:1px solid var(--line);}
+  table.run-table td.num{text-align:right;font-variant-numeric:tabular-nums;}
+  .swatch{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;}
+
+  .note{color:var(--muted);font-size:0.8rem;margin-top:8px;}
+  .placeholder{color:var(--muted);font-size:0.85rem;text-align:center;padding:20px 0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h2>Range of outcomes</h2>
+  <p class="sub">1,000 Monte Carlo simulations of the current polling. Switch views, or pull a single simulated run to see where it lands.</p>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-view="ci">Confidence intervals</button>
+    <button class="tab-btn" data-view="hist">Histogram</button>
+  </div>
+
+  <div class="panel" id="ci-panel">
+    <div class="chart-box tall"><canvas id="ciChart"></canvas></div>
+    <p class="note">Bars show the 10th&ndash;90th percentile range across all runs; the tick marks the median. The dark diamond marks a selected run, if any.</p>
+  </div>
+
+  <div class="panel" id="hist-panel" style="display:none;">
+    <div class="party-select" id="partyChips"></div>
+    <div class="chart-box"><canvas id="histChart"></canvas></div>
+    <p class="note">The highlighted bin and dashed line mark a selected run, if any.</p>
+  </div>
+
+  <div class="panel">
+    <h2 style="font-size:1rem;">View a single run</h2>
+    <div class="run-row">
+      <label for="runInput" style="font-size:0.85rem;">Run</label>
+      <input type="number" id="runInput" min="1" max="1000" value="58">
+      <button class="action" id="showRunBtn">Show run</button>
+      <button class="action secondary" id="randomRunBtn">Randomise</button>
+      <button class="action secondary" id="clearRunBtn">Clear</button>
+    </div>
+    <div id="runResult"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   DATA
+   Replace SIMULATIONS below with your real export from the
+   Excel Monte Carlo table. Shape: one object per row/run, with
+   a `run` number and one integer field per party — same party
+   keys used in the seat-projections module (LAB, CON, RFM, LDM, GRN).
+
+   Easiest path: export the Excel table as CSV, then paste through
+   a quick conversion (e.g. in a scratch cell or Python) into:
+
+   const SIMULATIONS = [
+     { run: 1,   LAB: 320, CON: 180, RFM: 60, LDM: 55, GRN: 4 },
+     { run: 2,   LAB: 298, CON: 201, RFM: 55, LDM: 61, GRN: 3 },
+     ... 1000 rows ...
+   ];
+
+   If your sheet doesn't already have a `run` column, just use the
+   row index (1..1000) — order doesn't need to mean anything.
+   ============================================================ */
+const PARTIES = [
+  { key: "LAB", label: "Labour",      color: "#DC241f" },
+  { key: "CON", label: "Conservative",color: "#0087DC" },
+  { key: "RFM", label: "Reform UK",   color: "#12B6CF" },
+  { key: "LDM", label: "Lib Dem",     color: "#FAA61A" },
+  { key: "GRN", label: "Green",       color: "#02A95B" },
+];
+
+// --- Mock data generator (DEMO ONLY — replace with real SIMULATIONS array) ---
+function mockSimulations(n = 1000) {
+  const centers = { LAB: 300, CON: 190, RFM: 68, LDM: 66, GRN: 4 };
+  const spread  = { LAB: 35,  CON: 30,  RFM: 18, LDM: 14, GRN: 3 };
+  function gauss() { // Box-Muller
+    let u = 0, v = 0;
+    while (u === 0) u = Math.random();
+    while (v === 0) v = Math.random();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+  const rows = [];
+  for (let i = 1; i <= n; i++) {
+    const row = { run: i };
+    let total = 0;
+    PARTIES.forEach(p => {
+      const val = Math.max(0, Math.round(centers[p.key] + gauss() * spread[p.key]));
+      row[p.key] = val;
+      total += val;
+    });
+    // rough rescale so seat totals stay near 650
+    const scale = 650 / total;
+    PARTIES.forEach(p => { row[p.key] = Math.round(row[p.key] * scale); });
+    rows.push(row);
+  }
+  return rows;
+}
+const SIMULATIONS = mockSimulations(1000);
+
+// ============================================================
+// STATS HELPERS
+// ============================================================
+function percentile(sorted, p) {
+  const idx = (sorted.length - 1) * p;
+  const lo = Math.floor(idx), hi = Math.ceil(idx);
+  if (lo === hi) return sorted[lo];
+  return sorted[lo] + (sorted[hi] - lo === 0 ? 0 : (sorted[hi] - sorted[lo]) * (idx - lo));
+}
+
+const partyStats = {};
+PARTIES.forEach(p => {
+  const vals = SIMULATIONS.map(r => r[p.key]).sort((a, b) => a - b);
+  partyStats[p.key] = {
+    sorted: vals,
+    p10: percentile(vals, 0.10),
+    p50: percentile(vals, 0.50),
+    p90: percentile(vals, 0.90),
+    min: vals[0],
+    max: vals[vals.length - 1],
+  };
+});
+
+let selectedRun = null; // run object or null
+let activeParty = PARTIES[0].key;
+
+// ============================================================
+// CI CHART (horizontal floating bars + median tick + selected-run marker)
+// ============================================================
+const ciCtx = document.getElementById('ciChart').getContext('2d');
+const ciChart = new Chart(ciCtx, {
+  type: 'bar',
+  data: {
+    labels: PARTIES.map(p => p.label),
+    datasets: [
+      {
+        label: '10th–90th percentile',
+        data: PARTIES.map(p => [partyStats[p.key].p10, partyStats[p.key].p90]),
+        backgroundColor: PARTIES.map(p => p.color + '55'),
+        borderColor: PARTIES.map(p => p.color),
+        borderWidth: 1,
+        borderSkipped: false,
+        borderRadius: 4,
+      },
+      {
+        type: 'scatter',
+        label: 'Median',
+        data: PARTIES.map((p, i) => ({ x: partyStats[p.key].p50, y: i })),
+        backgroundColor: '#1a1a1a',
+        pointStyle: 'line',
+        rotation: 90,
+        pointRadius: 10,
+        pointHoverRadius: 10,
+        borderWidth: 2,
+      },
+      {
+        type: 'scatter',
+        label: 'Selected run',
+        data: [],
+        backgroundColor: '#1a1a1a',
+        pointStyle: 'rectRot',
+        pointRadius: 7,
+        pointHoverRadius: 7,
+      },
+    ],
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: { title: { display: true, text: 'Seats' }, beginAtZero: true },
+      y: { grid: { display: false } },
+    },
+    plugins: {
+      legend: { display: true, labels: { filter: (item) => item.text !== 'Selected run' || selectedRun } },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => {
+            if (ctx.dataset.label === 'Median') return `Median: ${partyStats[PARTIES[ctx.dataIndex].key].p50} seats`;
+            if (ctx.dataset.label === 'Selected run') return `Run ${selectedRun?.run}: ${ctx.raw.x} seats`;
+            const p = PARTIES[ctx.dataIndex];
+            return `10th–90th percentile: ${p ? partyStats[p.key].p10 : ''}–${p ? partyStats[p.key].p90 : ''} seats`;
+          },
+        },
+      },
+    },
+  },
+});
+
+// ============================================================
+// HISTOGRAM CHART (per-party, with bin highlight + line for selected run)
+// ============================================================
+function buildBins(vals, binCount = 20) {
+  const min = Math.min(...vals), max = Math.max(...vals);
+  const width = (max - min) / binCount || 1;
+  const bins = Array.from({ length: binCount }, (_, i) => ({
+    from: min + i * width,
+    to: min + (i + 1) * width,
+    count: 0,
+  }));
+  vals.forEach(v => {
+    let idx = Math.floor((v - min) / width);
+    if (idx >= binCount) idx = binCount - 1;
+    if (idx < 0) idx = 0;
+    bins[idx].count++;
+  });
+  return bins;
+}
+
+const histCtx = document.getElementById('histChart').getContext('2d');
+let histChart;
+
+function renderHistogram() {
+  const stats = partyStats[activeParty];
+  const partyColor = PARTIES.find(p => p.key === activeParty).color;
+  const bins = buildBins(stats.sorted, 22);
+  const labels = bins.map(b => `${Math.round(b.from)}`);
+
+  let highlightIdx = -1;
+  if (selectedRun) {
+    const v = selectedRun[activeParty];
+    highlightIdx = bins.findIndex(b => v >= b.from && v <= b.to + 0.0001);
+    if (highlightIdx === -1) highlightIdx = bins.length - 1;
+  }
+
+  const colors = bins.map((_, i) => i === highlightIdx ? '#1a1a1a' : partyColor + '77');
+
+  const annotation = selectedRun ? {
+    line1: {
+      type: 'line',
+      xMin: highlightIdx,
+      xMax: highlightIdx,
+      borderColor: '#1a1a1a',
+      borderWidth: 2,
+      borderDash: [4, 3],
+      label: {
+        display: true,
+        content: `Run ${selectedRun.run}: ${selectedRun[activeParty]} seats`,
+        position: 'start',
+        backgroundColor: '#1a1a1a',
+        color: '#fff',
+        font: { size: 10 },
+      },
+    },
+  } : {};
+
+  if (histChart) {
+    histChart.data.labels = labels;
+    histChart.data.datasets[0].data = bins.map(b => b.count);
+    histChart.data.datasets[0].backgroundColor = colors;
+    histChart.options.plugins.annotation.annotations = annotation;
+    histChart.update();
+    return;
+  }
+
+  histChart = new Chart(histCtx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: `${PARTIES.find(p => p.key === activeParty).label} seats (distribution)`,
+        data: bins.map(b => b.count),
+        backgroundColor: colors,
+        borderRadius: 2,
+        barPercentage: 1.0,
+        categoryPercentage: 1.0,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { title: { display: true, text: 'Seats (bin start)' }, ticks: { maxTicksLimit: 10 } },
+        y: { title: { display: true, text: 'Number of runs' }, beginAtZero: true },
+      },
+      plugins: {
+        legend: { display: false },
+        annotation: { annotations: annotation },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => `${bins[ctx.dataIndex].count} of 1000 runs`,
+            title: (items) => {
+              const b = bins[items[0].dataIndex];
+              return `${Math.round(b.from)}–${Math.round(b.to)} seats`;
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
+// ============================================================
+// PARTY CHIPS (for histogram view)
+// ============================================================
+const chipWrap = document.getElementById('partyChips');
+PARTIES.forEach(p => {
+  const chip = document.createElement('button');
+  chip.className = 'party-chip' + (p.key === activeParty ? ' active' : '');
+  chip.textContent = p.label;
+  chip.style.background = p.key === activeParty ? p.color : '';
+  chip.dataset.key = p.key;
+  chip.addEventListener('click', () => {
+    activeParty = p.key;
+    document.querySelectorAll('.party-chip').forEach(c => {
+      c.classList.toggle('active', c.dataset.key === activeParty);
+      c.style.background = c.dataset.key === activeParty
+        ? PARTIES.find(x => x.key === c.dataset.key).color : '';
+    });
+    renderHistogram();
+  });
+  chipWrap.appendChild(chip);
+});
+
+// ============================================================
+// VIEW TOGGLE
+// ============================================================
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const view = btn.dataset.view;
+    document.getElementById('ci-panel').style.display = view === 'ci' ? '' : 'none';
+    document.getElementById('hist-panel').style.display = view === 'hist' ? '' : 'none';
+    if (view === 'hist') renderHistogram();
+    sendHeight();
+  });
+});
+
+// ============================================================
+// RUN SELECTION
+// ============================================================
+const runInput = document.getElementById('runInput');
+const runResult = document.getElementById('runResult');
+
+function rankNote(key, value) {
+  const sorted = partyStats[key].sorted;
+  const below = sorted.filter(v => v < value).length;
+  return `more favourable to ${PARTIES.find(p => p.key === key).label} than ${below} of ${sorted.length - 1} other runs`;
+}
+
+function applySelectedRun() {
+  // CI chart marker
+  ciChart.data.datasets[2].data = selectedRun
+    ? PARTIES.map((p, i) => ({ x: selectedRun[p.key], y: i }))
+    : [];
+  ciChart.update();
+
+  // Histogram
+  renderHistogram();
+
+  // Table
+  if (!selectedRun) {
+    runResult.innerHTML = '<p class="placeholder">No run selected.</p>';
+    return;
+  }
+  const rows = PARTIES.map(p => `
+    <tr>
+      <td><span class="swatch" style="background:${p.color}"></span>${p.label}</td>
+      <td class="num">${selectedRun[p.key]}</td>
+      <td class="note" style="padding-left:6px;">${rankNote(p.key, selectedRun[p.key])}</td>
+    </tr>`).join('');
+  runResult.innerHTML = `
+    <table class="run-table">
+      <thead><tr><th>Party</th><th style="text-align:right;">Seats</th><th></th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  sendHeight();
+}
+
+document.getElementById('showRunBtn').addEventListener('click', () => {
+  let n = parseInt(runInput.value, 10);
+  if (!n || n < 1) n = 1;
+  if (n > SIMULATIONS.length) n = SIMULATIONS.length;
+  runInput.value = n;
+  selectedRun = SIMULATIONS.find(r => r.run === n) || SIMULATIONS[n - 1];
+  applySelectedRun();
+});
+
+document.getElementById('randomRunBtn').addEventListener('click', () => {
+  const n = 1 + Math.floor(Math.random() * SIMULATIONS.length);
+  runInput.value = n;
+  selectedRun = SIMULATIONS.find(r => r.run === n) || SIMULATIONS[n - 1];
+  applySelectedRun();
+});
+
+document.getElementById('clearRunBtn').addEventListener('click', () => {
+  selectedRun = null;
+  applySelectedRun();
+});
+
+// Init with default run (58) to match the brief
+document.getElementById('showRunBtn').click();
+
+// ============================================================
+// IFRAME HEIGHT MESSAGING (same pattern as the polling averages module)
+// ============================================================
+function sendHeight() {
+  const height = document.body.scrollHeight;
+  window.parent.postMessage({ type: 'nowcast-module-height', height }, '*');
+}
+window.addEventListener('load', sendHeight);
+window.addEventListener('resize', sendHeight);
+setTimeout(sendHeight, 300);
+</script>
+</body>
+</html>
