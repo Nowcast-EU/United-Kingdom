@@ -19,26 +19,32 @@
   h2{font-size:1.15rem;margin:0 0 4px;}
   .sub{color:var(--muted);font-size:0.85rem;margin:0 0 16px;}
 
-  .tabs{display:flex;gap:6px;margin-bottom:14px;}
+  .tabs{display:flex;align-items:center;gap:16px;margin-bottom:14px;}
 .tab-btn{
-  padding:0;
+  padding:0 0 8px;
   border:0;
+  border-bottom:3px solid transparent;
   background:none;
   border-radius:0;
-  font-size:0.85rem;
-  font-weight:400;
+  font-size:1.05rem;
+  font-weight:500;
   cursor:pointer;
-  color:var(--ink);
+  color:var(--muted);
   text-decoration:none;
+  line-height:1.2;
 }
 
 .tab-btn.active{
   background:none;
   color:var(--ink);
-  border:0;
-  font-weight:600;
-  text-decoration:underline;
-  text-underline-offset:3px;
+  border-bottom:3px solid var(--ink);
+  font-weight:700;
+}
+
+.tab-divider{
+  width:1px;
+  align-self:stretch;
+  background:var(--line);
 }
 
   .chart-controls{
@@ -162,6 +168,7 @@
 
   <div class="tabs">
     <button class="tab-btn active" data-view="ci">Confidence</button>
+    <span class="tab-divider"></span>
     <button class="tab-btn" data-view="hist">Histogram</button>
   </div>
 
