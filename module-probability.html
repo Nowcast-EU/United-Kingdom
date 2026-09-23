@@ -1302,7 +1302,7 @@ function renderHistogram() {
     if (highlightIdx === -1) highlightIdx = bins.length - 1;
   }
 
-  const colors = bins.map((_, i) => i === highlightIdx ? partyColor : partyColor);
+  const colors = bins.map(() => partyColor);
 
   const annotation = selectedRun ? {
     line1: {
@@ -1335,15 +1335,16 @@ function renderHistogram() {
     type: 'bar',
     data: {
       labels,
-      datasets: [{
-        label: `${PARTIES.find(p => p.key === activeParty).label} seats (distribution)`,
-        data: bins.map(b => b.count),
-        backgroundColor: colors,
-        borderColor: '#FFFFFF',
-        borderRadius: 2,
-        barPercentage: 1.0,
-        categoryPercentage: 1.0,
-      }],
+datasets: [{
+  label: `${PARTIES.find(p => p.key === activeParty).label} seats (distribution)`,
+  data: bins.map(b => b.count),
+  backgroundColor: colors,
+  borderColor: '#fff',
+  borderWidth: 1,
+  borderRadius: 0,
+  barPercentage: 1.0,
+  categoryPercentage: 1.0,
+}],
     },
     options: {
       responsive: true,
