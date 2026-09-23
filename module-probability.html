@@ -1315,16 +1315,7 @@ scales: {
 },
     plugins: {
       legend: { display: false },
-      tooltip: {
-        callbacks: {
-          label: (ctx) => {
-            if (ctx.dataset.label === 'Median') return `Median: ${partyStats[PARTIES[ctx.dataIndex].key].p50} seats`;
-            if (ctx.dataset.label === 'Selected run') return `Run ${selectedRun?.run}: ${ctx.raw.x} seats`;
-            const p = PARTIES[ctx.dataIndex];
-            return `10th–90th percentile: ${p ? partyStats[p.key].p10 : ''}–${p ? partyStats[p.key].p90 : ''} seats`;
-          },
-        },
-      },
+      tooltip: { enabled: false },
     },
   },
 });
