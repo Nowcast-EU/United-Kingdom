@@ -1403,15 +1403,29 @@ document.getElementById('clearRunBtn').addEventListener('click', () => {
 document.getElementById('showRunBtn').click();
 
 // ============================================================
-// IFRAME HEIGHT MESSAGING (same pattern as the polling averages module)
+// IFRAME HEIGHT MESSAGING
 // ============================================================
 function sendHeight() {
-  const height = document.body.scrollHeight;
-  window.parent.postMessage({ type: 'nowcast-module-height', height }, '*');
+  const height = document.documentElement.scrollHeight;
+
+  window.parent.postMessage({
+    sender: 'nowcast-module',
+    height: height
+  }, '*');
 }
+
 window.addEventListener('load', sendHeight);
 window.addEventListener('resize', sendHeight);
-setTimeout(sendHeight, 300);
+
+const resizeObserver = new ResizeObserver(() => {
+  sendHeight();
+});
+
+resizeObserver.observe(document.body);
+
+setTimeout(sendHeight, 100);
+setTimeout(sendHeight, 500);
+setTimeout(sendHeight, 1000);
 </script>
 </body>
 </html>
