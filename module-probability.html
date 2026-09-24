@@ -1532,11 +1532,16 @@ x: {
   ticks: { stepSize: 50 },
   grid: { display: false }
 },
-  y: {
-    beginAtZero: true,
-    suggestedMax: 100,
-    grid: { display: false }
-  },
+y: {
+  beginAtZero: true,
+  suggestedMax: 100,
+  grid: { display: false },
+  ticks: {
+    callback: function(value) {
+      return (value / 10) + '%';
+    }
+  }
+},
 },
       plugins: {
         legend: { display: false },
