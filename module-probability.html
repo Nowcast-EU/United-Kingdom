@@ -1593,7 +1593,7 @@ const runResult = document.getElementById('runResult');
 
 function applySelectedRun() {
   // CI chart marker
-  ciChart.data.datasets[10].data = selectedRun
+  ciChart.data.datasets[11].data = selectedRun
     ? PARTIES.map((p, i) => ({ x: selectedRun[p.key], y: i }))
     : [];
 
