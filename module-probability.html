@@ -1411,7 +1411,6 @@ options: {
   indexAxis: 'y',
   responsive: true,
   maintainAspectRatio: false,
-  animation: false, // Prevents all initial and tab-switch animations
   scales: {
     x: {
       min: 0,
@@ -1609,20 +1608,16 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 // ============================================================
 const runResult = document.getElementById('runResult');
 
-function applySelectedRun() {
+function applySelectedRun(animate = true) {
   // CI chart marker
   ciChart.data.datasets[9].data = selectedRun
     ? PARTIES.map((p, i) => ({ x: selectedRun[p.key], y: i }))
     : [];
 
-  if (ciChart.options.plugins.annotation?.annotations?.runMarker) {
-    ciChart.options.plugins.annotation.annotations.runMarker.value = selectedRun[activeParty];
-  }
-
-  ciChart.update({
+ciChart.update(animate ? {
     duration: 300,
     easing: 'easeOutQuad'
-  });
+  } : 'none');
 
   // Histogram
   renderHistogram();
