@@ -1420,13 +1420,26 @@ options: {
     },
     y: { grid: { display: true, offset: false }, stacked: true },  
   },
-  plugins: {
-    legend: { display: false },
-    tooltip: { enabled: false },
-    annotation: {
-      animations: false, // Disables annotation fly-ins completely
+plugins: {
+  legend: { display: false },
+  tooltip: { enabled: false },
+
+  annotation: {
+    animations: false,
+
+    annotations: {
+      majorityLine: {
+        type: 'line',
+        xMin: 325,
+        xMax: 325,
+        borderColor: '#999999',
+        borderWidth: 1,
+        borderDash: [6, 6],
+        drawTime: 'beforeDatasetsDraw'
+      }
     }
-  },
+  }
+},
 },
 });
 
