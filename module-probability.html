@@ -1325,12 +1325,14 @@ const ciChart = new Chart(ciCtx, {
         pointRadius: 10,
         pointHoverRadius: 10,
         borderWidth: 2,
+        stack: 'median-marker',
         order: 1,
       },
       {
         type: 'scatter',
         label: 'Selected run',
         data: [],
+        stack: 'selected-run-marker',
         backgroundColor: '#000000',
     pointStyle: (ctx) => {
     const canvas = document.createElement('canvas');
