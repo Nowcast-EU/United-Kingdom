@@ -1246,19 +1246,15 @@ PARTIES.forEach(p => {
   const vals = SIMULATIONS.map(r => r[p.key]).sort((a, b) => a - b);
 partyStats[p.key] = {
   sorted: vals,
-
   p10: percentile(vals, 0.10),
   p20: percentile(vals, 0.20),
   p30: percentile(vals, 0.30),
   p40: percentile(vals, 0.40),
-
   p50: percentile(vals, 0.50),
-
   p60: percentile(vals, 0.60),
   p70: percentile(vals, 0.70),
   p80: percentile(vals, 0.80),
   p90: percentile(vals, 0.90),
-
   min: vals[0],
   max: vals[vals.length - 1],
 };
@@ -1288,40 +1284,40 @@ const ciChart = new Chart(ciCtx, {
                  order: 1,
       },
 {
-  label: '0th–10th percentile',
-  data: PARTIES.map(p => partyStats[p.key].p10),
+  label: '10th–20th percentile',
+  data: PARTIES.map(p =>
+    partyStats[p.key].p20 - partyStats[p.key].p10
+  ),
   backgroundColor: PARTIES.map(p => p.color + '40'),
   borderWidth: 0,
   stack: 'range',
   order: 1,
 },
 {
-  label: '10th–20th percentile',
-  data: PARTIES.map(p => partyStats[p.key].p20 - partyStats[p.key].p10),
+  label: '20th–30th percentile',
+  data: PARTIES.map(p =>
+    partyStats[p.key].p30 - partyStats[p.key].p20
+  ),
   backgroundColor: PARTIES.map(p => p.color + '60'),
   borderWidth: 0,
   stack: 'range',
   order: 1,
 },
 {
-  label: '20th–30th percentile',
-  data: PARTIES.map(p => partyStats[p.key].p30 - partyStats[p.key].p20),
+  label: '30th–40th percentile',
+  data: PARTIES.map(p =>
+    partyStats[p.key].p40 - partyStats[p.key].p30
+  ),
   backgroundColor: PARTIES.map(p => p.color + '80'),
   borderWidth: 0,
   stack: 'range',
   order: 1,
 },
 {
-  label: '30th–40th percentile',
-  data: PARTIES.map(p => partyStats[p.key].p40 - partyStats[p.key].p30),
-  backgroundColor: PARTIES.map(p => p.color + 'A0'),
-  borderWidth: 0,
-  stack: 'range',
-  order: 1,
-},
-{
   label: '40th–60th percentile',
-  data: PARTIES.map(p => partyStats[p.key].p60 - partyStats[p.key].p40),
+  data: PARTIES.map(p =>
+    partyStats[p.key].p60 - partyStats[p.key].p40
+  ),
   backgroundColor: PARTIES.map(p => p.color),
   borderWidth: 0,
   stack: 'range',
@@ -1329,31 +1325,29 @@ const ciChart = new Chart(ciCtx, {
 },
 {
   label: '60th–70th percentile',
-  data: PARTIES.map(p => partyStats[p.key].p70 - partyStats[p.key].p60),
-  backgroundColor: PARTIES.map(p => p.color + 'A0'),
-  borderWidth: 0,
-  stack: 'range',
-  order: 1,
-},
-{
-  label: '70th–80th percentile',
-  data: PARTIES.map(p => partyStats[p.key].p80 - partyStats[p.key].p70),
+  data: PARTIES.map(p =>
+    partyStats[p.key].p70 - partyStats[p.key].p60
+  ),
   backgroundColor: PARTIES.map(p => p.color + '80'),
   borderWidth: 0,
   stack: 'range',
   order: 1,
 },
 {
-  label: '80th–90th percentile',
-  data: PARTIES.map(p => partyStats[p.key].p90 - partyStats[p.key].p80),
+  label: '70th–80th percentile',
+  data: PARTIES.map(p =>
+    partyStats[p.key].p80 - partyStats[p.key].p70
+  ),
   backgroundColor: PARTIES.map(p => p.color + '60'),
   borderWidth: 0,
   stack: 'range',
   order: 1,
 },
 {
-  label: '90th–100th percentile',
-  data: PARTIES.map(p => partyStats[p.key].max - partyStats[p.key].p90),
+  label: '80th–90th percentile',
+  data: PARTIES.map(p =>
+    partyStats[p.key].p90 - partyStats[p.key].p80
+  ),
   backgroundColor: PARTIES.map(p => p.color + '40'),
   borderWidth: 0,
   stack: 'range',
@@ -1593,7 +1587,7 @@ const runResult = document.getElementById('runResult');
 
 function applySelectedRun() {
   // CI chart marker
-  ciChart.data.datasets[11].data = selectedRun
+  ciChart.data.datasets[9].data = selectedRun
     ? PARTIES.map((p, i) => ({ x: selectedRun[p.key], y: i }))
     : [];
 
