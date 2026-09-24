@@ -1542,6 +1542,14 @@ x: {
         legend: { display: false },
         annotation: { annotations: annotation },
       tooltip: { enabled: false },
+        majorityLine: {
+          type: 'line',
+          scaleID: 'x', 
+          value: 325,
+          borderColor: '#666',
+          borderWidth: 2,
+          borderDash: [5, 5]
+        }
       },
     },
   });
