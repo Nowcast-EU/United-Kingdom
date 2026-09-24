@@ -1279,6 +1279,7 @@ const ciChart = new Chart(ciCtx, {
         backgroundColor: 'transparent',
         borderWidth: 0,
         stack: 'range',
+                 order: 1,
       },
       {
         label: '10th–25th percentile',
@@ -1286,6 +1287,7 @@ const ciChart = new Chart(ciCtx, {
         backgroundColor: PARTIES.map(p => p.color + '40'),
         borderWidth: 0,
         stack: 'range',
+                order: 1,
       },
       {
         label: '25th–40th percentile',
@@ -1293,6 +1295,7 @@ const ciChart = new Chart(ciCtx, {
         backgroundColor: PARTIES.map(p => p.color + '90'),
         borderWidth: 0,
         stack: 'range',
+                order: 1,
       },
       {
         label: '40th–60th percentile',
@@ -1300,6 +1303,7 @@ const ciChart = new Chart(ciCtx, {
         backgroundColor: PARTIES.map(p => p.color),
         borderWidth: 0,
         stack: 'range',
+                order: 1,
       },
       {
         label: '60th–75th percentile',
@@ -1307,6 +1311,7 @@ const ciChart = new Chart(ciCtx, {
         backgroundColor: PARTIES.map(p => p.color + '90'),
         borderWidth: 0,
         stack: 'range',
+                order: 1,
       },
       {
         label: '75th–90th percentile',
@@ -1314,6 +1319,7 @@ const ciChart = new Chart(ciCtx, {
         backgroundColor: PARTIES.map(p => p.color + '40'),
         borderWidth: 0,
         stack: 'range',
+                order: 1,
       },
       {
         type: 'scatter',
@@ -1326,14 +1332,14 @@ const ciChart = new Chart(ciCtx, {
         pointHoverRadius: 10,
         borderWidth: 2,
         stack: 'median-marker',
-        order: 1,
+        order: 2,
       },
       {
         type: 'scatter',
         label: 'Selected run',
         data: [],
         stack: 'selected-run-marker',
-        order: -1,
+        order: 0,
         backgroundColor: '#000000',
     pointStyle: (ctx) => {
     const canvas = document.createElement('canvas');
