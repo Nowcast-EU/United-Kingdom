@@ -1295,10 +1295,20 @@ const ciChart = new Chart(ciCtx, {
         type: 'scatter',
         label: 'Selected run',
         data: [],
-        backgroundColor: '#1a1a1a',
-        pointStyle: 'rectRot',
-        pointRadius: 7,
-        pointHoverRadius: 7,
+        backgroundColor: '#000000',
+    pointStyle: (ctx) => {
+    const canvas = document.createElement('canvas');
+    const width = 4;   // Thin width
+    const height = 16; // Tall height
+    canvas.width = width;
+    canvas.height = height;
+
+    const c = canvas.getContext('2d');
+    c.fillStyle = '#000000';
+    c.fillRect(0, 0, width, height);
+
+    return canvas;
+  },
         order: 1,
       },
     ],
