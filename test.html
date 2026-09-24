@@ -136,10 +136,17 @@ padding: 20px var(--gutter);
     margin: 0 0 4px;
   }
 
-  .module .wip-note {
+.module .wip-note {
     color: #000000;
     font-size: 0.85rem;
     margin: 0 0 18px;
+    max-width: 66%;
+  }
+
+  @media (max-width: 768px) {
+    .module .wip-note {
+      max-width: 100%;
+    }
   }
 
   /* wrapper keeps embedded pages/Flourish charts responsive */
@@ -209,7 +216,7 @@ padding: 20px var(--gutter);
 <!-- ===================== PROJECTION ===================== -->
 <section class="module" id="projection" data-slug="projection">
   <h2>Central Seat Projection</h2>
-  <p class="wip-note">This is Nowcast UK's determinisitc projection based on a two-week polling average</p>
+  <p class="wip-note">This is Nowcast UK’s deterministic seat projection based on a two week polling average.</p>
   <div class="embed-wrap">
     <iframe class="module-frame" data-slug="projection"
              src="https://nowcast-eu.github.io/United-Kingdom/module-projection.html"></iframe>
@@ -232,7 +239,7 @@ padding: 20px var(--gutter);
   <!-- ===================== PROBABILITIES ===================== -->
   <section class="module" id="probabilities" data-slug="probabilities">
     <h2>Probabilities</h2>
-    <p class="wip-note">To account for real-world uncertainty, we run 1,000 simulations using current polling averages as a baseline. Each run randomly adjusts <br>key variables such as tactical voting, incumbent effects and electoral geography to show the full range of possible election outcomes.</p>
+    <p class="wip-note">To account for real-world uncertainty, we run 1,000 simulations using current polling averages as a baseline. Each run randomly adjusts key variables such as tactical voting, incumbent effects and electoral geography to show the full range of possible election outcomes.</p>
   <div class="embed-wrap">
     <iframe class="module-frame" data-slug="probabilities"
              src="https://nowcast-eu.github.io/United-Kingdom/module-probability.html"></iframe>
