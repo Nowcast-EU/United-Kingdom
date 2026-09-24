@@ -1274,7 +1274,7 @@ const ciChart = new Chart(ciCtx, {
         data: PARTIES.map(p => [partyStats[p.key].p10, partyStats[p.key].p90]),
         backgroundColor: PARTIES.map(p => p.color),
         borderColor: PARTIES.map(p => p.color),
-        borderWidth: 1,
+        borderWidth: 0,
         borderSkipped: false,
         borderRadius: 0,
         order: 2,
@@ -1298,8 +1298,8 @@ const ciChart = new Chart(ciCtx, {
         backgroundColor: '#000000',
     pointStyle: (ctx) => {
     const canvas = document.createElement('canvas');
-    const width = 4;   // Thin width
-    const height = 50; // Tall height
+    const width = 3;   // Thin width
+    const height = 65; // Tall height
     canvas.width = width;
     canvas.height = height;
 
