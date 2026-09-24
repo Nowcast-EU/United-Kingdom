@@ -1319,7 +1319,6 @@ const ciChart = new Chart(ciCtx, {
     maintainAspectRatio: false,
 scales: {
   x: {
-    title: { display: true, text: 'Seats' },
     min: 0,
     max: 400,
     grid: { display: false }
@@ -1431,7 +1430,6 @@ data: bins.map(b => ({
 scales: {
 x: {
   type: 'linear',
-  title: { display: true, text: 'Seats' },
   min: 0,
   max: 400,
   offset: false,
@@ -1440,7 +1438,6 @@ x: {
   grid: { display: false }
 },
   y: {
-    title: { display: true, text: 'Number of runs' },
     beginAtZero: true,
     suggestedMax: 100,
     grid: { display: false }
