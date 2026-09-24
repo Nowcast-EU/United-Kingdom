@@ -1487,7 +1487,18 @@ function renderHistogram() {
 
   const colors = bins.map(() => partyColor);
 
-  const annotation = selectedRun ? {
+const annotation = {
+  majorityLine: {
+    type: 'line',
+    xMin: 325,
+    xMax: 325,
+    borderColor: '#999999',
+    borderWidth: 1,
+    borderDash: [6, 6],
+    drawTime: 'beforeDatasetsDraw',
+  },
+
+  ...(selectedRun ? {
     line1: {
       type: 'line',
       xMin: selectedRun[activeParty],
@@ -1503,7 +1514,8 @@ function renderHistogram() {
         font: { size: 10 },
       },
     },
-  } : {};
+  } : {}),
+};
 
   if (histChart) {
 histChart.data.labels = labels;
