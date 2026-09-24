@@ -1336,13 +1336,9 @@ const ciChart = new Chart(ciCtx, {
         order: -1,
         backgroundColor: '#000000',
     pointStyle: (ctx) => {
-    const barMeta = ctx.chart.getDatasetMeta(0); // any of the stacked bar segments — all share the same row height
-    const barEl = barMeta.data[ctx.dataIndex];
-    const barHeight = barEl ? barEl.height : 65;
-
     const canvas = document.createElement('canvas');
     const width = 2;   // Thin width
-    const height = Math.round(barHeight * 1.1);
+    const height = 65; // Tall height
     canvas.width = width;
     canvas.height = height;
 
