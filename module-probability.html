@@ -1608,16 +1608,20 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 // ============================================================
 const runResult = document.getElementById('runResult');
 
-function applySelectedRun(animate = true) {
+function applySelectedRun(animate = false) {
   // CI chart marker
   ciChart.data.datasets[9].data = selectedRun
     ? PARTIES.map((p, i) => ({ x: selectedRun[p.key], y: i }))
     : [];
 
-ciChart.update(animate ? {
-    duration: 300,
-    easing: 'easeOutQuad'
-  } : 'none');
+if (animate) {
+    ciChart.options.animation = { duration: 300, easing: 'easeOutQuad' };
+    ciChart.update();
+    ciChart.options.animation = false; // Reset back to false for tab switches
+  } else {
+    ciChart.options.animation = false;
+    ciChart.update('none'); // Instant draw with zero animation
+  }
 
   // Histogram
   renderHistogram();
@@ -1653,18 +1657,16 @@ document.getElementById('defaultRunBtn').addEventListener('click', () => {
     ...DEFAULT_RUN,
     run: 'default'
   };
-
-  applySelectedRun();
+  applySelectedRun(true); // <-- Animate transition
 });
 
 document.getElementById('randomRunBtn').addEventListener('click', () => {
   const randomIndex = Math.floor(Math.random() * SIMULATIONS.length);
   selectedRun = SIMULATIONS[randomIndex];
-
-  applySelectedRun();
+applySelectedRun(true); // <-- Animate transition
 });
 
-applySelectedRun(animate = false);
+applySelectedRun(false);
 
 // ============================================================
 // IFRAME HEIGHT MESSAGING
