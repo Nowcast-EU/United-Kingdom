@@ -1340,19 +1340,21 @@ const ciChart = new Chart(ciCtx, {
         data: [],
         stack: 'selected-run-marker',
         backgroundColor: '#000000',
-    pointStyle: (ctx) => {
-    const canvas = document.createElement('canvas');
-    const width = 2;   // Thin width
-    const height = 65; // Tall height
-    canvas.width = width;
-    canvas.height = height;
+pointStyle: (ctx) => {
+  const canvas = document.createElement('canvas');
 
-    const c = canvas.getContext('2d');
-    c.fillStyle = '#000000';
-    c.fillRect(0, 0, width, height);
+  const width = 4;
+  const height = 65;
 
-    return canvas;
-  },
+  canvas.width = width;
+  canvas.height = height;
+
+  const c = canvas.getContext('2d');
+  c.fillStyle = '#000000';
+  c.fillRect(1, 0, 2, height);
+
+  return canvas;
+},
         order: 0,
       },
     ],
