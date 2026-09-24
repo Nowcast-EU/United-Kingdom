@@ -1339,7 +1339,6 @@ const ciChart = new Chart(ciCtx, {
         label: 'Selected run',
         data: [],
         stack: 'selected-run-marker',
-        order: 0,
         backgroundColor: '#000000',
     pointStyle: (ctx) => {
     const canvas = document.createElement('canvas');
@@ -1354,7 +1353,7 @@ const ciChart = new Chart(ciCtx, {
 
     return canvas;
   },
-        order: 1,
+        order: 3,
       },
     ],
   },
