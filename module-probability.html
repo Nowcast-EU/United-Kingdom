@@ -193,7 +193,9 @@
   </div>
 
 <div class="panel run-panel">
-  <h2 style="font-size:1rem;">Currently viewing run #XXX</h2>
+<h2 id="currentRunTitle" style="font-size:1rem; font-weight:400;">
+  Currently viewing <strong>run #XXX</strong>
+</h2>
 
   <div class="run-options">
     <button class="action" id="defaultRunBtn">Default</button>
@@ -1634,6 +1636,10 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 const runResult = document.getElementById('runResult');
 
 function applySelectedRun(animate = false) {
+
+   document.getElementById('currentRunTitle').innerHTML =
+    `Currently viewing <strong>run #${selectedRun.run}</strong>`;
+
   // CI chart marker
   ciChart.data.datasets[9].data = selectedRun
     ? PARTIES.map((p, i) => ({ x: selectedRun[p.key], y: i }))
