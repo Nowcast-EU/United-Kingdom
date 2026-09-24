@@ -1411,6 +1411,12 @@ pointStyle: (ctx) => {
     indexAxis: 'y',
     responsive: true,
     maintainAspectRatio: false,
+    animation: {
+    duration: 0,
+    onComplete: function() {
+      this.options.animation.duration = 300; // Restores smooth animations for user interactions
+    }
+  },
 scales: {
   x: {
     min: 0,
