@@ -1281,7 +1281,8 @@ const ciChart = new Chart(ciCtx, {
         backgroundColor: 'transparent',
         borderWidth: 0,
         stack: 'range',
-                 order: 1,
+        order: 1,
+        animation: false,
       },
 {
   label: '10th–20th percentile',
@@ -1292,6 +1293,7 @@ const ciChart = new Chart(ciCtx, {
   borderWidth: 0,
   stack: 'range',
   order: 1,
+  animation: false,
 },
 {
   label: '20th–30th percentile',
@@ -1302,6 +1304,7 @@ const ciChart = new Chart(ciCtx, {
   borderWidth: 0,
   stack: 'range',
   order: 1,
+    animation: false,
 },
 {
   label: '30th–40th percentile',
@@ -1312,6 +1315,7 @@ const ciChart = new Chart(ciCtx, {
   borderWidth: 0,
   stack: 'range',
   order: 1,
+    animation: false,
 },
 {
   label: '40th–60th percentile',
@@ -1322,6 +1326,7 @@ const ciChart = new Chart(ciCtx, {
   borderWidth: 0,
   stack: 'range',
   order: 1,
+    animation: false,
 },
 {
   label: '60th–70th percentile',
@@ -1332,6 +1337,7 @@ const ciChart = new Chart(ciCtx, {
   borderWidth: 0,
   stack: 'range',
   order: 1,
+    animation: false,
 },
 {
   label: '70th–80th percentile',
@@ -1342,6 +1348,7 @@ const ciChart = new Chart(ciCtx, {
   borderWidth: 0,
   stack: 'range',
   order: 1,
+    animation: false,
 },
 {
   label: '80th–90th percentile',
@@ -1352,6 +1359,7 @@ const ciChart = new Chart(ciCtx, {
   borderWidth: 0,
   stack: 'range',
   order: 1,
+    animation: false,
 },
       {
         type: 'scatter',
@@ -1365,6 +1373,7 @@ const ciChart = new Chart(ciCtx, {
         borderWidth: 2,
         stack: 'median-marker',
         order: 2,
+        animation: false,
       },
       {
         type: 'scatter',
@@ -1388,6 +1397,13 @@ pointStyle: (ctx) => {
   return canvas;
 },
         order: 0,
+
+          animations: {
+    x: {
+      duration: 400,
+      easing: 'easeOutCubic'
+    }
+  }
       },
     ],
   },
@@ -1395,7 +1411,6 @@ pointStyle: (ctx) => {
     indexAxis: 'y',
     responsive: true,
     maintainAspectRatio: false,
-    animation: false,
 scales: {
   x: {
     min: 0,
