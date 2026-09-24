@@ -510,8 +510,6 @@ var dotLineIndex = []; // which line (in fill order) each dot in dotElements bel
 var previousFilledCount = 0;
 var ROW_DELAY = 0.005; // seconds of stagger between each row/column as it appears
 
-  var DOT_GAP = 3; // keep this in sync with the gap value in the .fill-bar CSS rule
-
 function computeGridLayout(alongDim, acrossDim, count, gap) {
   // "along" = the dimension each line runs across; "across" = the dimension
   // lines are stacked along. Try every line length, keep the largest dot size
@@ -536,10 +534,14 @@ function buildDotGrid() {
   var h = fillBarEl.clientHeight;
   if (w < 1 || h < 1) return;
 
+  // Set gap to 1px on mobile (<= 500px), and 3px on desktop. 
+  // You can change "1" to whatever spacing looks best on mobile!
+  var dynamicGap = window.innerWidth <= 500 ? 1 : 3; 
+
   var orientation = h >= w ? 'portrait' : 'landscape';
   var layout = orientation === 'portrait'
-    ? computeGridLayout(w, h, TOTAL_SEATS, DOT_GAP)
-    : computeGridLayout(h, w, TOTAL_SEATS, DOT_GAP);
+    ? computeGridLayout(w, h, TOTAL_SEATS, dynamicGap)
+    : computeGridLayout(h, w, TOTAL_SEATS, dynamicGap);
 
   var remainder = TOTAL_SEATS % layout.lineLength;
   var fullLines = remainder === 0 ? layout.lineCount : layout.lineCount - 1;
@@ -568,7 +570,7 @@ function buildDotGrid() {
   previousFilledCount = 0;
 
   var dotSize = layout.size;
-  var gap = DOT_GAP;
+  var gap = dynamicGap;
   var lineCount = lineLengths.length;
   var lineSpan = lineCount * dotSize + (lineCount - 1) * gap;
   var crossStart = (orientation === 'portrait' ? h : w) / 2 - lineSpan / 2;
