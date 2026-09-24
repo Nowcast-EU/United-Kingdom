@@ -117,11 +117,35 @@
   }
 }
 
-  .run-options{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
+.run-options{
+  display:flex;
+  align-items:center;
+  gap:16px;
   margin-bottom:14px;
+}
+
+  .run-mode{
+  padding:0 0 5px 0;
+  border:none;
+  background:none;
+  color:var(--ink);
+  font-size:0.85rem;
+  cursor:pointer;
+  position:relative;
+}
+
+.run-mode.active::after{
+  content:'';
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:2px;
+  background:var(--ink);
+}
+
+.run-mode:hover{
+  opacity:0.7;
 }
 
   @media (min-width:701px){
@@ -134,6 +158,26 @@
   .run-panel .run-row button{
     width:100%;
   }
+}
+
+  .randomise-btn{
+  width:26px;
+  height:26px;
+  padding:0;
+  border:1px solid var(--line);
+  border-radius:6px;
+  background:var(--panel);
+  color:var(--ink);
+  font-size:1rem;
+  line-height:1;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.randomise-btn:hover{
+  background:var(--line);
 }
 
   .party-select{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
@@ -197,10 +241,21 @@
   Currently viewing <strong>run #XXX</strong>
 </h2>
 
-  <div class="run-options">
-    <button class="action" id="defaultRunBtn">Default</button>
-    <button class="action secondary" id="randomRunBtn">Random</button>
-  </div>
+<div class="run-options">
+
+  <button class="run-mode active" id="defaultRunBtn">
+    Default
+  </button>
+
+  <button class="run-mode" id="randomRunBtn">
+    Random
+  </button>
+
+  <button class="randomise-btn" id="randomiseBtn" aria-label="Generate random run" title="Generate random run">
+    ↻
+  </button>
+
+</div>
 
   <div id="runResult"></div>
 </div>
@@ -1684,17 +1739,35 @@ if (animate) {
 }
 
 document.getElementById('defaultRunBtn').addEventListener('click', () => {
+
+  document.querySelectorAll('.run-mode').forEach(btn =>
+    btn.classList.remove('active')
+  );
+
+  document.getElementById('defaultRunBtn').classList.add('active');
+
   selectedRun = {
     ...DEFAULT_RUN,
     run: 'default'
   };
-  applySelectedRun(true); // <-- Animate transition
+
+  applySelectedRun(true);
 });
 
-document.getElementById('randomRunBtn').addEventListener('click', () => {
+document.getElementById('randomiseBtn').addEventListener('click', () => {
+
+  // Switch to Random mode
+  document.querySelectorAll('.run-mode').forEach(btn =>
+    btn.classList.remove('active')
+  );
+
+  document.getElementById('randomRunBtn').classList.add('active');
+
+  // Pick a random simulation
   const randomIndex = Math.floor(Math.random() * SIMULATIONS.length);
   selectedRun = SIMULATIONS[randomIndex];
-applySelectedRun(true); // <-- Animate transition
+
+  applySelectedRun(true);
 });
 
 applySelectedRun(false);
