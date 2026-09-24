@@ -1324,11 +1324,7 @@ scales: {
     max: 400,
     grid: { display: false }
   },
-  y: { 
-    min: 100,
-    grid: { display: true, offset: false } 
-  },
-  
+  y: { grid: { display: true, offset: false } },  
 },
     plugins: {
       legend: { display: false },
@@ -1446,6 +1442,7 @@ x: {
   y: {
     title: { display: true, text: 'Number of runs' },
     beginAtZero: true,
+    min: 100,
     grid: { display: false }
   },
 },
