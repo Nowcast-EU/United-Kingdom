@@ -113,20 +113,33 @@ body {
 .party-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
+  justify-content: center;
+  padding: 4px 10px;
   font-size: 0.74rem;
-  font-weight: normal;
+  font-weight: 500;
   border: 1px solid var(--divider);
-  background: #f3f3f3;
+  background: #e9ecef; /* Neutral grey background */
   border-radius: 8px;
   cursor: pointer;
   color: var(--ink-soft);
-  opacity: 0.6;
-  transition: all 0.25s ease;
+  opacity: 0.75;
+  transition: all 0.2s ease;
 }
 
-.party-btn:hover { transform: translateY(-1px); }
+.party-btn:hover {
+  transform: translateY(-1px);
+  opacity: 1;
+}
+
+/* Selected state: inherits the party color */
+.party-btn[aria-pressed="true"] {
+  opacity: 1;
+  background: var(--party-color);
+  border-color: var(--party-color);
+  color: #ffffff; /* White text for contrast */
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
 
 .party-btn .swatch {
   width: 10px;
@@ -692,9 +705,8 @@ function render() {
       btn.className = 'party-btn';
       btn.type = 'button';
       btn.setAttribute('aria-pressed', selectedOrder.indexOf(p.id) !== -1);
-      btn.innerHTML =
-        '<span class="swatch" style="background:' + p.color + '"></span>' +
-        p.name + ' (' + p.seats + ')';
+    btn.style.setProperty('--party-color', p.color);
+    btn.innerHTML = p.name + ' (' + p.seats + ')';
       btn.addEventListener('click', function () { toggle(p.id); });
       partyListEl.appendChild(btn);
     });
