@@ -1600,7 +1600,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 // ============================================================
 const runResult = document.getElementById('runResult');
 
-function applySelectedRun() {
+function applySelectedRun(animate = true) {
   // CI chart marker
   ciChart.data.datasets[9].data = selectedRun
     ? PARTIES.map((p, i) => ({ x: selectedRun[p.key], y: i }))
@@ -1653,7 +1653,7 @@ document.getElementById('randomRunBtn').addEventListener('click', () => {
   applySelectedRun();
 });
 
-applySelectedRun();
+applySelectedRun(false);
 
 // ============================================================
 // IFRAME HEIGHT MESSAGING
