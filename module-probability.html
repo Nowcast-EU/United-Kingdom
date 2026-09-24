@@ -1537,8 +1537,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     document.getElementById('hist-panel').style.display =
       view === 'hist' ? '' : 'none';
 
-    document.getElementById('partyChips').style.display =
-      view === 'hist' ? 'flex' : 'none';
+   document.getElementById('partyChips').style.display = 'flex';
 
     if (view === 'hist') renderHistogram();
 
