@@ -1407,30 +1407,28 @@ pointStyle: (ctx) => {
       },
     ],
   },
-  options: {
-    indexAxis: 'y',
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: {
-    duration: 0,
-    onComplete: function() {
-      this.options.animation.duration = 300; // Restores smooth animations for user interactions
+options: {
+  indexAxis: 'y',
+  responsive: true,
+  maintainAspectRatio: false,
+  animation: false, // Prevents all initial and tab-switch animations
+  scales: {
+    x: {
+      min: 0,
+      max: 400,
+      stacked: true,
+      grid: { display: false }
+    },
+    y: { grid: { display: true, offset: false }, stacked: true },  
+  },
+  plugins: {
+    legend: { display: false },
+    tooltip: { enabled: false },
+    annotation: {
+      animations: false, // Disables annotation fly-ins completely
     }
   },
-scales: {
-  x: {
-    min: 0,
-    max: 400,
-    stacked: true,
-    grid: { display: false }
-  },
-  y: { grid: { display: true, offset: false }, stacked: true },  
 },
-    plugins: {
-      legend: { display: false },
-      tooltip: { enabled: false },
-    },
-  },
 });
 
 // ============================================================
