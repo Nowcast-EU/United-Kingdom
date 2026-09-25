@@ -1732,10 +1732,10 @@ function applySelectedRun(animate = false) {
   const returnDefaultNote = document.getElementById('returnDefaultNote');
 
 if (selectedRun.run === 'default') {
-  currentRunTitle.innerHTML = 'Currently viewing <strong>default</strong> run';
+  currentRunTitle.innerHTML = 'Currently viewing<br> <strong>default</strong> run';
 } else {
   currentRunTitle.innerHTML =
-    `Currently viewing random run <strong>#${selectedRun.run}</strong>`;
+    `Currently viewing<br> random run <strong>#${selectedRun.run}</strong>`;
 }
 
   // CI chart marker
