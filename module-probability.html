@@ -217,6 +217,24 @@
 
   .note{color:var(--muted);font-size:0.8rem;margin-top:8px;}
   .placeholder{color:var(--muted);font-size:0.85rem;text-align:center;padding:20px 0;}
+
+  .run-level{
+  font-weight:400;
+  text-align:right;
+}
+
+.run-level.low{
+  color:#d00000;
+}
+
+.run-level.mid{
+  color:#d4a000;
+}
+
+.run-level.high{
+  color:#008000;
+}
+  
 </style>
 </head>
 <body>
@@ -1730,20 +1748,41 @@ if (animate) {
     return;
   }
 
-  const rows = PARTIES.map(p => `
+const rows = PARTIES.map(p => {
+  const value = selectedRun[p.key];
+  const median = partyStats[p.key].p50;
+
+  let level;
+  let levelClass;
+
+if (value < median * 0.85) {
+  level = 'Low';
+  levelClass = 'low';
+} else if (value > median * 1.15) {
+  level = 'High';
+  levelClass = 'high';
+} else {
+  level = 'Mid';
+  levelClass = 'mid';
+}
+
+  return `
     <tr>
       <td><span class="swatch" style="background:${p.color}"></span>${p.key}</td>
-      <td class="num">${selectedRun[p.key]}</td>
-    </tr>`).join('');
+      <td class="num">${value}</td>
+      <td class="run-level ${levelClass}">${level}</td>
+    </tr>`;
+}).join('');
 
   runResult.innerHTML = `
     <table class="run-table">
-      <thead>
-        <tr>
-          <th>Party</th>
-          <th style="text-align:right;">Seats</th>
-        </tr>
-      </thead>
+<thead>
+  <tr>
+    <th>Party</th>
+    <th style="text-align:right;">Seats</th>
+    <th></th>
+  </tr>
+</thead>
       <tbody>${rows}</tbody>
     </table>`;
 
