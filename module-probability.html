@@ -134,8 +134,7 @@
   margin:0;
 }
 
-  #returnDefaultNote{
-  display:none;
+#returnDefaultNote{
   margin-top:8px;
   font-size:0.85rem;
   color:var(--muted);
@@ -1731,14 +1730,12 @@ function applySelectedRun(animate = false) {
   const currentRunTitle = document.getElementById('currentRunTitle');
   const returnDefaultNote = document.getElementById('returnDefaultNote');
 
-  if (selectedRun.run === 'default') {
-    currentRunTitle.textContent = 'Currently viewing default run';
-    returnDefaultNote.style.display = 'none';
-  } else {
-    currentRunTitle.textContent =
-      `Currently viewing random run #${selectedRun.run}`;
-    returnDefaultNote.style.display = 'block';
-  }
+if (selectedRun.run === 'default') {
+  currentRunTitle.textContent = 'Currently viewing default run';
+} else {
+  currentRunTitle.textContent =
+    `Currently viewing random run #${selectedRun.run}`;
+}
 
   // CI chart marker
   ciChart.data.datasets[9].data = selectedRun
