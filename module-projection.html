@@ -420,13 +420,28 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 6px;
   padding: 12px;
   border: none;
   border-right: 1px solid var(--divider);
   background: transparent;
   min-width: 0;
   overflow: hidden;
+}
+
+.chart-bars {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chart-majority-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 2px dashed #999;
+  pointer-events: none;
 }
 
 .chart-bar-row {
@@ -896,11 +911,15 @@ sendHeight();
   var panel = document.getElementById('chartPanel');
 
 var CHART_SCALE_SEATS = 325; // bar width is a % of this fixed number, not the largest party's seats
+var MAJORITY_MARKER_SEATS = 325;
 
 function renderChart() {
   var sorted = chartData.slice().sort(function (a, b) { return b.seats - a.seats; });
 
   panel.innerHTML = '';
+  var barsWrap = document.createElement('div');
+  barsWrap.className = 'chart-bars';
+
   sorted.forEach(function (d) {
     var row = document.createElement('div');
     row.className = 'chart-bar-row';
@@ -908,11 +927,34 @@ function renderChart() {
       '<div class="chart-bar-label">' + d.name + '</div>' +
       '<div class="chart-bar-track"><div class="chart-bar-fill" style="width:' + (d.seats / CHART_SCALE_SEATS * 100) + '%; background:' + d.color + ';"></div></div>' +
       '<div class="chart-bar-value">' + d.seats + '</div>';
-    panel.appendChild(row);
+    barsWrap.appendChild(row);
   });
+
+  var marker = document.createElement('div');
+  marker.className = 'chart-majority-line';
+  barsWrap.appendChild(marker);
+
+  panel.appendChild(barsWrap);
+  positionMajorityMarker(barsWrap, marker);
+}
+
+function positionMajorityMarker(barsWrap, marker) {
+  var track = barsWrap.querySelector('.chart-bar-track');
+  if (!track) return;
+  var barsRect = barsWrap.getBoundingClientRect();
+  var trackRect = track.getBoundingClientRect();
+  var fraction = MAJORITY_MARKER_SEATS / CHART_SCALE_SEATS;
+  var x = (trackRect.left - barsRect.left) + trackRect.width * fraction;
+  marker.style.left = x + 'px';
 }
 
   renderChart();
+
+  window.addEventListener('resize', renderChart);
+if ('ResizeObserver' in window) {
+  new ResizeObserver(renderChart).observe(panel);
+}
+  
 })();
 </script>
 
