@@ -1461,8 +1461,8 @@ const ciChart = new Chart(ciCtx, {
 pointStyle: (ctx) => {
   const canvas = document.createElement('canvas');
 
-  const width = 4;
-  const height = 65;
+const width = window.innerWidth <= 768 ? 2 : 4;
+const height = window.innerWidth <= 768 ? 30 : 65;
 
   canvas.width = width;
   canvas.height = height;
