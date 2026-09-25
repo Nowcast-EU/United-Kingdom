@@ -1452,35 +1452,39 @@ const ciChart = new Chart(ciCtx, {
         order: 2,
         animation: false,
       },
-      {
+{
         type: 'scatter',
         label: 'Selected run',
         data: [],
         stack: 'selected-run-marker',
         backgroundColor: '#000000',
-pointStyle: (ctx) => {
-  const canvas = document.createElement('canvas');
+        pointStyle: (ctx) => {
+          const isMobile = window.innerWidth < 768; // Adjust threshold as needed
 
-  const width = 4;
-  const height = 65;
+          const width = isMobile ? 2 : 4;
+          const height = isMobile ? 40 : 65;
 
-  canvas.width = width;
-  canvas.height = height;
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
 
-  const c = canvas.getContext('2d');
-  c.fillStyle = '#000000';
-  c.fillRect(1, 0, 2, height);
+          const c = canvas.getContext('2d');
+          c.fillStyle = '#000000';
+          
+          // Fill rectangle across the determined width and height
+          const rectWidth = isMobile ? 1 : 2;
+          const rectX = isMobile ? 0.5 : 1;
+          c.fillRect(rectX, 0, rectWidth, height);
 
-  return canvas;
-},
+          return canvas;
+        },
         order: 0,
-
-          animations: {
-    x: {
-      duration: 400,
-      easing: 'easeOutCubic'
-    }
-  }
+        animations: {
+          x: {
+            duration: 400,
+            easing: 'easeOutCubic'
+          }
+        }
       },
     ],
   },
