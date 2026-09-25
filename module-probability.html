@@ -1453,39 +1453,32 @@ const ciChart = new Chart(ciCtx, {
         animation: false,
       },
 {
-        type: 'scatter',
-        label: 'Selected run',
-        data: [],
-        stack: 'selected-run-marker',
-        backgroundColor: '#000000',
-        pointStyle: (ctx) => {
-          const isMobile = window.innerWidth < 768; // Adjust threshold as needed
+  type: 'scatter',
+  label: 'Selected run',
+  data: [],
+  stack: 'selected-run-marker',
+  backgroundColor: '#000000',
+  pointStyle: (ctx) => {
+    const isMobile = window.innerWidth < 768;
 
-          const width = isMobile ? 2 : 4;
-          const height = isMobile ? 40 : 65;
+    const width = isMobile ? 2 : 4;
+    const height = isMobile ? 40 : 65;
 
-          const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
+    // Create a Path2D object matching the rectangle path
+    const path = new Path2D();
+    path.rect(-width / 2, -height / 2, width, height);
 
-          const c = canvas.getContext('2d');
-          c.fillStyle = '#000000';
-          
-          // Fill rectangle across the determined width and height
-          const rectWidth = isMobile ? 1 : 2;
-          const rectX = isMobile ? 0.5 : 1;
-          c.fillRect(rectX, 0, rectWidth, height);
-
-          return canvas;
-        },
-        order: 0,
-        animations: {
-          x: {
-            duration: 400,
-            easing: 'easeOutCubic'
-          }
-        }
-      },
+    return path;
+  },
+  pointRadius: 0, // Set to 0 so Chart.js relies on the path dimensions
+  order: 0,
+  animations: {
+    x: {
+      duration: 400,
+      easing: 'easeOutCubic'
+    }
+  }
+},
     ],
   },
 options: {
