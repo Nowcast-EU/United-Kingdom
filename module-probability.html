@@ -1592,14 +1592,22 @@ const annotation = {
       xMax: selectedRun[activeParty],
       borderColor: '#000000',
       borderWidth: 1.5,
-      label: {
-        display: true,
-        content: `Run ${selectedRun.run}: ${selectedRun[activeParty]} seats`,
-        position: 'start',
-        backgroundColor: '#1a1a1a',
-        color: '#fff',
-        font: { size: 10 },
-      },
+label: {
+  display: true,
+  content: [
+    `Run: #${selectedRun.run}`,
+    `${selectedRun[activeParty]} seats`
+  ],
+  position: 'start',
+  backgroundColor: 'transparent',
+  color: '#000000',
+  font: {
+    size: 10
+  },
+  textAlign: 'left',
+  xAdjust: 8,
+  yAdjust: 0,
+},
     },
   } : {}),
 };
