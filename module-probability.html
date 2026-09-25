@@ -1594,10 +1594,10 @@ const annotation = {
       borderWidth: 1.5,
 label: {
   display: true,
-  content: [
-    `Run: #${selectedRun.run}`,
-    `${selectedRun[activeParty]} seats`
-  ],
+content: [
+  `Run: #${String(selectedRun.run).padEnd(7, ' ')}`,
+  `${selectedRun[activeParty]} seats`
+],
   position: 'end',
   backgroundColor: 'transparent',
   color: '#000000',
@@ -1605,10 +1605,10 @@ label: {
     size: 10
   },
   textAlign: 'left',
-  width: 65,
+
   xAdjust: 33,
   yAdjust: -8,
-  xAlign: 'right',
+  xAlign: 'left',
   yAlign: 'bottom',
 },
     },
