@@ -446,7 +446,7 @@ body {
 .chart-bar-track {
   flex: 1;
   height: 12px;
-  background: var(--accent-soft);
+  background: transparent;
   border-radius: 3px;
   overflow: hidden;
   min-width: 0;
@@ -895,21 +895,22 @@ sendHeight();
 
   var panel = document.getElementById('chartPanel');
 
-  function renderChart() {
-    var sorted = chartData.slice().sort(function (a, b) { return b.seats - a.seats; });
-    var max = Math.max.apply(null, sorted.map(function (d) { return d.seats; }));
+var CHART_SCALE_SEATS = 325; // bar width is a % of this fixed number, not the largest party's seats
 
-    panel.innerHTML = '';
-    sorted.forEach(function (d) {
-      var row = document.createElement('div');
-      row.className = 'chart-bar-row';
-      row.innerHTML =
-        '<div class="chart-bar-label">' + d.name + '</div>' +
-        '<div class="chart-bar-track"><div class="chart-bar-fill" style="width:' + (d.seats / max * 100) + '%; background:' + d.color + ';"></div></div>' +
-        '<div class="chart-bar-value">' + d.seats + '</div>';
-      panel.appendChild(row);
-    });
-  }
+function renderChart() {
+  var sorted = chartData.slice().sort(function (a, b) { return b.seats - a.seats; });
+
+  panel.innerHTML = '';
+  sorted.forEach(function (d) {
+    var row = document.createElement('div');
+    row.className = 'chart-bar-row';
+    row.innerHTML =
+      '<div class="chart-bar-label">' + d.name + '</div>' +
+      '<div class="chart-bar-track"><div class="chart-bar-fill" style="width:' + (d.seats / CHART_SCALE_SEATS * 100) + '%; background:' + d.color + ';"></div></div>' +
+      '<div class="chart-bar-value">' + d.seats + '</div>';
+    panel.appendChild(row);
+  });
+}
 
   renderChart();
 })();
