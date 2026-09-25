@@ -36,20 +36,24 @@ body {
   .wip-note { color: var(--muted); font-size: 0.85rem; margin: 0 0 20px; }
 
   /* ---------------- layout ---------------- */
-  .module-grid {
-    display: grid;
-    grid-template-columns: 1fr ;
-    grid-template-areas: "map" "builder";
-    gap: 20px;
-    max-width: 1250px;
-    margin: 0 auto;
-  }
+.module-grid {
+  display: grid;
+  grid-template-columns: 1fr 4fr;
+  grid-template-areas: "chart map" "builder builder";
+  gap: 20px;
+  max-width: 1250px;
+}
 
   @media (max-width: 780px) {
-    .module-grid {
-      grid-template-columns: 1fr;
-      grid-template-areas: "map" "builder";
-    }
+.module-grid {
+  grid-template-columns: 1fr;
+  grid-template-areas: "chart" "map" "builder";
+}
+
+    .chart-panel {
+  min-height: 180px;
+}
+    
   }
 
   /* ---------------- map panel ---------------- */
@@ -409,14 +413,63 @@ body {
   }
   
 }
+
+  .chart-panel {
+  grid-area: chart;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--divider);
+  border-radius: 10px;
+  background: #fff;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.chart-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.68rem;
+}
+
+.chart-bar-label {
+  width: 30px;
+  flex: none;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.chart-bar-track {
+  flex: 1;
+  height: 12px;
+  background: var(--accent-soft);
+  border-radius: 3px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.chart-bar-fill {
+  height: 100%;
+}
+
+.chart-bar-value {
+  width: 26px;
+  flex: none;
+  text-align: right;
+  font-weight: 700;
+  color: var(--ink);
+}
   
 </style>
 </head>
 <body>
 
 <div class="module-grid">
-
-<div class="map-panel">
+  <div class="chart-panel" id="chartPanel"></div>
+  <div class="map-panel">
   <div class="map-scale-wrap" id="mapScaleWrap">
     <iframe
       src="https://flo.uri.sh/visualisation/26928540/embed"
@@ -825,6 +878,39 @@ sendHeight();
   }
 
   renderH2H();
+})();
+</script>
+
+  <script>
+(function () {
+  // ---- Placeholder seat data — replace with real figures when ready ----
+  var chartData = [
+    { name: 'LAB', color: '#e4003b', seats: 258 },
+    { name: 'RFM', color: '#12b6cf', seats: 127 },
+    { name: 'CON', color: '#0087dc', seats: 113 },
+    { name: 'LDM', color: '#faa61a', seats: 70 },
+    { name: 'SNP', color: '#fdf38e', seats: 39 }
+  ];
+
+  var panel = document.getElementById('chartPanel');
+
+  function renderChart() {
+    var sorted = chartData.slice().sort(function (a, b) { return b.seats - a.seats; });
+    var max = Math.max.apply(null, sorted.map(function (d) { return d.seats; }));
+
+    panel.innerHTML = '';
+    sorted.forEach(function (d) {
+      var row = document.createElement('div');
+      row.className = 'chart-bar-row';
+      row.innerHTML =
+        '<div class="chart-bar-label">' + d.name + '</div>' +
+        '<div class="chart-bar-track"><div class="chart-bar-fill" style="width:' + (d.seats / max * 100) + '%; background:' + d.color + ';"></div></div>' +
+        '<div class="chart-bar-value">' + d.seats + '</div>';
+      panel.appendChild(row);
+    });
+  }
+
+  renderChart();
 })();
 </script>
 
