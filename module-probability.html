@@ -1452,33 +1452,36 @@ const ciChart = new Chart(ciCtx, {
         order: 2,
         animation: false,
       },
-{
-  type: 'scatter',
-  label: 'Selected run',
-  data: [],
-  stack: 'selected-run-marker',
-  backgroundColor: '#000000',
-  pointStyle: (ctx) => {
-    const isMobile = window.innerWidth < 768;
+ {
+        type: 'scatter',
+        label: 'Selected run',
+        data: [],
+        stack: 'selected-run-marker',
+        backgroundColor: '#000000',
+pointStyle: (ctx) => {
+  const canvas = document.createElement('canvas');
 
-    const width = isMobile ? 2 : 4;
-    const height = isMobile ? 40 : 65;
+  const width = 4;
+  const height = 65;
 
-    // Create a Path2D object matching the rectangle path
-    const path = new Path2D();
-    path.rect(-width / 2, -height / 2, width, height);
+  canvas.width = width;
+  canvas.height = height;
 
-    return path;
-  },
-  pointRadius: 0, // Set to 0 so Chart.js relies on the path dimensions
-  order: 0,
-  animations: {
+  const c = canvas.getContext('2d');
+  c.fillStyle = '#000000';
+  c.fillRect(1, 0, 2, height);
+
+  return canvas;
+},
+        order: 0,
+
+          animations: {
     x: {
       duration: 400,
       easing: 'easeOutCubic'
     }
   }
-},
+      },
     ],
   },
 options: {
