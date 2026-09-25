@@ -121,16 +121,21 @@
   display:flex;
   align-items:center;
   gap:10px;
-  margin-bottom:6px;
+  margin-bottom:10px;
 }
 
-    #currentRunTitle{
+.randomise-btn{
+  margin-right:-6px;
+}
+
+  #currentRunTitle{
   font-size:1rem;
   font-weight:400;
   margin:0;
 }
 
   #returnDefaultNote{
+  display:none;
   margin-top:8px;
   font-size:0.85rem;
   color:var(--muted);
@@ -146,40 +151,8 @@
   cursor:pointer;
 }
 
-.randomise-btn{
-  margin-right:-6px;
-}
-
-  .run-mode{
-  padding:0 0 5px 0;
-  border:none;
-  background:none;
-  color:var(--ink);
-  font-size:0.85rem;
-  cursor:pointer;
-  position:relative;
-}
-
-.run-mode.active::after{
-  content:'';
-  position:absolute;
-  left:0;
-  right:0;
-  bottom:0;
-  height:2px;
-  background:var(--ink);
-}
-
 .run-mode:hover{
   opacity:0.7;
-}
-
-  .run-mode.passive{
-  cursor:default;
-}
-
-.run-mode.passive:hover{
-  opacity:1;
 }
 
   @media (min-width:701px){
@@ -289,27 +262,27 @@
   </div>
 
 <div class="panel run-panel">
-<h2 id="currentRunTitle" style="font-size:1rem; font-weight:400; margin-bottom:8px;">
-  Currently viewing <strong>run #XXX</strong>
-</h2>
 
-<div class="run-options">
+  <div class="run-options">
 
-  <button class="randomise-btn" id="randomiseBtn"
-          aria-label="Generate random run"
-          title="Generate random run">
-    ↻
-  </button>
+    <button class="randomise-btn" id="randomiseBtn"
+            aria-label="Generate random run"
+            title="Generate random run">
+      ↻
+    </button>
 
-  <h2 id="currentRunTitle">Currently viewing default run</h2>
+    <h2 id="currentRunTitle">
+      Currently viewing default run
+    </h2>
 
-</div>
+  </div>
 
   <div id="runResult"></div>
-</div>
 
-  <div id="returnDefaultNote" style="display:none;">
-  Click here to return to the <button id="returnDefaultBtn">default run</button>
+  <div id="returnDefaultNote">
+    Click here to return to the <button id="returnDefaultBtn">default run</button>
+  </div>
+
 </div>
 
 </div>
@@ -1756,19 +1729,16 @@ const runResult = document.getElementById('runResult');
 function applySelectedRun(animate = false) {
 
   const currentRunTitle = document.getElementById('currentRunTitle');
-const returnDefaultNote = document.getElementById('returnDefaultNote');
+  const returnDefaultNote = document.getElementById('returnDefaultNote');
 
-if (selectedRun.run === 'default') {
-  currentRunTitle.textContent = 'Currently viewing default run';
-  returnDefaultNote.style.display = 'none';
-} else {
-  currentRunTitle.textContent =
-    `Currently viewing random run #${selectedRun.run}`;
-  returnDefaultNote.style.display = '';
-}
-
-   document.getElementById('currentRunTitle').innerHTML =
-    `Currently viewing <strong>run #${selectedRun.run}</strong>`;
+  if (selectedRun.run === 'default') {
+    currentRunTitle.textContent = 'Currently viewing default run';
+    returnDefaultNote.style.display = 'none';
+  } else {
+    currentRunTitle.textContent =
+      `Currently viewing random run #${selectedRun.run}`;
+    returnDefaultNote.style.display = '';
+  }
 
   // CI chart marker
   ciChart.data.datasets[9].data = selectedRun
@@ -1837,7 +1807,6 @@ if (value < median * 0.85) {
 document.getElementById('randomiseBtn').addEventListener('click', () => {
 
   const randomIndex = Math.floor(Math.random() * SIMULATIONS.length);
-
   selectedRun = SIMULATIONS[randomIndex];
 
   applySelectedRun(true);
