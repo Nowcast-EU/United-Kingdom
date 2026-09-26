@@ -1059,7 +1059,7 @@ function positionMajorityMarker(barsWrap, marker) {
   marker.style.left = x + 'px';
 }
 
-  function positionConfidenceRanges(barsWrap) {
+function positionConfidenceRanges(barsWrap) {
   var MIN_GAP = 6; // minimum px between the two caps, so they can never overlap
   barsWrap.querySelectorAll('.chart-range').forEach(function (rangeEl) {
     var track = rangeEl.closest('.chart-bar-track');
@@ -1067,11 +1067,11 @@ function positionMajorityMarker(barsWrap, marker) {
     var trackWidth = track.clientWidth;
     var low = parseFloat(rangeEl.dataset.low);
     var high = parseFloat(rangeEl.dataset.high);
-    var lowPx = (low / CHART_SCALE_SEATS) * trackWidth;
-    var highPx = (high / CHART_SCALE_SEATS) * trackWidth;
+    var lowPx = Math.round((low / CHART_SCALE_SEATS) * trackWidth);
+    var highPx = Math.round((high / CHART_SCALE_SEATS) * trackWidth);
 
     if (highPx - lowPx < MIN_GAP) {
-      var mid = (lowPx + highPx) / 2;
+      var mid = Math.round((lowPx + highPx) / 2);
       lowPx = mid - MIN_GAP / 2;
       highPx = mid + MIN_GAP / 2;
     }
