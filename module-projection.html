@@ -540,6 +540,11 @@ body {
   cursor: pointer;
 }
 
+  .chart-toggle input[type="checkbox"] {
+  width: 12px;
+  height: 12px;
+}
+
   @media (max-width: 780px) {
 
   .chart-panel {
@@ -578,7 +583,7 @@ body {
   <div id="chartPanel"></div>
   <label class="chart-toggle">
     <input type="checkbox" id="confidenceToggle" checked>
-    Show confidence range
+    Show interquartile range
   </label>
   <p class="chart-note">Your paragraph text goes here.</p>
 </div>
