@@ -495,28 +495,22 @@ body {
 
 .chart-range {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 10px;
+  inset: 0;
   pointer-events: none;
 }
 
 .chart-range-cap {
   position: absolute;
-  top: 0;
+  top: 50%;
+  transform: translateY(-50%);
   width: 2px;
   height: 10px;
   background: rgba(0, 0, 0, 0.7);
 }
 
-.chart-range-cap.cap-low { left: 0; }
-.chart-range-cap.cap-high { right: 0; }
-
 .chart-range-line {
   position: absolute;
   top: 50%;
-  left: 2px;
-  right: 2px;
   transform: translateY(-50%);
   height: 2px;
   background: rgba(0, 0, 0, 0.7);
@@ -1026,10 +1020,8 @@ function renderChart() {
     var range = CONFIDENCE_RANGES[d.name];
     var rangeHtml = '';
     if (range) {
-      var left = (range.low / CHART_SCALE_SEATS * 100);
-      var width = ((range.high - range.low) / CHART_SCALE_SEATS * 100);
       rangeHtml =
-        '<div class="chart-range" style="left:' + left + '%; width:' + width + '%;">' +
+        '<div class="chart-range" data-low="' + range.low + '" data-high="' + range.high + '">' +
           '<span class="chart-range-cap cap-low"></span>' +
           '<span class="chart-range-line"></span>' +
           '<span class="chart-range-cap cap-high"></span>' +
@@ -1054,6 +1046,7 @@ function renderChart() {
 
   panel.appendChild(barsWrap);
   positionMajorityMarker(barsWrap, marker);
+  positionConfidenceRanges(barsWrap);
 }
 
 function positionMajorityMarker(barsWrap, marker) {
@@ -1064,6 +1057,31 @@ function positionMajorityMarker(barsWrap, marker) {
   var fraction = MAJORITY_MARKER_SEATS / CHART_SCALE_SEATS;
   var x = (trackRect.left - barsRect.left) + trackRect.width * fraction;
   marker.style.left = x + 'px';
+}
+
+  function positionConfidenceRanges(barsWrap) {
+  var MIN_GAP = 6; // minimum px between the two caps, so they can never overlap
+  barsWrap.querySelectorAll('.chart-range').forEach(function (rangeEl) {
+    var track = rangeEl.closest('.chart-bar-track');
+    if (!track) return;
+    var trackWidth = track.clientWidth;
+    var low = parseFloat(rangeEl.dataset.low);
+    var high = parseFloat(rangeEl.dataset.high);
+    var lowPx = (low / CHART_SCALE_SEATS) * trackWidth;
+    var highPx = (high / CHART_SCALE_SEATS) * trackWidth;
+
+    if (highPx - lowPx < MIN_GAP) {
+      var mid = (lowPx + highPx) / 2;
+      lowPx = mid - MIN_GAP / 2;
+      highPx = mid + MIN_GAP / 2;
+    }
+
+    rangeEl.querySelector('.cap-low').style.left = lowPx + 'px';
+    rangeEl.querySelector('.cap-high').style.left = (highPx - 2) + 'px';
+    var line = rangeEl.querySelector('.chart-range-line');
+    line.style.left = (lowPx + 2) + 'px';
+    line.style.width = Math.max(0, highPx - lowPx - 4) + 'px';
+  });
 }
 
   renderChart();
