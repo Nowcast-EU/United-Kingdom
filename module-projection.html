@@ -473,8 +473,9 @@ body {
   height: 30px;
   background: transparent;
   border-radius: 0;
-  overflow: hidden;
+  overflow: visible;
   min-width: 0;
+  position: relative;
   margin-left: -4px;
 }
 
@@ -490,6 +491,43 @@ body {
   color: var(--ink);
   text-align: right;
   padding-right: 10px;
+}
+
+  .chart-range {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 10px;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.chart-range-cap {
+  width: 2px;
+  height: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  flex: none;
+}
+
+.chart-range-line {
+  flex: 1;
+  height: 2px;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.chart-panel.hide-confidence .chart-range {
+  display: none;
+}
+
+.chart-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+  margin-top: 8px;
+  cursor: pointer;
 }
 
   @media (max-width: 780px) {
@@ -520,9 +558,13 @@ body {
 <body>
 
 <div class="module-grid">
-<div class="chart-panel">
+<div class="chart-panel" id="chartPanelOuter">
   <p class="chart-title">This is Nowcast UK’s deterministic seat projection based on a two week polling average.</p>
   <div id="chartPanel"></div>
+  <label class="chart-toggle">
+    <input type="checkbox" id="confidenceToggle" checked>
+    Show confidence range
+  </label>
   <p class="chart-note">Your paragraph text goes here.</p>
 </div>
   <div class="map-panel">
@@ -956,6 +998,17 @@ sendHeight();
 var CHART_SCALE_SEATS = 350; // bar width is a % of this fixed number, not the largest party's seats
 var MAJORITY_MARKER_SEATS = 325;
 
+  // ---- Confidence ranges — match by party name, add/remove entries as needed ----
+var CONFIDENCE_RANGES = {
+  LAB: { low: 235, high: 284 },
+  RFM: { low: 98, high: 155 },
+  CON: { low: 88, high: 131 },
+  LDM: { low: 67, high: 73 },
+  SNP: { low: 37, high: 43 },
+  GRN: { low: 7, high: 9 },
+  PLC: { low: 9, high: 13 }
+};
+
 function renderChart() {
   var sorted = chartData.slice().sort(function (a, b) { return b.seats - a.seats; });
 
@@ -964,11 +1017,27 @@ function renderChart() {
   barsWrap.className = 'chart-bars';
 
   sorted.forEach(function (d) {
+    var range = CONFIDENCE_RANGES[d.name];
+    var rangeHtml = '';
+    if (range) {
+      var left = (range.low / CHART_SCALE_SEATS * 100);
+      var width = ((range.high - range.low) / CHART_SCALE_SEATS * 100);
+      rangeHtml =
+        '<div class="chart-range" style="left:' + left + '%; width:' + width + '%;">' +
+          '<span class="chart-range-cap"></span>' +
+          '<span class="chart-range-line"></span>' +
+          '<span class="chart-range-cap"></span>' +
+        '</div>';
+    }
+
     var row = document.createElement('div');
     row.className = 'chart-bar-row';
     row.innerHTML =
       '<div class="chart-bar-label">' + d.name + '</div>' +
-      '<div class="chart-bar-track"><div class="chart-bar-fill" style="width:' + (d.seats / CHART_SCALE_SEATS * 100) + '%; background:' + d.color + ';"></div></div>' +
+      '<div class="chart-bar-track">' +
+        '<div class="chart-bar-fill" style="width:' + (d.seats / CHART_SCALE_SEATS * 100) + '%; background:' + d.color + ';"></div>' +
+        rangeHtml +
+      '</div>' +
       '<div class="chart-bar-value">' + d.seats + '</div>';
     barsWrap.appendChild(row);
   });
@@ -997,6 +1066,10 @@ function positionMajorityMarker(barsWrap, marker) {
 if ('ResizeObserver' in window) {
   new ResizeObserver(renderChart).observe(panel);
 }
+
+  document.getElementById('confidenceToggle').addEventListener('change', function (e) {
+  document.getElementById('chartPanelOuter').classList.toggle('hide-confidence', !e.target.checked);
+});
   
 })();
 </script>
