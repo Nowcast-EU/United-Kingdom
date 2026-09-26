@@ -49,25 +49,6 @@ body {
   grid-template-columns: 1fr;
   grid-template-areas: "chart" "map" "builder";
 }
-
-.chart-panel {
-  min-height: 120px;
-  padding: 8px;
-  border-right: none;
-}
-
-.chart-bars {
-  gap: 3px;
-}
-
-.chart-bar-row {
-  font-size: 0.6rem;
-  gap: 4px;
-}
-
-.chart-bar-track {
-  height: 8px;
-}
     
   }
 
@@ -498,6 +479,29 @@ body {
   text-align: right;
   padding-right: 10px;
 }
+
+  @media (max-width: 780px) {
+
+  .chart-panel {
+  min-height: 120px;
+  padding: 8px;
+  border-right: none;
+}
+
+.chart-bars {
+  gap: 3px;
+}
+
+.chart-bar-row {
+  font-size: 0.6rem;
+  gap: 4px;
+}
+
+.chart-bar-track {
+  height: 8px;
+}
+
+  }
   
 </style>
 </head>
