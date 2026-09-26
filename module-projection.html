@@ -493,25 +493,31 @@ body {
   padding-right: 10px;
 }
 
-  .chart-range {
+.chart-range {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   height: 10px;
-  display: flex;
-  align-items: center;
   pointer-events: none;
 }
 
 .chart-range-cap {
+  position: absolute;
+  top: 0;
   width: 2px;
   height: 10px;
   background: rgba(0, 0, 0, 0.7);
-  flex: none;
 }
 
+.chart-range-cap.cap-low { left: 0; }
+.chart-range-cap.cap-high { right: 0; }
+
 .chart-range-line {
-  flex: 1;
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  right: 2px;
+  transform: translateY(-50%);
   height: 2px;
   background: rgba(0, 0, 0, 0.7);
 }
@@ -1024,9 +1030,9 @@ function renderChart() {
       var width = ((range.high - range.low) / CHART_SCALE_SEATS * 100);
       rangeHtml =
         '<div class="chart-range" style="left:' + left + '%; width:' + width + '%;">' +
-          '<span class="chart-range-cap"></span>' +
+          '<span class="chart-range-cap cap-low"></span>' +
           '<span class="chart-range-line"></span>' +
-          '<span class="chart-range-cap"></span>' +
+          '<span class="chart-range-cap cap-high"></span>' +
         '</div>';
     }
 
