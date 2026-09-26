@@ -35,6 +35,19 @@ body {
 }
   .wip-note { color: var(--muted); font-size: 0.85rem; margin: 0 0 20px; }
 
+  .chart-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 8px;
+}
+
+.chart-note {
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin: 8px 0 0;
+}
+
   /* ---------------- layout ---------------- */
 .module-grid {
   display: grid;
@@ -508,7 +521,11 @@ body {
 <body>
 
 <div class="module-grid">
-  <div class="chart-panel" id="chartPanel"></div>
+<div class="chart-panel">
+  <h3 class="chart-title">This is Nowcast UK’s deterministic seat projection based on a two week polling average.</h3>
+  <div id="chartPanel"></div>
+  <p class="chart-note">Your paragraph text goes here.</p>
+</div>
   <div class="map-panel">
   <div class="map-scale-wrap" id="mapScaleWrap">
     <iframe
