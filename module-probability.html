@@ -72,12 +72,20 @@
 
   @media (max-width:700px){
   .chart-controls{
-    align-items:flex-start;
-    flex-wrap:wrap;
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    padding-bottom:4px;
   }
-  .chart-controls .tabs,
+  .chart-controls .tabs{
+    flex-shrink:0;
+  }
   .chart-controls .party-select{
-    display:contents;
+    flex-wrap:nowrap;
+    flex-shrink:0;
+  }
+  .party-chip{
+    white-space:nowrap;
   }
 }
 
