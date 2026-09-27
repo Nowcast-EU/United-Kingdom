@@ -2810,7 +2810,7 @@ function autoSizeInlineField(el) {
   document.body.removeChild(span);
 }
 
-[document.getElementById('tacticalPct'), partyASelect, partyBSelect].forEach(el => {
+[partyASelect, partyBSelect].forEach(el => {
   autoSizeInlineField(el);
   el.addEventListener('input', () => autoSizeInlineField(el));
   el.addEventListener('change', () => autoSizeInlineField(el));
