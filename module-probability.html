@@ -1377,7 +1377,7 @@ const ciChart = new Chart(ciCtx, {
   data: PARTIES.map(p =>
     partyStats[p.key].p10 - partyStats[p.key].min
   ),
-  backgroundColor: PARTIES.map(p => p.color + '20'),
+  backgroundColor: PARTIES.map(p => p.color + '10'),
   borderWidth: 0,
   stack: 'range',
   order: 1,
@@ -1465,7 +1465,7 @@ const ciChart = new Chart(ciCtx, {
   data: PARTIES.map(p =>
     partyStats[p.key].max - partyStats[p.key].p90
   ),
-  backgroundColor: PARTIES.map(p => p.color + '20'),
+  backgroundColor: PARTIES.map(p => p.color + '10'),
   borderWidth: 0,
   stack: 'range',
   order: 1,
