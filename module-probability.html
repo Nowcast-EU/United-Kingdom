@@ -1471,20 +1471,6 @@ const ciChart = new Chart(ciCtx, {
   order: 1,
     animation: false,
 },
-      {
-        type: 'scatter',
-        label: 'Median',
-        data: PARTIES.map((p, i) => ({ x: partyStats[p.key].p50, y: i })),
-        backgroundColor: '#1a1a1a',
-        pointStyle: 'line',
-        rotation: 90,
-        pointRadius: 10,
-        pointHoverRadius: 10,
-        borderWidth: 2,
-        stack: 'median-marker',
-        order: 2,
-        animation: false,
-      },
  {
         type: 'scatter',
         label: 'Selected run',
@@ -1769,7 +1755,7 @@ if (selectedRun.run === 'default') {
 }
 
   // CI chart marker
-  ciChart.data.datasets[11].data = selectedRun
+  ciChart.data.datasets[10].data = selectedRun
     ? PARTIES.map((p, i) => ({ x: selectedRun[p.key], y: i }))
     : [];
 
