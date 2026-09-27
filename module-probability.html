@@ -242,7 +242,28 @@
   color:#008000;
 }
 
-  .tactical-heading{
+.tactical-grid{
+  display:grid;
+  grid-template-columns:1fr 2fr;
+  gap:32px;
+}
+.tactical-intro-heading{
+  font-size:1.3rem;
+  font-weight:700;
+  margin:0 0 12px;
+}
+.tactical-intro p{
+  margin:0;
+  color:var(--muted);
+  font-size:0.9rem;
+  line-height:1.6;
+}
+@media (max-width:700px){
+  .tactical-grid{
+    grid-template-columns:1fr;
+  }
+}
+.tactical-heading{
   font-size:1.3rem;
   font-weight:600;
   margin:0 0 20px;
@@ -406,17 +427,28 @@
 
 </div>
 
-  <div class="panel tactical-panel">
-  <h2 class="tactical-heading">
-    Projected seats with
-    <input type="number" id="tacticalPct" min="0" max="100" step="1" value="10" class="inline-input">%
-    tactical voting between
-    <select id="tacticalPartyA" class="inline-select"></select>
-    and
-    <select id="tacticalPartyB" class="inline-select"></select>
-  </h2>
+<div class="panel tactical-panel">
+  <div class="tactical-grid">
 
-  <div class="tactical-bars" id="tacticalBars"></div>
+    <div class="tactical-intro">
+      <h2 class="tactical-intro-heading">Tactical Voting Scenarios</h2>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+    </div>
+
+    <div class="tactical-content">
+      <h2 class="tactical-heading">
+        Projected seats with
+        <input type="number" id="tacticalPct" min="0" max="100" step="1" value="10" class="inline-input">%
+        tactical voting between
+        <select id="tacticalPartyA" class="inline-select"></select>
+        and
+        <select id="tacticalPartyB" class="inline-select"></select>
+      </h2>
+
+      <div class="tactical-bars" id="tacticalBars"></div>
+    </div>
+
+  </div>
 </div>
   
 </div>
