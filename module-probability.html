@@ -277,6 +277,19 @@
     border-left:none;
     padding-left:0;
   }
+  .tactical-intro,
+  .tactical-content{
+    min-width:0;
+  }
+  .tactical-bar-row,
+  .tactical-bracket-row{
+    grid-template-columns:40px 1fr 70px;
+    gap:8px;
+  }
+  .tactical-bar-row > *,
+  .tactical-bracket-row > *{
+    min-width:0;
+  }
 }
 .tactical-heading{
   font-size:1rem;
