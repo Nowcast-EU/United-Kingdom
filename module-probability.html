@@ -1365,13 +1365,24 @@ const ciChart = new Chart(ciCtx, {
     datasets: [
        {
         label: 'spacer',
-        data: PARTIES.map(p => partyStats[p.key].p10),
+        data: PARTIES.map(p => partyStats[p.key].min),
         backgroundColor: 'transparent',
         borderWidth: 0,
         stack: 'range',
         order: 1,
         animation: false,
       },
+{
+  label: 'min–10th percentile',
+  data: PARTIES.map(p =>
+    partyStats[p.key].p10 - partyStats[p.key].min
+  ),
+  backgroundColor: PARTIES.map(p => p.color + '20'),
+  borderWidth: 0,
+  stack: 'range',
+  order: 1,
+    animation: false,
+},
 {
   label: '10th–20th percentile',
   data: PARTIES.map(p =>
@@ -1444,6 +1455,17 @@ const ciChart = new Chart(ciCtx, {
     partyStats[p.key].p90 - partyStats[p.key].p80
   ),
   backgroundColor: PARTIES.map(p => p.color + '40'),
+  borderWidth: 0,
+  stack: 'range',
+  order: 1,
+    animation: false,
+},
+{
+  label: '90th percentile–max',
+  data: PARTIES.map(p =>
+    partyStats[p.key].max - partyStats[p.key].p90
+  ),
+  backgroundColor: PARTIES.map(p => p.color + '20'),
   borderWidth: 0,
   stack: 'range',
   order: 1,
@@ -1745,7 +1767,7 @@ if (selectedRun.run === 'default') {
 }
 
   // CI chart marker
-  ciChart.data.datasets[9].data = selectedRun
+  ciChart.data.datasets[11].data = selectedRun
     ? PARTIES.map((p, i) => ({ x: selectedRun[p.key], y: i }))
     : [];
 
