@@ -269,41 +269,7 @@
 .tactical-bars{
   padding-left:14px;
 }
-@media (max-width:700px){
 
-  .tactical-heading{
-  padding-left:0;
-}
-  .tactical-grid{
-    grid-template-columns:1fr;
-  }
-  .tactical-content{
-    border-left:none;
-    padding-left:0;
-  }
-  .tactical-intro,
-  .tactical-content{
-    min-width:0;
-  }
-  .tactical-bars{
-    padding-left:0;
-  }
-  .tactical-bar-row,
-  .tactical-bracket-row{
-    grid-template-columns:32px 1fr 44px;
-    gap:4px;
-  }
-  .tactical-bar-total{
-    font-size:0.95rem;
-  }
-  .tactical-bar-net{
-    font-size:0.8rem;
-  }
-  .tactical-bar-row > *,
-  .tactical-bracket-row > *{
-    min-width:0;
-  }
-}
 .tactical-heading{
   font-size:1rem;
   font-weight:400;
@@ -415,6 +381,42 @@
 
   #tacticalPct{
   width:45px;
+}
+
+  @media (max-width:700px){
+
+  .tactical-heading{
+  padding-left:0;
+}
+  .tactical-grid{
+    grid-template-columns:1fr;
+  }
+  .tactical-content{
+    border-left:none;
+    padding-left:0;
+  }
+  .tactical-intro,
+  .tactical-content{
+    min-width:0;
+  }
+  .tactical-bars{
+    padding-left:0;
+  }
+  .tactical-bar-row,
+  .tactical-bracket-row{
+    grid-template-columns:32px 1fr 44px;
+    gap:4px;
+  }
+  .tactical-bar-total{
+    font-size:0.95rem;
+  }
+  .tactical-bar-net{
+    font-size:0.8rem;
+  }
+  .tactical-bar-row > *,
+  .tactical-bracket-row > *{
+    min-width:0;
+  }
 }
   
 </style>
