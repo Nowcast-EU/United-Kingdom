@@ -35,6 +35,12 @@ body {
 }
   .wip-note { color: var(--muted); font-size: 0.85rem; margin: 0 0 20px; }
 
+  .chart-panel-title {
+  font-size: 1.4rem;
+  color: #000000;
+  margin: 0 0 6px;
+}
+
   .chart-title {
     color: #000000;
     font-size: 0.85rem;
@@ -584,6 +590,7 @@ body {
 
 <div class="module-grid">
 <div class="chart-panel" id="chartPanelOuter">
+<h2 class="chart-panel-title">Central Seat Projection</h2>
 <p class="chart-title">This is Nowcast UK’s deterministic seat projection calculated based on a two week polling average. Confidence bars represent the middle 50% of potential outcomes. Our full probabilistic breakdown can be viewed <a href="https://nowcast-eu.github.io/United-Kingdom/test#probabilities" target="_top">here</a>.</p>
   <div id="chartPanel"></div>
   <label class="chart-toggle">
