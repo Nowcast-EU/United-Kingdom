@@ -70,22 +70,14 @@
   margin:0;
 }
 
-  @media (max-width:700px){
+   @media (max-width:700px){
   .chart-controls{
-    flex-wrap:nowrap;
-    overflow-x:auto;
-    -webkit-overflow-scrolling:touch;
-    padding-bottom:4px;
+    align-items:flex-start;
+    flex-wrap:wrap;
   }
-  .chart-controls .tabs{
-    flex-shrink:0;
-  }
+  .chart-controls .tabs,
   .chart-controls .party-select{
-    flex-wrap:nowrap;
-    flex-shrink:0;
-  }
-  .party-chip{
-    white-space:nowrap;
+    display:contents;
   }
 }
 
