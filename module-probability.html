@@ -287,10 +287,15 @@
   background:var(--panel);
 }
 .tactical-bar-segment.unchanged{
-  opacity:0.35;
+  opacity:1;
 }
 .tactical-bar-segment.flips{
   opacity:1;
+}
+.tactical-bar-divider{
+  width:3px;
+  flex-shrink:0;
+  background:#fff;
 }
 .tactical-bar-total{
   font-size:1.1rem;
@@ -2581,7 +2586,7 @@ function computeTacticalScenario(partyAKey, partyBKey, pctValue) {
   const defaultTotals = {};
   const scenarioTotals = {};
   const unchanged = {};
-  PARTIES.forEach(p => { defaultTotals[p.key] = 0; scenarioTotals[p.key] = 0; unchanged[p.key] = 0; });
+  const flipsBySource = {}; // flipsBySource[targetKey][sourceKey] = count
 
   CONSTITUENCIES.forEach(c => {
     const defaultWinner = winnerOf(c);
@@ -2603,10 +2608,21 @@ function computeTacticalScenario(partyAKey, partyBKey, pctValue) {
 
     const scenarioWinner = winnerOf(shifted);
     scenarioTotals[scenarioWinner] = (scenarioTotals[scenarioWinner] || 0) + 1;
-    if (scenarioWinner === defaultWinner) unchanged[scenarioWinner] = (unchanged[scenarioWinner] || 0) + 1;
+
+    if (scenarioWinner === defaultWinner) {
+      unchanged[scenarioWinner] = (unchanged[scenarioWinner] || 0) + 1;
+    } else {
+      if (!flipsBySource[scenarioWinner]) flipsBySource[scenarioWinner] = {};
+      flipsBySource[scenarioWinner][defaultWinner] = (flipsBySource[scenarioWinner][defaultWinner] || 0) + 1;
+    }
   });
 
-  return { defaultTotals, scenarioTotals, unchanged };
+  return { defaultTotals, scenarioTotals, unchanged, flipsBySource };
+}
+
+function tacticalColorFor(key) {
+  const party = TACTICAL_PARTIES.find(p => p.key === key);
+  return party ? party.color : '#999999';
 }
 
 function renderTacticalBars() {
@@ -2614,30 +2630,38 @@ function renderTacticalBars() {
   const partyBKey = document.getElementById('tacticalPartyB').value;
   const pctValue = parseFloat(document.getElementById('tacticalPct').value) || 0;
 
-  const { defaultTotals, scenarioTotals, unchanged } = computeTacticalScenario(partyAKey, partyBKey, pctValue);
+  const { defaultTotals, scenarioTotals, unchanged, flipsBySource } = computeTacticalScenario(partyAKey, partyBKey, pctValue);
 
-  const keys = [partyAKey, partyBKey].sort((a, b) => scenarioTotals[b] - scenarioTotals[a]);
-  const maxTotal = Math.max(scenarioTotals[keys[0]], scenarioTotals[keys[1]], 1);
+  const keys = [partyAKey, partyBKey].sort((a, b) => (scenarioTotals[b] || 0) - (scenarioTotals[a] || 0));
+  const maxTotal = Math.max(scenarioTotals[keys[0]] || 0, scenarioTotals[keys[1]] || 0, 1);
 
   const container = document.getElementById('tacticalBars');
   container.innerHTML = keys.map(key => {
     const party = TACTICAL_PARTIES.find(p => p.key === key);
-    const total = scenarioTotals[key];
-    const unchangedCount = unchanged[key];
-    const flipsCount = total - unchangedCount;
-    const net = total - defaultTotals[key];
+    const total = scenarioTotals[key] || 0;
+    const unchangedCount = unchanged[key] || 0;
+    const sources = flipsBySource[key] || {};
+    const sourceKeys = Object.keys(sources).sort((a, b) => sources[b] - sources[a]);
+    const net = total - (defaultTotals[key] || 0);
     const netSign = net > 0 ? '+' : '';
     const netClass = net < 0 ? 'negative' : '';
 
     const unchangedWidth = (unchangedCount / maxTotal) * 100;
-    const flipsWidth = (flipsCount / maxTotal) * 100;
+
+    const flipSegmentsHtml = sourceKeys.map(sourceKey => {
+      const width = (sources[sourceKey] / maxTotal) * 100;
+      return `<div class="tactical-bar-segment flips" style="width:${width}%;background:${tacticalColorFor(sourceKey)};" title="${sourceKey} \u2192 ${key}: ${sources[sourceKey]} seats"></div>`;
+    }).join('');
+
+    const divider = sourceKeys.length > 0 ? `<div class="tactical-bar-divider"></div>` : '';
 
     return `
       <div class="tactical-bar-row">
         <div class="tactical-bar-label">${key}</div>
         <div class="tactical-bar-track">
           <div class="tactical-bar-segment unchanged" style="width:${unchangedWidth}%;background:${party.color};"></div>
-          <div class="tactical-bar-segment flips" style="width:${flipsWidth}%;background:${party.color};"></div>
+          ${divider}
+          ${flipSegmentsHtml}
         </div>
         <div>
           <div class="tactical-bar-total">${total} seats</div>
