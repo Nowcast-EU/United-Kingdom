@@ -379,10 +379,13 @@
 .tactical-bar-net{
   font-size:0.9rem;
   font-weight:700;
-  color:#02A95B;
+  color:#008500;
 }
 .tactical-bar-net.negative{
   color:#DC241f;
+}
+.tactical-bar-net.neutral{
+  color:var(--ink);
 }
   
 </style>
@@ -2749,8 +2752,8 @@ function renderTacticalBars() {
     const sources = flipsBySource[key] || {};
     const sourceKeys = Object.keys(sources).sort((a, b) => sources[b] - sources[a]);
     const net = total - (defaultTotals[key] || 0);
-    const netSign = net > 0 ? '+' : '';
-    const netClass = net < 0 ? 'negative' : '';
+    const netDisplay = net === 0 ? '=' : (net > 0 ? `+${net}` : `${net}`);
+    const netClass = net === 0 ? 'neutral' : (net < 0 ? 'negative' : '');
 
     const unchangedWidth = (unchangedCount / maxTotal) * 100;
 
@@ -2771,7 +2774,7 @@ function renderTacticalBars() {
         </div>
         <div>
           <div class="tactical-bar-total">${total} seats</div>
-          <div class="tactical-bar-net ${netClass}">${netSign}${net}</div>
+          <div class="tactical-bar-net ${netClass}">${netDisplay}</div>
         </div>
       </div>
     `;
