@@ -286,7 +286,6 @@
   padding-left:14px;
 }
 .inline-input{
-  width:48px;
   border:0;
   border-bottom:2px solid var(--ink);
   background:none;
@@ -2793,6 +2792,29 @@ TACTICAL_PARTIES.forEach(p => {
 });
 partyASelect.value = 'LAB';
 partyBSelect.value = 'GRN';
+
+function autoSizeInlineField(el) {
+  const span = document.createElement('span');
+  const computed = getComputedStyle(el);
+  span.style.font = computed.font;
+  span.style.fontWeight = computed.fontWeight;
+  span.style.position = 'absolute';
+  span.style.visibility = 'hidden';
+  span.style.whiteSpace = 'pre';
+  span.textContent = el.tagName === 'SELECT'
+    ? el.options[el.selectedIndex].text
+    : el.value;
+  document.body.appendChild(span);
+  const extra = el.tagName === 'SELECT' ? 24 : 6; // room for the dropdown arrow, or a little caret padding
+  el.style.width = (span.offsetWidth + extra) + 'px';
+  document.body.removeChild(span);
+}
+
+[document.getElementById('tacticalPct'), partyASelect, partyBSelect].forEach(el => {
+  autoSizeInlineField(el);
+  el.addEventListener('input', () => autoSizeInlineField(el));
+  el.addEventListener('change', () => autoSizeInlineField(el));
+});
 
 document.getElementById('tacticalPct').addEventListener('input', renderTacticalBars);
 partyASelect.addEventListener('change', renderTacticalBars);
