@@ -1718,7 +1718,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     document.getElementById('hist-panel').style.display =
       view === 'hist' ? '' : 'none';
 
-   document.getElementById('partyChips').style.display = 'flex';
+   document.getElementById('partyChips').style.display = '';
 
     if (view === 'hist') renderHistogram();
 
@@ -1726,7 +1726,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-  document.getElementById('partyChips').style.display = 'flex';
+  document.getElementById('partyChips').style.display = '';
 
 // ============================================================
 // RUN SELECTION
