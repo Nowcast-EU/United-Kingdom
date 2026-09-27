@@ -297,6 +297,45 @@
   flex-shrink:0;
   background:#fff;
 }
+.tactical-bracket-row{
+  display:grid;
+  grid-template-columns:70px 1fr 110px;
+  gap:16px;
+  margin-bottom:6px;
+}
+.tactical-bracket-track{
+  display:flex;
+}
+.tactical-bracket-segment{
+  display:flex;
+  flex-direction:column;
+  flex-shrink:0;
+}
+.tactical-bracket-line{
+  position:relative;
+  height:0;
+  border-top:1px solid #999;
+  margin:0 2px 4px;
+}
+.tactical-bracket-line::before,
+.tactical-bracket-line::after{
+  content:'';
+  position:absolute;
+  top:0;
+  width:1px;
+  height:6px;
+  background:#999;
+}
+.tactical-bracket-line::before{ left:0; }
+.tactical-bracket-line::after{ right:0; }
+.tactical-bracket-label{
+  display:block;
+  font-size:0.7rem;
+  color:var(--muted);
+  text-align:center;
+  overflow:hidden;
+  white-space:nowrap;
+}
 .tactical-bar-total{
   font-size:1.1rem;
   font-weight:700;
@@ -2635,8 +2674,28 @@ function renderTacticalBars() {
   const keys = [partyAKey, partyBKey].sort((a, b) => (scenarioTotals[b] || 0) - (scenarioTotals[a] || 0));
   const maxTotal = Math.max(scenarioTotals[keys[0]] || 0, scenarioTotals[keys[1]] || 0, 1);
 
+  const topUnchangedWidth = (unchanged[keys[0]] || 0) / maxTotal * 100;
+  const topFlipsWidth = 100 - topUnchangedWidth;
+
+  const bracketHtml = `
+    <div class="tactical-bracket-row">
+      <div></div>
+      <div class="tactical-bracket-track">
+        <div class="tactical-bracket-segment" style="width:${topUnchangedWidth}%;">
+          <div class="tactical-bracket-line"></div>
+          <span class="tactical-bracket-label">Unchanged from default projection</span>
+        </div>
+        <div class="tactical-bracket-segment" style="width:${topFlipsWidth}%;">
+          <div class="tactical-bracket-line"></div>
+          <span class="tactical-bracket-label">Flips</span>
+        </div>
+      </div>
+      <div></div>
+    </div>
+  `;
+
   const container = document.getElementById('tacticalBars');
-  container.innerHTML = keys.map(key => {
+  container.innerHTML = bracketHtml + keys.map(key => {
     const party = TACTICAL_PARTIES.find(p => p.key === key);
     const total = scenarioTotals[key] || 0;
     const unchangedCount = unchanged[key] || 0;
@@ -2670,6 +2729,10 @@ function renderTacticalBars() {
       </div>
     `;
   }).join('');
+
+  document.querySelectorAll('.tactical-bracket-label').forEach(label => {
+    label.style.visibility = label.scrollWidth > label.clientWidth ? 'hidden' : '';
+  });
 }
 
 const partyASelect = document.getElementById('tacticalPartyA');
