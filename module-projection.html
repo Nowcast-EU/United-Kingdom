@@ -243,6 +243,7 @@ body {
   color: #000000;
   text-align: center;
   margin-top: 10px;
+  width: 66%;
 }
 
   .majority-line {
@@ -915,7 +916,7 @@ function render() {
 updateDotFills();
 
    document.getElementById('builderNote').textContent =
-  "Functional majority = " + getFunctionalMajority() + ", as Sinn Féin don't take their seats in parliament";
+  "Select parties to participate in a coalition using the buttons above. Note: a working majority in this scenario is " + getFunctionalMajority() + ", as Sinn Féin don't take their seats in parliament and the Speaker of the House doesn't vote";
 
     // status text
     var total = selectedOrder.reduce(function (sum, id) {
