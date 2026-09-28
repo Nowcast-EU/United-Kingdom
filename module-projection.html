@@ -239,11 +239,10 @@ body {
 }
 
 .builder-note {
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   color: #000000;
   text-align: center;
   margin-top: 10px;
-  width: 66%;
 }
 
   .majority-line {
@@ -916,7 +915,7 @@ function render() {
 updateDotFills();
 
    document.getElementById('builderNote').textContent =
-  "Select parties to participate in a coalition using the buttons above. Note: a working majority in this scenario is " + getFunctionalMajority() + ", as Sinn Féin don't take their seats in parliament and the Speaker of the House doesn't vote";
+  "Select parties to participate in a coalition using the buttons above. Note: a working majority in this scenario is " + getFunctionalMajority() + ", as Sinn Féin don't take their seats in parliament and the Speaker of the House doesn't vote - except to break a tie.";
 
     // status text
     var total = selectedOrder.reduce(function (sum, id) {
