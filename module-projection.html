@@ -710,9 +710,9 @@ body {
   <span id="analysisToggleLabel">Click here to read our analysis</span>
   <span class="analysis-toggle-arrow" aria-hidden="true">▾</span>
 </button>
-<p class="chart-note" id="analysisText">Based on current polling averages, the Labour Party led by Andy Burnham is projected to win 257 seats. 69 short of a simple majority in the House of Commons, but enough to form a coalition or confidence & supply agreement with the Liberal Democrats as their closest viable partner. 80.1% of our simulations result in Labour remaining the largest party short of a majority, as opposed to 8.5% putting them above the 325 seat mark.<br>
+<p class="chart-note" id="analysisText">Based on current polling averages, the Labour Party led by Andy Burnham is projected to win 260 seats. 66 short of a simple majority in the House of Commons, but enough to form a coalition or confidence & supply agreement with the Liberal Democrats as their closest viable partner. 80.1% of our simulations result in Labour remaining the largest party short of a majority, as opposed to 8.5% putting them above the 325 seat mark.<br>
 <br>
-Reform are on course to gain 118 seats since the 2024 General Election, making them the largest net 'winner' of an election held today. However, the combined right continues to suffer from vote splitting among Reform, Restore and the Conservatives, and the prospect of a fairly disciplined tactical voting campaign forming against them. Our lower end estimates for Reform take the party back below 100 seats, while the Conservatives have a more robust rural-centred electoral geography to aid their post-GE2024 recovery — which is yet to fully materialise.<br>
+Reform are on course to gain 115 seats since the 2024 General Election, making them the largest net 'winner' of an election held today. However, the combined right continues to suffer from vote splitting among Reform, Restore and the Conservatives, and the prospect of a fairly disciplined tactical voting campaign forming against them. Our lower end estimates for Reform take the party back below 100 seats, while the Conservatives have a more robust rural-centred electoral geography to aid their post-GE2024 recovery — which is yet to fully materialise.<br>
 <br>
 The Liberal Democrats and Greens continue to hover around 10% in our polling averages, but the geography of their vote leads to two very different outcomes in terms of projected seats. Lib Dems are leading in 48 of the 54 seats they're likely to face a Conservative as their main challenger. Greens, on the other hand, face a much stronger Labour Party under Andy Burnham than Keir Starmer. They're likely to flip 4 seats from Labour with limited potential beyond that, pending an evaluation of their performance in the Holborn & St Pancras by-election.<br>
 <br>
@@ -809,12 +809,12 @@ Overall, the current political landscape lends itself to a hung parliament as th
   // Placeholder data — replace with the real projection once available.
 
   var parties = [
-    { id: 'lab', name: 'LAB', seats: 257, color: '#E4003B' },
-    { id: 'con', name: 'CON', seats: 118, color: '#0087dc' },
-    { id: 'ref', name: 'RFM', seats: 123, color: '#34D8EF' },
-    { id: 'ld', name: 'LDM', seats: 70, color: '#faa61a' },
+    { id: 'lab', name: 'LAB', seats: 260, color: '#E4003B' },
+    { id: 'con', name: 'CON', seats: 120, color: '#0087dc' },
+    { id: 'ref', name: 'RFM', seats: 120, color: '#34D8EF' },
+    { id: 'ld', name: 'LDM', seats: 69, color: '#faa61a' },
     { id: 'snp', name: 'SNP', seats: 39, color: '#fdf38e' },
-    { id: 'grn', name: 'GRN', seats: 8, color: '#6ab023' },
+    { id: 'grn', name: 'GRN', seats: 7, color: '#6ab023' },
     { id: 'dup', name: 'DUP', seats: 3, color: '#d46a4c' },
     { id: 'sf', name: 'SFN', seats: 7, color: '#326760' },
     { id: 'pc', name: 'PLC', seats: 12, color: '#005b54' },
@@ -1192,13 +1192,13 @@ sendHeight();
 (function () {
   // ---- Placeholder seat data — replace with real figures when ready ----
   var chartData = [
-    { name: 'LAB', color: '#e4003b', seats: 257 },
-    { name: 'RFM', color: '#34d8ef', seats: 123 },
-    { name: 'CON', color: '#0087dc', seats: 118 },
-    { name: 'LDM', color: '#faa61a', seats: 70 },
+    { name: 'LAB', color: '#e4003b', seats: 260 },
+    { name: 'RFM', color: '#34d8ef', seats: 120 },
+    { name: 'CON', color: '#0087dc', seats: 120 },
+    { name: 'LDM', color: '#faa61a', seats: 69 },
     { name: 'SNP', color: '#fdf38e', seats: 39 },
     { name: 'PLC', color: '#005B54', seats: 12 },
-    { name: 'GRN', color: '#6AB023', seats: 8 },
+    { name: 'GRN', color: '#6AB023', seats: 7 },
     { name: 'RES', color: '#000055', seats: 1 }
   ];
 
@@ -1209,12 +1209,12 @@ var MAJORITY_MARKER_SEATS = 325;
 
   // ---- Confidence ranges — match by party name, add/remove entries as needed ----
 var CONFIDENCE_RANGES = {
-  LAB: { low: 219, high: 295 },
-  RFM: { low: 77, high: 174 },
-  CON: { low: 85, high: 150 },
-  LDM: { low: 63, high: 74 },
+  LAB: { low: 227, high: 300 },
+  RFM: { low: 76, high: 161 },
+  CON: { low: 87, high: 157 },
+  LDM: { low: 61, high: 73 },
   SNP: { low: 34, high: 44 },
-  GRN: { low: 6, high: 10 },
+  GRN: { low: 5, high: 9 },
   PLC: { low: 10, high: 16 }
 };
 
