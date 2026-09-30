@@ -642,22 +642,33 @@ body {
 }
 
 .chart-note {
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
-  margin: 0;
-  transition: max-height 0.3s ease, opacity 0.3s ease;
+  display: none;
 }
 
 .chart-note.is-expanded {
-  opacity: 1;
-  margin-top: 8px;
+  display: block;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  background: var(--bg);
+  padding: 8px 0 12px;
+  margin-top: 4px;
+  max-height: 60vh;
+  overflow-y: auto;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
 }
 
     .desktop-only-text {
   display: none;
 }
   }
+
+  .analysis-wrap {
+  position: relative;
+}
   
 </style>
 </head>
@@ -672,6 +683,7 @@ body {
     <input type="checkbox" id="confidenceToggle" checked>
     Show interquartile range
   </label>
+  <div class="analysis-wrap">
 <button type="button" class="analysis-toggle" id="analysisToggle" aria-expanded="false" aria-controls="analysisText">
   <span id="analysisToggleLabel">Click here to read our analysis</span>
   <span class="analysis-toggle-arrow" aria-hidden="true">▾</span>
@@ -686,6 +698,7 @@ Overall, the current political landscape lends itself to a hung parliament as th
 <br>
 <span class="desktop-only-text">Explore constituency-level projections using our interactive map ➔</span></p>
 </div>
+  </div>
   <div class="map-panel">
   <div class="map-scale-wrap" id="mapScaleWrap">
     <iframe
@@ -729,16 +742,6 @@ Overall, the current political landscape lends itself to a hung parliament as th
     var expanded = text.classList.toggle('is-expanded');
     toggle.setAttribute('aria-expanded', expanded);
     label.textContent = expanded ? 'Hide our analysis' : 'Click here to read our analysis';
-    text.style.maxHeight = expanded ? text.scrollHeight + 'px' : '0px';
-  });
-
-  text.addEventListener('transitionend', function (e) {
-    if (e.propertyName !== 'max-height') return;
-    requestAnimationFrame(function () {
-      requestAnimationFrame(function () {
-        window.parent.postMessage({ sender: 'nowcast-module', height: document.documentElement.scrollHeight }, '*');
-      });
-    });
   });
 })();
 </script>
