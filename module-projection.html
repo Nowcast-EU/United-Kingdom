@@ -731,6 +731,11 @@ Overall, the current political landscape lends itself to a hung parliament as th
     label.textContent = expanded ? 'Hide our analysis' : 'Click here to read our analysis';
     text.style.maxHeight = expanded ? text.scrollHeight + 'px' : '0px';
   });
+
+  text.addEventListener('transitionend', function (e) {
+    if (e.propertyName !== 'max-height') return;
+    window.parent.postMessage({ sender: 'nowcast-module', height: document.documentElement.scrollHeight }, '*');
+  });
 })();
 </script>
 
