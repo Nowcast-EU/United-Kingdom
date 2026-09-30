@@ -1,205 +1,413 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🇬🇧 | Nowcast UK Projection</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nowcast UK / Projection</title>
 
   <!-- Social / Thumbnail preview -->
-  <meta property="og:title" content="🇬🇧 | Nowcast UK Projection">
+  <meta property="og:title" content="Nowcast UK / Projection">
   <meta property="og:description" content="">
-  <meta property="og:image" content="https://nowcast-eu.github.io/United-Kingdom/UK_LogoBG.png">
-  <meta property="og:url" content="https://nowcast-eu.github.io/United-Kingdom/">
+  <meta property="og:image" content="https://nowcast-eu.github.io/United-Kingdom/NowcastUK_thumbnail.png">
+  <meta property="og:url" content="https://nowcast-eu.github.io/United-Kingdom/test">
   <meta property="og:type" content="website">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
+  <meta property="og:image:width" content="800">
+  <meta property="og:image:height" content="418">
   <meta property="og:image:type" content="image/png">
 
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="🇬🇧 | Nowcast UK Projection">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Nowcast UK / Projection">
   <meta name="twitter:description" content="">
-  <meta name="twitter:image" content="https://nowcast-eu.github.io/United-Kingdom/thumbnail.png">
+  <meta name="twitter:image" content="https://nowcast-eu.github.io/United-Kingdom/NowcastUK_thumbnail.png">
 
   <meta name="referrer" content="no-referrer">
 
   <!-- Favicon -->
 <link rel="icon" type="image/png" href="https://nowcast-eu.github.io/United-Kingdom/UK_favicon.png" />
-
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: #ffffff;
-      font-family: system-ui, sans-serif;
-    }
-
-        .logo-container {
-  position: relative; /* container for absolute positioning */
-  width: 100%;        /* full width of page */
-}
-
-.page-logo {
-  position: absolute; /* position relative to .logo-container */
-  top: 2rem;          /* distance from top of page */
-  right: 12rem;        /* distance from right edge */
-  height: 6rem;       /* adjust logo size */
-  width: auto;        /* maintain aspect ratio */
-  z-index: 10;        /* above the Flourish content */
-}
-
-  @media (max-width: 767px) {
-  .page-logo {
-    top: 3.7rem;          /* distance from top of page */
-    right: 0.7rem;        /* distance from right edge */
-    height: 3rem;
+  
+<style>
+  :root {
+    --bg: #f8faf9;
+    --ink: #1A1E23;
+    --ink-soft: #4A4F57;
+    --muted: #8A8F98;
+    --accent: #005434;
+    --accent-soft: #E7ECF3;
+    --divider: #006548;
+    --topbar-h: 56px;
+    --page-max: 1250px;
+    --gutter: 8px;
   }
-}
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 
-    .flourish-container {
-      width: 100%;
-      position: relative;
-    }
-
-    .bar-container {
-      width: 100%;
-      position: relative;
-    }
-
-    .graph-container {
-      width: 100%;
-      position: relative;
-    }
-
-    iframe {
-      width: 100%;
-      border: none;
-      display: block;
-    }
-
-              /* ===== MAJORITY LINE (BAR CHART ONLY) ===== */
-.majority-line {
-  position: absolute;
-  left: 50%;                 /* 50% = majority threshold */
-  top: 65%;                  /* start halfway down */
-  bottom: 10%;                 /* extend to bottom */
-  width: 2px;
-  background: #000000;
-  transform: translateX(-50%);
-  z-index: 5;
-  pointer-events: none;      /* critical for iframe interaction */
-}
-
-  /* ===== MAJORITY LABEL ===== */
-.majority-label {
-  position: absolute;
-  top: 100%;              /* directly beneath the line */
-  margin-top: 6px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 12px;
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.6);
-  white-space: nowrap;
-  pointer-events: none;
-}
-
-    /* --- Desktop view --- */
-    @media (min-width: 768px) {
-      .flourish-container {
-        /* Aspect ratio: 1 wide, 1.25 tall */
-        aspect-ratio: 1 / 1.5;
-        max-width: 1000px;
-        margin: 0 auto;
-        position: relative;
-      }
-
-      .bar-container {
-        aspect-ratio: 4 / 1;
-        transform: translateY(-35px);
-        z-index: 10;
-        max-width: 1000px;
-        margin: 0 auto;
-        position: relative;
-      }
-
-      .graph-container {
-        aspect-ratio: 1.7 / 1;
-        transform: translateY(-35px);
-        z-index: 10;
-        max-width: 1000px;
-        margin: 0 auto;
-        position: relative;
-      }
-
-      iframe {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-      }
-    }
-
-    /* --- Mobile view --- */
-    @media (max-width: 767px) {
-
-    .majority-line {
-       top: 67.5%; 
-    bottom: 15%;          /* mobile bottom */
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    line-height: 1.5;
   }
-      
-      .flourish-container {
-        aspect-ratio: 1 / 1.8;
-        width: 100%;
-        position: relative;
-      }
 
-      .bar-container {
-        aspect-ratio: 4 / 2;
-        transform: translateY(-30px);
-        z-index: 10;
-        width: 100%;
-        position: relative;
-      }
+  /* ---- sticky top nav ---- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(250, 250, 248, 0.94);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--divider);
+  }
+  .topbar-inner {
+    max-width: var(--page-max);
+    margin: 0 auto;
+    height: var(--topbar-h);
+    padding: 0 var(--gutter);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .tabs {
+    display: flex;
+    gap: 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex: 1;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
 
-      .graph-container {
-        aspect-ratio: 2.5 / 2;
-        transform: translateY(-30px);
-        z-index: 10;
-        width: 100%;
-        position: relative;
-      }
+  .brand {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--ink);
+    font-weight: 700;
+    font-size: 1rem;
+    white-space: nowrap;
+}
+.brand-logo {
+    height: 32px;
+    width: auto;
+    display: block;
+}
 
-      iframe {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-      }
+@media (max-width: 600px) {
+    :root { --topbar-h: 86px; }
+
+    .topbar-inner {
+      height: auto;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      width: 100%;
+      min-width: 0;
     }
-  </style>
+
+    .brand {
+      padding: 8px 0 4px;
+      /* justify-content: center; */
+    }
+
+    .tabs {
+      flex: none;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      overflow-x: auto;
+    }
+}
+  
+  .tab {
+    flex: none;
+    position: relative;
+    padding: 8px 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--ink-soft);
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+@media (hover: hover) {
+    .tab:hover { background: var(--accent-soft); color: var(--ink); }
+}
+  .tab.is-active { color: var(--accent); }
+  .tab.is-active::after {
+    content: "";
+    position: absolute;
+    left: 10px; right: 10px; bottom: 1px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  /* ---- modules ---- */
+main { max-width: var(--page-max); margin: 0 auto; }
+
+  .module {
+    scroll-margin-top: calc(var(--topbar-h) + 10px);
+padding: 20px var(--gutter);
+  }
+
+  #projection {
+  padding-top: 2px;
+}
+
+  .module h2 {
+    font-size: 1.4rem;
+    margin: 0 0 4px;
+  }
+
+.module .wip-note {
+    color: #000000;
+    font-size: 0.85rem;
+    margin: 0 0 18px;
+    max-width: 66%;
+  }
+
+  @media (max-width: 768px) {
+    .module .wip-note {
+      max-width: 100%;
+    }
+  }
+
+  /* wrapper keeps embedded pages/Flourish charts responsive */
+  .embed-wrap {
+    position: relative;
+    width: 100%;
+    min-height: 100px;
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    overflow: hidden;
+  }
+
+  .embed-wrap iframe {
+    width: 100%;
+    border: 0;
+    display: block;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--divider);
+    margin: 0 var(--gutter);
+  }
+
+  .module-frame {
+  height: 400px;
+  overflow: hidden;
+}
+
+  footer {
+    text-align: center;
+    padding: 24px var(--gutter) 48px;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+</style>
 </head>
 <body>
 
-  <div class="logo-container"> <img src="https://nowcast-eu.github.io/United-Kingdom/UK_LogoBG.png" alt="Logo" class="page-logo"> </div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="#projection">
+      <img src="https://raw.githubusercontent.com/Nowcast-EU/United-Kingdom/refs/heads/main/NowcastUKlogo.png" alt="Nowcast UK" class="brand-logo">
+      <span class="brand-name">Nowcast UK</span>
+    </a>
+
+    <nav class="tabs" aria-label="Section navigation" id="tabs">
+      <a class="tab" href="#projection" data-slug="projection">Projection</a>
+      <a class="tab" href="#polling" data-slug="polling">Polling</a>
+      <a class="tab" href="#probabilities" data-slug="probabilities">Probabilities</a>
+      <a class="tab" href="#geography" data-slug="geography">Geography</a>
+      <a class="tab" href="#regions" data-slug="regions">Regions</a>
+      <a class="tab" href="#cabinet" data-slug="cabinet">Cabinet</a>
+      <a class="tab" href="#user-input" data-slug="user-input">User Input</a>
+      <a class="tab" href="#methodology" data-slug="methodology">Methodology</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<!-- ===================== PROJECTION ===================== -->
+<section class="module" id="projection" data-slug="projection">
+  <div class="embed-wrap">
+    <iframe class="module-frame" data-slug="projection"
+             src="https://nowcast-eu.github.io/United-Kingdom/module-projection.html"></iframe>
+  </div>
+</section>
+
+<hr class="divider">
+
+  <!-- ===================== POLLING ===================== -->
+  <section class="module" id="polling" data-slug="polling">
+    <h2>Polling & Projection History</h2>
+  <div class="embed-wrap">
+    <iframe class="module-frame" data-slug="polling"
+             src="https://nowcast-eu.github.io/United-Kingdom/module-polling.html"></iframe>
+  </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ===================== PROBABILITIES ===================== -->
+  <section class="module" id="probabilities" data-slug="probabilities">
+    <h2>Probabilities</h2>
+    <p class="wip-note">To account for real-world uncertainty, we run 1,000 simulations using current polling averages as a baseline. Each run randomly adjusts key variables such as tactical voting, incumbent effects and electoral geography to show the full range of possible election outcomes.</p>
+  <div class="embed-wrap">
+    <iframe class="module-frame" data-slug="probabilities"
+             src="https://nowcast-eu.github.io/United-Kingdom/module-probability.html"></iframe>
+  </div>
+  </section>
+
+  <hr class="divider">
+
+    <!-- ===================== GEOGRAPHY ===================== -->
+  <section class="module" id="geography" data-slug="geography">
+    <h2>Geography</h2>
+    <div class="embed-wrap">Coming soon!</div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ===================== REGIONS ===================== -->
+  <section class="module" id="regions" data-slug="regions">
+    <h2>Regions</h2>
+    <div class="embed-wrap">Coming soon!</div>
+  </section>
+
+  <hr class="divider">
+
+    <!-- ===================== CABINET ===================== -->
+  <section class="module" id="cabinet" data-slug="cabinet">
+    <h2>Cabinet</h2>
+    <div class="embed-wrap">Coming soon!</div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ===================== USER INPUT ===================== -->
+  <section class="module" id="user-input" data-slug="user-input">
+    <h2>User Input</h2>
+    <div class="embed-wrap">Coming soon!</div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ===================== METHODOLOGY ===================== -->
+  <section class="module" id="methodology" data-slug="methodology">
+    <h2>Methodology</h2>
+<p class="wip-note">Coming soon! In the meantime you can read about our methodology <a href="https://www.nowcast.uk/home/methodology">here</a>.</p>
+  </section>
+
+</main>
+
+<footer>© 2026 Nowcast UK</footer>
+
+<script>
+
+  // Resizes each module iframe to match the height its own page reports.
+(function () {
+  var frames = Array.prototype.slice.call(document.querySelectorAll('.module-frame'));
+
+   frames.forEach(function (f) { f.setAttribute('scrolling', 'no'); });
+
+  var resizeTimers = {};
+
+  window.addEventListener('message', function (event) {
+    var data = event.data;
+    try {
+      if (typeof data === 'string') data = JSON.parse(data);
+    } catch (e) {
+      return;
+    }
+    if (!data || data.sender !== 'nowcast-module' || !data.height) return;
+
+    var frame = frames.filter(function (f) {
+      return f.contentWindow === event.source;
+    })[0];
+    if (!frame) return;
+
+    var slug = frame.dataset.slug;
+    clearTimeout(resizeTimers[slug]);
+    resizeTimers[slug] = setTimeout(function () {
+      frame.style.height = data.height + 'px';
+    }, 120);
+  });
+})();
   
-  <div class="flourish-container">
-    <iframe src="https://flo.uri.sh/visualisation/26928540/embed" scrolling="no" frameborder="0"></iframe>
-  </div>
+  // Highlights the nav tab matching whichever section is currently in view.
+  (function () {
+    var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+    var sections = Array.prototype.slice.call(document.querySelectorAll('.module'));
+    var tabBySlug = {};
+    tabs.forEach(function (t) { tabBySlug[t.dataset.slug] = t; });
 
-      <div class="bar-container">
-<div class="majority-line">
-  <span class="majority-label">Majority</span>
-</div>
+    var tabsEl = document.getElementById('tabs');
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-  <iframe src="https://flo.uri.sh/visualisation/25559039/embed"
-          scrolling="no"
-          frameborder="0"></iframe>
-</div>
+    // Scrolls the tab strip just enough to show the active tab and the one after it.
+     function revealTab(activeTab) {
+      var next = activeTab.nextElementSibling || activeTab; // last tab: reveal itself
+      var box = tabsEl.getBoundingClientRect();
+      var a = activeTab.getBoundingClientRect();
+      var n = next.getBoundingClientRect();
+      var pad = 12;
+      var delta = 0;
 
-    <div class="graph-container">
-    <iframe src="https://flo.uri.sh/visualisation/27195458/embed" scrolling="no" frameborder="0"></iframe>
-  </div>
+      if (n.right > box.right - pad) {
+        // next tab is cut off on the right: scroll right, but keep the active tab's right edge in view
+        delta = Math.min(n.right - (box.right - pad), a.right - (box.left + pad));
+      } else if (a.left < box.left + pad) {
+        // active tab is cut off on the left (scrolling back up the page)
+        delta = a.left - (box.left + pad);
+      }
+
+      if (delta) {
+        tabsEl.scrollBy({ left: delta, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+      }
+    }
+
+    function setActive(slug) {
+      tabs.forEach(function (t) {
+        t.classList.toggle('is-active', t.dataset.slug === slug);
+      });
+      if (tabBySlug[slug]) revealTab(tabBySlug[slug]);
+    }
+
+    var observer = new IntersectionObserver(function (entries) {
+      var visible = entries.filter(function (e) { return e.isIntersecting; });
+      if (!visible.length) return;
+      visible.sort(function (a, b) {
+        return a.boundingClientRect.top - b.boundingClientRect.top;
+      });
+      var slug = visible[0].target.dataset.slug;
+      if (tabBySlug[slug]) setActive(slug);
+    }, { rootMargin: '-30% 0px -55% 0px', threshold: 0 });
+
+    sections.forEach(function (s) { observer.observe(s); });
+
+    var initial = (location.hash || '').replace('#', '');
+    setActive(tabBySlug[initial] ? initial : (tabs[0] && tabs[0].dataset.slug));
+  })();
+</script>
+
+  <script>
+(function () {
+  var cacheBust = Date.now();
+  document.querySelectorAll('.module-frame[src]').forEach(function (frame) {
+    frame.src = frame.src + (frame.src.indexOf('?') === -1 ? '?' : '&') + 'v=' + cacheBust;
+  });
+})();
+</script>
+
 </body>
 </html>
