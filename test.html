@@ -320,6 +320,8 @@ padding: 20px var(--gutter);
 
    frames.forEach(function (f) { f.setAttribute('scrolling', 'no'); });
 
+  var resizeTimers = {};
+
   window.addEventListener('message', function (event) {
     var data = event.data;
     try {
@@ -329,12 +331,16 @@ padding: 20px var(--gutter);
     }
     if (!data || data.sender !== 'nowcast-module' || !data.height) return;
 
-    console.log('[height msg]', data.height, new Date().toISOString());
-
     var frame = frames.filter(function (f) {
       return f.contentWindow === event.source;
     })[0];
-    if (frame) frame.style.height = data.height + 'px';
+    if (!frame) return;
+
+    var slug = frame.dataset.slug;
+    clearTimeout(resizeTimers[slug]);
+    resizeTimers[slug] = setTimeout(function () {
+      frame.style.height = data.height + 'px';
+    }, 120);
   });
 })();
   
