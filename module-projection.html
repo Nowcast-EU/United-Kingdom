@@ -650,7 +650,6 @@ body {
 }
 
 .chart-note.is-expanded {
-  max-height: 800px;
   opacity: 1;
   margin-top: 8px;
 }
@@ -729,7 +728,8 @@ Overall, the current political landscape lends itself to a hung parliament as th
   toggle.addEventListener('click', function () {
     var expanded = text.classList.toggle('is-expanded');
     toggle.setAttribute('aria-expanded', expanded);
-    label.textContent = expanded ? 'Hide analysis' : 'Click here to read our analysis';
+    label.textContent = expanded ? 'Hide our analysis' : 'Click here to read our analysis';
+    text.style.maxHeight = expanded ? text.scrollHeight + 'px' : '0px';
   });
 })();
 </script>
