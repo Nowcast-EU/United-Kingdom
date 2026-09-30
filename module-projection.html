@@ -639,6 +639,19 @@ body {
   margin-top: 8px;
 }
 
+      .analysis-collapse-btn {
+    display: block;
+    width: 100%;
+    background: var(--accent-soft);
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+
 .analysis-toggle-arrow {
   flex: none;
   font-size: 0.9rem;
@@ -704,7 +717,7 @@ The Liberal Democrats and Greens continue to hover around 10% in our polling ave
 <br>
 Overall, the current political landscape lends itself to a hung parliament as the most likely outcome of an election held today. The 'left-of-centre' is at an advantage for the first time since April 2025, without having to rely on Plaid Cymru or the SNP.<br>
 <br>
-<span class="desktop-only-text">Explore constituency-level projections using our interactive map ➔</span></p>
+<span class="desktop-only-text">Explore constituency-level projections using our interactive map ➔</span><br><br><button type="button" class="analysis-collapse-btn" id="analysisCollapseBtn">Collapse ▴</button></p>
 </div>
   </div>
   <div class="map-panel">
@@ -746,11 +759,23 @@ Overall, the current political landscape lends itself to a hung parliament as th
 
   var label = document.getElementById('analysisToggleLabel');
 
-  toggle.addEventListener('click', function () {
-    var expanded = text.classList.toggle('is-expanded');
+  var collapseBtn = document.getElementById('analysisCollapseBtn');
+
+  function setExpanded(expanded) {
+    text.classList.toggle('is-expanded', expanded);
     toggle.setAttribute('aria-expanded', expanded);
-    label.textContent = expanded ? 'Hide analysis' : 'Click here to read our analysis';
+    label.textContent = expanded ? 'Hide our analysis' : 'Click here to read our analysis';
+  }
+
+  toggle.addEventListener('click', function () {
+    setExpanded(!text.classList.contains('is-expanded'));
   });
+
+  if (collapseBtn) {
+    collapseBtn.addEventListener('click', function () {
+      setExpanded(false);
+    });
+  }
 })();
 </script>
 
