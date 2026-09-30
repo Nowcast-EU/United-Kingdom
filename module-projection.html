@@ -613,8 +613,11 @@ body {
 }
 
   @media (max-width: 780px) {
-    .analysis-toggle {
-  display: block;
+.analysis-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   width: 100%;
   text-align: left;
   background: var(--accent-soft);
@@ -626,6 +629,16 @@ body {
   color: var(--ink-soft);
   cursor: pointer;
   margin-top: 8px;
+}
+
+.analysis-toggle-arrow {
+  flex: none;
+  font-size: 0.9rem;
+  transition: transform 0.25s ease;
+}
+
+.analysis-toggle[aria-expanded="true"] .analysis-toggle-arrow {
+  transform: rotate(180deg);
 }
 
 .chart-note {
@@ -656,8 +669,9 @@ body {
     <input type="checkbox" id="confidenceToggle" checked>
     Show interquartile range
   </label>
- <button type="button" class="analysis-toggle" id="analysisToggle" aria-expanded="false" aria-controls="analysisText">
-  Click here to read our analysis
+<button type="button" class="analysis-toggle" id="analysisToggle" aria-expanded="false" aria-controls="analysisText">
+  <span id="analysisToggleLabel">Click here to read our analysis</span>
+  <span class="analysis-toggle-arrow" aria-hidden="true">▾</span>
 </button>
 <p class="chart-note" id="analysisText">Your paragraph text goes here.</p>
 </div>
@@ -698,10 +712,12 @@ body {
   var text = document.getElementById('analysisText');
   if (!toggle || !text) return;
 
+  var label = document.getElementById('analysisToggleLabel');
+
   toggle.addEventListener('click', function () {
     var expanded = text.classList.toggle('is-expanded');
     toggle.setAttribute('aria-expanded', expanded);
-    toggle.textContent = expanded ? 'Hide our analysis' : 'Click here to read our analysis';
+    label.textContent = expanded ? 'Hide our analysis' : 'Click here to read our analysis';
   });
 })();
 </script>
