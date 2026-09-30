@@ -654,6 +654,10 @@ body {
   opacity: 1;
   margin-top: 8px;
 }
+
+    .desktop-only-text {
+  display: none;
+}
   }
   
 </style>
@@ -673,7 +677,15 @@ body {
   <span id="analysisToggleLabel">Click here to read our analysis</span>
   <span class="analysis-toggle-arrow" aria-hidden="true">▾</span>
 </button>
-<p class="chart-note" id="analysisText">Your paragraph text goes here.</p>
+<p class="chart-note" id="analysisText">Based on current polling averages, the Labour Party led by Andy Burnham is projected to win 257 seats. 69 short of a simple majority in the House of Commons, but enough to form a coalition or confidence & supply agreement with the Liberal Democrats as their closest viable partner. 80.1% of our simulations result in Labour remaining the largest party short of a majority, as opposed to 8.5% putting them above the 325 seat mark.<br>
+<br>
+Reform are on course to gain 118 seats since the 2024 General Election, making them the largest net 'winner' of an election held today. However, the combined right continues to suffer from vote splitting among Reform, Restore and the Conservatives, and the prospect of a fairly disciplined tactical voting campaign forming against them. Our lower end estimates for Reform take the party back below 100 seats, while the Conservatives have a more robust rural-centred electoral geography to aid their post-GE2024 recovery — which is yet to fully materialise.<br>
+<br>
+The Liberal Democrats and Greens continue to hover around 10% in our polling averages, but the geography of their vote leads to two very different outcomes in terms of projected seats. Lib Dems are leading in 48 of the 54 seats they're likely to face a Conservative as their main challenger. Greens, on the other hand, face a much stronger Labour Party under Andy Burnham than Keir Starmer. They're likely to flip 4 seats from Labour with limited potential beyond that, pending an evaluation of their performance in the Holborn & St Pancras by-election.<br>
+<br>
+Overall, the current political landscape lends itself to a hung parliament as the most likely outcome of an election held today. The 'left-of-centre' is at an advantage for the first time since April 2025, without having to rely on Plaid Cymru or the SNP.<br>
+<br>
+<span class="desktop-only-text">Explore constituency-level projections using our interactive map ➔</span></p>
 </div>
   <div class="map-panel">
   <div class="map-scale-wrap" id="mapScaleWrap">
@@ -717,7 +729,7 @@ body {
   toggle.addEventListener('click', function () {
     var expanded = text.classList.toggle('is-expanded');
     toggle.setAttribute('aria-expanded', expanded);
-    label.textContent = expanded ? 'Hide our analysis' : 'Click here to read our analysis';
+    label.textContent = expanded ? 'Hide analysis' : 'Click here to read our analysis';
   });
 })();
 </script>
