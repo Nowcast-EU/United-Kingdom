@@ -607,6 +607,41 @@ body {
     height: 15px;
   }
 }
+
+.analysis-toggle {
+  display: none;
+}
+
+  @media (max-width: 780px) {
+    .analysis-toggle {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--accent-soft);
+  border: none;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.chart-note {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  margin: 0;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.chart-note.is-expanded {
+  max-height: 500px;
+  opacity: 1;
+  margin-top: 8px;
+}
+  }
   
 </style>
 </head>
@@ -621,15 +656,10 @@ body {
     <input type="checkbox" id="confidenceToggle" checked>
     Show interquartile range
   </label>
-  <p class="chart-note">Based on current polling averages, the Labour Party led by Andy Burnham is projected to win 257 seats - 69 short of a simple majority in the House of Commons. Enough to form a coalition or confidence & supply agreement with the Liberal Democrats as their closest viable partner. 80.1% of our simulations result in Labour becoming the largest party short of a majority, as opposed to 8.5% putting them above the 325 threshold.<br>
-<br>
-Reform are on course to gain 118 seats since the 2024 General Election, making them the largest net 'winner' of an election held today. However, the combined right continues to suffer from vote splitting among Reform, Restore and the Conservatives, and the prospect of tactical voting moving against them. Our lower end estimates for Reform take the party back below 100 seats, while the Conservatives have a more robust electoral geography to aid their post-GE2024 recovery which is yet to fully materialise.<br>
-<br>
-The Liberal Democrats and Greens continue to hover around 10% in our polling averages, but the geography of their vote leads to two very different outcomes in terms of projected seats. In the 54 constituencies where Lib Dems are likely to face a Conservative as their main challenger, they win 48 to 16. The Greens, on the other hand, face a rejuvenated Labour Party in the vast majority of their target seats - winning only 6.<br>
-<br>
-Overall, the current political landscape points to a near-certain hung parliament if an election was held today. Left-of-centre parties are at an advantage for the first time since April 2025, even when excluding nationalist parties such as Plaid Cymru and the SNP.<br>
-<br>
-Explore constituency-level projections using our interactive map ➔</p>
+ <button type="button" class="analysis-toggle" id="analysisToggle" aria-expanded="false" aria-controls="analysisText">
+  Click here to read our analysis
+</button>
+<p class="chart-note" id="analysisText">Your paragraph text goes here.</p>
 </div>
   <div class="map-panel">
   <div class="map-scale-wrap" id="mapScaleWrap">
@@ -661,6 +691,20 @@ Explore constituency-level projections using our interactive map ➔</p>
   <p class="h2h-subtitle">Aggregate of seats where both parties are in either first or second place</p>
   <div class="h2h-list" id="h2hList"></div>
 </section>
+
+  <script>
+(function () {
+  var toggle = document.getElementById('analysisToggle');
+  var text = document.getElementById('analysisText');
+  if (!toggle || !text) return;
+
+  toggle.addEventListener('click', function () {
+    var expanded = text.classList.toggle('is-expanded');
+    toggle.setAttribute('aria-expanded', expanded);
+    toggle.textContent = expanded ? 'Hide our analysis' : 'Click here to read our analysis';
+  });
+})();
+</script>
 
   <script>
 (function () {
