@@ -394,5 +394,14 @@ padding: 20px var(--gutter);
   })();
 </script>
 
+  <script>
+(function () {
+  var cacheBust = Date.now();
+  document.querySelectorAll('.module-frame[src]').forEach(function (frame) {
+    frame.src = frame.src + (frame.src.indexOf('?') === -1 ? '?' : '&') + 'v=' + cacheBust;
+  });
+})();
+</script>
+
 </body>
 </html>
