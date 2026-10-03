@@ -291,7 +291,7 @@
     var pct = Math.abs(diff / ref * 100);
     var shown = pct >= 100 ? Math.round(pct) : pct.toFixed(1);
     return (diff > 0 ? 'Over' : 'Under') + '-represented by ' + shown + '% (' +
-      (diff > 0 ? '+' : '\u2212') + Math.abs(diff) + ' seats vs PR)';
+      (diff > 0 ? '+' : '\u2212') + Math.abs(diff) + ' seats)';
   }
 
   function showTip(seg, party, sys, e) {
