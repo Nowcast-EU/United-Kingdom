@@ -339,13 +339,10 @@
 
   // Over/under-representation of a party versus the PR benchmark column.
   function repText(n, ref) {
-    if (ref === 0) return n === 0 ? 'Matches PR (no seats)' : 'Overrepresented (no seats under PR)';
     var diff = n - ref;
     if (diff === 0) return 'Matches PR';
-    var pct = Math.abs(diff / ref * 100);
-    var shown = pct >= 100 ? Math.round(pct) : pct.toFixed(1);
-    return (diff > 0 ? 'Over' : 'Under') + 'represented by ' + shown + '% (' +
-      (diff > 0 ? '+' : '\u2212') + Math.abs(diff) + ' seats)';
+    var seats = Math.abs(diff);
+    return (diff > 0 ? 'Over' : 'Under') + 'represented by ' + seats + (seats === 1 ? ' seat' : ' seats') + ' vs PR';
   }
 
   function showTip(seg, party, sys, e) {
