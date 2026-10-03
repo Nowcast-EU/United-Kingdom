@@ -107,6 +107,7 @@
   }
 
   .seg-tooltip strong { display: block; }
+  .seg-tooltip .rep { display: block; opacity: 0.85; }
 
   /* one line across all seven bars. --maj-frac is set from MAJORITY / TOTAL_SEATS.
      The 1px / 2px offsets account for the bars' 1px border. */
@@ -254,6 +255,10 @@
   var TOTAL_SEATS = 650;
   var MAJORITY = 326;
 
+  // The column treated as "perfect PR": the benchmark for over/under-representation.
+  // Defaults to the last column in SYSTEMS - change the index if you reorder.
+  var PR_REFERENCE_INDEX = SYSTEMS.length - 1;
+
   // ---------------------------------------------------------------
   // STATE + DOM
   // ---------------------------------------------------------------
@@ -278,12 +283,28 @@
   document.body.appendChild(tip);
   var hoveredSeg = null;
 
+  // Over/under-representation of a party versus the PR benchmark column.
+  function repText(n, ref) {
+    if (ref === 0) return n === 0 ? 'Matches PR (no seats)' : 'Over-represented (no seats under PR)';
+    var diff = n - ref;
+    if (diff === 0) return 'Matches PR';
+    var pct = Math.abs(diff / ref * 100);
+    var shown = pct >= 100 ? Math.round(pct) : pct.toFixed(1);
+    return (diff > 0 ? 'Over' : 'Under') + '-represented by ' + shown + '% (' +
+      (diff > 0 ? '+' : '\u2212') + Math.abs(diff) + ' seats vs PR)';
+  }
+
   function showTip(seg, party, sys, e) {
     if (hoveredSeg && hoveredSeg !== seg) hoveredSeg.classList.remove('is-hovered');
     hoveredSeg = seg;
     seg.classList.add('is-hovered');
     var n = sys.seats[party.id] || 0;
-    tip.innerHTML = '<strong>' + party.name + ' \u2014 ' + sys.name + '</strong>' + n + (n === 1 ? ' seat' : ' seats');
+    var refSys = SYSTEMS[PR_REFERENCE_INDEX];
+    var repLine = (sys === refSys)
+      ? 'Proportional benchmark'
+      : repText(n, refSys.seats[party.id] || 0);
+    tip.innerHTML = '<strong>' + party.name + ' \u2014 ' + sys.name + '</strong>' +
+      n + (n === 1 ? ' seat' : ' seats') + '<span class="rep">' + repLine + '</span>';
     tip.style.display = 'block';
     moveTip(e);
   }
