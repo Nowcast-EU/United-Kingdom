@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Systems — Nowcast UK</title>
+<style>
+  :root {
+    --bg: #f8faf9;
+    --ink: #1A1E23;
+    --ink-soft: #4A4F57;
+    --muted: #8A8F98;
+    --divider: #E2E2DE;
+    --accent-soft: #E7ECF3;
+    --col-gap: 12px;
+    --bar-h: clamp(260px, 52vw, 440px);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    line-height: 1.5;
+  }
+  h3 { font-size: 1rem; margin: 0; }
+
+  /* ---------------- builder panel ---------------- */
+  .builder-panel {
+    max-width: 1250px;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    position: relative;
+  }
+
+  .builder-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0 2px;
+    margin-bottom: 12px;
+  }
+
+  /* three rows (labels / bars / counts) share one 7-column grid template,
+     so every column lines up and the majority line can span all bars */
+  .systems-row {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    column-gap: var(--col-gap);
+  }
+
+  .system-label {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    min-height: 2.4em;
+    padding-bottom: 6px;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.15;
+    color: var(--ink-soft);
+  }
+
+  .bars-row { position: relative; }
+
+  .system-bar {
+    position: relative;
+    height: var(--bar-h);
+    border: 1px solid var(--divider);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  /* solid block of colour for each party, stacked from the bottom up */
+  .seg {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 0;
+    transition: bottom 0.35s ease, height 0.35s ease;
+  }
+
+  /* one line across all seven bars. --maj-frac is set from MAJORITY / TOTAL_SEATS.
+     The 1px / 2px offsets account for the bars' 1px border. */
+  .majority-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(1px + (100% - 2px) * var(--maj-frac, 0.5));
+    height: 2px;
+    margin-bottom: -1px;
+    background: #000;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.8);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .system-count {
+    margin-top: 6px;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: bold;
+  }
+
+  .party-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 14px;
+  }
+
+  .party-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    font-size: 0.74rem;
+    font-weight: 500;
+    border: 1px solid var(--divider);
+    background: #e9ecef; /* Neutral grey background */
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--ink-soft);
+    opacity: 0.75;
+    transition: all 0.2s ease;
+  }
+
+  .party-btn:hover {
+    transform: translateY(-1px);
+    opacity: 1;
+  }
+
+  /* Selected state: inherits the party color */
+  .party-btn[aria-pressed="true"] {
+    opacity: 1;
+    background: var(--party-color);
+    border-color: var(--party-color);
+    color: #ffffff;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  }
+
+  @media (min-width: 781px) {
+    .party-btn {
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      gap: 8px;
+    }
+  }
+
+  .builder-note {
+    font-size: 0.8rem;
+    color: #000000;
+    text-align: center;
+    width: 65%;
+    line-height: 1.2;
+    margin: 8px auto 0;
+  }
+
+  @media (max-width: 700px) {
+    .builder-note {
+      font-style: italic;
+      color: #555555;
+      width: 95%;
+    }
+  }
+
+  @media (max-width: 600px) {
+    :root { --col-gap: 5px; }
+    .system-label { font-size: 0.62rem; }
+    .system-count { font-size: 0.8rem; }
+    .system-bar { border-radius: 5px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="builder-panel">
+  <div class="builder-header">
+    <h3>Coalition builder</h3>
+  </div>
+
+  <div class="systems-row" id="labelsRow"></div>
+  <div class="systems-row bars-row" id="barsRow"></div>
+  <div class="systems-row" id="countsRow"></div>
+
+  <div class="party-list" id="partyList"></div>
+  <p class="builder-note" id="builderNote"></p>
+</div>
+
+<script>
+(function () {
+  // ---------------------------------------------------------------
+  // DATA — edit here
+  // ---------------------------------------------------------------
+  // Parties: button order follows this array. Colours match the projection module.
+  var PARTIES = [
+    { id: 'lab', name: 'LAB', color: '#E4003B' },
+    { id: 'con', name: 'CON', color: '#0087dc' },
+    { id: 'ref', name: 'RFM', color: '#34D8EF' },
+    { id: 'ld',  name: 'LDM', color: '#faa61a' },
+    { id: 'snp', name: 'SNP', color: '#fdf38e' },
+    { id: 'pc',  name: 'PLC', color: '#005b54' },
+    { id: 'grn', name: 'GRN', color: '#6ab023' },
+    { id: 'sf',  name: 'SFN', color: '#326760' },
+    { id: 'uup', name: 'UUP', color: '#3399ff' },
+    { id: 'dup', name: 'DUP', color: '#d46a4c' },
+    { id: 'sdl', name: 'SDL', color: '#2aa82c' },
+    { id: 'tuv', name: 'TUV', color: '#0C3A6A' },
+    { id: 'res', name: 'RES', color: '#000055' },
+    { id: 'all', name: 'ALL', color: '#FFD700' },
+    { id: 'oth', name: 'OTH', color: '#999999' }
+  ];
+
+  // Seats per party per system. PLACEHOLDER FIGURES — replace with the real ones.
+  // Each system should sum to TOTAL_SEATS (a console warning fires if not).
+  // Columns appear left to right in this order.
+  var SYSTEMS = [
+    { id: 'tworound',    name: 'Two-Round',     seats: { lab: 260, con: 120, ref: 120, ld: 69, snp: 39, grn: 7,  dup: 3, sf: 7, pc: 12, uup: 4, sdl: 2, tuv: 1, res: 1, oth: 5 } },
+    { id: 'fptp',        name: 'FPTP',          seats: { lab: 243, con: 121, ref: 130, ld: 69, snp: 35, grn: 17, dup: 3, sf: 7, pc: 11, uup: 4, sdl: 2, tuv: 1, res: 2, oth: 5 } },
+    { id: 'mmm',         name: 'MMM',           seats: { lab: 226, con: 121, ref: 140, ld: 70, snp: 31, grn: 28, dup: 3, sf: 7, pc: 9,  uup: 3, sdl: 2, tuv: 1, res: 3, oth: 6 } },
+    { id: 'stvpr',       name: 'STV-PR',        seats: { lab: 209, con: 122, ref: 149, ld: 71, snp: 27, grn: 38, dup: 4, sf: 6, pc: 8,  uup: 3, sdl: 2, tuv: 1, res: 4, oth: 6 } },
+    { id: 'dhondt',      name: 'dHondt PR',     seats: { lab: 192, con: 123, ref: 159, ld: 71, snp: 24, grn: 48, dup: 4, sf: 6, pc: 6,  uup: 3, sdl: 2, tuv: 1, res: 4, oth: 7 } },
+    { id: 'mmpr',        name: 'MMPR',          seats: { lab: 176, con: 124, ref: 169, ld: 71, snp: 19, grn: 58, dup: 4, sf: 6, pc: 5,  uup: 3, sdl: 2, tuv: 1, res: 5, oth: 7 } },
+    { id: 'perfect',     name: 'Perfect PR',    seats: { lab: 176, con: 124, ref: 169, ld: 71, snp: 19, grn: 58, dup: 4, sf: 6, pc: 5,  uup: 3, sdl: 2, tuv: 1, res: 5, oth: 7 } }
+  ];
+
+  var TOTAL_SEATS = 650;
+  var MAJORITY = 326;
+
+  // ---------------------------------------------------------------
+  // STATE + DOM
+  // ---------------------------------------------------------------
+  var selectedOrder = []; // party ids, in the order they were selected
+
+  var labelsRow = document.getElementById('labelsRow');
+  var barsRow = document.getElementById('barsRow');
+  var countsRow = document.getElementById('countsRow');
+  var partyListEl = document.getElementById('partyList');
+
+  var segs = [];     // segs[systemIndex][partyId] -> element
+  var counts = [];   // counts[systemIndex] -> element
+  var buttons = {};  // buttons[partyId] -> element
+
+  function partyById(id) {
+    return PARTIES.filter(function (p) { return p.id === id; })[0];
+  }
+
+  function build() {
+    barsRow.style.setProperty('--maj-frac', MAJORITY / TOTAL_SEATS);
+
+    SYSTEMS.forEach(function (sys, si) {
+      var sum = 0;
+      PARTIES.forEach(function (p) { sum += sys.seats[p.id] || 0; });
+      if (sum !== TOTAL_SEATS) {
+        console.warn('module-systems: "' + sys.name + '" sums to ' + sum + ', expected ' + TOTAL_SEATS);
+      }
+
+      var label = document.createElement('div');
+      label.className = 'system-label';
+      label.textContent = sys.name;
+      labelsRow.appendChild(label);
+
+      var bar = document.createElement('div');
+      bar.className = 'system-bar';
+      segs[si] = {};
+      PARTIES.forEach(function (p) {
+        var seg = document.createElement('div');
+        seg.className = 'seg';
+        seg.style.background = p.color;
+        var n = sys.seats[p.id] || 0;
+        seg.title = p.name + ': ' + n;
+        segs[si][p.id] = seg;
+        bar.appendChild(seg);
+      });
+      barsRow.appendChild(bar);
+
+      var count = document.createElement('div');
+      count.className = 'system-count';
+      counts[si] = count;
+      countsRow.appendChild(count);
+    });
+
+    var line = document.createElement('div');
+    line.className = 'majority-line';
+    barsRow.appendChild(line);
+
+    PARTIES.forEach(function (p) {
+      var btn = document.createElement('button');
+      btn.className = 'party-btn';
+      btn.type = 'button';
+      btn.setAttribute('aria-pressed', 'false');
+      btn.style.setProperty('--party-color', p.color);
+      btn.textContent = p.name;
+      btn.addEventListener('click', function () { toggle(p.id); });
+      partyListEl.appendChild(btn);
+      buttons[p.id] = btn;
+    });
+
+    document.getElementById('builderNote').textContent =
+      'Select parties to participate in a coalition using the buttons above. Majority = ' + MAJORITY + ' seats.';
+  }
+
+  // Positions every party's block in every column from the shared selection.
+  // Selected parties stack from the bottom in selection order; unselected ones
+  // collapse to zero height at the top of the stack.
+  function update() {
+    PARTIES.forEach(function (p) {
+      buttons[p.id].setAttribute('aria-pressed', selectedOrder.indexOf(p.id) !== -1);
+    });
+
+    SYSTEMS.forEach(function (sys, si) {
+      var cumulative = 0;
+      selectedOrder.forEach(function (id) {
+        var n = sys.seats[id] || 0;
+        var seg = segs[si][id];
+        seg.style.bottom = (cumulative / TOTAL_SEATS * 100) + '%';
+        seg.style.height = (n / TOTAL_SEATS * 100) + '%';
+        cumulative += n;
+      });
+      PARTIES.forEach(function (p) {
+        if (selectedOrder.indexOf(p.id) === -1) {
+          var seg = segs[si][p.id];
+          seg.style.bottom = (cumulative / TOTAL_SEATS * 100) + '%';
+          seg.style.height = '0%';
+        }
+      });
+
+      counts[si].textContent = cumulative;
+      counts[si].style.color = cumulative >= MAJORITY ? '#2BA84A' : 'var(--ink)';
+    });
+  }
+
+  function toggle(id) {
+    var idx = selectedOrder.indexOf(id);
+    if (idx === -1) selectedOrder.push(id);
+    else selectedOrder.splice(idx, 1);
+    update();
+    sendHeight();
+  }
+
+  build();
+  update();
+
+  // ---------------- report height to the parent site ----------------
+  function sendHeight() {
+    var h = document.documentElement.scrollHeight;
+    window.parent.postMessage({ sender: 'nowcast-module', height: h }, '*');
+  }
+  window.addEventListener('load', sendHeight);
+  window.addEventListener('resize', sendHeight);
+  if ('ResizeObserver' in window) {
+    new ResizeObserver(sendHeight).observe(document.body);
+  }
+  sendHeight();
+})();
+</script>
+
+</body>
+</html>
