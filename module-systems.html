@@ -342,7 +342,7 @@
     var diff = n - ref;
     if (diff === 0) return 'Matches PR';
     var seats = Math.abs(diff);
-    return (diff > 0 ? 'Over' : 'Under') + 'represented by ' + seats + (seats === 1 ? ' seat' : ' seats') + ' vs PR';
+    return (diff > 0 ? 'Over' : 'Under') + 'represented by ' + seats + (seats === 1 ? ' seat' : ' seats');
   }
 
   function showTip(seg, party, sys, e) {
