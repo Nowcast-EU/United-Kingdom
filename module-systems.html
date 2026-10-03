@@ -82,8 +82,31 @@
     right: 0;
     bottom: 0;
     height: 0;
-    transition: bottom 0.35s ease, height 0.35s ease;
+    transition: bottom 0.35s ease, height 0.35s ease, filter 0.15s ease, box-shadow 0.15s ease;
   }
+
+  .seg.is-hovered {
+    filter: brightness(1.12);
+    box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.55);
+    z-index: 1;
+  }
+
+  .seg-tooltip {
+    position: fixed;
+    z-index: 10;
+    display: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: rgba(26, 30, 35, 0.94);
+    color: #fff;
+    font-size: 0.8rem;
+    line-height: 1.3;
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  }
+
+  .seg-tooltip strong { display: block; }
 
   /* one line across all seven bars. --maj-frac is set from MAJORITY / TOTAL_SEATS.
      The 1px / 2px offsets account for the bars' 1px border. */
@@ -249,6 +272,37 @@
     return PARTIES.filter(function (p) { return p.id === id; })[0];
   }
 
+  // ---- hover tooltip + highlight ----
+  var tip = document.createElement('div');
+  tip.className = 'seg-tooltip';
+  document.body.appendChild(tip);
+  var hoveredSeg = null;
+
+  function showTip(seg, party, sys, e) {
+    if (hoveredSeg && hoveredSeg !== seg) hoveredSeg.classList.remove('is-hovered');
+    hoveredSeg = seg;
+    seg.classList.add('is-hovered');
+    var n = sys.seats[party.id] || 0;
+    tip.innerHTML = '<strong>' + party.name + ' \u2014 ' + sys.name + '</strong>' + n + (n === 1 ? ' seat' : ' seats');
+    tip.style.display = 'block';
+    moveTip(e);
+  }
+
+  function moveTip(e) {
+    var x = e.clientX + 14;
+    var y = e.clientY - tip.offsetHeight - 12;
+    if (y < 4) y = e.clientY + 18;
+    x = Math.min(x, window.innerWidth - tip.offsetWidth - 4);
+    tip.style.left = Math.max(4, x) + 'px';
+    tip.style.top = y + 'px';
+  }
+
+  function hideTip() {
+    if (hoveredSeg) hoveredSeg.classList.remove('is-hovered');
+    hoveredSeg = null;
+    tip.style.display = 'none';
+  }
+
   function build() {
     barsRow.style.setProperty('--maj-frac', MAJORITY / TOTAL_SEATS);
 
@@ -271,9 +325,10 @@
         var seg = document.createElement('div');
         seg.className = 'seg';
         seg.style.background = p.color;
-        var n = sys.seats[p.id] || 0;
-        seg.title = p.name + ': ' + n;
         segs[si][p.id] = seg;
+        seg.addEventListener('mouseenter', function (e) { showTip(seg, p, sys, e); });
+        seg.addEventListener('mousemove', moveTip);
+        seg.addEventListener('mouseleave', hideTip);
         bar.appendChild(seg);
       });
       barsRow.appendChild(bar);
