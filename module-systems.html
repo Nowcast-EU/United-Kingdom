@@ -231,6 +231,39 @@
     }
   }
 
+  /* "Toggle all" pill: same look as the party buttons, with a checkbox on the left */
+  .party-btn.toggle-all-btn {
+    --party-color: var(--ink-soft);
+    gap: 6px;
+  }
+
+  .toggle-all-btn .check-box {
+    position: relative;
+    flex: none;
+    width: 13px;
+    height: 13px;
+    border: 1.5px solid currentColor;
+    border-radius: 3px;
+    background: transparent;
+  }
+
+  .toggle-all-btn[aria-pressed="true"] .check-box {
+    background: #fff;
+    border-color: #fff;
+  }
+
+  .toggle-all-btn[aria-pressed="true"] .check-box::after {
+    content: '';
+    position: absolute;
+    left: 3.5px;
+    top: 0.5px;
+    width: 3px;
+    height: 7px;
+    border: solid var(--party-color);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
   .builder-note {
     font-size: 0.8rem;
     color: #000000;
@@ -314,6 +347,10 @@
   var TOTAL_SEATS = 650;
   var MAJORITY = 326;
 
+  // Order used by the "Toggle all" button, bottom of the bar first.
+  // Any party left out is added at the end automatically.
+  var TOGGLE_ALL_ORDER = ['lab', 'con', 'ref', 'ld', 'snp', 'pc', 'grn', 'sf', 'uup', 'dup', 'sdl', 'tuv', 'all', 'res', 'oth'];
+
   // The column treated as "perfect PR": the benchmark for over/under-representation.
   // Defaults to the last column in SYSTEMS - change the index if you reorder.
   var PR_REFERENCE_INDEX = SYSTEMS.length - 1;
@@ -332,7 +369,8 @@
 
   var segs = [];     // segs[systemIndex][partyId] -> element
   var counts = [];   // counts[systemIndex] -> element
-  var buttons = {};  // buttons[partyId] -> element
+  var allBtn = null; // the "Toggle all" button
+  var buttons = {};
 
   function partyById(id) {
     return PARTIES.filter(function (p) { return p.id === id; })[0];
@@ -510,6 +548,14 @@
       buttons[p.id] = btn;
     });
 
+    allBtn = document.createElement('button');
+    allBtn.className = 'party-btn toggle-all-btn';
+    allBtn.type = 'button';
+    allBtn.setAttribute('aria-pressed', 'false');
+    allBtn.innerHTML = '<span class="check-box" aria-hidden="true"></span>Toggle all';
+    allBtn.addEventListener('click', toggleAll);
+    partyListEl.appendChild(allBtn);
+
     document.getElementById('builderNote').textContent =
       'Select parties to participate in a coalition using the buttons above. For hypothetical scenarios, the majority threshold is fixed at 326';
   }
@@ -521,6 +567,7 @@
     PARTIES.forEach(function (p) {
       buttons[p.id].setAttribute('aria-pressed', selectedOrder.indexOf(p.id) !== -1);
     });
+    allBtn.setAttribute('aria-pressed', selectedOrder.length === PARTIES.length);
 
     SYSTEMS.forEach(function (sys, si) {
       var cumulative = 0;
@@ -538,6 +585,24 @@
       counts[si].textContent = cumulative;
       counts[si].style.color = cumulative >= MAJORITY ? '#008500' : 'var(--ink)';
     });
+  }
+
+  // TOGGLE_ALL_ORDER, with unknown ids dropped and any missing parties appended
+  function allOrder() {
+    var ids = TOGGLE_ALL_ORDER.filter(function (id) { return partyById(id); });
+    PARTIES.forEach(function (p) { if (ids.indexOf(p.id) === -1) ids.push(p.id); });
+    return ids;
+  }
+
+  function toggleAll() {
+    if (selectedOrder.length === PARTIES.length) {
+      selectedOrder = [];
+    } else {
+      selectedOrder = allOrder();
+      selectedOrder.forEach(function (id) { stackSeq[id] = ++seqCounter; });
+    }
+    update();
+    sendHeight();
   }
 
   function toggle(id) {
