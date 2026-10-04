@@ -469,6 +469,7 @@
       label.className = 'system-label';
       var nameEl = document.createElement('span');
       nameEl.textContent = sys.name;
+      if (sys.id === 'fptp') nameEl.style.fontWeight = '800';
       label.appendChild(nameEl);
       if (sys.info) {
         var infoBtn = document.createElement('button');
