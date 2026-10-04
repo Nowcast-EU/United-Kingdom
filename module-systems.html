@@ -385,7 +385,10 @@
   infoPopup.setAttribute('role', 'tooltip');
   document.body.appendChild(infoPopup);
 
+  var infoOwner = null; // which icon the popup currently belongs to
+
   function showInfo(btn, text) {
+    infoOwner = btn;
     infoPopup.textContent = text;
     infoPopup.style.display = 'block';
     var r = btn.getBoundingClientRect();
@@ -399,11 +402,13 @@
   }
 
   function hideInfo() {
+    infoOwner = null;
     infoPopup.style.display = 'none';
   }
 
-  document.addEventListener('click', function (e) {
+  document.addEventListener('pointerdown', function (e) {
     if (!e.target.closest('.sys-info')) hideInfo();
+    if (e.pointerType !== 'mouse' && !e.target.closest('.seg')) hideTip();
   });
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') hideInfo();
@@ -430,11 +435,22 @@
         infoBtn.className = 'sys-info';
         infoBtn.textContent = 'i';
         infoBtn.setAttribute('aria-label', 'About ' + sys.name);
-        infoBtn.addEventListener('mouseenter', function () { showInfo(infoBtn, sys.info); });
-        infoBtn.addEventListener('mouseleave', hideInfo);
-        infoBtn.addEventListener('focus', function () { showInfo(infoBtn, sys.info); });
+        var lastType = 'mouse';
+        infoBtn.addEventListener('pointerdown', function (e) { lastType = e.pointerType; });
+        infoBtn.addEventListener('pointerenter', function (e) {
+          if (e.pointerType === 'mouse') showInfo(infoBtn, sys.info);
+        });
+        infoBtn.addEventListener('pointerleave', function (e) {
+          if (e.pointerType === 'mouse') hideInfo();
+        });
+        infoBtn.addEventListener('focus', function () {
+          if (infoBtn.matches(':focus-visible')) showInfo(infoBtn, sys.info);
+        });
         infoBtn.addEventListener('blur', hideInfo);
-        infoBtn.addEventListener('click', function () { showInfo(infoBtn, sys.info); });
+        infoBtn.addEventListener('click', function () {
+          if (lastType !== 'mouse' && infoOwner === infoBtn) hideInfo();
+          else showInfo(infoBtn, sys.info);
+        });
         label.appendChild(infoBtn);
       }
       labelsRow.appendChild(label);
@@ -447,9 +463,24 @@
         seg.className = 'seg';
         seg.style.background = p.color;
         segs[si][p.id] = seg;
-        seg.addEventListener('mouseenter', function (e) { showTip(seg, p, sys, e); });
-        seg.addEventListener('mousemove', moveTip);
-        seg.addEventListener('mouseleave', hideTip);
+        seg.addEventListener('pointerenter', function (e) {
+          if (e.pointerType === 'mouse') showTip(seg, p, sys, e);
+        });
+        seg.addEventListener('pointermove', function (e) {
+          if (e.pointerType === 'mouse') moveTip(e);
+        });
+        seg.addEventListener('pointerleave', function (e) {
+          if (e.pointerType === 'mouse') hideTip();
+        });
+        var segTap = { touch: false, wasOpen: false };
+        seg.addEventListener('pointerdown', function (e) {
+          segTap.touch = e.pointerType !== 'mouse';
+          segTap.wasOpen = segTap.touch && hoveredSeg === seg;
+        });
+        seg.addEventListener('click', function (e) {
+          if (!segTap.touch) return;
+          if (segTap.wasOpen) hideTip(); else showTip(seg, p, sys, e);
+        });
         bar.appendChild(seg);
       });
       barsRow.appendChild(bar);
