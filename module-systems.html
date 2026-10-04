@@ -121,6 +121,8 @@
 
   .system-bar {
     position: relative;
+    display: flex;
+    flex-direction: column-reverse; /* lowest-ordered block sits at the bottom */
     height: var(--bar-h);
     border: 1px solid var(--divider);
     border-radius: 8px;
@@ -130,12 +132,10 @@
 
   /* solid block of colour for each party, stacked from the bottom up */
   .seg {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    flex: none;
+    width: 100%;
     height: 0;
-    transition: bottom 0.35s ease, height 0.35s ease, filter 0.15s ease, box-shadow 0.15s ease;
+    transition: height 0.35s ease, filter 0.15s ease, box-shadow 0.15s ease;
   }
 
   .seg.is-hovered {
@@ -322,6 +322,8 @@
   // STATE + DOM
   // ---------------------------------------------------------------
   var selectedOrder = []; // party ids, in the order they were selected
+  var stackSeq = {};      // party id -> stacking position (higher = nearer the top of the bar)
+  var seqCounter = 0;
 
   var labelsRow = document.getElementById('labelsRow');
   var barsRow = document.getElementById('barsRow');
@@ -525,16 +527,12 @@
       selectedOrder.forEach(function (id) {
         var n = sys.seats[id] || 0;
         var seg = segs[si][id];
-        seg.style.bottom = (cumulative / TOTAL_SEATS * 100) + '%';
+        seg.style.order = stackSeq[id];
         seg.style.height = (n / TOTAL_SEATS * 100) + '%';
         cumulative += n;
       });
       PARTIES.forEach(function (p) {
-        if (selectedOrder.indexOf(p.id) === -1) {
-          var seg = segs[si][p.id];
-          seg.style.bottom = (cumulative / TOTAL_SEATS * 100) + '%';
-          seg.style.height = '0%';
-        }
+        if (selectedOrder.indexOf(p.id) === -1) segs[si][p.id].style.height = '0%';
       });
 
       counts[si].textContent = cumulative;
@@ -544,7 +542,7 @@
 
   function toggle(id) {
     var idx = selectedOrder.indexOf(id);
-    if (idx === -1) selectedOrder.push(id);
+    if (idx === -1) { selectedOrder.push(id); stackSeq[id] = ++seqCounter; }
     else selectedOrder.splice(idx, 1);
     update();
     sendHeight();
