@@ -45,7 +45,6 @@
       against
       <select id="xvar" class="inline-select" aria-label="X axis variable"></select>
     </div>
-    <label class="chk"><input type="checkbox" id="trend" checked> Line of best fit</label>
   </div>
 
   <div class="chartbox"><canvas id="chart"></canvas></div>
@@ -313,7 +312,6 @@ $('party').onchange  = e=>{state.party=e.target.value; update();};
 $('metric').onchange = e=>{state.metric=e.target.value; fillPeriods(); update();};
 $('period').onchange = e=>{state.period=e.target.value; update();};
 $('xvar').onchange   = e=>{state.xvar=e.target.value; update();};
-$('trend').onchange  = e=>{state.trend=e.target.checked; update();};
 
 /* ============================================================
    IFRAME HEIGHT  →  parent page
