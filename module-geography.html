@@ -59,7 +59,6 @@
     <div class="row">
       <span class="lbl">X axis</span>
       <select id="xvar" aria-label="X axis variable"></select>
-      <label class="chk" id="logWrap"><input type="checkbox" id="logx"> Log scale</label>
       <label class="chk"><input type="checkbox" id="trend" checked> Line of best fit</label>
     </div>
   </div>
@@ -120,7 +119,7 @@ const XVARS = [
    STATE + DOM
    ============================================================ */
 const $ = id => document.getElementById(id);
-const state = {party:'LAB', metric:'share', period:'y2024', xvar:'leave', log:false, trend:true, hi:-1};
+const state = {party:'LAB', metric:'share', period:'y2024', xvar:'leave', trend:true, hi:-1};
 
 $('party').innerHTML  = Object.keys(PARTIES).map(k=>`<option value="${k}">${k}</option>`).join('');
 $('metric').innerHTML = '<option value="share">vote share</option><option value="swing">swing</option>';
@@ -230,7 +229,7 @@ function yAxisTitle(){
 
 function update(){
   const xv = XVARS.find(x=>x.id===state.xvar);
-  const useLog = !!(xv.log && state.log);
+  const useLog = xv.id === 'area';
   const xs = DATA.x[xv.id], ys = yValues(), col = PARTIES[state.party].colour;
 
   /* points */
@@ -288,10 +287,6 @@ function update(){
   }
   $('note').textContent = note; $('note').className = 'note'+(warn?' warn':'');
 
-  /* log checkbox only meaningful for area */
-  const canLog = !!xv.log;
-  $('logx').disabled = !canLog; $('logWrap').classList.toggle('off', !canLog);
-
   chart.update();
   const sel = $('party'); sel.style.backgroundColor = col;
   sel.classList.toggle('dark', state.party==='LDM');   /* amber needs dark text */
@@ -305,7 +300,6 @@ $('party').onchange  = e=>{state.party=e.target.value; update();};
 $('metric').onchange = e=>{state.metric=e.target.value; fillPeriods(); update();};
 $('period').onchange = e=>{state.period=e.target.value; update();};
 $('xvar').onchange   = e=>{state.xvar=e.target.value; update();};
-$('logx').onchange   = e=>{state.log=e.target.checked; update();};
 $('trend').onchange  = e=>{state.trend=e.target.checked; update();};
 
 /* ============================================================
