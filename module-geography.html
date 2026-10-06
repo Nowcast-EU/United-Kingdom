@@ -62,11 +62,6 @@
       <label class="chk" id="logWrap"><input type="checkbox" id="logx"> Log scale</label>
       <label class="chk"><input type="checkbox" id="trend" checked> Line of best fit</label>
     </div>
-    <div class="row">
-      <span class="lbl">Find</span>
-      <input type="text" id="find" list="seatlist" placeholder="Highlight a constituency…" autocomplete="off">
-      <datalist id="seatlist"></datalist>
-    </div>
   </div>
 
   <div class="chartbox"><canvas id="chart"></canvas></div>
@@ -130,7 +125,6 @@ const state = {party:'LAB', metric:'share', period:'y2024', xvar:'leave', log:fa
 $('party').innerHTML  = Object.keys(PARTIES).map(k=>`<option value="${k}">${k}</option>`).join('');
 $('metric').innerHTML = '<option value="share">vote share</option><option value="swing">swing</option>';
 $('xvar').innerHTML   = XVARS.map(x=>`<option value="${x.id}">${x.label}</option>`).join('');
-$('seatlist').innerHTML = NAMES.map(n=>`<option value="${n.replace(/"/g,'&quot;')}">`).join('');
 
 const PERIOD_MAP = {  /* keep the nearest equivalent when switching share <-> swing */
   y2019:'19_24', y2024:'19_24', proj:'24_proj',
@@ -313,11 +307,6 @@ $('period').onchange = e=>{state.period=e.target.value; update();};
 $('xvar').onchange   = e=>{state.xvar=e.target.value; update();};
 $('logx').onchange   = e=>{state.log=e.target.checked; update();};
 $('trend').onchange  = e=>{state.trend=e.target.checked; update();};
-$('find').oninput    = e=>{
-  const v = e.target.value.trim().toLowerCase();
-  state.hi = v ? NAMES.findIndex(n=>n.toLowerCase()===v) : -1;
-  update();
-};
 
 /* ============================================================
    IFRAME HEIGHT  →  parent page
