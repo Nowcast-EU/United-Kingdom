@@ -7,28 +7,18 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root{
-    --bg:#ffffff; --fg:#1b1f24; --muted:#5d6670; --line:#dfe3e8; --panel:#f5f6f8; --accent:#1b1f24;
+    --bg:#f8faf9; --fg:#1b1f24; --muted:#5d6670; --line:#dfe3e8; --panel:#f5f6f8; --accent:#1b1f24;
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);
     font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
   .wrap{margin:0;padding:0;display:flow-root}
-  .controls{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;
-    display:flex;flex-direction:column;gap:10px}
-  .row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
-  .lbl{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);min-width:56px}
-  .sentence{font-size:18px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
-  select,input[type=text]{
-    font:inherit;color:var(--fg);background:#fff;border:1px solid #c3c9d1;border-radius:8px;
-    padding:5px 28px 5px 10px;cursor:pointer;appearance:none;-webkit-appearance:none;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M1 1l4 4 4-4' fill='none' stroke='%235d6670' stroke-width='1.6'/></svg>");
-    background-repeat:no-repeat;background-position:right 10px center}
-  select:hover,select:focus,input[type=text]:focus{border-color:var(--accent);outline:none}
-  select.party{font-weight:700;color:#fff;border-color:transparent;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M1 1l4 4 4-4' fill='none' stroke='white' stroke-width='1.6'/></svg>")}
-  select.party.dark{color:#1b1f24;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M1 1l4 4 4-4' fill='none' stroke='%231b1f24' stroke-width='1.6'/></svg>")}
-  select.party option{color:#1b1f24;background:#fff;font-weight:400}
+  .controls{display:flex;flex-direction:column;gap:8px}
+  .sentence{font-size:1rem;font-weight:400;line-height:1.6}
+  .inline-select{
+    border:0;border-bottom:2px solid var(--fg);background:none;
+    font:inherit;font-weight:700;color:var(--fg);cursor:pointer;
+  }
   input[type=text]{cursor:text;background-image:none;padding-right:10px;min-width:210px}
   label.chk{display:inline-flex;align-items:center;gap:6px;font-size:14px;cursor:pointer;user-select:none}
   label.chk.off{opacity:.4;cursor:default}
@@ -47,19 +37,15 @@
 <body>
 <div class="wrap">
   <div class="controls">
-    <div class="row">
-      <div class="sentence">
-        <span>Show</span>
-        <select id="party" class="party" aria-label="Party"></select>
-        <select id="metric" aria-label="Measure"></select>
-        <select id="period" aria-label="Election or period"></select>
-      </div>
+    <div class="sentence">
+      Show
+      <select id="party" class="inline-select" aria-label="Party"></select>
+      <select id="metric" class="inline-select" aria-label="Measure"></select>
+      <select id="period" class="inline-select" aria-label="Election or period"></select>
+      against
+      <select id="xvar" class="inline-select" aria-label="X axis variable"></select>
     </div>
-    <div class="row sentence">
-      <span>against</span>
-      <select id="xvar" aria-label="X axis variable"></select>
-      <label class="chk"><input type="checkbox" id="trend" checked> Line of best fit</label>
-    </div>
+    <label class="chk"><input type="checkbox" id="trend" checked> Line of best fit</label>
   </div>
 
   <div class="chartbox"><canvas id="chart"></canvas></div>
@@ -232,6 +218,23 @@ function yAxisTitle(){
     : `${PARTIES[state.party].name} swing, ${periodLabel()} (percentage points)`;
 }
 
+  function sizeSelects(){
+  ['party','metric','period','xvar'].forEach(id=>{
+    const el = $(id);
+    const span = document.createElement('span');
+    const cs = getComputedStyle(el);
+    span.style.font = cs.font;
+    span.style.fontWeight = cs.fontWeight;
+    span.style.position = 'absolute';
+    span.style.visibility = 'hidden';
+    span.style.whiteSpace = 'pre';
+    span.textContent = el.options[el.selectedIndex].text;
+    document.body.appendChild(span);
+    el.style.width = (span.offsetWidth + 24) + 'px';
+    document.body.removeChild(span);
+  });
+}
+
 function update(){
   const xv = XVARS.find(x=>x.id===state.xvar);
   const useLog = xv.id === 'area';
@@ -297,8 +300,8 @@ if(state.metric==='swing'){
   $('note').textContent = note; $('note').className = 'note'+(warn?' warn':'');
 
   chart.update();
-  const sel = $('party'); sel.style.backgroundColor = col;
-  sel.classList.toggle('dark', state.party==='LDM');   /* amber needs dark text */
+  sizeSelects();
+  $('party').style.borderBottomColor = col;
   postHeight();
 }
 
