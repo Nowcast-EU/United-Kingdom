@@ -316,11 +316,12 @@ $('trend').onchange  = e=>{state.trend=e.target.checked; update();};
    (match the message shape used by your other modules)
    ============================================================ */
 function postHeight(){
-  const h = document.documentElement.scrollHeight;
-  try{ parent.postMessage({type:'nowcast-height', module:'geography', height:h}, '*'); }catch(e){}
+  var h = Math.ceil(document.querySelector('.wrap').getBoundingClientRect().height);
+  try{ window.parent.postMessage({ sender: 'nowcast-module', height: h }, '*'); }catch(e){}
 }
-new ResizeObserver(postHeight).observe(document.body);
 window.addEventListener('load', postHeight);
+window.addEventListener('resize', postHeight);
+if('ResizeObserver' in window) new ResizeObserver(postHeight).observe(document.querySelector('.wrap'));
 
 fillPeriods();
 update();
