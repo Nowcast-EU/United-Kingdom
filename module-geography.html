@@ -18,6 +18,9 @@
   .main-panel{min-width:0}
   .side-panel{border-left:1px solid var(--line);padding-left:14px;font-size:0.9rem;line-height:1.6}
   .side-panel p{margin:0;font-size:0.9rem}
+  .source{font-size:12.5px;font-style:italic;color:#999999;margin-top:4px}
+  .source a{color:inherit;text-decoration:underline}
+  .source a:hover{color:#666666}
   .sentence{font-size:1rem;font-weight:400;line-height:1.6}
   .inline-select{
     border:0;border-bottom:2px solid var(--fg);background:none;
@@ -62,7 +65,8 @@
 
   <div class="chartbox"><canvas id="chart"></canvas></div>
   <div class="stats" id="stats"></div>
-  <div class="note" id="note"></div>
+<div class="note" id="note"></div>
+<div class="source" id="source"></div>
 </div>
 
 <div class="side-panel">
@@ -238,6 +242,32 @@ function yAxisTitle(){
     : `${PARTIES[state.party].name} swing, ${periodLabel()} (percentage points)`;
 }
 
+  const SOURCES = {
+  y: {
+    y2019: {label:'EDIT ME: 2019 results source', url:''},
+    y2024: {label:'House of Commons Library: 2024 general election results', url:'https://electionresults.parliament.uk/general-elections/6'},
+    proj:  {label:'Nowcast UK projection', url:''}
+  },
+  x: {
+    leave: {label:'EDIT ME: Leave % source', url:''},
+    area:  {label:'EDIT ME: area source', url:''},
+    lat:   {label:'EDIT ME: latitude source', url:''},
+    imd:   {label:'MHCLG: English Indices of Deprivation 2025', url:'https://www.gov.uk/government/statistics/english-indices-of-deprivation-2025'},
+    cpov:  {label:'EDIT ME: child poverty source', url:''},
+    a1824: {label:'EDIT ME: age data source', url:''},
+    a65:   {label:'EDIT ME: age data source', url:''},
+    born:  {label:'EDIT ME: country of birth source', url:''}
+  }
+};
+function updateSource(){
+  const p = PERIODS[state.metric].find(o=>o.id===state.period);
+  const parts = [p.a, p.b].filter(Boolean).map(k=>SOURCES.y[k]).concat(SOURCES.x[state.xvar]);
+  const unique = [...new Map(parts.map(s=>[s.label, s])).values()];
+  $('source').innerHTML = 'Source: ' + unique.map(s =>
+    s.url ? `<a href="${s.url}" target="_blank" rel="noopener">${s.label}</a>` : s.label
+  ).join('; ');
+}
+
   function sizeSelects(){
   ['party','metric','period','xvar'].forEach(id=>{
     const el = $(id);
@@ -321,6 +351,7 @@ if(state.metric==='swing'){
 
   chart.update();
   sizeSelects();
+  updateSource();
   $('party').style.borderBottomColor = col;
   postHeight();
 }
