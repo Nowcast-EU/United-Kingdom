@@ -276,7 +276,12 @@ const ys = pts.map(p=>p.y);
     }
     tr.data = line;
     const r = f.r, strength = Math.abs(r)<.2?'very weak':Math.abs(r)<.4?'weak':Math.abs(r)<.6?'moderate':Math.abs(r)<.8?'strong':'very strong';
-    statsHtml = `Correlation <b>r = ${r.toFixed(2).replace('-','−')}</b> (R² = ${(r*r).toFixed(2)}) across ${xs.length} English constituencies – ${strength} ${r>=0?'positive':'negative'}${useLog?' (on log scale)':''}.`;
+const correlationLabel =
+  Math.abs(r) <= 0.10
+    ? 'virtually no correlation'
+    : `${strength} ${r>=0?'positive':'negative'}`;
+
+statsHtml = `Correlation <b>r = ${r.toFixed(2).replace('-','−')}</b> (R² = ${(r*r).toFixed(2)}) across ${xs.length} English constituencies – ${correlationLabel}${useLog?' (on log scale)':''}.`;
   } else { tr.data = []; statsHtml = `${xs.length} English constituencies.`; }
   $('stats').innerHTML = statsHtml;
 
