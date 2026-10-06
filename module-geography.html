@@ -67,9 +67,9 @@ const DATA = {"y2019":{"LAB":[22.13,21.52,36.84,26.81,15.68,25.58,23.77,47.53,22
 const PARTIES = {
   LAB:{name:'Labour',            colour:'#E4003B'},
   CON:{name:'Conservative',      colour:'#0087DC'},
-  RFM:{name:'Reform UK',         colour:'#12B6CF'},
-  LDM:{name:'Liberal Democrat',  colour:'#FAA61A'},
-  GRN:{name:'Green',             colour:'#02A95B'}
+  RFM:{name:'Reform UK',         colour:'#34d8ef'},
+  LDM:{name:'Lib Dem',           colour:'#FAA61A'},
+  GRN:{name:'Green',             colour:'#6ab023'}
 };
 const YEAR_LABEL = {y2019:'2019', y2024:'2024', proj:'Projected'};
 
@@ -105,7 +105,7 @@ const XVARS = [
 const $ = id => document.getElementById(id);
 const state = {party:'LAB', metric:'share', period:'y2024', xvar:'leave', trend:true, hi:-1};
 
-$('party').innerHTML  = Object.keys(PARTIES).map(k=>`<option value="${k}">${k}</option>`).join('');
+$('party').innerHTML  = Object.keys(PARTIES).map(k=>`<option value="${k}">${PARTIES[k].name}</option>`).join('');
 $('metric').innerHTML = '<option value="share">vote share</option><option value="swing">swing</option>';
 $('xvar').innerHTML   = XVARS.map(x=>`<option value="${x.id}">${x.label}</option>`).join('');
 
