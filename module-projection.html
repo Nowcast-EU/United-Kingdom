@@ -1077,7 +1077,7 @@ counterEl.style.color = total >= MAJORITY ? '#2BA84A' : 'var(--ink)';
       selectedOrder.splice(idx, 1);
     }
     render();
-    sendHeight();
+    postHeight();
   }
 
 render();
@@ -1086,18 +1086,17 @@ requestAnimationFrame(function () {
 });
 
 // ---------------- report height to the parent site ----------------
-  // See module-resize-snippet.html for the general version of this.
-  function sendHeight() {
-    var h = document.documentElement.scrollHeight;
-    window.parent.postMessage({ sender: 'nowcast-module', height: h }, '*');
+  function postHeight() {
+    var h = Math.ceil(document.body.getBoundingClientRect().height);
+    try { window.parent.postMessage({ sender: 'nowcast-module', height: h }, '*'); } catch (e) {}
   }
-window.addEventListener('load', sendHeight);
-window.addEventListener('resize', function () { sendHeight(); buildDotGrid(); });
+window.addEventListener('load', postHeight);
+window.addEventListener('resize', function () { postHeight(); buildDotGrid(); });
 if ('ResizeObserver' in window) {
-  new ResizeObserver(sendHeight).observe(document.body);
+  new ResizeObserver(postHeight).observe(document.body);
   new ResizeObserver(buildDotGrid).observe(fillBarEl);
 }
-sendHeight();
+postHeight();
 })();
 </script>
 
