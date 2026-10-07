@@ -127,7 +127,7 @@ const XVARS = [
    STATE + DOM
    ============================================================ */
 const $ = id => document.getElementById(id);
-const state = {party:'LAB', metric:'share', period:'y2024', xvar:'leave', trend:true, hi:-1};
+const state = {party:'CON', metric:'share', period:'y2024', xvar:'area', trend:true, hi:-1};
 
 $('party').innerHTML  = Object.keys(PARTIES).map(k=>`<option value="${k}">${PARTIES[k].name}</option>`).join('');
 $('metric').innerHTML = '<option value="share">vote share</option><option value="swing">swing</option>';
