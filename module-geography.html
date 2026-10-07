@@ -643,7 +643,7 @@ const YEAR_LABEL = {2019:'2019', 2024:'2024', proj:'projected'};
 const ELECTIONS = [
   {id:'2019', label:'2019'},
   {id:'2024', label:'2024'},
-  {id:'proj', label:'Projected'}
+  {id:'proj', label:'projected'}
 ];
 const PERIODS = {
   share: ELECTIONS.map(e=>({id:e.id, label:e.label, a:e.id})),
@@ -821,7 +821,7 @@ function yAxisShort(){
 }
 function yAxisTitle(){
   return state.metric==='share'
-    ? `${PARTIES[state.party].name} vote share, ${periodLabel()==='Projected'?'projected':periodLabel()} (%)`
+    ? `${PARTIES[state.party].name} vote share, ${periodLabel()==='projected'?'projected':periodLabel()} (%)`
     : `${PARTIES[state.party].name} swing, ${periodLabel()} (percentage points)`;
 }
 
