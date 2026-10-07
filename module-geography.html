@@ -42,8 +42,11 @@
   }
   
   @media (max-width:640px){
-    .sentence{font-size:16px}
-    .chartbox{height:360px}
+    .sentence{font-size:14px}
+    .chartbox{height:280px;margin-top:8px}
+    .stats{font-size:12px}
+    .note,.source{font-size:11px}
+    .side-panel p{font-size:12.5px;line-height:1.5}
     input[type=text]{min-width:0;flex:1}
   }
 </style>
@@ -767,6 +770,9 @@ function pearson(xs,ys){
 /* ============================================================
    CHART
    ============================================================ */
+
+const isMobile = () => window.matchMedia('(max-width:640px)').matches;
+  
 const hiPlugin = {
   id:'hiLabel',
   afterDatasetsDraw(chart){
@@ -911,6 +917,27 @@ const ys = pts.map(p=>p.y);
   sy.beginAtZero = state.metric==='share';
   sy.min = state.metric==='share' ? 0 : undefined;
 
+    /* mobile sizing */
+  const m = isMobile();
+  ds0.pointRadius      = m ? 2.5 : 3.6;
+  ds0.pointHoverRadius = m ? 4.5 : 6;
+  ds0.pointHitRadius   = m ? 8 : 6;            /* slightly larger hit area for fingers */
+  chart.data.datasets[1].borderWidth = m ? 1.5 : 2;
+  chart.data.datasets[1].borderDash  = m ? [5,4] : [7,5];
+  chart.data.datasets[2].pointRadius      = m ? 6 : 8;
+  chart.data.datasets[2].pointBorderWidth = m ? 2 : 2.5;
+
+  const tickFont  = {size: m ? 10 : 12};
+  const titleFont = {size: m ? 11 : 12, weight:'600'};
+  sx.ticks.font = tickFont;   sy.ticks.font = tickFont;
+  sx.title.font = titleFont;  sy.title.font = titleFont;
+  sx.ticks.maxTicksLimit = m ? 6 : 9;
+
+  const tt = chart.options.plugins.tooltip;
+  tt.padding   = m ? 7 : 10;
+  tt.titleFont = {size: m ? 12 : 14, weight:'700'};
+  tt.bodyFont  = {size: m ? 11 : 12};
+
   /* line of best fit (fitted on log10(x) when log scale is on) */
   const tr = chart.data.datasets[1];
   let statsHtml = '';
@@ -973,6 +1000,11 @@ window.addEventListener('load', postHeight);
 window.addEventListener('resize', postHeight);
 if('ResizeObserver' in window) new ResizeObserver(postHeight).observe(document.querySelector('.wrap'));
 
+let wasMobile = isMobile();
+window.addEventListener('resize', ()=>{
+  if(isMobile() !== wasMobile){ wasMobile = isMobile(); update(); }
+});
+  
 $('party').value  = state.party;
 fillMetrics();
 fillPeriods();
