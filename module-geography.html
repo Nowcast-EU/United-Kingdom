@@ -292,13 +292,12 @@ function update(){
 const rawXs = DATA.x[xv.id], rawYs = yValues(), col = PARTIES[state.party].colour;
 
 /* points — exclude constituencies where the party has no valid vote-share data */
-const pts = rawXs
-  .map((x,i)=>({x, y:rawYs[i], i}))
-  .filter(p=>p.y!==null);
+const allPts = rawXs.map((x,i)=>({x, y:rawYs[i], i}));
+const pts = allPts.filter(p=>p.y!==null);
 const xs = pts.map(p=>p.x);
 const ys = pts.map(p=>p.y);
   const ds0 = chart.data.datasets[0];
-  ds0.data = pts; ds0.backgroundColor = col+'99'; ds0.borderColor = col; ds0.hoverBackgroundColor = col;
+  ds0.data = allPts; ds0.backgroundColor = col+'99'; ds0.borderColor = col; ds0.hoverBackgroundColor = col;
 
   /* axes: titles, formatting, scale type */
   const sx = chart.options.scales.x, sy = chart.options.scales.y;
