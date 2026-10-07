@@ -924,7 +924,7 @@ const ys = pts.map(p=>p.y);
       line.push({x, y:f.my + f.slope*(t-f.mx)});
     }
     tr.data = line;
-    const r = f.r, strength = Math.abs(r)<.2?'very weak':Math.abs(r)<.4?'weak':Math.abs(r)<.6?'moderate':Math.abs(r)<.8?'strong':'very strong';
+    const r = f.r, strength = Math.abs(r)<.2?'very weak':Math.abs(r)<.4?'weak':Math.abs(r)<.7?'moderate':Math.abs(r)<.8?'strong':'very strong';
 const correlationLabel =
   Math.abs(r) <= 0.10
     ? 'virtually no correlation'
