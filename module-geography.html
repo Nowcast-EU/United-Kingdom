@@ -377,6 +377,10 @@ window.addEventListener('resize', postHeight);
 if('ResizeObserver' in window) new ResizeObserver(postHeight).observe(document.querySelector('.wrap'));
 
 fillPeriods();
+$('party').value  = state.party;
+$('metric').value = state.metric;
+$('period').value = state.period;
+$('xvar').value   = state.xvar;
 update();
 </script>
 </body>
