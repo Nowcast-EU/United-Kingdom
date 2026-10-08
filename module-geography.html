@@ -791,6 +791,96 @@ const hiPlugin = {
   }
 };
 
+  /* ---------- custom leader-line tooltip ---------- */
+const tip = {idx:-1, ds:0};
+
+/* Chart.js calls this whenever the hovered point changes */
+function tipExternal(ctx){
+  const t = ctx.tooltip;
+  if(t.opacity===0 || !t.dataPoints || !t.dataPoints.length){ tip.idx = -1; return; }
+  tip.idx = t.dataPoints[0].dataIndex;
+  tip.ds  = t.dataPoints[0].datasetIndex;
+}
+
+const tipPlugin = {
+  id:'leaderTip',
+  afterDraw(chart){
+    if(tip.idx<0 || tip.ds!==0) return;
+    const data = chart.data.datasets[0].data;
+    const meta = chart.getDatasetMeta(0);
+    const el = meta.data[tip.idx], raw = data[tip.idx];
+    if(!el || !raw || raw.y===null || !Number.isFinite(el.x) || !Number.isFinite(el.y)) return;
+
+    const m = isMobile(), ctx = chart.ctx, a = chart.chartArea;
+    const fs = m ? 10 : 11, pad = m ? 5 : 6, lh = fs + 3;
+    const L  = m ? 22 : 28;                       /* base leader-line length */
+    const xv = XVARS.find(x=>x.id===state.xvar);
+    const title = NAMES[raw.i];
+    const lines = [
+      yAxisShort()+': '+fmtY(raw.y),
+      xv.label.replace(/ \(.*\)/,'')+': '+xv.fmt(raw.x)
+    ];
+
+    /* measure the box */
+    ctx.save();
+    ctx.font = `700 ${fs+1}px system-ui,sans-serif`;
+    let w = ctx.measureText(title).width;
+    ctx.font = `400 ${fs}px system-ui,sans-serif`;
+    lines.forEach(l => { w = Math.max(w, ctx.measureText(l).width); });
+    const bw = w + pad*2, bh = lh*(lines.length+1) + pad*2;
+
+    /* pixel positions of all other visible dots */
+    const pts = [];
+    meta.data.forEach((p,i)=>{
+      if(i===tip.idx || !data[i] || data[i].y===null) return;
+      if(Number.isFinite(p.x) && Number.isFinite(p.y)) pts.push(p);
+    });
+
+    /* try 8 directions (0/45/90... degrees) at two distances, keep the clearest */
+    const dirs = [[1,-1],[-1,-1],[1,1],[-1,1],[1,0],[-1,0],[0,-1],[0,1]];
+    let best = null;
+    [L, L*1.9].forEach((d, di)=>{
+      dirs.forEach(([dx,dy], k)=>{
+        const n = Math.hypot(dx,dy), ux = dx/n, uy = dy/n;
+        const ex = el.x + ux*d, ey = el.y + uy*d;               /* line end = box anchor */
+        const bx = dx>0 ? ex : dx<0 ? ex-bw : ex-bw/2;
+        const by = dy>0 ? ey : dy<0 ? ey-bh : ey-bh/2;
+
+        const over = Math.max(0,a.left-bx) + Math.max(0,bx+bw-a.right)
+                   + Math.max(0,a.top-by)  + Math.max(0,by+bh-a.bottom);
+        let hits = 0;
+        for(const p of pts){
+          if(p.x>bx-4 && p.x<bx+bw+4 && p.y>by-4 && p.y<by+bh+4) hits++;
+        }
+        const score = over*1000 + hits*10 + di*3 + k*0.1;       /* lower is better */
+        if(!best || score<best.score) best = {score, ex, ey, bx, by, ux, uy};
+      });
+    });
+
+    /* dashed leader line */
+    const r  = (el.options && el.options.hoverRadius || 5) + 1;
+    ctx.strokeStyle = '#1b1f24';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3,3]);
+    ctx.beginPath();
+    ctx.moveTo(el.x + best.ux*r, el.y + best.uy*r);
+    ctx.lineTo(best.ex, best.ey);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    /* box + text */
+    ctx.fillStyle = '#1b1f24';
+    ctx.beginPath(); ctx.roundRect(best.bx, best.by, bw, bh, 4); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.textBaseline = 'top';
+    ctx.font = `700 ${fs+1}px system-ui,sans-serif`;
+    ctx.fillText(title, best.bx+pad, best.by+pad);
+    ctx.font = `400 ${fs}px system-ui,sans-serif`;
+    lines.forEach((l,i)=> ctx.fillText(l, best.bx+pad, best.by+pad+lh*(i+1)));
+    ctx.restore();
+  }
+};
+
 const chart = new Chart($('chart'),{
   type:'scatter',
   data:{datasets:[
@@ -805,19 +895,7 @@ const chart = new Chart($('chart'),{
     interaction:{mode:'nearest', intersect:true},
     plugins:{
       legend:{display:false},
-      tooltip:{
-        filter:item=>item.datasetIndex!==1,
-        displayColors:false,
-        padding:10,
-        titleFont:{size:14,weight:'700'},
-        callbacks:{
-          title:items=>NAMES[items[0].raw.i],
-          label:item=>{
-            const xv=XVARS.find(x=>x.id===state.xvar);
-            return [yAxisShort()+': '+fmtY(item.raw.y), xv.label.replace(/ \(.*\)/,'')+': '+xv.fmt(item.raw.x)];
-          }
-        }
-      }
+       tooltip:{ enabled:false, external:tipExternal }
     },
     scales:{
       x:{type:'linear', title:{display:true,font:{weight:'600'}}, grid:{color:'#eceff2'}, ticks:{maxTicksLimit:9}},
@@ -826,7 +904,7 @@ const chart = new Chart($('chart'),{
                lineWidth:ctx=>ctx.tick && ctx.tick.value===0 ? 1.6 : 1}}
     }
   },
-  plugins:[hiPlugin]
+  plugins:[hiPlugin, tipPlugin]
 });
 
 function fmtY(v){
@@ -890,6 +968,7 @@ function updateSource(){
 }
 
 function update(){
+  tip.idx = -1;
   const xv = XVARS.find(x=>x.id===state.xvar);
   const useLog = !!xv.log;
 const rawXs = DATA.x[xv.id], rawYs = yValues(), col = PARTIES[state.party].colour;
@@ -932,11 +1011,6 @@ const ys = pts.map(p=>p.y);
   sx.ticks.font = tickFont;   sy.ticks.font = tickFont;
   sx.title.font = titleFont;  sy.title.font = titleFont;
   sx.ticks.maxTicksLimit = m ? 6 : 9;
-
-  const tt = chart.options.plugins.tooltip;
-  tt.padding   = m ? 7 : 10;
-  tt.titleFont = {size: m ? 12 : 14, weight:'700'};
-  tt.bodyFont  = {size: m ? 11 : 12};
 
   /* line of best fit (fitted on log10(x) when log scale is on) */
   const tr = chart.data.datasets[1];
