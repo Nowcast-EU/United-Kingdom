@@ -969,7 +969,7 @@ function fmtY(v){
 }
 function periodLabel(){ return PERIODS[state.metric].find(o=>o.id===state.period).label; }
 function yAxisShort(){
-  return state.party+(state.metric==='share' ? ', ' : ' swing, ')+periodLabel().toLowerCase();
+  return state.party+(state.metric==='share' ? '' : ' swing')+' ('+periodLabel().toLowerCase()+')';
 }
 function yAxisTitle(){
   return state.metric==='share'
