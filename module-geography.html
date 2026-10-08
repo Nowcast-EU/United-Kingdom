@@ -823,7 +823,8 @@ const tipPlugin = {
     /* measure the box */
     const minGap   = m ? 10 : 14;   /* minimum space between label and value */
     const titleGap = m ? 5 : 6;     /* space below the constituency name */
-    const divGap   = 4;             /* space above and below the divider */
+    const divAbove = 2;             /* space between the Y row and the divider */
+    const divBelow = 5;             /* space between the divider and the X row */
 
     ctx.save();
     ctx.font = `700 ${fs+1}px system-ui,sans-serif`;
@@ -836,8 +837,8 @@ const tipPlugin = {
     /* vertical layout, relative to the top of the box */
     const yTitle = pad;
     const yRow1  = yTitle + (fs+1) + titleGap;
-    const yDiv   = yRow1 + fs + divGap;
-    const yRow2  = yDiv + divGap;
+    const yDiv   = yRow1 + fs + divAbove;
+    const yRow2  = yDiv + divBelow;
     const bw = w + pad*2, bh = yRow2 + fs + pad;
 
     /* pixel positions of all other visible dots */
