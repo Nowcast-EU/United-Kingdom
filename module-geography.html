@@ -701,7 +701,7 @@ const PERIODS = {
 /* X-axis variables. d = key in DATA.x, fmt = tick/tooltip formatter */
 const fmtInt = v => Math.round(v).toLocaleString('en-GB');
 const XVARS = [
-  {id:'leave', label:'Leave vote, 2016 (%)',              axis:'EU referendum Leave vote, 2016 (%)',    fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%'},
+  {id:'leave', label:'Leave vote, 2016 (%)',              axis:'EU referendum Leave vote, 2016 (%)',    fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:15, max:80},
   {id:'area',  label:'Area (km²)',                        axis:'Constituency area (km²)',               fmt:v=>fmtInt(v)+' km²', tick:v=>fmtInt(v), log:true},
   {id:'lat',   label:'Latitude (° north)',                axis:'Latitude (° north)',                    fmt:v=>v.toFixed(2)+'°N', tick:v=>v+'°N'},
   {id:'imd',   label:'Deprivation (IMD 2025 rank)',       axis:'IMD 2025 rank (1 = most deprived)',     fmt:v=>'rank '+fmtInt(v), tick:v=>v},
@@ -1099,9 +1099,18 @@ const ys = pts.map(p=>p.y);
     if(useLog){ const l=Math.log10(v); if(Math.abs(l-Math.round(l))>1e-9 && ![2,5,20,50,200,500,2000].includes(v)) return ''; }
     return xv.tick(v);
   };
-  sx.min = undefined; sx.max = undefined;
-  if(xv.id==='lat'){ sx.min=50; sx.max=56; }
-  if(xv.id==='pshare') sx.min = 0;
+  /* x bounds: manual if set on the variable, otherwise data range + buffer */
+  if(xs.length){
+    const lo = Math.min(...xs), hi = Math.max(...xs);
+    if(useLog){
+      sx.min = xv.min ?? lo/1.15;
+      sx.max = xv.max ?? hi*1.15;
+    } else {
+      const pad = (hi-lo)*0.04;
+      sx.min = xv.min ?? Math.floor(lo-pad);
+      sx.max = xv.max ?? Math.ceil(hi+pad);
+    }
+  }
   sy.title.text = yAxisTitle();
   sy.ticks.callback = v => state.metric==='swing' ? (v>0?'+':v<0?'−':'')+Math.abs(v) : v+'%';
   sy.beginAtZero = state.metric==='share';
