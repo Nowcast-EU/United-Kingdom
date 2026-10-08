@@ -703,14 +703,14 @@ const fmtInt = v => Math.round(v).toLocaleString('en-GB');
 const XVARS = [
   {id:'leave', label:'Leave vote, 2016 (%)',              axis:'EU referendum Leave vote, 2016 (%)',    fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:15, max:80},
   {id:'area',  label:'Area (km²)',                        axis:'Constituency area (km²)',               fmt:v=>fmtInt(v)+' km²', tick:v=>fmtInt(v), log:true},
-  {id:'lat',   label:'Latitude (° north)',                axis:'Latitude (° north)',                    fmt:v=>v.toFixed(2)+'°N', tick:v=>v+'°N'},
-  {id:'imd',   label:'Deprivation (IMD 2025 rank)',       axis:'IMD 2025 rank (1 = most deprived)',     fmt:v=>'rank '+fmtInt(v), tick:v=>v},
-  {id:'cpov',  label:'Child poverty (%)',                 axis:'Children in poverty (%)',               fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%'},
-  {id:'a1824', label:'Aged 18–24 (%)',                    axis:'Population aged 18–24 (%)',             fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%'},
-  {id:'a65',   label:'Aged 65+ (%)',                      axis:'Population aged 65+ (%)',               fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%'},
-  {id:'born',  label:'Born outside UK (%)',               axis:'Residents born outside the UK (%)',     fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%'},
-  {id:'noqual',  label:'No qualifications (%)',           axis:'16+ Population with no qualifications (%)',     fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%'},
-  {id:'highqual',  label:'Higher education (%)',          axis:'16+ Population with higher education qualifications (%)',     fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%'},
+  {id:'lat',   label:'Latitude (° north)',                axis:'Latitude (° north)',                    fmt:v=>v.toFixed(2)+'°N', tick:v=>v+'°N', min:50, max:56},
+  {id:'imd',   label:'Deprivation (IMD 2025 rank)',       axis:'IMD 2025 rank (1 = most deprived)',     fmt:v=>'rank '+fmtInt(v), tick:v=>v, min:0, max:543},
+  {id:'cpov',  label:'Child poverty (%)',                 axis:'Children in poverty (%)',               fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:5, max:65},
+  {id:'a1824', label:'Aged 18–24 (%)',                    axis:'Population aged 18–24 (%)',             fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:5, max:45},
+  {id:'a65',   label:'Aged 65+ (%)',                      axis:'Population aged 65+ (%)',               fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:5, max:40},
+  {id:'born',  label:'Born outside UK (%)',               axis:'Residents born outside the UK (%)',     fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:0, max:65},
+  {id:'noqual',  label:'No qualifications (%)',           axis:'16+ Population with no qualifications (%)',     fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:0, max:35},
+  {id:'highqual',  label:'Higher education (%)',          axis:'16+ Population with higher education qualifications (%)',     fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:15, max:70},
   {id:'lgbt',  label:'LGBT+ identity (%)',                 axis:'Residents identifying as LGBT+ (%)',     fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%'}
 ];
 
