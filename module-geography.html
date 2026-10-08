@@ -78,6 +78,23 @@
   .sentence-row{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
   .sentence-row .sentence{flex:1;min-width:0}
   .sentence-row .chk{flex:none;white-space:nowrap;margin-top:3px}
+
+  @media (min-width:641px){
+  .sentence-row{
+    justify-content:flex-start;
+    gap:0;
+  }
+
+  .sentence-row .sentence{
+    flex:0 1 auto;
+  }
+
+  .sentence-row .chk{
+    border-left:1px solid #d0d0d0;
+    padding-left:12px;
+    margin-left:12px;
+  }
+}
   
     @media (max-width:700px){
     .content-grid{grid-template-columns:1fr}
