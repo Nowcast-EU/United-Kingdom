@@ -815,18 +815,30 @@ const tipPlugin = {
     const fs = m ? 10 : 11, pad = m ? 5 : 6, lh = fs + 3;
     const xv = XVARS.find(x=>x.id===state.xvar);
     const title = NAMES[raw.i];
-    const lines = [
-      yAxisShort()+': '+fmtY(raw.y),
-      xv.label.replace(/ \(.*\)/,'')+': '+xv.fmt(raw.x)
+    const rows = [
+      {label: yAxisShort(),                        value: fmtY(raw.y)},
+      {label: xv.label.replace(/ \(.*\)/,''),      value: xv.fmt(raw.x)}
     ];
 
     /* measure the box */
+    const minGap   = m ? 10 : 14;   /* minimum space between label and value */
+    const titleGap = m ? 5 : 6;     /* space below the constituency name */
+    const divGap   = 4;             /* space above and below the divider */
+
     ctx.save();
     ctx.font = `700 ${fs+1}px system-ui,sans-serif`;
     let w = ctx.measureText(title).width;
     ctx.font = `400 ${fs}px system-ui,sans-serif`;
-    lines.forEach(l => { w = Math.max(w, ctx.measureText(l).width); });
-    const bw = w + pad*2, bh = lh*(lines.length+1) + pad*2;
+    rows.forEach(r => {
+      w = Math.max(w, ctx.measureText(r.label).width + minGap + ctx.measureText(r.value).width);
+    });
+
+    /* vertical layout, relative to the top of the box */
+    const yTitle = pad;
+    const yRow1  = yTitle + (fs+1) + titleGap;
+    const yDiv   = yRow1 + fs + divGap;
+    const yRow2  = yDiv + divGap;
+    const bw = w + pad*2, bh = yRow2 + fs + pad;
 
     /* pixel positions of all other visible dots */
     const pts = [];
@@ -899,10 +911,28 @@ const tipPlugin = {
     ctx.stroke();
     ctx.fillStyle = '#1b1f24';
     ctx.textBaseline = 'top';
+
+    /* title */
+    ctx.textAlign = 'left';
     ctx.font = `700 ${fs+1}px system-ui,sans-serif`;
-    ctx.fillText(title, best.bx+pad, best.by+pad);
+    ctx.fillText(title, best.bx+pad, best.by+yTitle);
+
+    /* divider between the two rows */
+    ctx.strokeStyle = '#c9ced4';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(best.bx+pad, Math.round(best.by+yDiv)+0.5);
+    ctx.lineTo(best.bx+bw-pad, Math.round(best.by+yDiv)+0.5);
+    ctx.stroke();
+
+    /* rows: label left, value right-aligned */
     ctx.font = `400 ${fs}px system-ui,sans-serif`;
-    lines.forEach((l,i)=> ctx.fillText(l, best.bx+pad, best.by+pad+lh*(i+1)));
+    [yRow1, yRow2].forEach((yy,i)=>{
+      ctx.textAlign = 'left';
+      ctx.fillText(rows[i].label, best.bx+pad, best.by+yy);
+      ctx.textAlign = 'right';
+      ctx.fillText(rows[i].value, best.bx+bw-pad, best.by+yy);
+    });
     ctx.restore();
   }
 };
