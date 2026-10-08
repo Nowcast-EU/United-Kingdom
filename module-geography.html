@@ -79,6 +79,10 @@
   .sentence-row .sentence{flex:1;min-width:0}
   .sentence-row .chk{flex:none;white-space:nowrap;margin-top:3px}
 
+  .mobile-break{
+  display:inline;
+}
+
   @media (min-width:641px){
   .sentence-row{
     justify-content:flex-start;
@@ -112,6 +116,11 @@
     input[type=text]{min-width:0;flex:1}
     .dd-menu{max-height:240px}
     .dd-item,.dd-head{padding-top:7px;padding-bottom:7px}
+
+      .mobile-break{
+    display:block;
+  }
+    
   }
 </style>
 </head>
@@ -126,9 +135,9 @@
       Show
       <select id="party" class="inline-select" aria-label="Party"></select>
       <select id="metric" class="inline-select" aria-label="Measure"></select>,
-      <select id="period" class="inline-select" aria-label="Election or period"></select>
-      against
-      <select id="xvar" class="inline-select" aria-label="X axis variable"></select>
+    <select id="period" class="inline-select" aria-label="Election or period"></select>
+    <span class="mobile-break">against</span>
+    <select id="xvar" class="inline-select" aria-label="X axis variable"></select>
     </div>
     <label class="chk" id="winLabel"><input type="checkbox" id="colourWin"> Colour by winning party</label>
     </div>
