@@ -769,7 +769,7 @@ Object.keys(PARTIES).forEach(p=>(PARTIES[p].elections || ELECTIONS.map(e=>e.id))
    STATE + DOM
    ============================================================ */
 const $ = id => document.getElementById(id);
-const state = {party:'CON', metric:'share', period:'2024', xvar:'area', trend:true, hi:-1, xparty:'LAB', xel:'2024', colourByWin:false};
+const state = {party:'LAB', metric:'share', period:'2024', xvar:'lat', trend:true, hi:-1, xparty:'LAB', xel:'2024', colourByWin:true};
 
 $('party').innerHTML  = Object.keys(PARTIES).map(k=>`<option value="${k}">${PARTIES[k].name}</option>`).join('');
 function fillXVar(){
