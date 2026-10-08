@@ -850,9 +850,9 @@ const tipPlugin = {
     /* ---- build candidate routes ----
        Each route = start direction, optional elbow, end point, and the box
        positioned so the line meets the MIDDLE of one of its sides. */
-    const S = m ? [10,18] : [14,26];     /* diagonal run (px per axis) */
-    const H = m ? [8,18]  : [10,22];     /* length of the final straight segment */
-    const D = m ? [18,32] : [24,44];     /* length for purely straight routes */
+    const S = m ? [10,18,30,44] : [14,26,42,60];     /* diagonal run (px per axis) */
+    const H = m ? [8,18,30]     : [10,22,36];        /* length of the final straight segment */
+    const D = m ? [18,32,50,70] : [24,44,70,100];    /* length for purely straight routes */
     const x0 = el.x, y0 = el.y, R = 0.7071;
     const cands = [];
 
@@ -883,9 +883,9 @@ const tipPlugin = {
                  + Math.max(0,a.top-by)  + Math.max(0,by+bh-a.bottom);
       let hits = 0;
       for(const p of pts){
-        if(p.x>bx-4 && p.x<bx+bw+4 && p.y>by-4 && p.y<by+bh+4) hits++;
+        if(p.x>bx-8 && p.x<bx+bw+8 && p.y>by-8 && p.y<by+bh+8) hits++;
       }
-      c.score = over*1000 + hits*10 + c.len*0.05 + k*0.001;
+      c.score = over*1000 + hits*10 + c.len*0.01 + k*0.001;
       if(!best || c.score<best.score) best = c;
     });
 
