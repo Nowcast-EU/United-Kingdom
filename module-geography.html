@@ -675,11 +675,11 @@ York Outer	29.94	49.63	0.48	18.67	0.02	45.32	26.94	11.57	10.75	4.33	39.18	22.5	1
    CONFIG
    ============================================================ */
 const PARTIES = {
-  LAB:{name:'Labour',            colour:'#E4003B'},
-  CON:{name:'Conservative',      colour:'#0087DC'},
-  RFM:{name:'Reform UK',         colour:'#34d8ef'},
-  LDM:{name:'Lib Dem',           colour:'#FAA61A'},
-  GRN:{name:'Green',             colour:'#6ab023'},
+  LAB:{name:'Labour',            colour:'#E4003B', xbounds:{'2019':[0,90], '2024':[0,75], proj:[0,60]}},
+  CON:{name:'Conservative',      colour:'#0087DC', xbounds:{'2019':[5,80], '2024':[0,55], proj:[0,60]}},
+  RFM:{name:'Reform UK',         colour:'#34d8ef', xbounds:{'2019':[0,30], '2024':[0,50], proj:[5,55]}},
+  LDM:{name:'Lib Dem',           colour:'#FAA61A', xbounds:{'2019':[0,60], '2024':[0,65], proj:[0,65]}},
+  GRN:{name:'Green',             colour:'#6ab023', xbounds:{'2019':[0,60], '2024':[0,60], proj:[0,60]}},
   RES:{name:'Restore',           colour:'#000055', elections:['proj']}
 };
 const YEAR_LABEL = {2019:'2019', 2024:'2024', proj:'projected'};
@@ -782,6 +782,8 @@ function getXv(){
     axis:  `${name} vote share, ${lab==='Projected'?'projected':lab} (%)`,
     fmt: v=>v.toFixed(1)+'%',
     tick:v=>v+'%',
+    min: (PARTIES[state.xparty].xbounds || {})[state.xel]?.[0],
+    max: (PARTIES[state.xparty].xbounds || {})[state.xel]?.[1],
     data: DATA[state.xel][state.xparty].map(v=>v===0 ? null : v)
   };
 }
