@@ -891,9 +891,13 @@ const tipPlugin = {
     ctx.setLineDash([]);
 
     /* box + text */
+    ctx.fillStyle = '#f8faf9';
+    ctx.strokeStyle = '#1b1f24';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect(best.bx, best.by, bw, bh, 2);
+    ctx.fill();
+    ctx.stroke();
     ctx.fillStyle = '#1b1f24';
-    ctx.beginPath(); ctx.roundRect(best.bx, best.by, bw, bh, 4); ctx.fill();
-    ctx.fillStyle = '#fff';
     ctx.textBaseline = 'top';
     ctx.font = `700 ${fs+1}px system-ui,sans-serif`;
     ctx.fillText(title, best.bx+pad, best.by+pad);
