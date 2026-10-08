@@ -1164,9 +1164,6 @@ hs.data = state.hi>=0 ? [pts.find(p=>p.i===state.hi)] : [];
   /* notes */
   let note='', warn=false;
   const p = PERIODS[state.metric].find(o=>o.id===state.period);
-if(state.metric==='swing'){
-  note = 'Swing = change in vote share between the two dates, in percentage points.';
-}
   $('note').textContent = note; $('note').className = 'note'+(warn?' warn':'');
 
   chart.update();
