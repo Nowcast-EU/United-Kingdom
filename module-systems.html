@@ -350,6 +350,9 @@
   var TOTAL_SEATS = 650;
   var MAJORITY = 326;
 
+  // Parties selected when the page loads, bottom of the bar first.
+  var DEFAULT_SELECTED = ['lab', 'ld'];
+
   // Order used by the "Toggle all" button, bottom of the bar first.
   // Any party left out is added at the end automatically.
   var TOGGLE_ALL_ORDER = ['sf', 'pc', 'sdl', 'grn', 'snp', 'lab', 'ld', 'all', 'oth', 'uup', 'con', 'ref', 'dup', 'tuv', 'res'];
@@ -618,6 +621,12 @@
   }
 
   build();
+  DEFAULT_SELECTED.forEach(function (id) {
+    if (partyById(id) && selectedOrder.indexOf(id) === -1) {
+      selectedOrder.push(id);
+      stackSeq[id] = ++seqCounter;
+    }
+  });
   update();
 
   // ---------------- report height to the parent site ----------------
