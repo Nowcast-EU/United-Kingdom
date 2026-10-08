@@ -35,6 +35,45 @@
   .note{font-size:12.5px;color:var(--muted);margin-top:4px}
   .note:empty{display:none}
   .note.warn{color:#8a5a00}
+
+    .dd{position:relative;display:inline-block}
+  .dd-btn{
+    position:relative;border:0;border-bottom:2px solid var(--fg);border-radius:0;background:none;
+    -webkit-appearance:none;appearance:none;
+    font:inherit;font-weight:700;color:var(--fg);line-height:inherit;
+    padding:0 24px 0 2px;margin:0;text-align:left;cursor:pointer;
+  }
+  .dd-btn::after{
+    content:'';position:absolute;right:6px;top:50%;width:6px;height:6px;
+    border-right:2px solid currentColor;border-bottom:2px solid currentColor;
+    transform:translateY(-70%) rotate(45deg);
+  }
+  .dd.open .dd-btn::after{transform:translateY(-30%) rotate(-135deg)}
+
+  .dd-menu{
+    display:none;position:absolute;left:0;top:100%;margin-top:4px;z-index:50;
+    min-width:100%;max-height:300px;overflow-y:auto;padding:4px 0;
+    background:var(--bg);border:1px solid var(--fg);border-radius:2px;
+    box-shadow:0 4px 14px rgba(0,0,0,.12);
+    font-size:.9em;font-weight:400;white-space:nowrap;
+  }
+  .dd.open .dd-menu{display:block}
+  .dd-item,.dd-head{
+    display:block;width:100%;border:0;background:none;-webkit-appearance:none;appearance:none;
+    font:inherit;color:var(--fg);text-align:left;cursor:pointer;padding:6px 14px;line-height:1.3;
+  }
+  .dd-item:hover,.dd-head:hover,.dd-item:focus-visible,.dd-head:focus-visible{background:#eceff2;outline:none}
+  .dd-item.sel{font-weight:700}
+  .dd-head{position:relative;font-weight:600;padding-right:32px}
+  .dd-head::after{
+    content:'';position:absolute;right:14px;top:50%;width:5px;height:5px;
+    border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;
+    transform:translateY(-50%) rotate(-45deg);
+  }
+  .dd-group.open > .dd-head::after{transform:translateY(-70%) rotate(45deg)}
+  .dd-body{display:none;margin-left:14px;border-left:2px solid var(--line)}
+  .dd-group.open > .dd-body{display:block}
+  .dd-body .dd-item,.dd-body .dd-head{padding-left:12px}
   
     @media (max-width:700px){
     .content-grid{grid-template-columns:1fr}
@@ -48,6 +87,8 @@
     .note,.source{font-size:11px}
     .side-panel p{font-size:12.5px;line-height:1.5}
     input[type=text]{min-width:0;flex:1}
+    .dd-menu{max-height:240px}
+    .dd-item,.dd-head{padding-top:7px;padding-bottom:7px}
   }
 </style>
 </head>
@@ -713,10 +754,37 @@ Object.keys(PARTIES).forEach(p=>(PARTIES[p].elections || ELECTIONS.map(e=>e.id))
    STATE + DOM
    ============================================================ */
 const $ = id => document.getElementById(id);
-const state = {party:'CON', metric:'share', period:'2024', xvar:'area', trend:true, hi:-1};
+const state = {party:'CON', metric:'share', period:'2024', xvar:'area', trend:true, hi:-1, xparty:'LAB', xel:'2024'};
 
 $('party').innerHTML  = Object.keys(PARTIES).map(k=>`<option value="${k}">${PARTIES[k].name}</option>`).join('');
-$('xvar').innerHTML   = XVARS.map(x=>`<option value="${x.id}">${x.label}</option>`).join('');
+function fillXVar(){
+  let h = XVARS.map(x=>`<option value="${x.id}">${x.label}</option>`).join('');
+  h += '<optgroup label="Party vote share">';
+  Object.keys(PARTIES).forEach(p=>{
+    (PARTIES[p].elections || ELECTIONS.map(e=>e.id)).forEach(id=>{
+      const lab = ELECTIONS.find(e=>e.id===id).label;
+      h += `<option value="pshare:${p}|${id}" data-sub="${PARTIES[p].name}" data-label="${PARTIES[p].name} vote share, ${lab}">${lab}</option>`;
+    });
+  });
+  h += '</optgroup>';
+  $('xvar').innerHTML = h;
+}
+
+  /* returns the X variable definition, building one on the fly for party vote share */
+function getXv(){
+  if(state.xvar!=='pshare') return XVARS.find(x=>x.id===state.xvar);
+  const name = PARTIES[state.xparty].name;
+  const lab  = ELECTIONS.find(e=>e.id===state.xel).label;
+  return {
+    id:'pshare',
+    label: `${name} vote share (${lab})`,
+    short: `${state.xparty} (${lab.toLowerCase()})`,
+    axis:  `${name} vote share, ${lab==='Projected'?'projected':lab} (%)`,
+    fmt: v=>v.toFixed(1)+'%',
+    tick:v=>v+'%',
+    data: DATA[state.xel][state.xparty].map(v=>v===0 ? null : v)
+  };
+}
 
 function availablePeriods(metric){
   const ok = PARTIES[state.party].elections || ELECTIONS.map(e=>e.id);
@@ -813,11 +881,11 @@ const tipPlugin = {
 
     const m = isMobile(), ctx = chart.ctx, a = chart.chartArea;
     const fs = m ? 10 : 11, pad = m ? 5 : 6, lh = fs + 3;
-    const xv = XVARS.find(x=>x.id===state.xvar);
+    const xv = getXv();
     const title = NAMES[raw.i];
     const rows = [
       {label: yAxisShort(),                        value: fmtY(raw.y)},
-      {label: xv.label.replace(/ \(.*\)/,''),      value: xv.fmt(raw.x)}
+      {label: xv.short || xv.label.replace(/ \(.*\)/,''), value: xv.fmt(raw.x)}
     ];
 
     /* measure the box */
@@ -1000,35 +1068,18 @@ function yAxisTitle(){
 };
 function updateSource(){
   const p = PERIODS[state.metric].find(o=>o.id===state.period);
-  const parts = [p.a, p.b].filter(Boolean).map(k=>SOURCES.y[k]).concat(SOURCES.x[state.xvar]);
+  const parts = [p.a, p.b].filter(Boolean).map(k=>SOURCES.y[k]).concat(state.xvar==='pshare' ? SOURCES.y[state.xel] : SOURCES.x[state.xvar]);
   const unique = [...new Map(parts.map(s=>[s.label, s])).values()];
   $('source').innerHTML = 'Source: ' + unique.map(s =>
     s.url ? `<a href="${s.url}" target="_blank" rel="noopener">${s.label}</a>` : s.label
   ).join('; ');
 }
 
-  function sizeSelects(){
-  ['party','metric','period','xvar'].forEach(id=>{
-    const el = $(id);
-    const span = document.createElement('span');
-    const cs = getComputedStyle(el);
-    span.style.font = cs.font;
-    span.style.fontWeight = cs.fontWeight;
-    span.style.position = 'absolute';
-    span.style.visibility = 'hidden';
-    span.style.whiteSpace = 'pre';
-    span.textContent = el.options[el.selectedIndex].text;
-    document.body.appendChild(span);
-    el.style.width = (span.offsetWidth + 24) + 'px';
-    document.body.removeChild(span);
-  });
-}
-
 function update(){
   tip.idx = -1;
-  const xv = XVARS.find(x=>x.id===state.xvar);
+  const xv = getXv();
   const useLog = !!xv.log;
-const rawXs = DATA.x[xv.id], rawYs = yValues(), col = PARTIES[state.party].colour;
+  const rawXs = xv.data || DATA.x[xv.id], rawYs = yValues(), col = PARTIES[state.party].colour;
 
 /* points — exclude constituencies where the party has no valid vote-share data */
 const allPts = rawXs.map((x,i)=>({x, y: x===null ? null : rawYs[i], i}));
@@ -1050,6 +1101,7 @@ const ys = pts.map(p=>p.y);
   };
   sx.min = undefined; sx.max = undefined;
   if(xv.id==='lat'){ sx.min=50; sx.max=56; }
+  if(xv.id==='pshare') sx.min = 0;
   sy.title.text = yAxisTitle();
   sy.ticks.callback = v => state.metric==='swing' ? (v>0?'+':v<0?'−':'')+Math.abs(v) : v+'%';
   sy.beginAtZero = state.metric==='share';
@@ -1107,11 +1159,135 @@ if(state.metric==='swing'){
   $('note').textContent = note; $('note').className = 'note'+(warn?' warn':'');
 
   chart.update();
-  sizeSelects();
   updateSource();
   $('party').style.borderBottomColor = col;
+  ddRefreshAll();
   postHeight();
 }
+
+  /* ============================================================
+   CUSTOM DROPDOWNS
+   The hidden <select> stays the source of truth (options, value, onchange).
+   <optgroup> = expandable group.  data-sub="Name" on an option = a second level.
+   data-label on an option = text shown on the button (defaults to the option text).
+   ============================================================ */
+const DD = {};
+
+function ddClose(){
+  Object.values(DD).forEach(d=>{
+    d.wrap.classList.remove('open');
+    d.btn.setAttribute('aria-expanded','false');
+  });
+}
+
+function ddTree(sel){
+  const root = {kids:[], map:{}};
+  Array.from(sel.options).forEach(o=>{
+    const path = [];
+    if(o.parentElement.tagName==='OPTGROUP') path.push(o.parentElement.label);
+    if(o.dataset.sub) path.push(o.dataset.sub);
+    let node = root;
+    path.forEach(name=>{
+      let g = node.map[name];
+      if(!g){ g = {name, kids:[], map:{}}; node.map[name] = g; node.kids.push(g); }
+      node = g;
+    });
+    node.kids.push({opt:o});
+  });
+  return root;
+}
+
+function ddRender(d){
+  const {sel, menu} = d;
+  menu.innerHTML = '';
+  const build = (node, parent)=>{
+    node.kids.forEach(k=>{
+      if(k.opt){
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'dd-item' + (k.opt.value===sel.value ? ' sel' : '');
+        b.textContent = k.opt.textContent;
+        b.dataset.value = k.opt.value;
+        parent.appendChild(b);
+      } else {
+        const g = document.createElement('div');
+        g.className = 'dd-group';
+        const h = document.createElement('button');
+        h.type = 'button'; h.className = 'dd-head'; h.textContent = k.name;
+        const body = document.createElement('div');
+        body.className = 'dd-body';
+        g.append(h, body);
+        build(k, body);
+        if(body.querySelector('.sel')) g.classList.add('open');   /* auto-expand the selected path */
+        h.onclick = ()=> g.classList.toggle('open');
+        parent.appendChild(g);
+      }
+    });
+  };
+  build(ddTree(sel), menu);
+}
+
+function ddRefreshAll(){
+  Object.values(DD).forEach(d=>{
+    const o = d.sel.options[d.sel.selectedIndex];
+    d.btn.textContent = o ? (o.dataset.label || o.textContent) : '';
+    d.btn.style.borderBottomColor = d.sel.style.borderBottomColor;   /* keeps the party colour underline */
+  });
+}
+
+function ddInit(ids){
+  ids.forEach(id=>{
+    const sel = $(id);
+    const wrap = document.createElement('span');  wrap.className = 'dd';
+    const btn  = document.createElement('button'); btn.type = 'button'; btn.className = 'dd-btn';
+    const menu = document.createElement('div');    menu.className = 'dd-menu';
+    btn.setAttribute('aria-haspopup','true');
+    btn.setAttribute('aria-expanded','false');
+    btn.setAttribute('aria-label', sel.getAttribute('aria-label') || id);
+    wrap.append(btn, menu);
+    sel.style.display = 'none';
+    sel.after(wrap);
+    const d = DD[id] = {sel, wrap, btn, menu};
+
+    btn.onclick = ()=>{
+      const wasOpen = wrap.classList.contains('open');
+      ddClose();
+      if(wasOpen) return;
+      ddRender(d);
+      wrap.classList.add('open');
+      btn.setAttribute('aria-expanded','true');
+      /* keep the menu inside the iframe's right edge */
+      menu.style.left = ''; menu.style.right = '';
+      if(menu.getBoundingClientRect().right > document.documentElement.clientWidth - 4){
+        menu.style.left = 'auto'; menu.style.right = '0';
+      }
+      const s = menu.querySelector('.sel');
+      if(s) menu.scrollTop = Math.max(0, s.offsetTop - menu.clientHeight/2);
+    };
+
+    menu.onclick = e=>{
+      const it = e.target.closest('.dd-item');
+      if(!it) return;
+      sel.value = it.dataset.value;
+      ddClose();
+      sel.dispatchEvent(new Event('change'));   /* triggers your existing onchange handlers */
+      btn.focus();
+    };
+
+    wrap.addEventListener('keydown', e=>{
+      if(e.key==='Escape'){ ddClose(); btn.focus(); return; }
+      if(e.key!=='ArrowDown' && e.key!=='ArrowUp') return;
+      e.preventDefault();
+      if(!wrap.classList.contains('open')) btn.click();
+      const items = Array.from(menu.querySelectorAll('.dd-head,.dd-item')).filter(x=>x.offsetParent);
+      if(!items.length) return;
+      const i = items.indexOf(document.activeElement);
+      const n = e.key==='ArrowDown' ? i+1 : i-1;
+      items[(n + items.length) % items.length].focus();
+    });
+  });
+}
+document.addEventListener('pointerdown', e=>{ if(!e.target.closest('.dd')) ddClose(); });
 
 /* ============================================================
    EVENTS
@@ -1119,7 +1295,16 @@ if(state.metric==='swing'){
 $('party').onchange  = e=>{state.party=e.target.value; fillMetrics(); fillPeriods(); update();};
 $('metric').onchange = e=>{state.metric=e.target.value; fillPeriods(); update();};
 $('period').onchange = e=>{state.period=e.target.value; update();};
-$('xvar').onchange   = e=>{state.xvar=e.target.value; update();};
+$('xvar').onchange = e=>{
+  const v = e.target.value;
+  if(v.startsWith('pshare:')){
+    state.xvar = 'pshare';
+    [state.xparty, state.xel] = v.slice(7).split('|');
+  } else {
+    state.xvar = v;
+  }
+  update();
+};
 
 /* ============================================================
    IFRAME HEIGHT  →  parent page
@@ -1138,10 +1323,14 @@ window.addEventListener('resize', ()=>{
   if(isMobile() !== wasMobile){ wasMobile = isMobile(); update(); }
 });
   
-$('party').value  = state.party;
+fillXVar();
 fillMetrics();
 fillPeriods();
+$('party').value  = state.party;
+$('metric').value = state.metric;
+$('period').value = state.period;
 $('xvar').value   = state.xvar;
+ddInit(['party','metric','period','xvar']);
 update();
 </script>
 </body>
