@@ -890,7 +890,7 @@ const tipPlugin = {
     });
 
     /* leader line: dot -> (elbow) -> box side midpoint */
-    const r = (el.options && el.options.hoverRadius || 5) + 1;
+    const r = (el.options && el.options.hoverRadius || 5) + 2;
     ctx.strokeStyle = '#1b1f24';
     ctx.lineWidth = 1;
     ctx.lineJoin = 'round';
@@ -1036,7 +1036,9 @@ const xs = pts.map(p=>p.x);
 const ys = pts.map(p=>p.y);
   const ds0 = chart.data.datasets[0];
   ds0.data = allPts; ds0.backgroundColor = col+'99'; ds0.borderColor = col; ds0.hoverBackgroundColor = col;
-
+  ds0.hoverBorderColor = '#1b1f24';
+  ds0.hoverBorderWidth = 1.5;
+  
   /* axes: titles, formatting, scale type */
   const sx = chart.options.scales.x, sy = chart.options.scales.y;
   sx.type = useLog ? 'logarithmic' : 'linear';
