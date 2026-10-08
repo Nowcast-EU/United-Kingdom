@@ -813,7 +813,6 @@ const tipPlugin = {
 
     const m = isMobile(), ctx = chart.ctx, a = chart.chartArea;
     const fs = m ? 10 : 11, pad = m ? 5 : 6, lh = fs + 3;
-    const L  = m ? 22 : 28;                       /* base leader-line length */
     const xv = XVARS.find(x=>x.id===state.xvar);
     const title = NAMES[raw.i];
     const lines = [
@@ -836,35 +835,58 @@ const tipPlugin = {
       if(Number.isFinite(p.x) && Number.isFinite(p.y)) pts.push(p);
     });
 
-    /* try 8 directions (0/45/90... degrees) at two distances, keep the clearest */
-    const dirs = [[1,-1],[-1,-1],[1,1],[-1,1],[1,0],[-1,0],[0,-1],[0,1]];
-    let best = null;
-    [L, L*1.9].forEach((d, di)=>{
-      dirs.forEach(([dx,dy], k)=>{
-        const n = Math.hypot(dx,dy), ux = dx/n, uy = dy/n;
-        const ex = el.x + ux*d, ey = el.y + uy*d;               /* line end = box anchor */
-        const bx = dx>0 ? ex : dx<0 ? ex-bw : ex-bw/2;
-        const by = dy>0 ? ey : dy<0 ? ey-bh : ey-bh/2;
+    /* ---- build candidate routes ----
+       Each route = start direction, optional elbow, end point, and the box
+       positioned so the line meets the MIDDLE of one of its sides. */
+    const S = m ? [10,18] : [14,26];     /* diagonal run (px per axis) */
+    const H = m ? [8,18]  : [10,22];     /* length of the final straight segment */
+    const D = m ? [18,32] : [24,44];     /* length for purely straight routes */
+    const x0 = el.x, y0 = el.y, R = 0.7071;
+    const cands = [];
 
-        const over = Math.max(0,a.left-bx) + Math.max(0,bx+bw-a.right)
-                   + Math.max(0,a.top-by)  + Math.max(0,by+bh-a.bottom);
-        let hits = 0;
-        for(const p of pts){
-          if(p.x>bx-4 && p.x<bx+bw+4 && p.y>by-4 && p.y<by+bh+4) hits++;
-        }
-        const score = over*1000 + hits*10 + di*3 + k*0.1;       /* lower is better */
-        if(!best || score<best.score) best = {score, ex, ey, bx, by, ux, uy};
-      });
+    for(const sx of [1,-1]) for(const sy of [1,-1]) for(const s of S) for(const h of H){
+      const ex = x0+sx*s, ey = y0+sy*s;                     /* elbow */
+      const len = s*1.4142 + h;
+      /* finish horizontally into the left/right side of the box */
+      let nx = ex+sx*h, ny = ey;
+      cands.push({ux:sx*R, uy:sy*R, elbow:[ex,ey], end:[nx,ny], len,
+        bx: sx>0 ? nx : nx-bw, by: ny-bh/2});
+      /* finish vertically into the top/bottom of the box */
+      nx = ex; ny = ey+sy*h;
+      cands.push({ux:sx*R, uy:sy*R, elbow:[ex,ey], end:[nx,ny], len,
+        bx: nx-bw/2, by: sy>0 ? ny : ny-bh});
+    }
+    for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]) for(const d of D){
+      const nx = x0+dx*d, ny = y0+dy*d;
+      cands.push({ux:dx, uy:dy, elbow:null, end:[nx,ny], len:d,
+        bx: dx>0 ? nx : dx<0 ? nx-bw : nx-bw/2,
+        by: dy>0 ? ny : dy<0 ? ny-bh : ny-bh/2});
+    }
+
+    /* score: stay inside the plot, avoid other dots, prefer shorter lines */
+    let best = null;
+    cands.forEach((c,k)=>{
+      const {bx,by} = c;
+      const over = Math.max(0,a.left-bx) + Math.max(0,bx+bw-a.right)
+                 + Math.max(0,a.top-by)  + Math.max(0,by+bh-a.bottom);
+      let hits = 0;
+      for(const p of pts){
+        if(p.x>bx-4 && p.x<bx+bw+4 && p.y>by-4 && p.y<by+bh+4) hits++;
+      }
+      c.score = over*1000 + hits*10 + c.len*0.05 + k*0.001;
+      if(!best || c.score<best.score) best = c;
     });
 
-    /* dashed leader line */
-    const r  = (el.options && el.options.hoverRadius || 5) + 1;
+    /* leader line: dot -> (elbow) -> box side midpoint */
+    const r = (el.options && el.options.hoverRadius || 5) + 1;
     ctx.strokeStyle = '#1b1f24';
     ctx.lineWidth = 1;
+    ctx.lineJoin = 'round';
     ctx.setLineDash([3,3]);
     ctx.beginPath();
-    ctx.moveTo(el.x + best.ux*r, el.y + best.uy*r);
-    ctx.lineTo(best.ex, best.ey);
+    ctx.moveTo(x0 + best.ux*r, y0 + best.uy*r);
+    if(best.elbow) ctx.lineTo(best.elbow[0], best.elbow[1]);
+    ctx.lineTo(best.end[0], best.end[1]);
     ctx.stroke();
     ctx.setLineDash([]);
 
