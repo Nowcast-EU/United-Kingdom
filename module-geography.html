@@ -1376,6 +1376,7 @@ $('party').value  = state.party;
 $('metric').value = state.metric;
 $('period').value = state.period;
 $('xvar').value   = state.xvar;
+$('colourWin').checked = state.colourByWin;
 $('colourWin').onchange = e=>{ state.colourByWin = e.target.checked; update(); };
 ddInit(['party','metric','period','xvar']);
 update();
