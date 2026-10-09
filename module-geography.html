@@ -745,7 +745,7 @@ const PERIODS = {
 const fmtInt = v => Math.round(v).toLocaleString('en-GB');
 const XVARS = [
   {id:'leave', label:'Leave vote, 2016 (%)',              axis:'EU referendum Leave vote, 2016 (%)',    fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:15, max:80},
-  {id:'remain', label:'Remain vote, 2016 (%)',            axis:'EU referendum Remain vote, 2016 (%)',    fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%'},
+  {id:'remain', label:'Remain vote, 2016 (%)',            axis:'EU referendum Remain vote, 2016 (%)',    fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:20, max:85},
   {id:'area',  label:'Area (km²)',                        axis:'Constituency area (km²)',               fmt:v=>fmtInt(v)+' km²', tick:v=>fmtInt(v), log:true},
   {id:'lat',   label:'Latitude (° north)',                axis:'Latitude (° north)',                    fmt:v=>v.toFixed(2)+'°N', tick:v=>v+'°N', min:50, max:56},
   {id:'prox', label:'Distance from London (km)',          axis:'Distance from central London (km)',     fmt:v=>fmtInt(v)+' km', tick:v=>fmtInt(v), snap:50, min:0, max:475},
