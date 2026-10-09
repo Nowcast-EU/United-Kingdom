@@ -1391,7 +1391,15 @@ function ddRender(d){
         g.append(h, body);
         build(k, body);
         if(body.querySelector('.sel')) g.classList.add('open');   /* auto-expand the selected path */
-        h.onclick = ()=> g.classList.toggle('open');
+        h.onclick = ()=>{
+          const opening = !g.classList.contains('open');
+          if(opening){
+            Array.from(parent.children).forEach(s=>{
+              if(s !== g && s.classList.contains('dd-group')) s.classList.remove('open');
+            });
+          }
+          g.classList.toggle('open');
+        };
         parent.appendChild(g);
       }
     });
