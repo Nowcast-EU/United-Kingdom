@@ -749,7 +749,7 @@ const XVARS = [
   {id:'area',  label:'Area (km²)',                        axis:'Constituency area (km²)',               fmt:v=>fmtInt(v)+' km²', tick:v=>fmtInt(v), log:true},
   {id:'lat',   label:'Latitude (° north)',                axis:'Latitude (° north)',                    fmt:v=>v.toFixed(2)+'°N', tick:v=>v+'°N', min:50, max:56},
   {id:'prox', label:'Distance from London (km)',          axis:'Distance from central London (km)',     fmt:v=>fmtInt(v)+' km', tick:v=>fmtInt(v), snap:50, min:0, max:475},
-  {id:'income', label:'Personal income (k)',              axis:'Median personal income (k)',            fmt:v=>v.toFixed(1)+' k', tick:v=>fmtInt(v), min:20, max:55},
+  {id:'income', label:'Personal income (k)',              axis:'Median personal income (thousands)',            fmt:v=>v.toFixed(1)+' k', tick:v=>fmtInt(v), min:20, max:55},
   {id:'imd',   label:'Deprivation (IMD rank)',            axis:'IMD 2025 rank (1 = most deprived)',     fmt:v=>'rank '+fmtInt(v), tick:v=>v, min:0, max:543},
   {id:'cpov',  label:'Child poverty (%)',                 axis:'Relative poverty after housing costs (%)',               fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:5, max:65},
   {id:'a017', label:'Aged 0–17 (%)',                      axis:'Population aged 0–17 (%)',              fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:10, max:30},
