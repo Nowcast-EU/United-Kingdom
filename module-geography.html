@@ -759,6 +759,39 @@ const XVARS = [
 ];
 
   /* ============================================================
+   X-AXIS NESTS
+   Add, rename or reorganise dropdown nests here.
+   Each attribute is identified by its XVARS id.
+   ============================================================ */
+
+const XVAR_NESTS = [
+  {
+    name: 'Geography',
+    attributes: ['area', 'lat', 'prox']
+  },
+  {
+    name: 'Age',
+    attributes: ['a1824', 'a65']
+  },
+    {
+    name: 'Identity',
+    attributes: ['born', 'lgbt']
+  },
+    {
+    name: 'Education',
+    attributes: ['noqual', 'highqual']
+  },
+  {
+    name: 'Economy',
+    attributes: ['imd', 'cpov']
+  },
+    {
+    name: 'Brexit vote',
+    attributes: ['leave']
+  }
+];
+
+  /* ============================================================
    DATA TABLE  →  NAMES / DATA
    Reads the pasted table in <script id="geo-data"> (tab-separated, first row = headers)
      Constituency | PARTY_period columns (e.g. LAB_2024, CON_proj) | one column per X variable
@@ -805,15 +838,47 @@ const state = {party:'LAB', metric:'share', period:'2024', xvar:'lat', trend:tru
 
 $('party').innerHTML  = Object.keys(PARTIES).map(k=>`<option value="${k}">${PARTIES[k].name}</option>`).join('');
 function fillXVar(){
-  let h = XVARS.map(x=>`<option value="${x.id}">${x.label}</option>`).join('');
+  let h = '';
+  const assigned = new Set();
+
+  // Add the manually defined attribute nests
+  XVAR_NESTS.forEach(nest => {
+    const attributes = nest.attributes
+      .map(id => XVARS.find(x => x.id === id))
+      .filter(Boolean);
+
+    if (!attributes.length) return;
+
+    h += `<optgroup label="${nest.name}">`;
+
+    attributes.forEach(x => {
+      h += `<option value="${x.id}">${x.label}</option>`;
+      assigned.add(x.id);
+    });
+
+    h += '</optgroup>';
+  });
+
+  // Keep any attributes not assigned to a nest available
+  XVARS.filter(x => !assigned.has(x.id)).forEach(x => {
+    h += `<option value="${x.id}">${x.label}</option>`;
+  });
+
+  // Keep the existing party vote share section
   h += '<optgroup label="Party vote share">';
-  Object.keys(PARTIES).forEach(p=>{
-    (PARTIES[p].elections || ELECTIONS.map(e=>e.id)).forEach(id=>{
-      const lab = ELECTIONS.find(e=>e.id===id).label;
-      h += `<option value="pshare:${p}|${id}" data-sub="${PARTIES[p].name}" data-label="${PARTIES[p].name} vote share, ${lab}">${lab}</option>`;
+
+  Object.keys(PARTIES).forEach(p => {
+    (PARTIES[p].elections || ELECTIONS.map(e => e.id)).forEach(id => {
+      const lab = ELECTIONS.find(e => e.id === id).label;
+
+      h += `<option value="pshare:${p}|${id}"
+        data-sub="${PARTIES[p].name}"
+        data-label="${PARTIES[p].name} vote share, ${lab}">${lab}</option>`;
     });
   });
+
   h += '</optgroup>';
+
   $('xvar').innerHTML = h;
 }
 
