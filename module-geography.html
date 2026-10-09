@@ -1153,7 +1153,7 @@ const tipPlugin = {
 const chart = new Chart($('chart'),{
   type:'scatter',
   data:{datasets:[
-    {label:'Constituencies', data:[], pointRadius:3.6, pointHoverRadius:6, pointHitRadius:6, borderWidth:.6, order:2},
+    {label:'Constituencies', data:[], pointRadius:3.6, pointHoverRadius:6, pointHitRadius:6, borderWidth:.6, order:2, clip:false},
     {label:'Line of best fit', data:[], type:'line', showLine:true, pointRadius:0, borderColor:'#1b1f24', borderWidth:2, borderDash:[7,5], fill:false, tension:0, order:1, pointHitRadius:0, pointHoverRadius:0},
     {label:'Highlighted', data:[], pointRadius:8, pointBorderWidth:2.5, pointBorderColor:'#1b1f24', pointBackgroundColor:'transparent', pointHoverRadius:8, order:0}
   ]},
