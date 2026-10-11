@@ -213,9 +213,26 @@ padding: 20px var(--gutter);
     margin: 0 var(--gutter);
   }
 
-  .module-frame {
-  height: 400px;
+.module-frame {
+  height: 400px;                      /* fallback until the module reports its height */
+  min-height: var(--frame-min, 400px);
   overflow: hidden;
+}
+
+/* Desktop values: placeholders, replace with your measured numbers */
+.module-frame[data-slug="projection"]    { --frame-min: 2000px; }
+.module-frame[data-slug="polling"]       { --frame-min: 900px; }
+.module-frame[data-slug="probabilities"] { --frame-min: 900px; }
+.module-frame[data-slug="geography"]     { --frame-min: 600px; }
+.module-frame[data-slug="systems"]       { --frame-min: 650px; }
+
+/* Mobile values (700px matches the breakpoint your modules use internally) */
+@media (max-width: 700px) {
+  .module-frame[data-slug="projection"]    { --frame-min: 1900px; }
+  .module-frame[data-slug="polling"]       { --frame-min: 1100px; }
+  .module-frame[data-slug="probabilities"] { --frame-min: 1100px; }
+  .module-frame[data-slug="geography"]     { --frame-min: 600px; }
+  .module-frame[data-slug="systems"]       { --frame-min: 400px; }
 }
 
   footer {
