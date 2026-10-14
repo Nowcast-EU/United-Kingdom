@@ -937,8 +937,6 @@ function buildDotGrid() {
       rect.setAttribute('height', dotSize);
       rect.setAttribute('rx', dotSize / 2);
       rect.setAttribute('class', 'seat-dot');
-      var title = document.createElementNS(SVG_NS, 'title');
-      rect.appendChild(title);
       fillBarEl.appendChild(rect);
       dotElements.push(rect);
       dotLineIndex.push(lineIndex);
@@ -1024,11 +1022,6 @@ dotElements.forEach(function (dot, i) {
   if (isFilled && dot.getAttribute('data-dot-color') !== seat.color) {
     dot.style.setProperty('--dot-color', seat.color);
     dot.setAttribute('data-dot-color', seat.color);
-  }
-
-  var title = dot.querySelector('title');
-  if (title.textContent !== seat.name) {
-    title.textContent = seat.name;
   }
 
   if (i >= rangeStart && i < rangeEnd) {
