@@ -1012,20 +1012,30 @@ function updateDotFills() {
   var rangeEnd = Math.max(previousFilledCount, filledCount);
   var startLineIndex = dotLineIndex[Math.min(rangeStart, dotLineIndex.length - 1)];
 
-  dotElements.forEach(function (dot, i) {
-    var seat = seats[i];
-    var isFilled = i < filledCount;
-    dot.classList.toggle('seat-dot-filled', isFilled);
-    if (isFilled) dot.style.setProperty('--dot-color', seat.color);
-    dot.querySelector('title').textContent = seat.name;
 
-    if (i >= rangeStart && i < rangeEnd) {
-      var delay = (dotLineIndex[i] - startLineIndex) * ROW_DELAY;
-      dot.style.setProperty('--dot-delay', Math.max(delay, 0).toFixed(3) + 's');
-    } else {
-      dot.style.setProperty('--dot-delay', '0s');
-    }
-  });
+dotElements.forEach(function (dot, i) {
+  var seat = seats[i];
+  var isFilled = i < filledCount;
+
+  if (dot.classList.contains('seat-dot-filled') !== isFilled) {
+    dot.classList.toggle('seat-dot-filled', isFilled);
+  }
+
+  if (isFilled && dot.getAttribute('data-dot-color') !== seat.color) {
+    dot.style.setProperty('--dot-color', seat.color);
+    dot.setAttribute('data-dot-color', seat.color);
+  }
+
+  var title = dot.querySelector('title');
+  if (title.textContent !== seat.name) {
+    title.textContent = seat.name;
+  }
+
+  if (i >= rangeStart && i < rangeEnd) {
+    var delay = (dotLineIndex[i] - startLineIndex) * ROW_DELAY;
+    dot.style.setProperty('--dot-delay', Math.max(delay, 0).toFixed(3) + 's');
+  }
+});
 
   previousFilledCount = filledCount;
 }
