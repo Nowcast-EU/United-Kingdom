@@ -3002,6 +3002,18 @@ function autoSizeInlineField(el) {
 }
 
 document.getElementById('tacticalPct').addEventListener('input', renderTacticalBars);
+
+document.getElementById('tacticalPct').addEventListener('keydown', e => {
+if (e.key === 'Enter') e.target.blur();
+});
+
+document.getElementById('tacticalPct').addEventListener('blur', e => {
+let v = parseFloat(e.target.value);
+if (isNaN(v)) v = 0;
+e.target.value = Math.min(100, Math.max(0, v));
+renderTacticalBars();
+});
+  
 partyASelect.addEventListener('change', renderTacticalBars);
 partyBSelect.addEventListener('change', renderTacticalBars);
 
