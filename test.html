@@ -158,36 +158,10 @@ h2.subtitle a:hover {
   input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
   input[type=number] { -moz-appearance: textfield; }
 
-  /* Coalition builder */
-  #coalition-builder { margin-top: 48px; }
-  .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-  h3 { margin: 0; }
-  .legend { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 15px; }
-  .legend-item {
-    display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;
-    border: 1px solid #ccc; border-radius: 8px; padding: 6px 10px; background: #f3f3f3;
-    transition: all 0.25s ease; opacity: 0.6; font-weight: normal;
-  }
-  .legend-item:hover { transform: translateY(-1px); }
-  .legend-item.active { opacity: 1; background: #ffffff; border-color: #999; box-shadow: 0 1px 3px rgba(0,0,0,0.15); font-weight: bold; }
-  .legend-box { width: 20px; height: 20px; border-radius: 4px; }
-  .bar-container { position: relative; height: 117px; background: #f0f0f0; border-radius: 10px; overflow: hidden; margin-bottom: 12px; width: 100%; }
-  .coalition-overlay { position: absolute; top: 0; left: 0; height: 100%; width: 0%; border-top-left-radius: 10px; border-bottom-left-radius: 10px; display: flex; overflow: hidden; transition: width 1s ease; }
-  .segment { height: 100%; flex-shrink: 0; border-radius: 0; }
-  .majority-line {
-    position: absolute; top: 0; bottom: 0; width: 2px;
-    background: repeating-linear-gradient(to bottom,#333,#333 5px,transparent 5px,transparent 10px);
-    left: 50%;
-  }
-  .counter { font-size: 22px; font-weight: bold; text-align: center; margin-bottom: 8px; }
-  .note { font-size: 13px; color: #555; text-align: center; }
-
   /* --- MOBILE VIEW --- */
   @media (max-width: 768px) {
     table, th, td { font-size: 13px; }
-    .counter { font-size: 18px; }
     h3 { font-size: 16px; }
-    .legend-item { font-size: 12px; padding: 5px 8px; }
     .input-wrapper input { width: 45px; }
 
     /* 👇 manually control column widths on mobile */
@@ -230,87 +204,6 @@ tfoot td {
   height: 8px;
   border-top: 2px solid #ccc;
   border-bottom: 2px solid #ccc;
-}
-
-/* --- Responsive rectangular tab switcher --- */
-/* --- Final rectangular tab switcher --- */
-.tab-switcher {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #f4f4f4;
-  border-radius: 12px;
-  padding: 3px;
-  border: 1px solid #d0d0d0;
-  overflow: hidden;
-  width: 140px;             /* base width desktop */
-  max-width: 100%;
-  height: 38px;
-  box-sizing: border-box;
-  -webkit-user-select: none; /* 👈 prevent highlight */
-  -ms-user-select: none;
-  user-select: none;
-}
-
-.tab-btn {
-  position: relative;
-  z-index: 2;
-  flex: 1;
-  min-width: 0;
-  background: transparent;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 14px;
-  color: #111;
-  text-align: center;
-  line-height: 1;
-  white-space: nowrap;
-  transition: color 0.25s ease, font-weight 0.25s ease;
-  padding: 0;
-  -webkit-tap-highlight-color: transparent; /* 👈 remove blue tap flash */
-}
-
-.tab-btn.active {
-  font-weight: 700;
-}
-
-.tab-btn:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-.tab-pill {
-  position: absolute;
-  top: 3px;
-  bottom: 3px;
-  left: 3px;
-  right: 50%;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-  z-index: 1;
-}
-
-/* --- Mobile scaling + perfect edge alignment --- */
-@media (max-width: 480px) {
-  .tab-switcher {
-    width: 120px;
-    height: 34px;
-    padding: 3px;
-  }
-  .tab-btn {
-    font-size: 13px;
-  }
-  .tab-pill {
-    top: 3px;
-    bottom: 3px;
-    left: 3px;
-    right: 50%;
-  }
 }
 
   .disclaimer {
@@ -463,162 +356,8 @@ tfoot td {
   color: var(--party-color);    /* colour set inline via JS */
 }
 
-/* Floating Converter Button (use for the button element) */
-#help-button {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background-color: #008500;
-  color: #fff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-  transition: background 0.3s ease, transform 0.2s ease;
-  z-index: 1000;
-  border: none;           /* remove default button border */
-  padding: 0;             /* keep exact size */
-}
-
-/* ensure focus shows an outline for keyboard users */
-#help-button:focus {
-  outline: 2px solid rgba(255,255,255,0.9);
-  outline-offset: 2px;
-}
-
-/* hover behaviour */
-#help-button:hover {
-  background-color: #006d00;
-  transform: scale(1.05);
-}
-
-/* size the img inside the button */
-#help-button img {
-  width: 25px;
-  height: 25px;
-  display: block;
-  pointer-events: none;   /* clicks hit the button, not the svg */
-}
-
-/* --- Conversion Panel --- */
-
-#help-panel button {
-  background: #008500;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 12px;
-  cursor: pointer;
-  margin-top: 8px;
-  font-weight: 600;
-  transition: background 0.2s ease;
-}
-#help-panel button:hover {
-  background: #006d00;
-}
-
-#conversion-results {
-  margin-top: 10px;
-  text-align: left;
-  font-size: 13px;
-  color: #333;
-}
-
-/* --- Popup Panel --- */
-#help-panel {
-  position: fixed;
-  bottom: 80px;
-  right: 24px;
-  width: 400px;
-  max-width: calc(100vw - 32px); /* 👈 add this line */
-  background: #ffffff;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  padding: 14px 16px;
-  font-size: 14px;
-  line-height: 1.4;
-  font-family: Inter, system-ui, sans-serif;
-  display: none;
-  z-index: 999;
-  text-align: center;
-}
-
-#help-panel h4 {
-  margin-top: 0;
-  font-size: 16px;
-  color: #008500;
-  margin-bottom: 6px;
-}
-
-/* --- GB → UK mini calculator table --- */
-#gbuk-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-  table-layout: fixed; /* ensures all columns equal width */
-}
-
-/* header + cell styles */
-#gbuk-table th,
-#gbuk-table td {
-  border-bottom: 1px solid #eee;
-  padding: 3px 4px;
-  text-align: center;
-  font-size: 13px;
-  width: 33.33%; /* 👈 each column equal width */
-  box-sizing: border-box;
-}
-
-/* narrower popup container */
-#help-panel {
-  width: 250px; /* 👈 thinner default popup */
-}
-
-/* input boxes scale to fit their cells */
-#gbuk-table input {
-  width: 90%; /* 👈 dynamically scales within cell */
-  text-align: center;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 2px;
-  font-size: 13px;
-  box-sizing: border-box;
-}
-
-/* bold result column */
-#gbuk-table td:last-child {
-  font-weight: 600;
-}
-
-/* party column with coloured bar (same style as main table) */
-#gbuk-table .party-column {
-  font-weight: bold;
-  position: relative;
-  padding-left: 12px;
-  text-align: left;
-  color: black;
-}
-#gbuk-table .party-column::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 6px;
-  height: 100%;
-  border-radius: 2px 0 0 2px;
-  background-color: var(--party-color);
-}
-
-/* subtle grey header for consistency */
-#gbuk-table thead th {
-  background: #f1f5f9;
-  font-weight: 600;
-}
+#settings-section { margin-top: 48px; }
+#settings-section > h3 { text-align: center; margin-bottom: 13px; }
 
   /* --- Concentration editor table layout --- */
 #concentration-table {
@@ -696,23 +435,6 @@ tfoot td {
     display: none;
 }
 
-#settings-badge {
-  display: none;
-  position: fixed;
-  bottom: 60px;
-  right: 20px;
-  font-size: 20px;
-  z-index: 1001;
-  pointer-events: none;
-}
-
-@media (max-width: 768px) {
-  #settings-badge {
-    bottom: 60px;
-    right: 12px;
-  }
-}
-
 </style>
 </head>
 
@@ -765,24 +487,18 @@ tfoot td {
   Advanced calculator including Your Party and Restore Britain can be found <a href="https://nowcast-eu.github.io/United-Kingdom/advanced-calculator"><em>here</em></a>.
 </p>
 
-<div id="coalition-builder">
-<div class="header-container">
-  <h3>Coalition Builder (User Generated)</h3>
-
-  <div class="tab-switcher">
-    <div class="tab-pill" id="tab-pill"></div>
-    <button class="tab-btn active" id="tab-result">Result</button>
-    <button class="tab-btn" id="tab-2023">2024</button>
-  </div>
-</div>
-
-  <div class="legend" id="legend"></div>
-  <div class="bar-container" id="bar">
-    <div class="coalition-overlay" id="coalition-overlay"></div>
-    <div class="majority-line" title="Majority (326 seats)"></div>
-  </div>
-  <div class="counter" id="counter">0 / 650</div>
-  <div class="note">Majority = 326 seats</div>
+<div id="settings-section">
+  <h3>Concentration &amp; Incumbent Effects (%)</h3>
+  <table id="concentration-table">
+    <thead>
+      <tr>
+        <th>Party</th>
+        <th>Concentration</th>
+        <th>Incumbents</th>
+      </tr>
+    </thead>
+    <tbody id="concentration-body"></tbody>
+  </table>
 </div>
 
 </div><!-- end left-column -->
@@ -811,29 +527,6 @@ tfoot td {
 </p>
 </div><!-- end right-column -->
 </div><!-- end page-layout -->
-
-<!-- Floating Converter Button -->
-<button id="help-button" aria-label="Settings" title="Settings" type="button">
-  <img id="help-icon" src="https://raw.githubusercontent.com/Nowcast-EU/United-Kingdom/refs/heads/main/cog.svg" alt="" />
-</button>
-
-<span id="settings-badge">❗</span>
-
-<!-- Vote Concentration Editor -->
-<div id="help-panel">
-  <h4>Additional Settings (%)</h4>
-
-  <table id="concentration-table">
-    <thead>
-      <tr>
-        <th>Party</th>
-        <th>Concentration</th>
-        <th>Incumbents</th>
-      </tr>
-    </thead>
-    <tbody id="concentration-body"></tbody>
-  </table>
-</div>
 
 <script>
 const BASELINE = {"baseline_national": {"LAB": 0.175, "CON": 0.17557, "RFM": 0.27192, "LDM": 0.12103, "GRN": 0.152, "SNP": 0.335, "PLC": 0.302, "SFN": 0.27, "DUP": 0.221, "ALL": 0.15, "UUP": 0.122, "SDL": 0.111, "TUV": 0.062, "OTH": 0.038},
@@ -3307,15 +3000,6 @@ perConst.forEach(row => {
 
   document.getElementById('total-seats').textContent=Object.values(totals).reduce((a,b)=>a+b,0);
   document.getElementById('calculate').style.background='#008500';
-  updateCoalitionFromTotals(totals);
-  
-  // ---- Dynamic majority threshold (UK style) ----
-const totalSeats = Object.values(totals).reduce((a,b)=>a+b,0);
-const sfnSeats = totals["SFN"] || 0;
-const majoritySeats = Math.ceil((totalSeats - sfnSeats) / 2);
-
-// update the note text dynamically
-document.querySelector(".note").textContent = `Note: functional majority = ${majoritySeats} seats`;
 
 // --- auto-refresh constituency view if one is selected ---
 const currentName = document.getElementById("constituency-search").value.trim();
@@ -3415,23 +3099,6 @@ document.getElementById('randomise').addEventListener('click', () => {
   updateVoteTotal();
   calculate();
 });
-
-const settingsBadge = document.getElementById('settings-badge');
-
-document.getElementById('randomise').addEventListener('click', () => {
-  settingsBadge.style.display = 'block';
-});
-
-document.getElementById('reset').addEventListener('click', () => {
-  settingsBadge.style.display = 'none';
-});
-
-parties.forEach((p, i) => {
-  const input = document.getElementById(`votes-${i}`);
-  if (input) input.addEventListener('input', () => {
-    settingsBadge.style.display = 'none';
-  });
-});
   
 document.getElementById('calculate').addEventListener('click', calculate);
 renderTable();
@@ -3440,102 +3107,6 @@ document.addEventListener('DOMContentLoaded', () => calculate());
   document.addEventListener("DOMContentLoaded", () => {
   renderConcentrationTable();
   bindConcentrationInputs();
-});
-
-/* ---- Coalition Builder ---- */
-const COAL_TOTAL=650,COAL_MAJ=326;
-let selected=[];
-const legend=document.getElementById("legend"),overlay=document.getElementById("coalition-overlay"),counter=document.getElementById("counter");
-
-function toggleParty(n){
-  if(selected.includes(n))selected=selected.filter(x=>x!==n);
-  else selected.push(n);
-  renderCoalition(lastTotalsCache);
-}
-
-let lastTotalsCache=null;
-function updateCoalitionFromTotals(t){lastTotalsCache=t;renderCoalition(t);}
-
-function renderCoalition(t){
-  if(!t)return;
-  
-    // ---- Update majority line dynamically whenever coalition view updates ----
-  const totalSeats = Object.values(t).reduce((a,b)=>a+b,0);
-  const sfnSeats = t["SFN"] || 0;
-  const majoritySeats = Math.ceil((totalSeats - sfnSeats) / 2);
-  document.querySelector(".note").textContent = `Note: functional majority = ${majoritySeats} seats`;
-  
-overlay.innerHTML = "";
-legend.innerHTML = "";
-
-// 🟢 Only show parties that currently have seats
-const validParties = PARTIES.filter(n => (t[n] || 0) > 0);
-
-// ❌ Do NOT clear "selected" — this allows zero-seat parties to stay selected
-// selected = selected.filter(n => validParties.includes(n));
-
-validParties.forEach(n => {
-  const s = t[n] || 0;
-  const item = document.createElement('div');
-  item.className = 'legend-item' + (selected.includes(n) ? ' active' : '');
-  item.innerHTML = `<div class="legend-box" style="background:${PARTY_COLORS[n] || '#999'}"></div> <strong>${n}</strong> ${s}`;
-  item.onclick = () => toggleParty(n);
-  legend.appendChild(item);
-});
-
-  const totalSel=selected.reduce((s,n)=>s+(t[n]||0),0);
-  const width=(totalSel/COAL_TOTAL)*100;
-  overlay.style.width="0%";
-  overlay.innerHTML="";
-  if(totalSel>0){
-    selected.forEach(n=>{
-      const s=t[n]||0;
-      const seg=document.createElement('div');
-      seg.className='segment';
-      seg.style.flexBasis=((s/totalSel)*100)+'%';
-      seg.style.background=PARTY_COLORS[n]||"#999";
-      overlay.appendChild(seg);
-    });
-  }
-  requestAnimationFrame(()=>overlay.style.width=width+"%");
-  counter.textContent=`${totalSel} / ${COAL_TOTAL}`;
-  counter.style.color=totalSel>=COAL_MAJ?"#2BA84A":"#000";
-  document.querySelectorAll(".legend-item").forEach(el=>{
-    const n=el.querySelector("strong").textContent;
-    el.classList.toggle("active",selected.includes(n));
-  });
-}
-/* ---- Tab Switching (fixed state handling) ---- */
-const tabResult = document.getElementById("tab-result");
-const tab2023 = document.getElementById("tab-2023");
-let is2023View = false;
-let lastUserTotals = null; // store the most recent calculated result
-
-// --- patch: remember user totals whenever calculator runs ---
-const originalUpdateCoalitionFromTotals = updateCoalitionFromTotals;
-updateCoalitionFromTotals = function(t) {
-  if (!is2023View) lastUserTotals = t; // only store when user-generated
-  originalUpdateCoalitionFromTotals(t);
-};
-
-tabResult.addEventListener("click", () => {
-  if (!tabResult.classList.contains("active")) {
-    tabResult.classList.add("active");
-    tab2023.classList.remove("active");
-    is2023View = false;
-    document.getElementById("tab-pill").style.transform = "translateX(0%)";
-    updateCoalitionFromTotals(lastUserTotals || lastTotalsCache);
-  }
-});
-
-tab2023.addEventListener("click", () => {
-  if (!tab2023.classList.contains("active")) {
-    tab2023.classList.add("active");
-    tabResult.classList.remove("active");
-    is2023View = true;
-    document.getElementById("tab-pill").style.transform = "translateX(100%)";
-    originalUpdateCoalitionFromTotals(PREV_2023);
-  }
 });
 
   /* ---- Constituency Search + Bar Display ---- */
@@ -3728,15 +3299,6 @@ if (incumbent) {
   winnerText.innerHTML = `${name}: ${winnerHTML}`;
 }
 }  
-
-/* ---- Floating GB→UK Mini Calculator ---- */
-const helpBtn = document.getElementById("help-button");
-const helpPanel = document.getElementById("help-panel");
-
-// toggle open/close ONLY when button clicked
-helpBtn.addEventListener("click", () => {
-  helpPanel.style.display = helpPanel.style.display === "block" ? "none" : "block";
-});
 
   (function() {
   var css = document.createElement('link');
