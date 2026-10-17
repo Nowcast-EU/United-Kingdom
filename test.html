@@ -2503,8 +2503,8 @@ const PREV_2023 = {"LAB":411,"CON":121,"RFM":5,"LDM":72,"GRN":4,"SNP":9,"PLC":4,
 // Defaults: 0
 const VOTE_CONCENTRATION = {
   "LAB": 0.00,
-  "CON": 0.05,
-  "RFM": -0.02,
+  "CON": 0.00,
+  "RFM": 0.00,
   "LDM": 0.00,
   "GRN": 0.03,
   "SNP": 0.00,
@@ -2519,7 +2519,7 @@ const VOTE_CONCENTRATION = {
 };
 
   const INCUMBENT_STRENGTH = {
-  LAB: 0.01,
+  LAB: 0.00,
   CON: 0.00,
   RFM: 0.00,
   LDM: 0.00,
@@ -2528,23 +2528,6 @@ const VOTE_CONCENTRATION = {
 
 const VOTE_CONCENTRATION_DEFAULTS = { ...VOTE_CONCENTRATION };
 const INCUMBENT_STRENGTH_DEFAULTS = { ...INCUMBENT_STRENGTH };
-
-  const CONC_DISPLAY_OFFSET = {
-  LAB: 2.0,
-  CON: 5.0,
-  RFM: 0.0,
-  LDM: 7.0,
-  GRN: -10.0
-};
-
-  // display offsets for the incumbent input boxes (display only)
-const INC_DISPLAY_OFFSET = {
-  LAB: 1.0,
-  CON: 2.0,
-  RFM: -30.0,
-  LDM: 0.0,
-  GRN: -45.0
-};
 
   const CONC_EDITABLE = ["LAB", "CON", "RFM", "LDM", "GRN"];
 
@@ -2563,7 +2546,7 @@ function renderConcentrationTable() {
       <td>
         <input type="number"
           id="conc-${p}"
-          value="${((VOTE_CONCENTRATION[p] * 100) + (CONC_DISPLAY_OFFSET[p] || 0)).toFixed(1)}"
+          value="${(VOTE_CONCENTRATION[p] * 100).toFixed(1)}"
           step="0.5"
           min="-100"
           max="100"
@@ -2575,7 +2558,7 @@ function renderConcentrationTable() {
       <td>
         <input type="number"
           id="inc-${p}"
-          value="${(((Number(INCUMBENT_STRENGTH[p] || 0) * 100) + (INC_DISPLAY_OFFSET[p] || 0))).toFixed(1)}"
+          value="${(Number(INCUMBENT_STRENGTH[p] || 0) * 100).toFixed(1)}"
           step="0.5"
           min="-100"
           max="100"
@@ -2616,7 +2599,7 @@ function bindConcentrationInputs() {
 
       const party = input.id.replace("conc-", "");
       // store REAL value = displayed - offset
-      VOTE_CONCENTRATION[party] = (val - (CONC_DISPLAY_OFFSET[party] || 0)) / 100;
+      VOTE_CONCENTRATION[party] = val / 100;
 
       calculate();
     });
@@ -2630,7 +2613,7 @@ function bindConcentrationInputs() {
       input.value = val.toFixed(1);
 
       const party = input.id.replace("conc-", "");
-      VOTE_CONCENTRATION[party] = (val - (CONC_DISPLAY_OFFSET[party] || 0)) / 100;
+      VOTE_CONCENTRATION[party] = val / 100;
 
       calculate();
     });
@@ -2661,7 +2644,7 @@ function bindConcentrationInputs() {
       val = clampConcentration(val);
 
       const party = input.id.replace("inc-", "");
-      INCUMBENT_STRENGTH[party] = (val - (INC_DISPLAY_OFFSET[party] || 0)) / 100;
+      INCUMBENT_STRENGTH[party] = val / 100;
 
       calculate();
     });
@@ -2675,7 +2658,7 @@ function bindConcentrationInputs() {
       input.value = val.toFixed(1);
 
       const party = input.id.replace("inc-", "");
-      INCUMBENT_STRENGTH[party] = (val - (INC_DISPLAY_OFFSET[party] || 0)) / 100;
+      INCUMBENT_STRENGTH[party] = val / 100;
 
       calculate();
     });
@@ -3027,12 +3010,12 @@ document.getElementById('reset').addEventListener('click', () => {
   CONC_EDITABLE.forEach(p => {
     const concInput = document.getElementById(`conc-${p}`);
     if (concInput) {
-      concInput.value = ((VOTE_CONCENTRATION_DEFAULTS[p] * 100) + (CONC_DISPLAY_OFFSET[p] || 0)).toFixed(1);
+      concInput.value = (VOTE_CONCENTRATION_DEFAULTS[p] * 100).toFixed(1);
     }
 
     const incInput = document.getElementById(`inc-${p}`);
     if (incInput) {
-      incInput.value = ((INCUMBENT_STRENGTH_DEFAULTS[p] * 100) + (INC_DISPLAY_OFFSET[p] || 0)).toFixed(1);
+      incInput.value = (INCUMBENT_STRENGTH_DEFAULTS[p] * 100).toFixed(1);
     }
   });
 
@@ -3091,7 +3074,7 @@ document.getElementById('randomise').addEventListener('click', () => {
   // --- Vote concentration: random displayed value between -50.0 and 50.0 ---
   CONC_EDITABLE.forEach(p => {
     const randomDisplayVal = Math.round((Math.random() * 100 - 50) * 10) / 10;
-    VOTE_CONCENTRATION[p] = (randomDisplayVal - (CONC_DISPLAY_OFFSET[p] || 0)) / 100;
+    VOTE_CONCENTRATION[p] = randomDisplayVal / 100;
     const concInput = document.getElementById(`conc-${p}`);
     if (concInput) concInput.value = randomDisplayVal.toFixed(1);
   });
