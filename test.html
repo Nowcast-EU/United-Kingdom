@@ -478,6 +478,8 @@ tfoot td {
   font-size: 13px; padding: 3px 4px; border: 1px solid #cbd5e1; border-radius: 4px; background: #fff;
 }
 
+  <canvas id="demo-chart"></canvas>
+
 #demo-readout { text-align: center; font-size: 13px; font-weight: 600; height: 18px; margin-bottom: 2px; }
 .demo-ends { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; color: #555; }
 
@@ -492,6 +494,16 @@ tfoot td {
 .h-slider::-webkit-slider-runnable-track { height: 22px; background: transparent; }
 .h-slider::-moz-range-track { background: transparent; }
 .h-slider::-webkit-slider-thumb { margin-top: 4px; }   /* (22px track - 14px thumb) / 2 */
+
+#demo-chart {
+  display: block;
+  width: 100%;
+  height: 170px;
+  margin: 4px 0 8px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+}
 
 </style>
 </head>
@@ -2543,8 +2555,8 @@ const CONSTITUENCY_INCUMBENTS = {
 
 const DEMOGRAPHICS = {
   categories: [
-    { key: "ns", label: "North / South", a: "north", b: "south", aLabel: "North", bLabel: "South" },
-    { key: "ur", label: "Urban / Rural", a: "urban", b: "rural", aLabel: "Urban", bLabel: "Rural" }
+    { key: "ns", label: "North / South", a: "south", b: "north", aLabel: "South", bLabel: "North", x: "lat" },
+    { key: "ur", label: "Urban / Rural", a: "urban", b: "rural", aLabel: "Urban", bLabel: "Rural", x: "density", xFlip: true }
   ],
   constituencies: [
     { "name": "Aldershot", "north": 0, "south": 100, "urban": 64.9474923299401, "rural": 35.0525076700599 },
@@ -3164,7 +3176,112 @@ function syncDemographicUI() {
   document.getElementById("demo-right").textContent = c.bLabel;
   updateDemoReadout(v);
   paintSlider(slider);
+  drawDemoChart();
 }
+
+function drawDemoChart() {
+  const canvas = document.getElementById("demo-chart");
+  const cat = currentDemoCategory();
+  if (!canvas || !cat) return;
+
+  const party = document.getElementById("demo-party").value;
+  const xKey = cat.x || cat.b;
+  const results = window.latestConstituencyResults || [];
+
+  // One point per constituency that has demographic data: x = attribute, y = projected vote share %
+  const pts = [];
+  results.forEach(r => {
+    const row = DEMO_LOOKUP[r.name];
+    if (!row) return;
+    const raw = row[xKey];
+    if (raw == null || raw === "") return;
+    const x = Number(raw);
+    if (!isFinite(x)) return;
+    pts.push([x, (r[party] || 0) * 100]);
+  });
+
+  // Size the canvas for sharp rendering on high-DPI screens
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.clientWidth, H = canvas.clientHeight;
+  if (!W || !H) return;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  ctx.font = "10px Inter, system-ui, sans-serif";
+
+  if (pts.length < 2) {
+    ctx.fillStyle = "#888";
+    ctx.textAlign = "center";
+    ctx.fillText("No demographic data for this party's seats", W / 2, H / 2);
+    return;
+  }
+
+  const padL = 34, padR = 10, padT = 10, padB = 22;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+
+  const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  const xMin = Math.min(...xs), xMax = Math.max(...xs);
+  const xSpan = (xMax - xMin) || 1;
+  const yMax = Math.max(10, Math.ceil(Math.max(...ys) / 10) * 10);   // rounded up to the next 10
+
+  const px = x => padL + ((cat.xFlip ? xMax - x : x - xMin) / xSpan) * plotW;
+  const py = y => padT + plotH - (y / yMax) * plotH;
+
+  // axes
+  ctx.strokeStyle = "#cbd5e1";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(padL, padT);
+  ctx.lineTo(padL, padT + plotH);
+  ctx.lineTo(padL + plotW, padT + plotH);
+  ctx.stroke();
+
+  // points
+  ctx.fillStyle = PARTY_COLORS[party] || "#555";
+  ctx.globalAlpha = 0.55;
+  pts.forEach(([x, y]) => {
+    ctx.beginPath();
+    ctx.arc(px(x), py(y), 2.2, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+
+  // line of best fit (ordinary least squares), clipped to the plot area
+  const n = pts.length;
+  const sx = xs.reduce((a, b) => a + b, 0);
+  const sy = ys.reduce((a, b) => a + b, 0);
+  const sxx = xs.reduce((a, x) => a + x * x, 0);
+  const sxy = pts.reduce((a, [x, y]) => a + x * y, 0);
+  const denom = n * sxx - sx * sx;
+  if (Math.abs(denom) > 1e-9) {
+    const m = (n * sxy - sx * sy) / denom;
+    const b = (sy - m * sx) / n;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(padL, padT, plotW, plotH);
+    ctx.clip();
+    ctx.strokeStyle = "#111";
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(px(xMin), py(m * xMin + b));
+    ctx.lineTo(px(xMax), py(m * xMax + b));
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // minimal labels: y range on the left, slider end labels along the bottom
+  ctx.fillStyle = "#666";
+  ctx.textAlign = "right";
+  ctx.fillText(yMax + "%", padL - 4, padT + 8);
+  ctx.fillText("0", padL - 4, padT + plotH);
+  ctx.textAlign = "left";
+  ctx.fillText(cat.aLabel, padL, H - 7);
+  ctx.textAlign = "right";
+  ctx.fillText(cat.bLabel, padL + plotW, H - 7);
+}
+window.addEventListener("resize", drawDemoChart);
 
 function renderDemographicEditor() {
   if (!DEMO_CATEGORIES.length) return;
@@ -3673,6 +3790,7 @@ function calculate() {
 
   window.latestTotals = totals;
   updateTable();
+  drawDemoChart();
 
   if (window.updateMapColors) window.updateMapColors();
 }
