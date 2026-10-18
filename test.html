@@ -381,7 +381,7 @@ tfoot td {
 .input-wrapper input:disabled { background:#f1f5f9; color:#888; cursor:not-allowed; }
 
 /* ---- Table + slider editor side by side ---- */
-#table-row { display: flex; align-items: flex-start; gap: 16px; margin-top: 12px; }
+#table-row { display: flex; align-items: stretch; gap: 16px; margin-top: 12px; }
 #table-col { flex: 0 0 44%; min-width: 0; }
 #table-col table { margin-top: 0; }
 
@@ -391,19 +391,30 @@ tfoot td {
 #table-col th:nth-child(3) { width: 20%; }
 #table-col th:nth-child(4) { width: 20%; }
 
-#settings-section { flex: 1 1 0; min-width: 0; margin-top: 0; }
+#settings-section { flex: 1 1 0; min-width: 0; margin-top: 0; display: flex; flex-direction: column; }
 #settings-section > h3 { text-align: center; margin: 0 0 4px; font-size: 15px; }
 .slider-note { text-align: center; font-size: 11px; color: #777; margin: 0 0 8px; }
 
-#slider-panel { display: flex; justify-content: space-between; gap: 2px; }
+#slider-panel { display: flex; justify-content: space-between; gap: 2px; flex: 1 1 0; min-height: 0; }
 .slider-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .slider-value { font-size: 11px; font-weight: 600; height: 14px; line-height: 14px; }
 
+  .slider-wrap {
+  position: relative;
+  width: 100%;
+  flex: 1 1 0;        /* take all remaining column height */
+  min-height: 60px;   /* floor so short tables don't crush the sliders */
+}
+
 .v-slider {
   writing-mode: vertical-lr;
-  direction: rtl;            /* +100 at the top, -100 at the bottom */
+  direction: rtl;
+  position: absolute;
+  top: 0;
+  height: 100%;
+  left: 50%;
+  transform: translateX(-50%);
   width: 22px;
-  height: 170px;
   margin: 0;
   padding: 0;
   cursor: pointer;
@@ -413,7 +424,7 @@ tfoot td {
   background-color: transparent;
   background-repeat: no-repeat;
   background-position: center;
-  background-size: 6px 100%;   /* the bar is a 6px-wide strip, centred */
+  background-size: 6px 100%;
 }
 
 .v-slider::-webkit-slider-runnable-track { background: transparent; }
@@ -450,6 +461,7 @@ tfoot td {
   #table-row { flex-direction: column; }
   #table-col { flex: none; width: 100%; }
   #settings-section { width: 100%; margin-top: 24px; }
+  .slider-wrap { flex: none; height: 150px; }
 }
   
 </style>
@@ -2654,9 +2666,11 @@ function renderConcentrationTable() {
     return `
       <div class="slider-col">
         <div class="slider-value" id="conc-val-${p}">${c}</div>
-        <input type="range" class="v-slider" id="conc-${p}"
-               min="-100" max="100" step="0.5" value="${c}"
-               aria-label="${p} concentration">
+        <div class="slider-wrap">
+          <input type="range" class="v-slider" id="conc-${p}"
+                 min="-100" max="100" step="0.5" value="${c}"
+                 aria-label="${p} concentration">
+        </div>
         <div class="slider-party" style="--party-color:${PARTY_COLORS[p]}">${p}</div>
         <input type="number" class="inc-input" id="inc-${p}"
                value="${i}" step="0.5" min="-100" max="100"
