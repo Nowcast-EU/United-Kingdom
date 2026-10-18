@@ -558,8 +558,8 @@ tfoot td {
   </div>
 
   <div id="settings-section">
-    <h3>Concentration &amp; Incumbents</h3>
-    <p class="slider-note">Slider = concentration (−100 to 100). Box below = incumbent effect (%).</p>
+    <h3>Efficiency &amp; Incumbents</h3>
+    <p class="slider-note">Slider = efficiency (−50 to 50). Box below = incumbent effect (%).</p>
     <div id="slider-panel"></div>
   </div>
 </div>
@@ -3455,8 +3455,9 @@ function sliderPos(x) {
 
 function paintSlider(slider) {
   const v = parseFloat(slider.value) || 0;
-  const p = (v + 100) / 200;      // thumb position, 0 to 1
-  const m = 1 - p;                // mirror position on the other side of 0
+    const lo = parseFloat(slider.min), hi = parseFloat(slider.max);
+   const p = (v - lo) / (hi - lo);   // thumb position, 0 to 1, works for any symmetric range
+   const m = 1 - p;                // mirror position on the other side of 0
 
   const segs = v >= 0
     ? [[0, m, TRACK_COL], [m, 0.5, COUNTER_COL], [0.5, p, PARTY_COLORS[slider.id.replace("conc-","")]], [p, 1, TRACK_COL]]
@@ -3497,7 +3498,7 @@ function syncConcentrationUI(p) {
 function refreshConcentrationPanel() {
   CONC_EDITABLE.forEach(p => syncConcentrationUI(p));
   const h = document.querySelector("#settings-section > h3");
-  if (h) h.textContent = `Concentration & Incumbents: ${NATION_NAMES[currentNation()]}`;
+  if (h) h.textContent = `Efficiency & Incumbents: ${NATION_NAMES[currentNation()]}`;
 }
 
 function renderConcentrationTable() {
@@ -3507,8 +3508,8 @@ function renderConcentrationTable() {
       <div class="slider-value" id="conc-val-${p}">0.0</div>
       <div class="slider-wrap">
         <input type="range" class="v-slider" id="conc-${p}"
-               min="-100" max="100" step="0.5" value="0"
-               aria-label="${p} concentration">
+                min="-50" max="50" step="0.5" value="0"
+               aria-label="${p} efficiency">
       </div>
       <div class="slider-party" style="--party-color:${PARTY_COLORS[p]}">${p}</div>
       <input type="number" class="inc-input" id="inc-${p}"
