@@ -219,8 +219,16 @@ tfoot td {
   body { padding: 0; }
   #page-layout { display: flex; flex-direction: row; align-items: flex-start; width: 100%; }
   #left-column { width: 55%; padding: 0 32px 24px 64px; box-sizing: border-box; }
-  #right-column { width: 45%; padding: 0 64px 24px 32px; box-sizing: border-box;
-    position: sticky; top: 0; max-height: 100vh; overflow-y: auto; }
+  #right-column {
+    width: 45%;
+    height: 100vh;
+    height: 100dvh;
+    padding: 24px 64px 24px 32px;
+    box-sizing: border-box;
+    position: sticky;
+    top: 0;
+    overflow: hidden;
+  }
 }
 
 /* Mobile: single column */
@@ -357,12 +365,8 @@ tfoot td {
   background: #fff;
 }
 
-@media (min-width: 1024px) {
-  #constituency-map {
-    height: 700px;
-    max-width: 700px;
-    margin: 0 auto;
-  }
+@media (min-width: 769px) {
+  #constituency-map { height: 100%; max-width: none; margin: 0; }
 }
 
 .map-tooltip-clean {
@@ -570,28 +574,7 @@ tfoot td {
 
 </div><!-- end left-column -->
 <div id="right-column">
-  <!-- Constituency-level results -->
-<div id="constituency-section">
-  <h3>Constituency Results (User Generated)</h3>
-  <div class="search-container">
-    <input type="text" id="constituency-search" placeholder="Search for a constituency...">
-    <ul id="constituency-dropdown" class="dropdown"></ul>
-  </div>
-  <div id="constituency-bars"></div>
-  <p id="winner-text" class="winner-text"></p>
-</div>
-
-  <!-- Constituency Map -->
-<div id="map-section" style="margin-top:48px;">
   <div id="constituency-map" style="border-radius:10px; overflow:hidden; border:1px solid #e2e8f0;"></div>
-<div style="display:flex; align-items:center; justify-content:space-between; margin-top:6px;">
-    <p style="font-size:12px; color:#888; margin:0;">Click a constituency to see its results above.</p>
-    <button onclick="document.getElementById('randomise').click()" style="background:#008500; color:#fff; border:none; border-radius:6px; padding:5px 12px; font-size:12px; cursor:pointer;">Randomise</button>
-  </div>
-
-<p class="disclaimer">
-  ** This calculator is a simplified version of the Nowcast UK model. Certain features that can't be included such as vote concentration, incumbent effects, and demographic weighting mean some projections may differ from our bi-monthly tracker.
-</p>
 </div><!-- end right-column -->
 </div><!-- end page-layout -->
 
@@ -3691,8 +3674,6 @@ function calculate() {
   window.latestTotals = totals;
   updateTable();
 
-  const currentName = document.getElementById("constituency-search").value.trim();
-  if (currentName) showConstituencyResults(currentName);
   if (window.updateMapColors) window.updateMapColors();
 }
 
@@ -3767,197 +3748,6 @@ document.addEventListener('DOMContentLoaded', () => calculate());
   bindConcentrationInputs();
     renderDemographicEditor();
 });
-
-  /* ---- Constituency Search + Bar Display ---- */
-const searchInput = document.getElementById("constituency-search");
-
-  // ---- Focus + blur behavior for constituency search ----
-let lastSelectedConstituency = "";
-
-searchInput.addEventListener("focus", () => {
-  lastSelectedConstituency = searchInput.value;
-  searchInput.value = "";
-});
-
-searchInput.addEventListener("blur", () => {
-  // restore only if user didn't type anything new
-  if (searchInput.value.trim() === "" && lastSelectedConstituency) {
-    searchInput.value = lastSelectedConstituency;
-  }
-});
-
-const dropdown = document.getElementById("constituency-dropdown");
-const barsDiv = document.getElementById("constituency-bars");
-const winnerText = document.getElementById("winner-text");
-showPlaceholderBars();
-
-// ---- Placeholder bars shown before user selection ----
-function showPlaceholderBars() {
-  barsDiv.innerHTML = "";
-  for (let i = 0; i < 5; i++) {
-    const row = document.createElement("div");
-    row.className = "bar-row";
-
-    const partyLabel = document.createElement("div");
-    partyLabel.className = "bar-party";
-    partyLabel.textContent = ""; // no text yet
-    row.appendChild(partyLabel);
-
-    const wrapper = document.createElement("div");
-    wrapper.className = "bar-wrapper";
-
-    const bar = document.createElement("div");
-    bar.className = "bar";
-    bar.style.width = "0%"; // unfilled
-    bar.style.background = "#ccc"; // light grey placeholder color
-    wrapper.appendChild(bar);
-
-    row.appendChild(wrapper);
-
-    const valueLabel = document.createElement("div");
-    valueLabel.className = "bar-value";
-    valueLabel.textContent = ""; // no text yet
-    row.appendChild(valueLabel);
-
-    barsDiv.appendChild(row);
-  }
-
-  winnerText.textContent = ""; // no winner yet
-}
-
-// Build searchable list of names
-   const allConstituencies = RELATIVE_STRENGTH.constituencies.map(c => c.name);
-
-// Filter + display dropdown
-searchInput.addEventListener("input", () => {
-  const query = searchInput.value.trim().toLowerCase();
-  dropdown.innerHTML = "";
-  if (query.length === 0) {
-    dropdown.style.display = "none";
-    return;
-  }
-const matches = allConstituencies.filter(name => {
-  const lowerName = name.toLowerCase();
-  const words = lowerName.split(/[\s\-']/); // split on spaces, hyphens, apostrophes
-  const queryWords = query.split(/\s+/).filter(Boolean); // split the user input by spaces
-
-  // every typed word must match the start of *some* word in the constituency name
-  return queryWords.every(qw =>
-    words.some(word => word.startsWith(qw))
-  );
-});
-  matches.slice(0, 10).forEach(name => {
-    const li = document.createElement("li");
-    li.textContent = name;
-    li.addEventListener("click", () => selectConstituency(name));
-    dropdown.appendChild(li);
-  });
-  dropdown.style.display = matches.length > 0 ? "block" : "none";
-});
-
-document.addEventListener("click", (e) => {
-  if (!e.target.closest(".search-container")) dropdown.style.display = "none";
-});
-
-function selectConstituency(name) {
-  searchInput.value = name;
-  dropdown.style.display = "none";
-  showConstituencyResults(name);
-}
-
-function showConstituencyResults(name) {
-const dataset = window.latestConstituencyResults || [];
-const c = dataset.find(x => x.name === name);
-  if (!c) return;
-
-  // Compute total and shares
-  const partyShares = PARTIES.map(p => ({
-  name: p,
-  value: c[p] || 0,
-  color: PARTY_COLORS[p]
-  })).filter(x => x.value > 0 || x.name === "OTH");
-
-  const sorted = partyShares.sort((a,b) => b.value - a.value);
-  const max = sorted[0].value;
-
-  barsDiv.innerHTML = "";
-  sorted.forEach(p => {
-  const row = document.createElement("div");
-  row.className = "bar-row";
-
-  // Party label on the left
-  const partyLabel = document.createElement("div");
-  partyLabel.className = "bar-party";
-  partyLabel.textContent = p.name;
-  row.appendChild(partyLabel);
-
-  // Bar wrapper + coloured bar inside
-  const wrapper = document.createElement("div");
-  wrapper.className = "bar-wrapper";
-
-  const bar = document.createElement("div");
-  bar.className = "bar";
-    
-// Determine scale: if the largest party < 50%, we compress so 50% = full width
-let scaleFactor = 1;
-if (max < 0.5) {
-  scaleFactor = 1 / 0.5; // we'll map 50% vote to 100% width
-}
-
-// Scale each bar relative to either 100% or 50% rule
-let barWidth;
-if (max >= 0.5) {
-  // normal proportional scaling
-  barWidth = (p.value / max) * 100;
-} else {
-  // compress so 50% = 100% width
-  barWidth = (p.value / 0.5) * 100;
-}
-
-// clamp to 100%
-barWidth = Math.min(barWidth, 100);
-bar.style.width = barWidth + "%";
-
-  bar.style.background = p.color;
-  wrapper.appendChild(bar);
-
-row.appendChild(wrapper);
-
-// Percentage value outside the bar (right side)
-const valueLabel = document.createElement("div");
-valueLabel.className = "bar-value";
-valueLabel.textContent = `${(p.value * 100).toFixed(1)}%`;
-row.appendChild(valueLabel);
-
-barsDiv.appendChild(row);
-});
-
-  const winner = sorted[0];
-const incumbent = CONSTITUENCY_INCUMBENTS[name];
-const winnerAlias = PARTY_ALIASES[winner.name] || winner.name;
-const incumbentAlias = incumbent ? (PARTY_ALIASES[incumbent] || incumbent) : null;
-
-// helper to choose display colour
-function partyColor(partyCode) {
-  if (["SNP", "ALL"].includes(partyCode)) return "#000000"; // black
-  if (partyCode === "OTH") return "#999999"; // grey for Independent/Other
-  return PARTY_COLORS[partyCode] || "#000000";
-}
-
-// build span HTML
-const winnerHTML = `<span class="party coloured" style="--party-color:${partyColor(winner.name)}">${winnerAlias}</span>`;
-const incumbentHTML = incumbent ? `<span class="party coloured" style="--party-color:${partyColor(incumbent)}">${incumbentAlias}</span>` : "";
-
-if (incumbent) {
-  if (incumbent === winner.name) {
-    winnerText.innerHTML = `${winnerHTML} HOLD`;
-  } else {
-    winnerText.innerHTML = `${winnerHTML} GAIN from ${incumbentHTML}`;
-  }
-} else {
-  winnerText.innerHTML = `${name}: ${winnerHTML}`;
-}
-}  
 
   (function() {
   var css = document.createElement('link');
@@ -4657,8 +4447,7 @@ if (incumbent) {
 mouseout: function(e) {
     e.target.setStyle(sty(winners())(f));
     e.target.closeTooltip();
-},
-        click:function(){var el=document.getElementById('constituency-search');if(el){el.value=f.properties.NAME;showConstituencyResults(f.properties.NAME);document.getElementById('constituency-section').scrollIntoView({behavior:'smooth'});}}
+}
       });
     }}).addTo(map);
     window.updateMapColors=function(){if(layer)layer.setStyle(sty(winners()));};
