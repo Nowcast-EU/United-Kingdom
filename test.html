@@ -113,7 +113,6 @@ h2.subtitle a:hover {
   th { background: #f1f5f9; font-weight: 600; }
   td.party-column { font-weight: bold; position: relative; padding-left: 14px; color: black; }
   td.party-column::before { content: ""; position: absolute; left: 0; top: 0; width: 8px; height: 100%; border-radius: 2px 0 0 2px; background-color: var(--party-color); }
-  td.ge2024-column { font-style: italic; color: #999999; }
   td.seats-column, td.diff-column { font-weight: bold; text-align: center; }
   .diff-column.positive { color: #008500; }
   .diff-column.negative { color: #bb0000; }
@@ -163,13 +162,6 @@ h2.subtitle a:hover {
     table, th, td { font-size: 13px; }
     h3 { font-size: 16px; }
     .input-wrapper input { width: 45px; }
-
-    /* 👇 manually control column widths on mobile */
-    table th:nth-child(1), table td:nth-child(1) { width: 20%; } /* Party */
-    table th:nth-child(2), table td:nth-child(2) { width: 15%; } /* 2023 */
-    table th:nth-child(3), table td:nth-child(3) { width: 25%; } /* Votes */
-    table th:nth-child(4), table td:nth-child(4) { width: 20%; } /* Seats */
-    table th:nth-child(5), table td:nth-child(5) { width: 20%; } /* +/- */
   }
 
   @media (max-width: 480px) {
@@ -356,58 +348,6 @@ tfoot td {
   color: var(--party-color);    /* colour set inline via JS */
 }
 
-#settings-section { margin-top: 48px; }
-#settings-section > h3 { text-align: center; margin-bottom: 13px; }
-
-  /* --- Concentration editor table layout --- */
-#concentration-table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: auto; /* important */
-}
-
-#concentration-table th:nth-child(1),
-#concentration-table td:nth-child(1) {
-  width: 30%; /* Party */
-}
-
-#concentration-table th:nth-child(2),
-#concentration-table td:nth-child(2) {
-  width: 35%; /* Input */
-}
-
-#concentration-table th:nth-child(3),
-#concentration-table td:nth-child(3) {
-  width: 35%; /* Input */
-}
-
-#concentration-table th {
-  background: #f1f5f9;
-  height: 28px;
-  text-align: center;
-  font-weight: 600;
-  font-size: 14px;
-  vertical-align: middle;
-}
-
-#concentration-table td {
-  height: 26px;
-  text-align: center;
-  vertical-align: middle;
-  padding: 4px 6px;
-}
-
-#concentration-table input {
-  width: 45px;
-  height: 24px;
-  text-align: center;
-  border: 1px solid #cbd5e1;
-  border-radius: 4px;
-  font-size: 13px;
-  padding: 2px 4px;
-  box-sizing: border-box;
-}
-
 #constituency-map {
   width: 100%;
   max-width: 100%;        /* add this */
@@ -440,6 +380,52 @@ tfoot td {
 .nation-tab.active { background:#fff; font-weight:700; box-shadow:0 1px 3px rgba(0,0,0,0.1); }
 .input-wrapper input:disabled { background:#f1f5f9; color:#888; cursor:not-allowed; }
 
+/* ---- Table + slider editor side by side ---- */
+#table-row { display: flex; align-items: flex-start; gap: 16px; margin-top: 12px; }
+#table-col { flex: 0 0 44%; min-width: 0; }
+#table-col table { margin-top: 0; }
+
+/* column widths: Party / Votes / Seats / +/- */
+#table-col th:nth-child(1) { width: 22%; }
+#table-col th:nth-child(2) { width: 38%; }
+#table-col th:nth-child(3) { width: 20%; }
+#table-col th:nth-child(4) { width: 20%; }
+
+#settings-section { flex: 1 1 0; min-width: 0; margin-top: 0; }
+#settings-section > h3 { text-align: center; margin: 0 0 4px; font-size: 15px; }
+.slider-note { text-align: center; font-size: 11px; color: #777; margin: 0 0 8px; }
+
+#slider-panel { display: flex; justify-content: space-between; gap: 2px; }
+.slider-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.slider-value { font-size: 11px; font-weight: 600; height: 14px; line-height: 14px; }
+
+.v-slider {
+  writing-mode: vertical-lr;
+  direction: rtl;            /* puts +100 at the top, -100 at the bottom */
+  width: 22px;
+  height: 170px;
+  margin: 0;
+  accent-color: #008500;
+}
+
+.slider-party {
+  width: 100%; text-align: center; font-weight: bold; font-size: 12px;
+  padding-bottom: 2px; border-bottom: 3px solid var(--party-color);
+}
+
+.inc-input {
+  width: 100%; max-width: 44px; height: 22px; box-sizing: border-box;
+  text-align: center; font-size: 11px; padding: 2px 1px;
+  border: 1px solid #cbd5e1; border-radius: 4px;
+}
+
+/* Phones: stack the editor under the table */
+@media (max-width: 768px) {
+  #table-row { flex-direction: column; }
+  #table-col { flex: none; width: 100%; }
+  #settings-section { width: 100%; margin-top: 24px; }
+}
+  
 </style>
 </head>
 
@@ -468,27 +454,35 @@ tfoot td {
 <p id="tab-note" style="text-align:center; font-size:13px; color:#777; margin:8px 0 0;"></p>
 
   
-<table>
-  <thead>
-    <tr>
-      <th>Party</th>
-      <th>2024</th>
-      <th>Votes (%)</th>
-      <th>Seats</th>
-      <th>+/- 2024</th>
-    </tr>
-  </thead>
-  <tbody id="tbody"></tbody>
-  <tfoot>
-    <tr>
-      <td>Totals</td>
-      <td></td>
-      <td id="total-votes">0.0%</td>
-      <td id="total-seats">0</td>
-      <td></td>
-    </tr>
-  </tfoot>
-</table>
+<div id="table-row">
+  <div id="table-col">
+    <table>
+      <thead>
+        <tr>
+          <th>Party</th>
+          <th>Votes (%)</th>
+          <th>Seats</th>
+          <th>+/- 2024</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+      <tfoot>
+        <tr>
+          <td>Totals</td>
+          <td id="total-votes">0.0%</td>
+          <td id="total-seats">0</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <div id="settings-section">
+    <h3>Concentration &amp; Incumbents</h3>
+    <p class="slider-note">Slider = concentration (−100 to 100). Box below = incumbent effect (%).</p>
+    <div id="slider-panel"></div>
+  </div>
+</div>
 
 <div class="button-container">
   <button id="calculate">Calculate</button>
@@ -499,20 +493,6 @@ tfoot td {
 <p style="text-align:center; font-size:clamp(0.65rem, 1.8vw, 1rem); margin: 12px 0;">
   Advanced calculator including Your Party and Restore Britain can be found <a href="https://nowcast-eu.github.io/United-Kingdom/advanced-calculator"><em>here</em></a>.
 </p>
-
-<div id="settings-section">
-  <h3>Concentration &amp; Incumbent Effects (%)</h3>
-  <table id="concentration-table">
-    <thead>
-      <tr>
-        <th>Party</th>
-        <th>Concentration</th>
-        <th>Incumbents</th>
-      </tr>
-    </thead>
-    <tbody id="concentration-body"></tbody>
-  </table>
-</div>
 
 </div><!-- end left-column -->
 <div id="right-column">
@@ -2591,153 +2571,107 @@ const VOTE_CONCENTRATION = {
   RFM: -0.40,
   LDM: 0.00,
   GRN: -0.55,
-  RES: 0.00
+  RES: 0.00,
+  SNP: 0.00,
+  PLC: 0.00
 };
 
 const VOTE_CONCENTRATION_DEFAULTS = { ...VOTE_CONCENTRATION };
 const INCUMBENT_STRENGTH_DEFAULTS = { ...INCUMBENT_STRENGTH };
 
-  const CONC_EDITABLE = ["LAB", "CON", "RFM", "LDM", "GRN", "RES"];
+const CONC_EDITABLE = ["LAB", "CON", "RFM", "LDM", "GRN", "RES", "SNP", "PLC"];
 
-  // Build the vote concentration editor table
+// Push current state into the sliders / readouts / incumbent boxes for one party
+function syncConcentrationUI(p) {
+  const c = VOTE_CONCENTRATION[p] * 100;
+  const slider = document.getElementById(`conc-${p}`);
+  const readout = document.getElementById(`conc-val-${p}`);
+  const inc = document.getElementById(`inc-${p}`);
+  if (slider) slider.value = c;
+  if (readout) readout.textContent = c.toFixed(1);
+  if (inc) inc.value = (Number(INCUMBENT_STRENGTH[p] || 0) * 100).toFixed(1);
+}
+
 function renderConcentrationTable() {
-  const tbody = document.getElementById("concentration-body");
-  tbody.innerHTML = "";
+  const panel = document.getElementById("slider-panel");
+  panel.innerHTML = CONC_EDITABLE.map(p => {
+    const c = (VOTE_CONCENTRATION[p] * 100).toFixed(1);
+    const i = (Number(INCUMBENT_STRENGTH[p] || 0) * 100).toFixed(1);
+    return `
+      <div class="slider-col">
+        <div class="slider-value" id="conc-val-${p}">${c}</div>
+        <input type="range" class="v-slider" id="conc-${p}"
+               min="-100" max="100" step="0.5" value="${c}"
+               aria-label="${p} concentration">
+        <div class="slider-party" style="--party-color:${PARTY_COLORS[p]}">${p}</div>
+        <input type="number" class="inc-input" id="inc-${p}"
+               value="${i}" step="0.5" min="-100" max="100"
+               aria-label="${p} incumbent effect">
+      </div>`;
+  }).join("");
+}
 
+function bindConcentrationInputs() {
+  // --- Concentration sliders ---
   CONC_EDITABLE.forEach(p => {
-    const row = document.createElement("tr");
+    const slider = document.getElementById(`conc-${p}`);
+    const readout = document.getElementById(`conc-val-${p}`);
 
-    row.innerHTML = `
-      <td class="party-column" style="--party-color:${PARTY_COLORS[p]}">${p}</td>
+    // while dragging: update the value and readout, flag Calculate as stale
+    slider.addEventListener("input", () => {
+      const val = clampConcentration(parseFloat(slider.value));
+      VOTE_CONCENTRATION[p] = val / 100;
+      readout.textContent = val.toFixed(1);
+      document.getElementById('calculate').style.background = '#ffa500';
+    });
 
-      <!-- Concentration column (display offset applied) -->
-      <td>
-        <input type="number"
-          id="conc-${p}"
-          value="${(VOTE_CONCENTRATION[p] * 100).toFixed(1)}"
-          step="0.5"
-          min="-100"
-          max="100"
-          style="width:70px; text-align:center;"
-        >
-      </td>
+    // on release: recalculate seats and map
+    slider.addEventListener("change", calculate);
+  });
 
-      <!-- Incumbent strength column -->
-      <td>
-        <input type="number"
-          id="inc-${p}"
-          value="${(Number(INCUMBENT_STRENGTH[p] || 0) * 100).toFixed(1)}"
-          step="0.5"
-          min="-100"
-          max="100"
-          style="width:70px; text-align:center;"
-        >
-      </td>
-    `;
+  // --- Incumbent boxes (same behaviour as before) ---
+  const incInputs = CONC_EDITABLE.map(p => document.getElementById(`inc-${p}`));
+  incInputs.forEach((input, index) => {
+    let originalValue = input.value;
 
-    tbody.appendChild(row);
+    input.addEventListener("focus", () => {
+      originalValue = input.value;
+      input.value = "";
+    });
+
+    input.addEventListener("input", () => {
+      const raw = input.value;
+      if (raw === "-") return;
+      let val = parseFloat(raw);
+      if (isNaN(val)) return;
+      val = clampConcentration(val);
+      INCUMBENT_STRENGTH[input.id.replace("inc-", "")] = val / 100;
+      calculate();
+    });
+
+    input.addEventListener("blur", () => {
+      if (input.value === "" || input.value === "-" || isNaN(parseFloat(input.value))) {
+        input.value = originalValue;
+        return;
+      }
+      const val = clampConcentration(parseFloat(input.value));
+      input.value = val.toFixed(1);
+      INCUMBENT_STRENGTH[input.id.replace("inc-", "")] = val / 100;
+      calculate();
+    });
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        (incInputs[index + 1] || incInputs[0]).focus();
+      }
+    });
   });
 }
 
   function clampConcentration(val) {
   if (isNaN(val)) return 0;
   return Math.max(-100, Math.min(100, val));
-}
-
-function bindConcentrationInputs() {
-  const concInputs = CONC_EDITABLE.map(p => document.getElementById(`conc-${p}`));
-  const incInputs  = CONC_EDITABLE.map(p => document.getElementById(`inc-${p}`));
-
-  // --- Concentration inputs (existing behaviour + display offset handling) ---
-  concInputs.forEach((input, index) => {
-    let originalValue = input.value;
-
-    input.addEventListener("focus", () => {
-      originalValue = input.value;
-      input.dataset.displayValue = originalValue;
-      input.value = "";
-    });
-
-    input.addEventListener("input", () => {
-      const raw = input.value;
-      if (raw === "-") return;
-      let val = parseFloat(raw);
-      if (isNaN(val)) return;
-      val = clampConcentration(val);
-
-      const party = input.id.replace("conc-", "");
-      // store REAL value = displayed - offset
-      VOTE_CONCENTRATION[party] = val / 100;
-
-      calculate();
-    });
-
-    input.addEventListener("blur", () => {
-      if (input.value === "" || input.value === "-" || isNaN(parseFloat(input.value))) {
-        input.value = originalValue;
-        return;
-      }
-      let val = clampConcentration(parseFloat(input.value));
-      input.value = val.toFixed(1);
-
-      const party = input.id.replace("conc-", "");
-      VOTE_CONCENTRATION[party] = val / 100;
-
-      calculate();
-    });
-
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        if (concInputs[index + 1]) concInputs[index + 1].focus(); else concInputs[0].focus();
-      }
-    });
-  });
-
-  // --- Incumbent strength inputs (must ONLY update INCUMBENT_STRENGTH) ---
-  incInputs.forEach((input, index) => {
-    let originalValue = input.value;
-
-    input.addEventListener("focus", () => {
-      originalValue = input.value;
-      input.dataset.displayValue = originalValue;
-      input.value = "";
-    });
-
-    input.addEventListener("input", () => {
-      const raw = input.value;
-      if (raw === "-") return;
-      let val = parseFloat(raw);
-      if (isNaN(val)) return;
-      val = clampConcentration(val);
-
-      const party = input.id.replace("inc-", "");
-      INCUMBENT_STRENGTH[party] = val / 100;
-
-      calculate();
-    });
-
-    input.addEventListener("blur", () => {
-      if (input.value === "" || input.value === "-" || isNaN(parseFloat(input.value))) {
-        input.value = originalValue;
-        return;
-      }
-      let val = clampConcentration(parseFloat(input.value));
-      input.value = val.toFixed(1);
-
-      const party = input.id.replace("inc-", "");
-      INCUMBENT_STRENGTH[party] = val / 100;
-
-      calculate();
-    });
-
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        if (incInputs[index + 1]) incInputs[index + 1].focus(); else incInputs[0].focus();
-      }
-    });
-  });
 }
 
 // Full party name aliases
@@ -2762,22 +2696,19 @@ const PARTY_ALIASES = {
 function renderTable() {
   const nation = NATION_KEY[currentTab];
   const own = NATION_PARTIES[nation];
-  const geSrc = currentTab === "UK" ? GE2024 : GE2024_BY_NATION[nation];
 
   const rows = own.slice();
   if (currentTab === "UK") rows.push("--divider--", ...UK_EXTRA);
 
   document.getElementById('tbody').innerHTML = rows.map(p => {
     if (p === "--divider--") {
-      return `<tr class="divider-row"><td colspan="5"><i>Calculated from the Scotland, Wales and Northern Ireland tabs</i></td></tr>`;
+      return `<tr class="divider-row"><td colspan="4"><i>Calculated from the Scotland, Wales and Northern Ireland tabs</i></td></tr>`;
     }
-    const ge = geSrc[p];
     const editable = own.includes(p) && p !== "OTH";
     const val = editable ? (VOTES[nation][p] || 0).toFixed(1) : "0.0";
     return `
       <tr data-party="${p}">
         <td class="party-column" style="--party-color:${PARTY_COLORS[p]}">${p}</td>
-        <td class="ge2024-column">${ge == null ? "—" : ge.toFixed(1) + "%"}</td>
         <td>
           <div class="input-wrapper">
             <input type="number" id="votes-${p}" data-party="${p}" value="${val}" ${editable ? 'min="0" max="100" step="0.1"' : 'disabled'}>
@@ -3002,18 +2933,8 @@ document.getElementById('reset').addEventListener('click', () => {
     INCUMBENT_STRENGTH[p] = INCUMBENT_STRENGTH_DEFAULTS[p];
   });
 
-  // ---- Reset display values for settings panel ----
-  CONC_EDITABLE.forEach(p => {
-    const concInput = document.getElementById(`conc-${p}`);
-    if (concInput) {
-      concInput.value = (VOTE_CONCENTRATION_DEFAULTS[p] * 100).toFixed(1);
-    }
-
-    const incInput = document.getElementById(`inc-${p}`);
-    if (incInput) {
-      incInput.value = (INCUMBENT_STRENGTH_DEFAULTS[p] * 100).toFixed(1);
-    }
-  });
+    // ---- Reset display values for settings panel ----
+  CONC_EDITABLE.forEach(p => syncConcentrationUI(p));
 
   // ---- Recalculate everything ----
   calculate();
@@ -3040,10 +2961,9 @@ document.getElementById('randomise').addEventListener('click', () => {
   });
 
   CONC_EDITABLE.forEach(p => {
-    const d = Math.round((Math.random() * 100 - 50) * 10) / 10;
+    const d = Math.round((Math.random() * 100 - 50) * 2) / 2;   // snaps to the slider's 0.5 step
     VOTE_CONCENTRATION[p] = d / 100;
-    const el = document.getElementById(`conc-${p}`);
-    if (el) el.value = d.toFixed(1);
+    syncConcentrationUI(p);
   });
 
   renderTable();
