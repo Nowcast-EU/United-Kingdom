@@ -3407,14 +3407,37 @@ const VOTE_CONCENTRATION_DEFAULTS = {
   PLC: 0.00
 };
 
-// Each nation gets its own copy of the settings
 const NATIONS = Object.keys(NATION_PARTIES);          // ENG, SCO, WAL, NI
+
+// Per-nation overrides. List only the values that differ from the shared defaults above.
+// Values are fractions: 0.10 = 10.0 on the slider, -0.25 = -25.0.
+// Keys: ENG (also used by the UK tab), SCO, WAL.
+const VOTE_CONCENTRATION_DEFAULTS_BY_NATION = {
+  SCO: { SNP: 0.00, LAB: 0.13, CON: 0.00, RFM: 0.13, LDM: 0.15, GRN: -0.02, RES: 0.00 },
+  WAL: { PLC: -0.10, LAB: 0.05, CON: 0.05, RFM: 0.00, LDM: 0.10, GRN: 0.05, RES: 0.00 }
+};
+const INCUMBENT_STRENGTH_DEFAULTS_BY_NATION = {
+  SCO: { SNP: 0.00, LAB: 0.04, CON: 0.00, RFM: 0.00, LDM: 0.10, GRN: 0.00, RES: 0.00 },
+  WAL: { PLC: -0.25, LAB: 0.00, CON: 0.00, RFM: 0.00, LDM: 0.00, GRN: 0.00, RES: 0.00 }
+};
+
 const VOTE_CONCENTRATION = {};
 const INCUMBENT_STRENGTH = {};
-NATIONS.forEach(n => {
-  VOTE_CONCENTRATION[n] = { ...VOTE_CONCENTRATION_DEFAULTS };
-  INCUMBENT_STRENGTH[n] = { ...INCUMBENT_STRENGTH_DEFAULTS };
-});
+
+// Shared defaults, then the nation's own overrides on top
+function resetNationSettings() {
+  NATIONS.forEach(n => {
+    VOTE_CONCENTRATION[n] = {
+      ...VOTE_CONCENTRATION_DEFAULTS,
+      ...(VOTE_CONCENTRATION_DEFAULTS_BY_NATION[n] || {})
+    };
+    INCUMBENT_STRENGTH[n] = {
+      ...INCUMBENT_STRENGTH_DEFAULTS,
+      ...(INCUMBENT_STRENGTH_DEFAULTS_BY_NATION[n] || {})
+    };
+  });
+}
+resetNationSettings();
 
 const CONC_EDITABLE = ["LAB", "CON", "RFM", "LDM", "GRN", "RES", "SNP", "PLC"];
 
@@ -3826,10 +3849,7 @@ document.getElementById('reset').addEventListener('click', () => {
   renderTable();
 
   // ---- Reset concentration & incumbent strength (all nations) ----
-  NATIONS.forEach(n => {
-    VOTE_CONCENTRATION[n] = { ...VOTE_CONCENTRATION_DEFAULTS };
-    INCUMBENT_STRENGTH[n] = { ...INCUMBENT_STRENGTH_DEFAULTS };
-  });
+  resetNationSettings();
   refreshConcentrationPanel();
 
   resetDemographicEffects();
