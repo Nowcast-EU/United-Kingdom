@@ -430,7 +430,7 @@ tfoot td {
 .v-slider::-webkit-slider-runnable-track { background: transparent; }
 .v-slider::-moz-range-track { background: transparent; }
 
-.v-slider::-webkit-slider-thumb {
+.v-slider::-webkit-slider-thumb, .h-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 14px; height: 14px; box-sizing: border-box;
@@ -438,7 +438,7 @@ tfoot td {
   background: #fff;
   border: 2px solid #008500;
 }
-.v-slider::-moz-range-thumb {
+.v-slider::-moz-range-thumb, .h-slider::-moz-range-thumb {
   width: 14px; height: 14px; box-sizing: border-box;
   border-radius: 50%;
   background: #fff;
@@ -466,21 +466,28 @@ tfoot td {
 
 #demo-section { margin-top: 28px; }
 #demo-section > h3 { text-align: center; margin: 0 0 4px; font-size: 15px; }
-#demo-table { table-layout: fixed; margin-top: 4px; }
-#demo-table th:first-child { width: 28%; }
-#demo-table th.demo-party { border-bottom: 3px solid var(--party-color); }
-#demo-table td { text-align: center; padding: 3px 2px; }
-#demo-table td.demo-label { text-align: left; font-size: 12px; padding-left: 6px; }
-.demo-input {
-  width: 100%; max-width: 52px; height: 22px; box-sizing: border-box;
-  text-align: center; font-size: 12px; padding: 2px 1px;
-  border: 1px solid #cbd5e1; border-radius: 4px;
-}
-@media (max-width: 768px) {
-  #demo-table th, #demo-table td.demo-label { font-size: 11px; }
-  .demo-input { font-size: 11px; }
-}
   
+  .demo-controls { display: flex; gap: 12px; justify-content: center; margin: 8px 0; flex-wrap: wrap; }
+.demo-controls label { font-size: 13px; display: flex; align-items: center; gap: 6px; }
+.demo-controls select {
+  font-size: 13px; padding: 3px 4px; border: 1px solid #cbd5e1; border-radius: 4px; background: #fff;
+}
+
+#demo-readout { text-align: center; font-size: 13px; font-weight: 600; height: 18px; margin-bottom: 2px; }
+.demo-ends { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; color: #555; }
+
+.h-slider {
+  width: 100%; height: 22px; margin: 0; padding: 0; cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 6px;
+}
+.h-slider::-webkit-slider-runnable-track { height: 22px; background: transparent; }
+.h-slider::-moz-range-track { background: transparent; }
+.h-slider::-webkit-slider-thumb { margin-top: 4px; }   /* (22px track - 14px thumb) / 2 */
+
 </style>
 </head>
 
@@ -546,12 +553,14 @@ tfoot td {
 </div>
 
 <div id="demo-section">
-  <h3>Demographic Effects (%)</h3>
-  <p class="slider-note">Each box is a party's advantage (+) or disadvantage (−) with that group. Applies to constituencies with demographic data.</p>
-  <table id="demo-table">
-    <thead id="demo-head"></thead>
-    <tbody id="demo-body"></tbody>
-  </table>
+  <h3>Demographic Effects</h3>
+  <div class="demo-controls">
+    <label>Party <select id="demo-party"></select></label>
+    <label>Category <select id="demo-cat"></select></label>
+  </div>
+  <div id="demo-readout"></div>
+  <input type="range" class="h-slider" id="demo-slider" min="-100" max="100" step="1" value="0" aria-label="Demographic effect">
+  <div class="demo-ends"><span id="demo-left"></span><span id="demo-right"></span></div>
 </div>
 
 <p style="text-align:center; font-size:clamp(0.65rem, 1.8vw, 1rem); margin: 12px 0;">
@@ -2549,13 +2558,9 @@ const CONSTITUENCY_INCUMBENTS = {
 };
 
 const DEMOGRAPHICS = {
-  attributes: [
-    { key: "north", label: "Northern-ness" },
-    { key: "south", label: "Southern-ness" },
-    { key: "urban", label: "Urban" },
-    { key: "rural", label: "Rural" }
-    // , { key: "DEGREE", label: "Degree educated" }
-    // , { key: "OWNER_OCC", label: "Home owners" }
+  categories: [
+    { key: "ns", label: "North / South", a: "north", b: "south", aLabel: "North", bLabel: "South" },
+    { key: "ur", label: "Urban / Rural", a: "urban", b: "rural", aLabel: "Urban", bLabel: "Rural" }
   ],
   constituencies: [
     { "name": "Aldershot", "north": 0, "south": 100, "urban": 64.9474923299401, "rural": 35.0525076700599 },
@@ -3106,18 +3111,17 @@ const DEMOGRAPHICS = {
 };
 
 /* ---- Demographic effects ---- */
-const DEMO_PARTIES = ["LAB", "CON", "RFM", "LDM", "GRN", "RES"];  // parties that get an input column
-const DEMO_PREV_SCALE = 100;   // 100 = prevalence treated as a fraction (18 -> 0.18). Set to 1 for the literal reading.
-const DEMO_MIN = -100, DEMO_MAX = 1000;
-const DEMO_ATTRIBUTES = DEMOGRAPHICS.attributes;
+const DEMO_PARTIES = ["LAB", "CON", "RFM", "LDM", "GRN", "RES", "SNP", "PLC"];
+const DEMO_MAX_EFFECT = 1;   // slider at ±100 = ±100% effect in a fully one-sided seat. Try 0.5 for half-strength.
+const DEMO_CATEGORIES = DEMOGRAPHICS.categories;
 
-// Optional starting values in percentage points, e.g. { AGE_18_24: { GRN: 15 } }
+// Optional starting values (-100 to 100), e.g. { ns: { GRN: -20 } }
 const DEMO_DEFAULTS = {};
 
 const DEMO_LOOKUP = {};
 DEMOGRAPHICS.constituencies.forEach(r => { DEMO_LOOKUP[r.name] = r; });
 
-// Warn in the console if any demographic row doesn't match a constituency name
+// Console warning if any demographic row doesn't match a constituency name
 (function () {
   const known = new Set(RELATIVE_STRENGTH.constituencies.map(c => c.name));
   DEMOGRAPHICS.constituencies.forEach(r => {
@@ -3125,85 +3129,88 @@ DEMOGRAPHICS.constituencies.forEach(r => { DEMO_LOOKUP[r.name] = r; });
   });
 })();
 
-const DEMO_EFFECTS = {};   // DEMO_EFFECTS[attributeKey][party] = effect in percentage points
+const DEMO_EFFECTS = {};   // DEMO_EFFECTS[categoryKey][party] = slider value, -100 to 100
 function resetDemographicEffects() {
-  DEMO_ATTRIBUTES.forEach(a => {
-    DEMO_EFFECTS[a.key] = {};
+  DEMO_CATEGORIES.forEach(c => {
+    DEMO_EFFECTS[c.key] = {};
     DEMO_PARTIES.forEach(p => {
-      DEMO_EFFECTS[a.key][p] = (DEMO_DEFAULTS[a.key] && DEMO_DEFAULTS[a.key][p]) || 0;
+      DEMO_EFFECTS[c.key][p] = (DEMO_DEFAULTS[c.key] && DEMO_DEFAULTS[c.key][p]) || 0;
     });
   });
 }
 resetDemographicEffects();
 
-// 1 + (effect x prevalence) for each attribute, multiplied together.
+// Negative = toward the category's left attribute (a), positive = toward the right (b).
 // No data row for the constituency (Scotland, Wales, NI for now) = no effect.
 function demographicMultiplier(name, p) {
   const row = DEMO_LOOKUP[name];
   if (!row) return 1;
   let m = 1;
-  DEMO_ATTRIBUTES.forEach(a => {
-    const eff = (DEMO_EFFECTS[a.key] && DEMO_EFFECTS[a.key][p]) || 0;
-    const prev = Number(row[a.key]);
-    if (!eff || !isFinite(prev)) return;
-    m *= 1 + (eff / 100) * (prev / DEMO_PREV_SCALE);   // to add instead: use m += ... and start from m = 1
+  DEMO_CATEGORIES.forEach(c => {
+    const s = (DEMO_EFFECTS[c.key] && DEMO_EFFECTS[c.key][p]) || 0;
+    const a = Number(row[c.a]), b = Number(row[c.b]);
+    if (!s || !isFinite(a) || !isFinite(b)) return;
+    m *= 1 + (s / 100) * DEMO_MAX_EFFECT * ((b - a) / 100);
   });
-  return m;
+  return Math.max(0, m);
 }
 
-function renderDemographicTable() {
-  document.getElementById("demo-head").innerHTML =
-    `<tr><th>Group</th>${DEMO_PARTIES.map(p =>
-      `<th class="demo-party" style="--party-color:${PARTY_COLORS[p]}">${p}</th>`).join("")}</tr>`;
-
-  document.getElementById("demo-body").innerHTML = DEMO_ATTRIBUTES.map(a => `
-    <tr>
-      <td class="demo-label">${a.label}</td>
-      ${DEMO_PARTIES.map(p => `
-        <td><input type="number" class="demo-input" data-attr="${a.key}" data-party="${p}"
-             value="${DEMO_EFFECTS[a.key][p].toFixed(1)}" step="1" min="${DEMO_MIN}" max="${DEMO_MAX}"
-             aria-label="${p} effect for ${a.label}"></td>`).join("")}
-    </tr>`).join("");
-
-  bindDemographicInputs();
+function currentDemoCategory() {
+  const key = document.getElementById("demo-cat").value;
+  return DEMO_CATEGORIES.find(c => c.key === key);
 }
 
+function updateDemoReadout(v) {
+  const c = currentDemoCategory();
+  const el = document.getElementById("demo-readout");
+  el.textContent = !v ? "No effect"
+    : `Towards ${v < 0 ? c.aLabel : c.bLabel}: ${Math.abs(v).toFixed(0)}`;
+}
+
+// Load the stored value for the selected party + category into the slider
 function syncDemographicUI() {
-  document.querySelectorAll(".demo-input").forEach(el => {
-    el.value = DEMO_EFFECTS[el.dataset.attr][el.dataset.party].toFixed(1);
-  });
+  const c = currentDemoCategory();
+  if (!c) return;
+  const party = document.getElementById("demo-party").value;
+  const slider = document.getElementById("demo-slider");
+  const v = (DEMO_EFFECTS[c.key] && DEMO_EFFECTS[c.key][party]) || 0;
+
+  slider.value = v;
+  document.getElementById("demo-left").textContent = c.aLabel;
+  document.getElementById("demo-right").textContent = c.bLabel;
+  updateDemoReadout(v);
+  paintSlider(slider);
 }
 
-function bindDemographicInputs() {
-  const inputs = Array.from(document.querySelectorAll(".demo-input"));
-  inputs.forEach((input, i) => {
-    let original = input.value;
-    const store = v => { DEMO_EFFECTS[input.dataset.attr][input.dataset.party] = v; };
-    const clamp = v => Math.max(DEMO_MIN, Math.min(DEMO_MAX, v));
+function renderDemographicEditor() {
+  if (!DEMO_CATEGORIES.length) return;
+  const partySel = document.getElementById("demo-party");
+  const catSel = document.getElementById("demo-cat");
+  const slider = document.getElementById("demo-slider");
 
-    input.addEventListener("focus", () => { original = input.value; input.value = ""; });
+  partySel.innerHTML = DEMO_PARTIES.map(p =>
+    `<option value="${p}">${PARTY_ALIASES[p] || p}</option>`).join("");
+  catSel.innerHTML = DEMO_CATEGORIES.map(c =>
+    `<option value="${c.key}">${c.label}</option>`).join("");
 
-    input.addEventListener("input", () => {            // live update while typing
-      if (input.value === "-") return;
-      const v = parseFloat(input.value);
-      if (isNaN(v)) return;
-      store(clamp(v));
-      calculateThrottled();
-    });
+  partySel.addEventListener("change", syncDemographicUI);
+  catSel.addEventListener("change", syncDemographicUI);
 
-    input.addEventListener("blur", () => {
-      const v = parseFloat(input.value);
-      if (isNaN(v)) { input.value = original; return; }
-      const c = clamp(v);
-      input.value = c.toFixed(1);
-      store(c);
-      calculate();
-    });
-
-    input.addEventListener("keydown", e => {
-      if (e.key === "Enter") { e.preventDefault(); (inputs[i + 1] || inputs[0]).focus(); }
-    });
+  slider.addEventListener("input", () => {
+    const v = parseFloat(slider.value) || 0;
+    DEMO_EFFECTS[currentDemoCategory().key][partySel.value] = v;
+    updateDemoReadout(v);
+    paintSlider(slider);
+    calculateThrottled();
   });
+
+  // double-click snaps back to exactly 0
+  slider.addEventListener("dblclick", () => {
+    slider.value = 0;
+    slider.dispatchEvent(new Event("input"));
+  });
+
+  syncDemographicUI();
 }
 
 /* ---- Party setup ---- */
@@ -3328,7 +3335,8 @@ function paintSlider(slider) {
     .filter(([a, b]) => b > a)
     .map(([a, b, c]) => `${c} ${sliderPos(a)} ${sliderPos(b)}`);
 
-  slider.style.backgroundImage = `linear-gradient(to top, ${stops.join(', ')})`;
+    const dir = slider.classList.contains('h-slider') ? 'to right' : 'to top';
+  slider.style.backgroundImage = `linear-gradient(${dir}, ${stops.join(', ')})`;
 }
 
 // Push current state into the sliders / readouts / incumbent boxes for one party
@@ -3756,7 +3764,7 @@ document.addEventListener('DOMContentLoaded', () => calculate());
   document.addEventListener("DOMContentLoaded", () => {
   renderConcentrationTable();
   bindConcentrationInputs();
-  renderDemographicTable();
+    renderDemographicEditor();
 });
 
   /* ---- Constituency Search + Bar Display ---- */
