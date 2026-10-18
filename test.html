@@ -2495,7 +2495,7 @@ const CONSTITUENCY_INCUMBENTS = {
 const PARTIES = ["LAB", "CON", "RFM", "LDM", "GRN", "RES", "SNP", "PLC", "SFN", "DUP", "ALL", "UUP", "SDL", "TUV", "OTH"];
 const PARTY_COLORS = {"LAB":"#E4003B","CON":"#0087DC","RFM":"#23C7DF","LDM":"#FAA61A","GRN":"#6AB023","RES":"#000055","SNP":"#FDF38E","PLC":"#005B54","SFN":"#326760","DUP":"#D46A4C","ALL":"#F6CB2F","UUP":"#48A5EE","SDL":"#2AA82C","TUV":"#0C3A6A","OTH":"#DADADA"};
 const GE2024 = {"LAB":33.7,"CON":23.7,"RFM":14.3,"LDM":12.2,"GRN":6.8,"RES":0.0,"SNP":30.0,"PLC":14.8,"SFN":27.0,"DUP":22.1,"ALL":15.0,"UUP":12.2,"SDL":11.1,"TUV":6.2,"OTH":3.7};
-const DEFAULTS = {"LAB":18.2,"CON":17.7,"RFM":25.5,"LDM":12.3,"GRN":16.3,"RES":2.0,"SNP":30.0,"PLC":28.0,"SFN":27.0,"DUP":22.1,"ALL":15.0,"UUP":12.2,"SDL":11.1,"TUV":6.2,"OTH":1.6};
+const DEFAULTS = {"LAB":26.8,"CON":19.6,"RFM":22.7,"LDM":9.4,"GRN":9.7,"RES":2.8,"SNP":33.3,"PLC":27.6,"SFN":22.2,"DUP":17.2,"ALL":10.4,"UUP":16.9,"SDL":15.0,"TUV":9.7,"OTH":2.7};
 const PREV_2023 = {"LAB":411,"CON":121,"RFM":5,"LDM":72,"GRN":4,"RES":0,"SNP":9,"PLC":4,"SFN":7,"DUP":5,"ALL":1,"UUP":1,"SDL":2,"TUV":1,"OTH":7};
 
   // ---- Vote concentration (adjustable per party) ----
@@ -2503,14 +2503,14 @@ const PREV_2023 = {"LAB":411,"CON":121,"RFM":5,"LDM":72,"GRN":4,"RES":0,"SNP":9,
 // negative values reduce local strength in both comparisons.
 // Defaults: 0
 const VOTE_CONCENTRATION = {
-  "LAB": 0.00,
-  "CON": 0.00,
-  "RFM": 0.00,
+  "LAB": 0.10,
+  "CON": 0.05,
+  "RFM": 0.01,
   "LDM": 0.00,
-  "GRN": 0.00,
-  "RES": 0.00,
+  "GRN": 0.10,
+  "RES": 0.10,
   "SNP": 0.00,
-  "PLC": 0.00,
+  "PLC": -0.10,
   "SFN": 0.00,
   "DUP": 0.00,
   "ALL": 0.00,
@@ -2521,11 +2521,11 @@ const VOTE_CONCENTRATION = {
 };
 
   const INCUMBENT_STRENGTH = {
-  LAB: 0.00,
-  CON: 0.00,
-  RFM: 0.00,
+  LAB: 0.01,
+  CON: 0.02,
+  RFM: -0.40,
   LDM: 0.00,
-  GRN: 0.00,
+  GRN: -0.55,
   RES: 0.00
 };
 
