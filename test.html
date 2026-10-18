@@ -3863,6 +3863,34 @@ document.getElementById('reset').addEventListener('click', () => {
   document.getElementById('calculate').style.background = '#008500';
 });
 
+/* ---- Randomise settings ---- */
+// Standard deviations in slider units. Raise for wilder results, lower for tamer ones.
+const RANDOM_SD = {
+  efficiency: 15,     // slider range is -50 to 50
+  demographic: 25     // slider range is -100 to 100
+};
+
+// Standard normal sample (Box-Muller transform)
+function randn() {
+  let u = 0, v = 0;
+  while (u === 0) u = Math.random();
+  while (v === 0) v = Math.random();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+// Normal sample around `centre`, snapped to the slider step and clamped to [lo, hi]
+function randomAround(centre, sd, lo, hi, step) {
+  const snapped = Math.round((centre + randn() * sd) / step) * step;
+  return Math.max(lo, Math.min(hi, snapped));
+}
+
+// A nation's default efficiency for a party, in slider units (-50 to 50)
+function efficiencyDefault(n, p) {
+  const o = VOTE_CONCENTRATION_DEFAULTS_BY_NATION[n];
+  const v = (o && o[p] !== undefined) ? o[p] : VOTE_CONCENTRATION_DEFAULTS[p];
+  return (v || 0) * 100;
+}
+
 document.getElementById('randomise').addEventListener('click', () => {
   function randomNormalised(n, total) {
     const raws = Array.from({length: n}, () => Math.random());
@@ -3880,13 +3908,23 @@ document.getElementById('randomise').addEventListener('click', () => {
     ps.forEach((p, j) => VOTES[n][p] = vals[j]);
   });
 
+  // efficiency: normal around each nation's own defaults
   NATIONS.forEach(n => {
     CONC_EDITABLE.filter(p => NATION_PARTIES[n].includes(p)).forEach(p => {
-      const d = Math.round((Math.random() * 100 - 50) * 2) / 2;   // snaps to the slider's 0.5 step
+      const d = randomAround(efficiencyDefault(n, p), RANDOM_SD.efficiency, -50, 50, 0.5);
       VOTE_CONCENTRATION[n][p] = d / 100;
     });
   });
   refreshConcentrationPanel();
+
+  // demographic effects: normal around their defaults (0 unless set in DEMO_DEFAULTS)
+  DEMO_CATEGORIES.forEach(c => {
+    DEMO_PARTIES.forEach(p => {
+      const centre = (DEMO_DEFAULTS[c.key] && DEMO_DEFAULTS[c.key][p]) || 0;
+      DEMO_EFFECTS[c.key][p] = randomAround(centre, RANDOM_SD.demographic, -100, 100, 1);
+    });
+  });
+  syncDemographicUI();
 
   renderTable();
   calculate();
