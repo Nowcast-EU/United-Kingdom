@@ -2611,22 +2611,30 @@ function renderConcentrationTable() {
   }).join("");
 }
 
+  // Runs calculate() at most once per animation frame while a slider is dragged
+let calcQueued = false;
+function calculateThrottled() {
+  if (calcQueued) return;
+  calcQueued = true;
+  requestAnimationFrame(() => {
+    calcQueued = false;
+    calculate();
+  });
+}
+
 function bindConcentrationInputs() {
   // --- Concentration sliders ---
   CONC_EDITABLE.forEach(p => {
     const slider = document.getElementById(`conc-${p}`);
     const readout = document.getElementById(`conc-val-${p}`);
 
-    // while dragging: update the value and readout, flag Calculate as stale
+    // while dragging: update value, readout, and recalculate live
     slider.addEventListener("input", () => {
       const val = clampConcentration(parseFloat(slider.value));
       VOTE_CONCENTRATION[p] = val / 100;
       readout.textContent = val.toFixed(1);
-      document.getElementById('calculate').style.background = '#ffa500';
+      calculateThrottled();
     });
-
-    // on release: recalculate seats and map
-    slider.addEventListener("change", calculate);
   });
 
   // --- Incumbent boxes (same behaviour as before) ---
