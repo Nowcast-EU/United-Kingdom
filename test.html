@@ -435,6 +435,11 @@ tfoot td {
     display: none;
 }
 
+.nation-tabs { display:flex; gap:0; margin-top:12px; border:1px solid #d0d0d0; border-radius:10px; background:#f4f4f4; padding:3px; }
+.nation-tab { flex:1; border:none; background:transparent; border-radius:8px; padding:7px 4px; font-size:14px; font-weight:500; color:#111; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.nation-tab.active { background:#fff; font-weight:700; box-shadow:0 1px 3px rgba(0,0,0,0.1); }
+.input-wrapper input:disabled { background:#f1f5f9; color:#888; cursor:not-allowed; }
+
 </style>
 </head>
 
@@ -453,6 +458,14 @@ tfoot td {
     </h2>
   </div>
 </div>
+
+  <div class="nation-tabs" id="nation-tabs">
+  <button class="nation-tab active" data-nation="UK">UK</button>
+  <button class="nation-tab" data-nation="SCO">Scotland</button>
+  <button class="nation-tab" data-nation="WAL">Wales</button>
+  <button class="nation-tab" data-nation="NI">N. Ireland</button>
+</div>
+<p id="tab-note" style="text-align:center; font-size:13px; color:#777; margin:8px 0 0;"></p>
 
   
 <table>
@@ -2495,8 +2508,60 @@ const CONSTITUENCY_INCUMBENTS = {
 const PARTIES = ["LAB", "CON", "RFM", "LDM", "GRN", "RES", "SNP", "PLC", "SFN", "DUP", "ALL", "UUP", "SDL", "TUV", "OTH"];
 const PARTY_COLORS = {"LAB":"#E4003B","CON":"#0087DC","RFM":"#23C7DF","LDM":"#FAA61A","GRN":"#6AB023","RES":"#000055","SNP":"#FDF38E","PLC":"#005B54","SFN":"#326760","DUP":"#D46A4C","ALL":"#F6CB2F","UUP":"#48A5EE","SDL":"#2AA82C","TUV":"#0C3A6A","OTH":"#DADADA"};
 const GE2024 = {"LAB":33.7,"CON":23.7,"RFM":14.3,"LDM":12.2,"GRN":6.8,"RES":0.0,"SNP":30.0,"PLC":14.8,"SFN":27.0,"DUP":22.1,"ALL":15.0,"UUP":12.2,"SDL":11.1,"TUV":6.2,"OTH":3.7};
-const DEFAULTS = {"LAB":26.8,"CON":19.6,"RFM":22.7,"LDM":9.4,"GRN":9.7,"RES":2.8,"SNP":33.3,"PLC":27.6,"SFN":22.2,"DUP":17.2,"ALL":10.4,"UUP":16.9,"SDL":15.0,"TUV":9.7,"OTH":2.7};
 const PREV_2023 = {"LAB":411,"CON":121,"RFM":5,"LDM":72,"GRN":4,"RES":0,"SNP":9,"PLC":4,"SFN":7,"DUP":5,"ALL":1,"UUP":1,"SDL":2,"TUV":1,"OTH":7};
+
+  /* ---- Nations ---- */
+const NATION_KEY = { UK: "ENG", SCO: "SCO", WAL: "WAL", NI: "NI" };   // tab -> nation that its inputs control
+const NATION_PARTIES = {
+  ENG: ["LAB","CON","RFM","LDM","GRN","RES","OTH"],
+  SCO: ["LAB","CON","RFM","LDM","GRN","RES","SNP","OTH"],
+  WAL: ["LAB","CON","RFM","LDM","GRN","RES","PLC","OTH"],
+  NI:  ["SFN","DUP","ALL","UUP","SDL","TUV","GRN","OTH"]
+};
+const UK_EXTRA = ["SNP","PLC","SFN","DUP","ALL","UUP","SDL","TUV"];  // greyed, calculated rows on the UK tab
+const NATION_WEIGHTS = { ENG: 0.841, SCO: 0.084, WAL: 0.05, NI: 0.025 }; // share of UK votes; must sum to 1
+const TAB_NOTES = {
+  UK:  "Editable figures apply to England only. Greyed figures are UK-wide shares calculated from the other tabs.",
+  SCO: "Scottish vote shares. Seats shown are Scottish seats only.",
+  WAL: "Welsh vote shares. Seats shown are Welsh seats only.",
+  NI:  "Northern Ireland vote shares. Seats shown are Northern Irish seats only."
+};
+
+// PLACEHOLDER defaults: edit these. OTH is always calculated as 100 minus the rest.
+const DEFAULTS_BY_NATION = {
+  ENG: { LAB:18.2, CON:17.7, RFM:25.5, LDM:12.3, GRN:16.3, RES:2.0 },
+  SCO: { LAB:18.0, CON:12.0, RFM:22.0, LDM:8.0,  GRN:8.0,  RES:1.0, SNP:30.0 },
+  WAL: { LAB:17.0, CON:12.0, RFM:28.0, LDM:5.0,  GRN:7.0,  RES:1.0, PLC:28.0 },
+  NI:  { SFN:27.0, DUP:22.1, ALL:15.0, UUP:12.2, SDL:11.1, TUV:6.2, GRN:2.0 }
+};
+
+// 2024 column for the nation tabs. Fill in your own figures; missing ones show "—".
+const GE2024_BY_NATION = {
+  ENG: {},
+  SCO: { SNP:30.0 },
+  WAL: { PLC:14.8 },
+  NI:  { SFN:27.0, DUP:22.1, ALL:15.0, UUP:12.2, SDL:11.1, TUV:6.2 }
+};
+
+/* ---- State ---- */
+const VOTES = {};
+Object.keys(DEFAULTS_BY_NATION).forEach(n => VOTES[n] = { ...DEFAULTS_BY_NATION[n] });
+let currentTab = "UK";
+
+/* ---- Assign each seat to a nation, and count seats currently held per nation ---- */
+function nationOf(row) {
+  if ((row.SNP || 0) > 0) return "SCO";
+  if ((row.PLC || 0) > 0) return "WAL";
+  if (["SFN","DUP","ALL","UUP","SDL","TUV"].some(p => (row[p] || 0) > 0)) return "NI";
+  return "ENG";
+}
+RELATIVE_STRENGTH.constituencies.forEach(r => r.nation = nationOf(r));
+
+const PREV_BY_NATION = { ENG:{}, SCO:{}, WAL:{}, NI:{} };
+RELATIVE_STRENGTH.constituencies.forEach(r => {
+  const inc = CONSTITUENCY_INCUMBENTS[r.name];
+  if (inc) PREV_BY_NATION[r.nation][inc] = (PREV_BY_NATION[r.nation][inc] || 0) + 1;
+});
 
   // ---- Vote concentration (adjustable per party) ----
 // Positive values increase local strength when local > national baseline,
@@ -2694,174 +2759,122 @@ const PARTY_ALIASES = {
   "OTH": "Independent/Other"
 };
 
-const parties = PARTIES.map(name => ({
-  name,
-  color: PARTY_COLORS[name] || "#999",
-  ge2024: GE2024[name],
-  votes: DEFAULTS[name],
-  final: 0
-}));
-
-/* ---- Render table ---- */
 function renderTable() {
-  const tbody = document.getElementById('tbody');
+  const nation = NATION_KEY[currentTab];
+  const own = NATION_PARTIES[nation];
+  const geSrc = currentTab === "UK" ? GE2024 : GE2024_BY_NATION[nation];
 
-tbody.innerHTML = parties.map((p, i) => {
-  // 🟩 Skip OTH for now — we’ll insert it manually after GRN
-  if (p.name === "OTH") return "";
+  const rows = own.slice();
+  if (currentTab === "UK") rows.push("--divider--", ...UK_EXTRA);
 
-  let row = `
-    <tr>
-      <td class="party-column" style="--party-color:${p.color}">${p.name}</td>
-      <td class="ge2024-column">${p.ge2024.toFixed(1)}%</td>
-      <td>
-        ${p.name === "OTH" ? `
+  document.getElementById('tbody').innerHTML = rows.map(p => {
+    if (p === "--divider--") {
+      return `<tr class="divider-row"><td colspan="5"><i>Calculated from the Scotland, Wales and Northern Ireland tabs</i></td></tr>`;
+    }
+    const ge = geSrc[p];
+    const editable = own.includes(p) && p !== "OTH";
+    const val = editable ? (VOTES[nation][p] || 0).toFixed(1) : "0.0";
+    return `
+      <tr data-party="${p}">
+        <td class="party-column" style="--party-color:${PARTY_COLORS[p]}">${p}</td>
+        <td class="ge2024-column">${ge == null ? "—" : ge.toFixed(1) + "%"}</td>
+        <td>
           <div class="input-wrapper">
-            <input type="number" id="votes-${i}" value="${p.votes.toFixed(1)}" disabled>
+            <input type="number" id="votes-${p}" data-party="${p}" value="${val}" ${editable ? 'min="0" max="100" step="0.1"' : 'disabled'}>
             <span class="percent-sign">%</span>
           </div>
-        ` : `
-          <div class="input-wrapper">
-            <input type="number" id="votes-${i}" value="${p.votes.toFixed(1)}" min="0" max="100" step="0.1">
-            <span class="percent-sign">%</span>
-          </div>
-        `}
-      </td>
-      <td class="seats-column" id="seats-${i}">—</td>
-      <td class="diff-column" id="diff-${i}">—</td>
-    </tr>
-  `;
+        </td>
+        <td class="seats-column" id="seats-${p}">—</td>
+        <td class="diff-column" id="diff-${p}">—</td>
+      </tr>`;
+  }).join('');
 
-  // --- Insert OTH row right after RES ---
-  if (p.name === "RES") {
-    // find OTH’s index
-    const othIndex = parties.findIndex(x => x.name === "OTH");
-    const oth = parties[othIndex];
-    if (oth) {
-      row += `
-        <tr>
-          <td class="party-column" style="--party-color:${oth.color}">${oth.name}</td>
-          <td class="ge2024-column">${oth.ge2024.toFixed(1)}%</td>
-          <td>
-            <div class="input-wrapper">
-              <input type="number" id="votes-${othIndex}" value="${oth.votes.toFixed(1)}" disabled>
-              <span class="percent-sign">%</span>
-            </div>
-          </td>
-          <td class="seats-column" id="seats-${othIndex}">—</td>
-          <td class="diff-column" id="diff-${othIndex}">—</td>
-        </tr>
-      `;
-    }
+  document.getElementById('tab-note').textContent = TAB_NOTES[currentTab];
 
-    // now add the divider row for Scotland
-    row += `<tr class="divider-row"><td colspan="5"><i>Vote share in Scotland and Wales</i></td></tr>`;
-  }
+  const inputs = document.querySelectorAll('#tbody input:not(:disabled)');
+  inputs.forEach((input, index) => {
+    const party = input.dataset.party;
+    let originalValue = input.value;
+    let hasChanged = false;
 
-  if (p.name === "PLC") {
-    row += `<tr class="divider-row"><td colspan="5"><i>Vote share in Northern Ireland</i></td></tr>`;
-  }
+    input.addEventListener('focus', () => {
+      originalValue = input.value;
+      input.value = '';
+      hasChanged = false;
+    });
 
-  return row;
-}).join('');
+    input.addEventListener('input', () => {
+      hasChanged = true;
+      const v = parseFloat(input.value);
+      VOTES[nation][party] = isNaN(v) ? 0 : v;
+      refreshCalculated();
+      document.getElementById('calculate').style.background = '#ffa500';
+    });
 
-  // ✅ keep your original input logic below unchanged
-const inputs = document.querySelectorAll('.input-wrapper input');
-inputs.forEach((input, index) => {
-  let originalValue = input.value;
-  let hasChanged = false; // track if user actually changed it
-
-  // When user focuses: remember old value, clear visually, but preserve logical value
-  input.addEventListener('focus', () => {
-    originalValue = input.value;
-    input.dataset.displayValue = originalValue; // store in data attr
-    input.value = ''; // visually empty
-    hasChanged = false; // reset change tracking
-  });
-
-  // When user types, mark as changed and update total
-  input.addEventListener('input', () => {
-    hasChanged = true;
-    updateVoteTotal();
-    document.getElementById('calculate').style.background = '#ffa500';
-  });
-
-  // When user leaves the box
-  input.addEventListener('blur', () => {
-    // if left blank → restore visually & logically
-    if (input.value === '' || isNaN(parseFloat(input.value))) {
-      input.value = originalValue;
-    } else {
-    // 👇 Force 1 decimal place display
-    input.value = parseFloat(input.value).toFixed(1);
-  }
-
-    // Only recalc if user *actually changed* the value
-    if (hasChanged && parseFloat(input.value) !== parseFloat(originalValue)) {
-      calculate();
-    }
-  });
-
-  // When user presses Enter
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-
-      // if left blank, restore previous visually
-      if (input.value === '' || isNaN(parseFloat(input.value))) {
+    input.addEventListener('blur', () => {
+      const v = parseFloat(input.value);
+      if (isNaN(v)) {
         input.value = originalValue;
-      }
-
-      // move to next input
-      if (inputs[index + 1]) {
-        inputs[index + 1].focus();
+        VOTES[nation][party] = parseFloat(originalValue) || 0;
+        refreshCalculated();
       } else {
-        inputs[0].focus(); // loop to top
+        input.value = v.toFixed(1);
       }
-    }
-  });
-});
+      if (hasChanged && parseFloat(input.value) !== parseFloat(originalValue)) calculate();
+    });
 
-  updateVoteTotal();
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        (inputs[index + 1] || inputs[0]).focus();
+      }
+    });
+  });
+
+  refreshCalculated();
 }
 
-function updateVoteTotal() {
-  // --- Weight multipliers for total and OTH calculation ---
-  const WEIGHTS = {
-    "SNP": 0.084, 
-    "PLC": 0.05,   
-    "PLC": 0.05,   
-    "SFN": 0.025,  
-    "DUP": 0.025,
-    "ALL": 0.025,
-    "UUP": 0.025,
-    "SDL": 0.025,
-    "TUV": 0.025
-  };
+// Updates the greyed values and the vote total without rebuilding the table
+function refreshCalculated() {
+  const nation = NATION_KEY[currentTab];
+  const own = NATION_PARTIES[nation];
 
-  let weightedSum = 0;
-
-  parties.forEach((p, i) => {
-    if (p.name !== "OTH") {
-      const rawValue = parseFloat(document.getElementById(`votes-${i}`).value) || 0;
-      const weight = WEIGHTS[p.name] || 1;  // 👈 Default weight = 1 (no change)
-      weightedSum += rawValue * weight;
-    }
+  document.querySelectorAll('#tbody input:disabled').forEach(el => {
+    const p = el.dataset.party;
+    el.value = (own.includes(p) ? nationShare(nation, p) : ukShare(p)).toFixed(1);
   });
 
-  // Calculate "OTH" as whatever remains of 100 after weighted sum
-  const othersValue = Math.max(0, 100 - weightedSum);
-  const othersIndex = parties.findIndex(p => p.name === "OTH");
+  const total = own.reduce((a, p) => a + nationShare(nation, p), 0);
+  const cell = document.getElementById('total-votes');
+  cell.textContent = total.toFixed(1) + '%';
+  cell.style.color = total > 100.05 ? '#bb0000' : '';
+}
 
-  if (othersIndex !== -1) {
-    const othersInput = document.getElementById(`votes-${othersIndex}`);
-    if (othersInput) {
-      othersInput.value = othersValue.toFixed(1);
-    }
-  }
+// Fills in seats and +/- for whichever tab is showing
+function updateTable() {
+  const t = window.latestTotals;
+  if (!t) return;
+  const nation = NATION_KEY[currentTab];
+  const seats = currentTab === "UK" ? t.UK : t[nation];
+  const prev = currentTab === "UK" ? PREV_2023 : PREV_BY_NATION[nation];
 
-  // Update total votes row (weighted total + adjusted OTH)
-  document.getElementById('total-votes').textContent = (weightedSum + othersValue).toFixed(1) + '%';
+  let totalSeats = 0;
+  document.querySelectorAll('#tbody tr[data-party]').forEach(tr => {
+    const p = tr.dataset.party;
+    const s = seats[p] || 0;
+    totalSeats += s;
+    document.getElementById(`seats-${p}`).textContent = s;
+
+    const diff = s - (prev[p] || 0);
+    const cell = document.getElementById(`diff-${p}`);
+    if (diff > 0) { cell.textContent = `+${diff}`; cell.className = 'diff-column positive'; }
+    else if (diff < 0) { cell.textContent = `${diff}`; cell.className = 'diff-column negative'; }
+    else { cell.textContent = '(=)'; cell.className = 'diff-column equal'; }
+  });
+
+  document.getElementById('total-seats').textContent = totalSeats;
+  document.getElementById('calculate').style.background = '#008500';
+  refreshCalculated();
 }
 
 function applyStrengthToRow(row, target) {
@@ -2888,20 +2901,32 @@ function applyStrengthToRow(row, target) {
   return out;
 }
 
+function otherShare(n) {
+  const sum = NATION_PARTIES[n].filter(p => p !== "OTH").reduce((a, p) => a + (VOTES[n][p] || 0), 0);
+  return Math.max(0, 100 - sum);
+}
+function nationShare(n, p) {
+  if (!NATION_PARTIES[n].includes(p)) return 0;
+  return p === "OTH" ? otherShare(n) : (VOTES[n][p] || 0);
+}
+function ukShare(p) {
+  return Object.keys(NATION_WEIGHTS).reduce((a, n) => a + NATION_WEIGHTS[n] * nationShare(n, p), 0);
+}
+
 function computeConstituencyShares() {
-  const target = {};
-  PARTIES.forEach((n, i) => {
-    target[n] = (parseFloat(document.getElementById(`votes-${i}`).value) || 0) / 100;
+  const targets = {};
+  Object.keys(NATION_PARTIES).forEach(n => {
+    targets[n] = {};
+    PARTIES.forEach(p => targets[n][p] = nationShare(n, p) / 100);
   });
 
   return RELATIVE_STRENGTH.constituencies.map(row => {
-    const out = applyStrengthToRow(row, target);
-
-    // normalise so the constituency shares sum to 100%
+    const out = applyStrengthToRow(row, targets[row.nation]);
     let sum = 0;
     PARTIES.forEach(p => sum += out[p]);
     if (sum > 0) PARTIES.forEach(p => out[p] /= sum);
-
+    out.name = row.name;
+    out.nation = row.nation;
     return out;
   });
 }
@@ -2921,64 +2946,43 @@ function dhondtSeats(votes,seats=6,nationalVotes,validParties){
   return alloc;
 }
 
-/* ---- Calculate ---- */
-function calculate(){
-  const nationalVotes={};
-  parties.forEach((p,i)=>{
-    p.votes=parseFloat(document.getElementById(`votes-${i}`).value)||0;
-    nationalVotes[p.name]=p.votes;
-  });
-
-  const perConst=computeConstituencyShares();
+function calculate() {
+  const perConst = computeConstituencyShares();
   window.latestConstituencyResults = perConst;
-  const totals=Object.fromEntries(PARTIES.map(p=>[p,0]));
 
-perConst.forEach(row => {
-  const sVotes = row; // local votes in this constituency
+  const blank = () => Object.fromEntries(PARTIES.map(p => [p, 0]));
+  const totals = { UK: blank(), ENG: blank(), SCO: blank(), WAL: blank(), NI: blank() };
 
-  // 👇 Calculate total valid vote sum in this constituency
-  let totalVotes = 0;
-  PARTIES.forEach(p => totalVotes += sVotes[p] || 0);
+  perConst.forEach(row => {
+    const n = row.nation;
+    let totalVotes = 0;
+    PARTIES.forEach(p => totalVotes += row[p] || 0);
+    const validParties = PARTIES.filter(p => (row[p] || 0) >= 0.03 * totalVotes);
 
-  // 👇 Apply a constituency-level threshold (e.g. 3% of local valid votes)
-  const validParties = PARTIES.filter(p => (sVotes[p] || 0) >= 0.03 * totalVotes);
+    const nationalVotes = {};
+    PARTIES.forEach(p => nationalVotes[p] = nationShare(n, p));
 
-  // 👇 Allocate seats only among those parties
-  const s = dhondtSeats(sVotes, CONSTITUENCY_SEATS[row.name] || 6, nationalVotes, validParties);
-
-  PARTIES.forEach(p => totals[p] += (s[p] || 0));
-});
-
-  PARTIES.forEach((n,i)=>{
-    const seats=totals[n];
-    document.getElementById(`seats-${i}`).textContent=seats;
-    parties[i].final=seats;
-
-    const diff=seats-(PREV_2023[n]||0);
-    const diffCell=document.getElementById(`diff-${i}`);
-    if(diff>0){diffCell.textContent=`+${diff}`;diffCell.className='diff-column positive';}
-    else if(diff<0){diffCell.textContent=`${diff}`;diffCell.className='diff-column negative';}
-    else{diffCell.textContent='(=)';diffCell.className='diff-column equal';}
+    const s = dhondtSeats(row, CONSTITUENCY_SEATS[row.name] || 6, nationalVotes, validParties);
+    PARTIES.forEach(p => {
+      const k = s[p] || 0;
+      totals.UK[p] += k;
+      totals[n][p] += k;
+    });
   });
 
-  document.getElementById('total-seats').textContent=Object.values(totals).reduce((a,b)=>a+b,0);
-  document.getElementById('calculate').style.background='#008500';
+  window.latestTotals = totals;
+  updateTable();
 
-// --- auto-refresh constituency view if one is selected ---
-const currentName = document.getElementById("constituency-search").value.trim();
-if (currentName) showConstituencyResults(currentName);
-
-if (window.updateMapColors) window.updateMapColors();
+  const currentName = document.getElementById("constituency-search").value.trim();
+  if (currentName) showConstituencyResults(currentName);
+  if (window.updateMapColors) window.updateMapColors();
 }
 
 /* ---- Reset ---- */
 document.getElementById('reset').addEventListener('click', () => {
 
-  // ---- Reset vote share inputs ----
-  parties.forEach((p, i) => {
-    const input = document.getElementById(`votes-${i}`);
-    if (input) input.value = DEFAULTS[p.name].toFixed(1);
-  });
+  Object.keys(DEFAULTS_BY_NATION).forEach(n => { VOTES[n] = { ...DEFAULTS_BY_NATION[n] }; });
+  renderTable();
 
 // ---- Reset concentration & incumbent strength ----
   CONC_EDITABLE.forEach(p => {
@@ -3001,70 +3005,51 @@ document.getElementById('reset').addEventListener('click', () => {
 
   // ---- Recalculate everything ----
   calculate();
-  updateVoteTotal();
 
   // ---- Return calculate button to green ----
   document.getElementById('calculate').style.background = '#008500';
 });
 
-/* ---- Randomise ---- */
 document.getElementById('randomise').addEventListener('click', () => {
-
-  // Helper: normalise n random values to exactly 'total', displayed as percentages
   function randomNormalised(n, total) {
     const raws = Array.from({length: n}, () => Math.random());
     const sum = raws.reduce((a, b) => a + b, 0);
-    // Divide each by sum (normalise to 1.0), multiply by total (e.g. 96)
-    // then multiply by 10, floor, divide by 10 to get clean 1dp values
     const scaled = raws.map(v => Math.floor((v / sum) * total * 10) / 10);
-    // The last value takes exactly whatever is left to guarantee the total
     const runningSum = scaled.slice(0, -1).reduce((a, b) => a + b, 0);
     scaled[scaled.length - 1] = Math.round((total - runningSum) * 10) / 10;
     return scaled;
   }
 
-  // --- GB main parties: LAB, CON, RFM, LDM, GRN — guaranteed total of 96 ---
-const gbParties = ["LAB", "CON", "RFM", "LDM", "GRN", "RES"];
-const gbValues = randomNormalised(gbParties.length, 90);
-  gbParties.forEach((name, j) => {
-    const i = parties.findIndex(p => p.name === name);
-    const input = document.getElementById(`votes-${i}`);
-    if (input) input.value = gbValues[j].toFixed(1);
+  // each nation: its editable parties share 96%, leaving 4% for OTH
+  Object.keys(NATION_PARTIES).forEach(n => {
+    const ps = NATION_PARTIES[n].filter(p => p !== "OTH");
+    const vals = randomNormalised(ps.length, 96);
+    ps.forEach((p, j) => VOTES[n][p] = vals[j]);
   });
 
-  // --- SNP: random between 5.0 and 70.0 ---
-  const snpIndex = parties.findIndex(p => p.name === "SNP");
-  const snpInput = document.getElementById(`votes-${snpIndex}`);
-  if (snpInput) snpInput.value = (Math.floor((5 + Math.random() * 50) * 10) / 10).toFixed(1);
-
-  // --- PLC: random between 5.0 and 70.0 ---
-  const plcIndex = parties.findIndex(p => p.name === "PLC");
-  const plcInput = document.getElementById(`votes-${plcIndex}`);
-  if (plcInput) plcInput.value = (Math.floor((5 + Math.random() * 50) * 10) / 10).toFixed(1);
-
-  // --- NI parties: SFN, DUP, ALL, SDL, UUP, TUV — guaranteed total of 96 ---
-  const niParties = ["SFN", "DUP", "ALL", "SDL", "UUP", "TUV"];
-  const niValues = randomNormalised(niParties.length, 96);
-  niParties.forEach((name, j) => {
-    const i = parties.findIndex(p => p.name === name);
-    const input = document.getElementById(`votes-${i}`);
-    if (input) input.value = niValues[j].toFixed(1);
-  });
-
-  // --- Vote concentration: random displayed value between -50.0 and 50.0 ---
   CONC_EDITABLE.forEach(p => {
-    const randomDisplayVal = Math.round((Math.random() * 100 - 50) * 10) / 10;
-    VOTE_CONCENTRATION[p] = randomDisplayVal / 100;
-    const concInput = document.getElementById(`conc-${p}`);
-    if (concInput) concInput.value = randomDisplayVal.toFixed(1);
+    const d = Math.round((Math.random() * 100 - 50) * 10) / 10;
+    VOTE_CONCENTRATION[p] = d / 100;
+    const el = document.getElementById(`conc-${p}`);
+    if (el) el.value = d.toFixed(1);
   });
 
-  updateVoteTotal();
+  renderTable();
   calculate();
 });
   
 document.getElementById('calculate').addEventListener('click', calculate);
 renderTable();
+
+  document.querySelectorAll('.nation-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentTab = btn.dataset.nation;
+    document.querySelectorAll('.nation-tab').forEach(b => b.classList.toggle('active', b === btn));
+    renderTable();
+    updateTable();
+  });
+});
+  
 document.addEventListener('DOMContentLoaded', () => calculate());
   
   document.addEventListener("DOMContentLoaded", () => {
