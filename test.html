@@ -2839,10 +2839,12 @@ function refreshCalculated() {
   const nation = NATION_KEY[currentTab];
   const own = NATION_PARTIES[nation];
 
-  document.querySelectorAll('#tbody input:disabled').forEach(el => {
-    const p = el.dataset.party;
-    el.value = (own.includes(p) ? nationShare(nation, p) : ukShare(p)).toFixed(1);
-  });
+document.querySelectorAll('#tbody input:disabled').forEach(el => {
+  const p = el.dataset.party;
+  // On the UK tab, OTH must be the UK-wide remainder, not England's
+  const useNation = own.includes(p) && !(currentTab === "UK" && p === "OTH");
+  el.value = (useNation ? nationShare(nation, p) : ukShare(p)).toFixed(1);
+});
 
   const total = own.reduce((a, p) => a + nationShare(nation, p), 0);
   const cell = document.getElementById('total-votes');
