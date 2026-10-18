@@ -400,8 +400,8 @@ tfoot td {
 #settings-section > h3 { text-align: center; margin: 0 0 4px; font-size: 15px; }
 .slider-note { text-align: center; font-size: 11px; color: #777; margin: 0 0 8px; }
 
-#slider-panel { display: flex; justify-content: space-between; gap: 2px; flex: 1 1 0; min-height: 0; }
-.slider-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+#slider-panel { display: flex; flex-direction: column; flex: 1 1 0; min-height: 0; }
+.slider-col, .inc-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .slider-value { font-size: 11px; font-weight: 600; height: 14px; line-height: 14px; }
 
   .slider-wrap {
@@ -419,7 +419,7 @@ tfoot td {
   height: 100%;
   left: 50%;
   transform: translateX(-50%);
-  width: 22px;
+  width: 18px;
   margin: 0;
   padding: 0;
   cursor: pointer;
@@ -429,13 +429,14 @@ tfoot td {
   background-color: transparent;
   background-repeat: no-repeat;
   background-position: center;
-  background-size: 6px 100%;
+  background-size: 8px 100%;
 }
 
 .v-slider::-webkit-slider-runnable-track { background: transparent; }
 .v-slider::-moz-range-track { background: transparent; }
 
-.v-slider::-webkit-slider-thumb, .h-slider::-webkit-slider-thumb {
+/* Horizontal demographic slider: keeps the original round thumb */
+.h-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 14px; height: 14px; box-sizing: border-box;
@@ -443,11 +444,27 @@ tfoot td {
   background: #fff;
   border: 2px solid #008500;
 }
-.v-slider::-moz-range-thumb, .h-slider::-moz-range-thumb {
+.h-slider::-moz-range-thumb {
   width: 14px; height: 14px; box-sizing: border-box;
   border-radius: 50%;
   background: #fff;
   border: 2px solid #008500;
+}
+
+/* Vertical efficiency sliders: party-coloured rectangle, 18px across x 10px along the track */
+.v-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px; height: 10px; box-sizing: border-box;
+  border-radius: 2px;
+  background: var(--party-color, #008500);
+  border: 1.5px solid rgba(0, 0, 0, 0.55);
+}
+.v-slider::-moz-range-thumb {
+  width: 18px; height: 10px; box-sizing: border-box;
+  border-radius: 2px;
+  background: var(--party-color, #008500);
+  border: 1.5px solid rgba(0, 0, 0, 0.55);
 }
 
 .slider-party {
@@ -467,6 +484,7 @@ tfoot td {
   #table-col { flex: none; width: 100%; }
   #settings-section { width: 100%; margin-top: 24px; }
   .slider-wrap { flex: none; height: 150px; }
+  .slider-row { flex: none; }
 }
 
 #demo-section { margin-top: 28px; }
@@ -501,10 +519,15 @@ tfoot td {
   background: #fff;
 }
 
-.slider-col.disabled { opacity: 0.35; }
+.slider-col.disabled, .inc-col.disabled { opacity: 0.35; }
 .slider-col.disabled .v-slider,
-.slider-col.disabled .inc-input { cursor: not-allowed; }
+.inc-col.disabled .inc-input { cursor: not-allowed; }
 .inc-input:disabled { background: #f1f5f9; }
+
+.panel-heading { text-align: center; font-size: 12px; font-weight: 600; color: #555; margin: 2px 0 6px; }
+.panel-heading.second { border-top: 1px solid #e2e8f0; padding-top: 8px; margin-top: 10px; }
+.slider-row { display: flex; justify-content: space-between; gap: 2px; flex: 1 1 0; min-height: 0; }
+.inc-row { display: flex; justify-content: space-between; gap: 2px; }
 
 </style>
 </head>
@@ -559,7 +582,6 @@ tfoot td {
 
   <div id="settings-section">
     <h3>Efficiency &amp; Incumbents</h3>
-    <p class="slider-note">Slider = efficiency (−50 to 50). Box below = incumbent effect (%).</p>
     <div id="slider-panel"></div>
   </div>
 </div>
@@ -3442,15 +3464,16 @@ resetNationSettings();
 const CONC_EDITABLE = ["LAB", "CON", "RFM", "LDM", "GRN", "RES", "SNP", "PLC"];
 
   // ---- Bipolar slider fill ----
-const THUMB = 14;                 // must match the thumb width/height in the CSS
+const THUMB_V = 10;               // vertical sliders: thumb size ALONG the track (CSS height)
+const THUMB_H = 14;               // horizontal demographic slider: thumb diameter                 
 const TRACK_COL   = '#e5e7eb';    // empty track
 const FILL_COL    = '#008500';    // fill, growing from the centre toward the thumb
 const COUNTER_COL = '#9ca3af';    // darker, greyer mirror segment on the opposite half
 
 // x runs 0 (bottom) to 1 (top). The thumb's centre travels THUMB/2 in from each end,
 // so the stop positions are offset to line up with it.
-function sliderPos(x) {
-  return `calc(${THUMB / 2}px + ${x} * (100% - ${THUMB}px))`;
+function sliderPos(x, t) {
+  return `calc(${t / 2}px + ${x} * (100% - ${t}px))`;
 }
 
 function paintSlider(slider) {
@@ -3458,6 +3481,7 @@ function paintSlider(slider) {
     const lo = parseFloat(slider.min), hi = parseFloat(slider.max);
    const p = (v - lo) / (hi - lo);   // thumb position, 0 to 1, works for any symmetric range
    const m = 1 - p;                // mirror position on the other side of 0
+   const t = slider.classList.contains('h-slider') ? THUMB_H : THUMB_V;
 
   const segs = v >= 0
     ? [[0, m, TRACK_COL], [m, 0.5, COUNTER_COL], [0.5, p, PARTY_COLORS[slider.id.replace("conc-","")]], [p, 1, TRACK_COL]]
@@ -3465,7 +3489,7 @@ function paintSlider(slider) {
 
   const stops = segs
     .filter(([a, b]) => b > a)
-    .map(([a, b, c]) => `${c} ${sliderPos(a)} ${sliderPos(b)}`);
+    .map(([a, b, c]) => `${c} ${sliderPos(a, t)} ${sliderPos(b, t)}`);
 
     const dir = slider.classList.contains('h-slider') ? 'to right' : 'to top';
   slider.style.backgroundImage = `linear-gradient(${dir}, ${stops.join(', ')})`;
@@ -3486,6 +3510,8 @@ function syncConcentrationUI(p) {
   const inc = document.getElementById(`inc-${p}`);
 
   if (col) col.classList.toggle("disabled", !active);
+    const icol = document.getElementById(`inc-col-${p}`);
+  if (icol) icol.classList.toggle("disabled", !active);
   if (slider) { slider.disabled = !active; slider.value = c; paintSlider(slider); }
   if (readout) readout.textContent = active ? c.toFixed(1) : "–";
   if (inc) {
@@ -3503,19 +3529,32 @@ function refreshConcentrationPanel() {
 
 function renderConcentrationTable() {
   const panel = document.getElementById("slider-panel");
-  panel.innerHTML = CONC_EDITABLE.map(p => `
-    <div class="slider-col" id="conc-col-${p}">
-      <div class="slider-value" id="conc-val-${p}">0.0</div>
-      <div class="slider-wrap">
-        <input type="range" class="v-slider" id="conc-${p}"
-                min="-50" max="50" step="0.5" value="0"
-               aria-label="${p} efficiency">
-      </div>
-      <div class="slider-party" style="--party-color:${PARTY_COLORS[p]}">${p}</div>
-      <input type="number" class="inc-input" id="inc-${p}"
-             step="0.5" min="-100" max="100"
-             aria-label="${p} incumbent effect">
-    </div>`).join("");
+  const label = p => `<div class="slider-party" style="--party-color:${PARTY_COLORS[p]}">${p}</div>`;
+
+  panel.innerHTML = `
+    <div class="panel-heading">Efficiency</div>
+    <div class="slider-row">
+      ${CONC_EDITABLE.map(p => `
+        <div class="slider-col" id="conc-col-${p}" style="--party-color:${PARTY_COLORS[p]}">
+          ${label(p)}
+          <div class="slider-value" id="conc-val-${p}">0.0</div>
+          <div class="slider-wrap">
+            <input type="range" class="v-slider" id="conc-${p}"
+                   min="-50" max="50" step="0.5" value="0"
+                   aria-label="${p} efficiency">
+          </div>
+        </div>`).join("")}
+    </div>
+    <div class="panel-heading second">Incumbents</div>
+    <div class="inc-row">
+      ${CONC_EDITABLE.map(p => `
+        <div class="inc-col" id="inc-col-${p}">
+          ${label(p)}
+          <input type="number" class="inc-input" id="inc-${p}"
+                 step="0.5" min="-100" max="100"
+                 aria-label="${p} incumbent effect">
+        </div>`).join("")}
+    </div>`;
   refreshConcentrationPanel();
 }
 
