@@ -2839,14 +2839,24 @@ function refreshCalculated() {
   const nation = NATION_KEY[currentTab];
   const own = NATION_PARTIES[nation];
 
+// UK tab: OTH = 100 minus every other figure shown in the column
+const ukOTH = Math.max(0, 100 -
+  own.filter(p => p !== "OTH").reduce((a, p) => a + nationShare(nation, p), 0) -
+  UK_EXTRA.reduce((a, p) => a + ukShare(p), 0));
+
 document.querySelectorAll('#tbody input:disabled').forEach(el => {
   const p = el.dataset.party;
-  // On the UK tab, OTH must be the UK-wide remainder, not England's
-  const useNation = own.includes(p) && !(currentTab === "UK" && p === "OTH");
-  el.value = (useNation ? nationShare(nation, p) : ukShare(p)).toFixed(1);
+  let v;
+  if (currentTab === "UK" && p === "OTH") v = ukOTH;
+  else v = own.includes(p) ? nationShare(nation, p) : ukShare(p);
+  el.value = v.toFixed(1);
 });
 
-  const total = own.reduce((a, p) => a + nationShare(nation, p), 0);
+const total = currentTab === "UK"
+  ? own.filter(p => p !== "OTH").reduce((a, p) => a + nationShare(nation, p), 0)
+    + UK_EXTRA.reduce((a, p) => a + ukShare(p), 0)
+    + ukOTH
+  : own.reduce((a, p) => a + nationShare(nation, p), 0);
   const cell = document.getElementById('total-votes');
   cell.textContent = total.toFixed(1) + '%';
   cell.style.color = total > 100.05 ? '#bb0000' : '';
