@@ -2625,8 +2625,8 @@ function paintSlider(slider) {
   const m = 1 - p;                // mirror position on the other side of 0
 
   const segs = v >= 0
-    ? [[0, m, TRACK_COL], [m, 0.5, COUNTER_COL], [0.5, p, FILL_COL], [p, 1, TRACK_COL]]
-    : [[0, p, TRACK_COL], [p, 0.5, FILL_COL], [0.5, m, COUNTER_COL], [m, 1, TRACK_COL]];
+    ? [[0, m, TRACK_COL], [m, 0.5, COUNTER_COL], [0.5, p, PARTY_COLORS[slider.id.replace("conc-","")]], [p, 1, TRACK_COL]]
+    : [[0, p, TRACK_COL], [p, 0.5, PARTY_COLORS[slider.id.replace("conc-","")]], [0.5, m, COUNTER_COL], [m, 1, TRACK_COL]];
 
   const stops = segs
     .filter(([a, b]) => b > a)
