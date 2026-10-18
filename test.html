@@ -501,6 +501,11 @@ tfoot td {
   background: #fff;
 }
 
+.slider-col.disabled { opacity: 0.35; }
+.slider-col.disabled .v-slider,
+.slider-col.disabled .inc-input { cursor: not-allowed; }
+.inc-input:disabled { background: #f1f5f9; }
+
 </style>
 </head>
 
@@ -3373,7 +3378,7 @@ RELATIVE_STRENGTH.constituencies.forEach(r => {
 // Positive values increase local strength when local > national baseline,
 // negative values reduce local strength in both comparisons.
 // Defaults: 0
-const VOTE_CONCENTRATION = {
+const VOTE_CONCENTRATION_DEFAULTS = {
   "LAB": 0.10,
   "CON": 0.05,
   "RFM": 0.01,
@@ -3391,7 +3396,7 @@ const VOTE_CONCENTRATION = {
   "OTH": 0.00
 };
 
-  const INCUMBENT_STRENGTH = {
+  const INCUMBENT_STRENGTH_DEFAULTS = {
   LAB: 0.01,
   CON: 0.02,
   RFM: -0.40,
@@ -3402,8 +3407,14 @@ const VOTE_CONCENTRATION = {
   PLC: 0.00
 };
 
-const VOTE_CONCENTRATION_DEFAULTS = { ...VOTE_CONCENTRATION };
-const INCUMBENT_STRENGTH_DEFAULTS = { ...INCUMBENT_STRENGTH };
+// Each nation gets its own copy of the settings
+const NATIONS = Object.keys(NATION_PARTIES);          // ENG, SCO, WAL, NI
+const VOTE_CONCENTRATION = {};
+const INCUMBENT_STRENGTH = {};
+NATIONS.forEach(n => {
+  VOTE_CONCENTRATION[n] = { ...VOTE_CONCENTRATION_DEFAULTS };
+  INCUMBENT_STRENGTH[n] = { ...INCUMBENT_STRENGTH_DEFAULTS };
+});
 
 const CONC_EDITABLE = ["LAB", "CON", "RFM", "LDM", "GRN", "RES", "SNP", "PLC"];
 
@@ -3436,70 +3447,73 @@ function paintSlider(slider) {
   slider.style.backgroundImage = `linear-gradient(${dir}, ${stops.join(', ')})`;
 }
 
-// Push current state into the sliders / readouts / incumbent boxes for one party
+const NATION_NAMES = { ENG: "England", SCO: "Scotland", WAL: "Wales", NI: "Northern Ireland" };
+function currentNation() { return NATION_KEY[currentTab]; }
+
+// Load one party's stored values for the current nation; grey it out if it has no vote share there
 function syncConcentrationUI(p) {
-  const c = VOTE_CONCENTRATION[p] * 100;
+  const n = currentNation();
+  const active = NATION_PARTIES[n].includes(p);
+  const c = active ? VOTE_CONCENTRATION[n][p] * 100 : 0;
+
+  const col = document.getElementById(`conc-col-${p}`);
   const slider = document.getElementById(`conc-${p}`);
   const readout = document.getElementById(`conc-val-${p}`);
   const inc = document.getElementById(`inc-${p}`);
-  if (slider) { slider.value = c; paintSlider(slider); }
-  if (readout) readout.textContent = c.toFixed(1);
-  if (inc) inc.value = (Number(INCUMBENT_STRENGTH[p] || 0) * 100).toFixed(1);
+
+  if (col) col.classList.toggle("disabled", !active);
+  if (slider) { slider.disabled = !active; slider.value = c; paintSlider(slider); }
+  if (readout) readout.textContent = active ? c.toFixed(1) : "–";
+  if (inc) {
+    inc.disabled = !active;
+    inc.placeholder = "–";
+    inc.value = active ? (Number(INCUMBENT_STRENGTH[n][p] || 0) * 100).toFixed(1) : "";
+  }
+}
+
+function refreshConcentrationPanel() {
+  CONC_EDITABLE.forEach(p => syncConcentrationUI(p));
+  const h = document.querySelector("#settings-section > h3");
+  if (h) h.textContent = `Concentration & Incumbents: ${NATION_NAMES[currentNation()]}`;
 }
 
 function renderConcentrationTable() {
   const panel = document.getElementById("slider-panel");
-  panel.innerHTML = CONC_EDITABLE.map(p => {
-    const c = (VOTE_CONCENTRATION[p] * 100).toFixed(1);
-    const i = (Number(INCUMBENT_STRENGTH[p] || 0) * 100).toFixed(1);
-    return `
-      <div class="slider-col">
-        <div class="slider-value" id="conc-val-${p}">${c}</div>
-        <div class="slider-wrap">
-          <input type="range" class="v-slider" id="conc-${p}"
-                 min="-100" max="100" step="0.5" value="${c}"
-                 aria-label="${p} concentration">
-        </div>
-        <div class="slider-party" style="--party-color:${PARTY_COLORS[p]}">${p}</div>
-        <input type="number" class="inc-input" id="inc-${p}"
-               value="${i}" step="0.5" min="-100" max="100"
-               aria-label="${p} incumbent effect">
-      </div>`;
-  }).join("");
-  
-  CONC_EDITABLE.forEach(p => paintSlider(document.getElementById(`conc-${p}`)));
-}
-
-  // Runs calculate() at most once per animation frame while a slider is dragged
-let calcQueued = false;
-function calculateThrottled() {
-  if (calcQueued) return;
-  calcQueued = true;
-  requestAnimationFrame(() => {
-    calcQueued = false;
-    calculate();
-  });
+  panel.innerHTML = CONC_EDITABLE.map(p => `
+    <div class="slider-col" id="conc-col-${p}">
+      <div class="slider-value" id="conc-val-${p}">0.0</div>
+      <div class="slider-wrap">
+        <input type="range" class="v-slider" id="conc-${p}"
+               min="-100" max="100" step="0.5" value="0"
+               aria-label="${p} concentration">
+      </div>
+      <div class="slider-party" style="--party-color:${PARTY_COLORS[p]}">${p}</div>
+      <input type="number" class="inc-input" id="inc-${p}"
+             step="0.5" min="-100" max="100"
+             aria-label="${p} incumbent effect">
+    </div>`).join("");
+  refreshConcentrationPanel();
 }
 
 function bindConcentrationInputs() {
-  // --- Concentration sliders ---
+  // --- Concentration sliders (write to the current nation) ---
   CONC_EDITABLE.forEach(p => {
     const slider = document.getElementById(`conc-${p}`);
     const readout = document.getElementById(`conc-val-${p}`);
 
-    // while dragging: update value, readout, and recalculate live
     slider.addEventListener("input", () => {
       const val = clampConcentration(parseFloat(slider.value));
-      VOTE_CONCENTRATION[p] = val / 100;
+      VOTE_CONCENTRATION[currentNation()][p] = val / 100;
       readout.textContent = val.toFixed(1);
       paintSlider(slider);
       calculateThrottled();
     });
   });
 
-  // --- Incumbent boxes (same behaviour as before) ---
+  // --- Incumbent boxes ---
   const incInputs = CONC_EDITABLE.map(p => document.getElementById(`inc-${p}`));
-  incInputs.forEach((input, index) => {
+  incInputs.forEach(input => {
+    const party = input.id.replace("inc-", "");
     let originalValue = input.value;
 
     input.addEventListener("focus", () => {
@@ -3508,12 +3522,10 @@ function bindConcentrationInputs() {
     });
 
     input.addEventListener("input", () => {
-      const raw = input.value;
-      if (raw === "-") return;
-      let val = parseFloat(raw);
+      if (input.value === "-") return;
+      let val = parseFloat(input.value);
       if (isNaN(val)) return;
-      val = clampConcentration(val);
-      INCUMBENT_STRENGTH[input.id.replace("inc-", "")] = val / 100;
+      INCUMBENT_STRENGTH[currentNation()][party] = clampConcentration(val) / 100;
       calculate();
     });
 
@@ -3524,16 +3536,29 @@ function bindConcentrationInputs() {
       }
       const val = clampConcentration(parseFloat(input.value));
       input.value = val.toFixed(1);
-      INCUMBENT_STRENGTH[input.id.replace("inc-", "")] = val / 100;
+      INCUMBENT_STRENGTH[currentNation()][party] = val / 100;
       calculate();
     });
 
     input.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         e.preventDefault();
-        (incInputs[index + 1] || incInputs[0]).focus();
+        const enabled = incInputs.filter(i => !i.disabled);   // skip greyed-out boxes
+        const next = enabled[enabled.indexOf(input) + 1] || enabled[0];
+        if (next) next.focus();
       }
     });
+  });
+}
+
+  // Runs calculate() at most once per animation frame while a slider is dragged
+let calcQueued = false;
+function calculateThrottled() {
+  if (calcQueued) return;
+  calcQueued = true;
+  requestAnimationFrame(() => {
+    calcQueued = false;
+    calculate();
   });
 }
 
@@ -3683,17 +3708,20 @@ function applyStrengthToRow(row, target) {
   const out = { name: row.name };
   const incumbentParty = CONSTITUENCY_INCUMBENTS[row.name];
 
+  const conc = VOTE_CONCENTRATION[row.nation];
+  const inc  = INCUMBENT_STRENGTH[row.nation];
+
   PARTIES.forEach(p => {
     const strength = (Number(row[p]) || 0) / 100;   // 100 -> 1.00
 
     // concentration: boosts seats where the party is above 100%, trims below
-    const concVal = Number(VOTE_CONCENTRATION[p] ?? 0);
+    const concVal = Number(conc[p] ?? 0);
     let multiplier = 1;
     if (strength > 1) multiplier = 1 + concVal;
     else if (strength < 1) multiplier = 1 - concVal;
 
     // incumbent effect: only for the sitting party
-    if (p === incumbentParty) multiplier *= (1 + Number(INCUMBENT_STRENGTH[p] ?? 0));
+    if (p === incumbentParty) multiplier *= (1 + Number(inc[p] ?? 0));
 
         // demographic effect, applied after concentration and incumbency
     multiplier *= demographicMultiplier(row.name, p);
@@ -3797,14 +3825,12 @@ document.getElementById('reset').addEventListener('click', () => {
   Object.keys(DEFAULTS_BY_NATION).forEach(n => { VOTES[n] = { ...DEFAULTS_BY_NATION[n] }; });
   renderTable();
 
-// ---- Reset concentration & incumbent strength ----
-  CONC_EDITABLE.forEach(p => {
-    VOTE_CONCENTRATION[p] = VOTE_CONCENTRATION_DEFAULTS[p];
-    INCUMBENT_STRENGTH[p] = INCUMBENT_STRENGTH_DEFAULTS[p];
+  // ---- Reset concentration & incumbent strength (all nations) ----
+  NATIONS.forEach(n => {
+    VOTE_CONCENTRATION[n] = { ...VOTE_CONCENTRATION_DEFAULTS };
+    INCUMBENT_STRENGTH[n] = { ...INCUMBENT_STRENGTH_DEFAULTS };
   });
-
-    // ---- Reset display values for settings panel ----
-  CONC_EDITABLE.forEach(p => syncConcentrationUI(p));
+  refreshConcentrationPanel();
 
   resetDemographicEffects();
   syncDemographicUI();
@@ -3833,11 +3859,13 @@ document.getElementById('randomise').addEventListener('click', () => {
     ps.forEach((p, j) => VOTES[n][p] = vals[j]);
   });
 
-  CONC_EDITABLE.forEach(p => {
-    const d = Math.round((Math.random() * 100 - 50) * 2) / 2;   // snaps to the slider's 0.5 step
-    VOTE_CONCENTRATION[p] = d / 100;
-    syncConcentrationUI(p);
+  NATIONS.forEach(n => {
+    CONC_EDITABLE.filter(p => NATION_PARTIES[n].includes(p)).forEach(p => {
+      const d = Math.round((Math.random() * 100 - 50) * 2) / 2;   // snaps to the slider's 0.5 step
+      VOTE_CONCENTRATION[n][p] = d / 100;
+    });
   });
+  refreshConcentrationPanel();
 
   renderTable();
   calculate();
@@ -3852,6 +3880,7 @@ renderTable();
     document.querySelectorAll('.nation-tab').forEach(b => b.classList.toggle('active', b === btn));
     renderTable();
     updateTable();
+    refreshConcentrationPanel();
   });
 });
   
