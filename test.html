@@ -401,11 +401,37 @@ tfoot td {
 
 .v-slider {
   writing-mode: vertical-lr;
-  direction: rtl;            /* puts +100 at the top, -100 at the bottom */
+  direction: rtl;            /* +100 at the top, -100 at the bottom */
   width: 22px;
   height: 170px;
   margin: 0;
-  accent-color: #008500;
+  padding: 0;
+  cursor: pointer;
+
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 6px 100%;   /* the bar is a 6px-wide strip, centred */
+}
+
+.v-slider::-webkit-slider-runnable-track { background: transparent; }
+.v-slider::-moz-range-track { background: transparent; }
+
+.v-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px; height: 14px; box-sizing: border-box;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #008500;
+}
+.v-slider::-moz-range-thumb {
+  width: 14px; height: 14px; box-sizing: border-box;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #008500;
 }
 
 .slider-party {
@@ -2581,13 +2607,41 @@ const INCUMBENT_STRENGTH_DEFAULTS = { ...INCUMBENT_STRENGTH };
 
 const CONC_EDITABLE = ["LAB", "CON", "RFM", "LDM", "GRN", "RES", "SNP", "PLC"];
 
+  // ---- Bipolar slider fill ----
+const THUMB = 14;                 // must match the thumb width/height in the CSS
+const TRACK_COL   = '#e5e7eb';    // empty track
+const FILL_COL    = '#008500';    // fill, growing from the centre toward the thumb
+const COUNTER_COL = '#9ca3af';    // darker, greyer mirror segment on the opposite half
+
+// x runs 0 (bottom) to 1 (top). The thumb's centre travels THUMB/2 in from each end,
+// so the stop positions are offset to line up with it.
+function sliderPos(x) {
+  return `calc(${THUMB / 2}px + ${x} * (100% - ${THUMB}px))`;
+}
+
+function paintSlider(slider) {
+  const v = parseFloat(slider.value) || 0;
+  const p = (v + 100) / 200;      // thumb position, 0 to 1
+  const m = 1 - p;                // mirror position on the other side of 0
+
+  const segs = v >= 0
+    ? [[0, m, TRACK_COL], [m, 0.5, COUNTER_COL], [0.5, p, FILL_COL], [p, 1, TRACK_COL]]
+    : [[0, p, TRACK_COL], [p, 0.5, FILL_COL], [0.5, m, COUNTER_COL], [m, 1, TRACK_COL]];
+
+  const stops = segs
+    .filter(([a, b]) => b > a)
+    .map(([a, b, c]) => `${c} ${sliderPos(a)} ${sliderPos(b)}`);
+
+  slider.style.backgroundImage = `linear-gradient(to top, ${stops.join(', ')})`;
+}
+
 // Push current state into the sliders / readouts / incumbent boxes for one party
 function syncConcentrationUI(p) {
   const c = VOTE_CONCENTRATION[p] * 100;
   const slider = document.getElementById(`conc-${p}`);
   const readout = document.getElementById(`conc-val-${p}`);
   const inc = document.getElementById(`inc-${p}`);
-  if (slider) slider.value = c;
+  if (slider) { slider.value = c; paintSlider(slider); }
   if (readout) readout.textContent = c.toFixed(1);
   if (inc) inc.value = (Number(INCUMBENT_STRENGTH[p] || 0) * 100).toFixed(1);
 }
@@ -2609,6 +2663,8 @@ function renderConcentrationTable() {
                aria-label="${p} incumbent effect">
       </div>`;
   }).join("");
+  
+  CONC_EDITABLE.forEach(p => paintSlider(document.getElementById(`conc-${p}`)));
 }
 
   // Runs calculate() at most once per animation frame while a slider is dragged
@@ -2633,6 +2689,7 @@ function bindConcentrationInputs() {
       const val = clampConcentration(parseFloat(slider.value));
       VOTE_CONCENTRATION[p] = val / 100;
       readout.textContent = val.toFixed(1);
+      paintSlider(slider);
       calculateThrottled();
     });
   });
