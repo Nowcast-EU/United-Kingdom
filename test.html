@@ -3652,6 +3652,7 @@ function paintSlider(slider) {
   const v = parseFloat(slider.value) || 0;
     const lo = parseFloat(slider.min), hi = parseFloat(slider.max);
    const p = (v - lo) / (hi - lo);   // thumb position, 0 to 1, works for any symmetric range
+   const zero = (0 - lo) / (hi - lo);
    const m = 1 - p;                // mirror position on the other side of 0
    const horizontal = slider.classList.contains('h-slider') ||
      (slider.classList.contains('v-slider') && window.matchMedia('(max-width: 768px)').matches);
@@ -3670,9 +3671,11 @@ function paintSlider(slider) {
     .map(([a, b, c]) => `${c} ${sliderPos(a, t)} ${sliderPos(b, t)}`);
 
   const dir = horizontal ? 'to right' : 'to top';
-  slider.style.backgroundImage = `linear-gradient(${dir}, ${stops.join(', ')})`;
-  slider.style.backgroundSize = "100% 100%";
-  slider.style.backgroundPosition = "center";
+  slider.style.backgroundImage = `linear-gradient(#000, #000), linear-gradient(${dir}, ${stops.join(', ')})`;
+  slider.style.backgroundSize = horizontal ? "1px 100%, 100% 100%" : "100% 1px, 100% 100%";
+  slider.style.backgroundPosition = horizontal
+    ? `${sliderPos(zero, t)} center, center`
+    : `center ${sliderPos(1 - zero, t)}, center`;
 }
 
 window.addEventListener("resize", () => {
