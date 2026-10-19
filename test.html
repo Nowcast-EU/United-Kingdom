@@ -3670,11 +3670,11 @@ function paintSlider(slider) {
   const startCap = visibleSegs[0][2];
   const endCap = visibleSegs[visibleSegs.length - 1][2];
   const startCapPosition = horizontal
-    ? `calc(${t / 2}px - ${TRACK_THICKNESS / 2}px) center`
-    : `center calc(100% - ${t / 2}px - ${TRACK_THICKNESS / 2}px)`;
+    ? `0 center`
+    : `center 100%`;
   const endCapPosition = horizontal
-    ? `calc(100% - ${t / 2}px - ${TRACK_THICKNESS / 2}px) center`
-    : `center calc(${t / 2}px - ${TRACK_THICKNESS / 2}px)`;
+    ? `100% center`
+    : `center 0`;
   const capSize = `${TRACK_THICKNESS}px ${TRACK_THICKNESS}px`;
   slider.style.backgroundImage = [
     `radial-gradient(circle, ${startCap} 99%, transparent 100%)`,
