@@ -105,15 +105,18 @@ h2.subtitle a:hover {
 
   th, td { 
     padding: 4px 6px; 
-    border: 1px solid #e2e8f0; 
+    border: 0; 
     text-align: left; 
     word-wrap: break-word; 
   }
 
-  th { background: #f1f5f9; font-weight: 600; }
+  th { background: transparent; font-weight: 600; }
+  thead th { border-bottom: 2px solid #111; }
+  tbody tr:not(.divider-row) td { border-bottom: 1px solid #e2e8f0; }
   td.party-column { font-weight: bold; position: relative; padding-left: 14px; color: black; }
   td.party-column::before { content: ""; position: absolute; left: 0; top: 0; width: 8px; height: 100%; border-radius: 2px 0 0 2px; background-color: var(--party-color); }
-  td.seats-column, td.diff-column { font-weight: bold; text-align: center; }
+  td.seats-column { font-weight: bold; text-align: center; white-space: nowrap; }
+  .seat-change { font-weight: 500; }
   .diff-column.positive { color: #008500; }
   .diff-column.negative { color: #bb0000; }
   .diff-column.equal { color: #555555; }
@@ -125,7 +128,8 @@ h2.subtitle a:hover {
   }
   .percent-sign { font-size: 14px; }
 
-  tfoot td { font-weight: bold; text-align: center; background: #f1f5f9; }
+  tfoot { border-top: 1px solid #111; }
+  tfoot td { font-weight: bold; text-align: center; background: transparent; }
   tfoot td:first-child { text-align: left; padding-left: 14px; }
 
   input[type=number]::-webkit-inner-spin-button,
@@ -369,11 +373,10 @@ tfoot td {
 #table-col { flex: 0 0 44%; min-width: 0; }
 #table-col table { margin-top: 0; }
 
-/* column widths: Party / Votes / Seats / +/- */
-#table-col th:nth-child(1) { width: 22%; }
+/* column widths: Party / Votes / Seats and change */
+#table-col th:nth-child(1) { width: 26%; }
 #table-col th:nth-child(2) { width: 38%; }
-#table-col th:nth-child(3) { width: 20%; }
-#table-col th:nth-child(4) { width: 20%; }
+#table-col th:nth-child(3) { width: 36%; }
 
 #settings-section { flex: 1 1 0; min-width: 0; margin-top: 0; display: flex; flex-direction: column; }
 #settings-section > h3 { text-align: center; margin: 0 0 4px; font-size: 15px; }
@@ -706,8 +709,7 @@ tfoot td {
         <tr>
           <th>Party</th>
           <th>Votes (%)</th>
-          <th>Seats</th>
-          <th>+/- 2024</th>
+          <th>Seats<br>(+/- vs 2024)</th>
         </tr>
       </thead>
       <tbody id="tbody"></tbody>
@@ -716,7 +718,6 @@ tfoot td {
           <td>Totals</td>
           <td id="total-votes">0.0%</td>
           <td id="total-seats">0</td>
-          <td></td>
         </tr>
       </tfoot>
     </table>
@@ -3852,7 +3853,7 @@ function renderTable() {
 
   document.getElementById('tbody').innerHTML = rows.map(p => {
     if (p === "--divider--") {
-      return `<tr class="divider-row"><td colspan="4"><i>Calculated from the Scotland, Wales and Northern Ireland tabs</i></td></tr>`;
+      return `<tr class="divider-row"><td colspan="3"><i>Calculated from the Scotland, Wales and Northern Ireland tabs</i></td></tr>`;
     }
     const editable = own.includes(p) && p !== "OTH";
     const val = editable ? (VOTES[nation][p] || 0).toFixed(1) : "0.0";
@@ -3866,7 +3867,6 @@ function renderTable() {
           </div>
         </td>
         <td class="seats-column" id="seats-${p}">—</td>
-        <td class="diff-column" id="diff-${p}">—</td>
       </tr>`;
   }).join('');
 
@@ -3947,13 +3947,12 @@ function updateTable() {
     const p = tr.dataset.party;
     const s = seats[p] || 0;
     totalSeats += s;
-    document.getElementById(`seats-${p}`).textContent = s;
 
     const diff = s - (prev[p] || 0);
-    const cell = document.getElementById(`diff-${p}`);
-    if (diff > 0) { cell.textContent = `+${diff}`; cell.className = 'diff-column positive'; }
-    else if (diff < 0) { cell.textContent = `${diff}`; cell.className = 'diff-column negative'; }
-    else { cell.textContent = '(=)'; cell.className = 'diff-column equal'; }
+    const cell = document.getElementById(`seats-${p}`);
+    if (diff > 0) { cell.innerHTML = `${s} <span class="seat-change diff-column positive">(+${diff})</span>`; }
+    else if (diff < 0) { cell.innerHTML = `${s} <span class="seat-change diff-column negative">(${diff})</span>`; }
+    else { cell.innerHTML = `${s} <span class="seat-change diff-column equal">(=)</span>`; }
   });
 
   document.getElementById('total-seats').textContent = totalSeats;
