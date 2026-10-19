@@ -3766,6 +3766,18 @@ function updateTable() {
   refreshCalculated();
 }
 
+// Smooth replacement for the old on/off step at strength = 1.
+// Returns -1 to +1: 0 at par, +/-1 at EFF_SATURATION times above/below par.
+const EFF_SATURATION = 2;   // strength at which the full effect is reached (2 = double, and half on the low side)
+const EFF_SHAPE = 2;        // 1 = straight ramp, 2 = flat middle, 3 = flatter still
+const EFF_WIDTH = Math.log(EFF_SATURATION);
+
+function efficiencyCurve(strength) {
+  if (strength <= 0) return -1;
+  const u = Math.log(strength) / EFF_WIDTH;          // 0 at par, +/-1 at saturation
+  return Math.sign(u) * Math.pow(Math.min(1, Math.abs(u)), EFF_SHAPE);
+}
+
 function applyStrengthToRow(row, target) {
   const out = { name: row.name };
   const incumbentParty = CONSTITUENCY_INCUMBENTS[row.name];
@@ -3778,9 +3790,7 @@ function applyStrengthToRow(row, target) {
 
     // concentration: boosts seats where the party is above 100%, trims below
     const concVal = Number(conc[p] ?? 0);
-    let multiplier = 1;
-    if (strength > 1) multiplier = 1 + concVal;
-    else if (strength < 1) multiplier = 1 - concVal;
+    let multiplier = 1 + concVal * efficiencyCurve(strength);
 
     // incumbent effect: only for the sitting party
     if (p === incumbentParty) multiplier *= (1 + Number(inc[p] ?? 0));
