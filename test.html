@@ -380,6 +380,7 @@ tfoot td {
 .slider-note { text-align: center; font-size: 11px; color: #777; margin: 0 0 8px; }
 
 #slider-panel { display: flex; flex-direction: column; flex: 1 1 0; min-height: 0; }
+.effect-group { display: flex; flex-direction: column; flex: 1 1 0; min-height: 0; }
 .effect-block { display: flex; flex-direction: column; min-width: 0; }
 .effect-block.concentration-block { flex: 1 1 0; min-height: 0; }
 .slider-col, .inc-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
@@ -464,6 +465,7 @@ tfoot td {
   #table-row { flex-direction: column; gap: 12px; padding: 0; border: 0; background: transparent; }
   #table-col { flex: none; width: 100%; }
   #settings-section { flex: none; width: 100%; margin-top: 0; }
+  .effect-group { flex: none; }
   #slider-panel { flex: none; min-height: auto; }
   .effect-block.concentration-block { flex: none; }
   .slider-row, .inc-row {
@@ -489,11 +491,12 @@ tfoot td {
   .effect-block, #demo-section {
     box-sizing: border-box;
     padding: 12px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
     background: #fff;
   }
   .effect-block + .effect-block, #demo-section { margin-top: 12px; }
+  #demo-section { display: none; }
+  body.mobile-demographics #settings-section { display: none; }
+  body.mobile-demographics #demo-section { display: block; }
 }
 
 #demo-section { margin-top: 28px; }
@@ -580,8 +583,9 @@ tfoot td {
 }
 .tab-group { display: flex; align-items: flex-end; gap: 3px; }
 .tab-group-left { width: 50%; }
+#mobile-view-tabs { display: none; }
 
-.nation-tab, .tab-action {
+.nation-tab, .tab-action, .mobile-view-tab {
   font-family: inherit;
   font-size: 14px;
   font-weight: 500;
@@ -595,8 +599,9 @@ tfoot td {
 }
 .nation-tab { flex: 1 1 0; min-width: 0; white-space: nowrap; }
 .nation-tab:hover, .tab-action:hover { background: #f1f5f9; }
+.mobile-view-tab { flex: none; }
 
-.nation-tab.active {
+.nation-tab.active, .mobile-view-tab.active {
   background: #fff;
   color: #0f172a;
   font-weight: 700;
@@ -622,6 +627,7 @@ tfoot td {
   }
 
   .tab-action { font-size: 12px; padding: 5px 8px 4px; }
+  #mobile-view-tabs { display: flex; justify-content: flex-end; margin: 0; }
 }
 
 </style>
@@ -679,6 +685,11 @@ tfoot td {
       </tfoot>
     </table>
   </div>
+
+<div id="mobile-view-tabs" class="tab-group" role="tablist" aria-label="Mobile calculator view">
+  <button class="mobile-view-tab active" type="button" role="tab" aria-selected="true" aria-controls="settings-section" data-view="concentration">Concentration</button>
+  <button class="mobile-view-tab" type="button" role="tab" aria-selected="false" aria-controls="demo-section" data-view="demographics">Demographics</button>
+</div>
 
 <div id="settings-section">
   <div id="slider-panel"></div>
@@ -3317,7 +3328,7 @@ function drawDemoChart() {
   });
 
   // Size the canvas for sharp rendering on high-DPI screens
-  const dpr = window.devicePixelRatio || 1;
+  const dpr = Math.max(window.devicePixelRatio || 1, 2);
   const W = canvas.clientWidth, H = canvas.clientHeight;
   if (!W || !H) return;
   canvas.width = W * dpr;
@@ -3626,9 +3637,10 @@ function renderConcentrationTable() {
   const label = p => `<div class="slider-party" style="--party-color:${PARTY_COLORS[p]}">${p}</div>`;
 
   panel.innerHTML = `
-    <div class="effect-block concentration-block">
-      <div class="panel-heading">Vote Share Concentration</div>
-      <div class="slider-row">
+    <div class="effect-group">
+      <div class="effect-block concentration-block">
+        <div class="panel-heading">Vote Share Concentration</div>
+        <div class="slider-row">
       ${CONC_EDITABLE.map(p => `
         <div class="slider-col" id="conc-col-${p}" style="--party-color:${PARTY_COLORS[p]}">
           ${label(p)}
@@ -3639,11 +3651,11 @@ function renderConcentrationTable() {
                    aria-label="${p} efficiency">
           </div>
         </div>`).join("")}
+        </div>
       </div>
-    </div>
-    <div class="effect-block incumbent-block">
-      <div class="panel-heading second">Incumbent Effects</div>
-      <div class="inc-row">
+      <div class="effect-block incumbent-block">
+        <div class="panel-heading second">Incumbent Effects</div>
+        <div class="inc-row">
       ${CONC_EDITABLE.map(p => `
         <div class="inc-col" id="inc-col-${p}">
           ${label(p)}
@@ -3651,6 +3663,7 @@ function renderConcentrationTable() {
                  step="0.5" min="-100" max="100"
                  aria-label="${p} incumbent effect">
         </div>`).join("")}
+        </div>
       </div>
     </div>`;
   refreshConcentrationPanel();
@@ -4081,6 +4094,19 @@ renderTable();
     renderTable();
     updateTable();
     refreshConcentrationPanel();
+  });
+});
+
+document.querySelectorAll('.mobile-view-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const showDemographics = btn.dataset.view === 'demographics';
+    document.body.classList.toggle('mobile-demographics', showDemographics);
+    if (showDemographics) requestAnimationFrame(drawDemoChart);
+    document.querySelectorAll('.mobile-view-tab').forEach(tab => {
+      const active = tab === btn;
+      tab.classList.toggle('active', active);
+      tab.setAttribute('aria-selected', String(active));
+    });
   });
 });
   
