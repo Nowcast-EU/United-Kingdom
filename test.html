@@ -411,7 +411,7 @@ tfoot td {
   background-color: transparent;
   background-repeat: no-repeat;
   background-position: center;
-  background-size: 12px 100%;
+  background-size: 100% 100%;
   border-radius: 999px;
 }
 
@@ -483,7 +483,7 @@ tfoot td {
     transform: none;
     width: 100%;
     height: 22px;
-    background-size: 100% 12px;
+    background-size: 100% 100%;
   }
   .v-slider::-webkit-slider-runnable-track { height: 22px; background: transparent; }
   .v-slider::-webkit-slider-thumb { width: 10px; height: 18px; }
@@ -528,7 +528,7 @@ tfoot td {
   background-color: transparent;
   background-repeat: no-repeat;
   background-position: center;
-  background-size: 100% 12px;
+  background-size: 100% 100%;
   border-radius: 999px;
 }
 .h-slider::-webkit-slider-runnable-track { height: 22px; background: transparent; }
@@ -3637,7 +3637,6 @@ const CONC_EDITABLE = ["LAB", "CON", "RFM", "LDM", "GRN", "RES", "SNP", "PLC"];
 const THUMB_V = 10;               // vertical sliders: thumb size ALONG the track (CSS height)
 const THUMB_H = 14;               // horizontal demographic slider: thumb diameter                 
 const THUMB_MOBILE = 10;           // horizontal efficiency slider: thumb width
-const TRACK_THICKNESS = 12;
 const TRACK_COL   = '#dcdcdc';    // empty track
 const FILL_COL    = '#008500';    // fill, growing from the centre toward the thumb
 const COUNTER_COL = '#c5c5c5';    // darker, greyer mirror segment on the opposite half
@@ -3667,24 +3666,9 @@ function paintSlider(slider) {
     .map(([a, b, c]) => `${c} ${sliderPos(a, t)} ${sliderPos(b, t)}`);
 
   const dir = horizontal ? 'to right' : 'to top';
-  const startCap = visibleSegs[0][2];
-  const endCap = visibleSegs[visibleSegs.length - 1][2];
-  const startCapPosition = horizontal
-    ? `0 center`
-    : `center 100%`;
-  const endCapPosition = horizontal
-    ? `100% center`
-    : `center 0`;
-  const capSize = `${TRACK_THICKNESS}px ${TRACK_THICKNESS}px`;
-  slider.style.backgroundImage = [
-    `radial-gradient(circle, ${startCap} 99%, transparent 100%)`,
-    `radial-gradient(circle, ${endCap} 99%, transparent 100%)`,
-    `linear-gradient(${dir}, ${stops.join(', ')})`
-  ].join(', ');
-  slider.style.backgroundSize = horizontal
-    ? `${capSize}, ${capSize}, 100% ${TRACK_THICKNESS}px`
-    : `${capSize}, ${capSize}, ${TRACK_THICKNESS}px 100%`;
-  slider.style.backgroundPosition = `${startCapPosition}, ${endCapPosition}, center`;
+  slider.style.backgroundImage = `linear-gradient(${dir}, ${stops.join(', ')})`;
+  slider.style.backgroundSize = "100% 100%";
+  slider.style.backgroundPosition = "center";
 }
 
 window.addEventListener("resize", () => {
