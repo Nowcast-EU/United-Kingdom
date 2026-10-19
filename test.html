@@ -462,7 +462,7 @@ tfoot td {
 
 /* Phones: stack the editor under the table */
 @media (max-width: 768px) {
-  #table-row { flex-direction: column; gap: 12px; padding: 0; border: 0; background: transparent; }
+  #table-row { flex-direction: column; gap: 0; padding: 0; border: 0; background: transparent; }
   #table-col { flex: none; width: 100%; }
   #settings-section { flex: none; width: 100%; margin-top: 0; }
   .effect-group { flex: none; }
@@ -496,15 +496,17 @@ tfoot td {
   .effect-group, #demo-section {
     box-sizing: border-box;
     border: 1px solid #cbd5e1;
-    border-radius: 6px;
+    border-radius: 0 0 6px 6px;
     background: #fff;
   }
   .effect-block + .effect-block, #demo-section { margin-top: 12px; }
   #settings-section, #demo-section, #right-column { display: none; }
   body.mobile-concentration #settings-section { display: flex; }
   body.mobile-demographics #demo-section { display: block; }
+  body.mobile-demographics #demo-section { margin-top: 0; }
   body.mobile-map-view #left-column { padding-bottom: 0; }
   body.mobile-map-view #right-column { display: block; margin-top: 0; }
+  body.mobile-map-view #constituency-map { border-radius: 0 0 10px 10px !important; }
 }
 
 #demo-section { margin-top: 28px; }
@@ -546,10 +548,12 @@ tfoot td {
 
 .panel-heading { text-align: left; font-size: 15px; font-weight: 700; color: #0f172a; margin: 0 0 6px; }
 .panel-heading.second { border-top: 1px solid #e2e8f0; padding-top: 8px; margin-top: 10px; }
+.concentration-country { display: none; }
 .slider-row { display: flex; justify-content: space-between; gap: 2px; flex: 1 1 0; min-height: 0; }
 .inc-row { display: flex; justify-content: space-between; gap: 2px; }
 
 @media (max-width: 768px) {
+  .concentration-country { display: inline; font-weight: 400; color: #64748b; }
   #slider-panel .slider-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -622,12 +626,21 @@ tfoot td {
 .tab-action:active { background: #dbe2ea; }
 
 @media (max-width: 768px) {
-  .tab-group-left { width: auto; flex: 1 1 auto; }
+  .tab-group-left { width: auto; flex: 0 0 auto; }
 
   .nation-tab {
     font-size: 0;
-    padding: 7px 6px 6px;
+    flex: 0 0 30px;
+    width: 30px;
+    height: 30px;
+    box-sizing: border-box;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
+
+  .nation-tab.active { padding-top: 0; }
 
   .nation-tab::after {
     content: attr(data-short);
@@ -642,7 +655,9 @@ tfoot td {
     justify-content: space-between;
     align-items: flex-end;
     width: 100%;
-    margin: 0;
+    margin: 12px 0 -1px;
+    position: relative;
+    z-index: 2;
   }
   #mobile-view-tabs .tab-group { flex: 0 0 auto; }
 }
@@ -3625,6 +3640,7 @@ function paintSlider(slider) {
 }
 
 const NATION_NAMES = { ENG: "England", SCO: "Scotland", WAL: "Wales", NI: "Northern Ireland" };
+const NATION_TAB_NAMES = { UK: "England", SCO: "Scotland", WAL: "Wales", NI: "N. Ireland" };
 function currentNation() { return NATION_KEY[currentTab]; }
 
 // Load one party's stored values for the current nation; grey it out if it has no vote share there
@@ -3652,6 +3668,8 @@ function syncConcentrationUI(p) {
 
 function refreshConcentrationPanel() {
   CONC_EDITABLE.forEach(p => syncConcentrationUI(p));
+  const countryLabel = document.getElementById("concentration-country");
+  if (countryLabel) countryLabel.textContent = ` (${NATION_TAB_NAMES[currentTab]})`;
 }
 
 function renderConcentrationTable() {
@@ -3661,7 +3679,7 @@ function renderConcentrationTable() {
   panel.innerHTML = `
     <div class="effect-group">
       <div class="effect-block concentration-block">
-        <div class="panel-heading">Vote Share Concentration</div>
+        <div class="panel-heading">Vote Share Concentration<span class="concentration-country" id="concentration-country"></span></div>
         <div class="slider-row">
       ${CONC_EDITABLE.map(p => `
         <div class="slider-col" id="conc-col-${p}" style="--party-color:${PARTY_COLORS[p]}">
