@@ -549,8 +549,18 @@ tfoot td {
 
 @media (max-width: 768px) {
   .tab-group-left { width: auto; flex: 1 1 auto; }
-  .nation-tab, .tab-action { font-size: 12px; padding: 7px 6px 6px; }
-  .tab-action { padding: 5px 8px 4px; }
+
+  .nation-tab {
+    font-size: 0;
+    padding: 7px 6px 6px;
+  }
+
+  .nation-tab::after {
+    content: attr(data-short);
+    font-size: 12px;
+  }
+
+  .tab-action { font-size: 12px; padding: 5px 8px 4px; }
 }
 
 </style>
@@ -574,10 +584,10 @@ tfoot td {
 
 <div id="tab-bar">
   <div class="tab-group tab-group-left">
-    <button class="nation-tab active" data-nation="UK">UK</button>
-    <button class="nation-tab" data-nation="SCO">Scotland</button>
-    <button class="nation-tab" data-nation="WAL">Wales</button>
-    <button class="nation-tab" data-nation="NI">N. Ireland</button>
+  <button class="nation-tab active" data-nation="UK" data-short="UK">UK</button>
+  <button class="nation-tab" data-nation="SCO" data-short="SC">Scotland</button>
+  <button class="nation-tab" data-nation="WAL" data-short="WA">Wales</button>
+  <button class="nation-tab" data-nation="NI" data-short="NI">N. Ireland</button>
   </div>
   <div class="tab-group tab-group-right">
     <button class="tab-action" id="reset">Reset</button>
