@@ -3637,6 +3637,7 @@ const CONC_EDITABLE = ["LAB", "CON", "RFM", "LDM", "GRN", "RES", "SNP", "PLC"];
 const THUMB_V = 10;               // vertical sliders: thumb size ALONG the track (CSS height)
 const THUMB_H = 14;               // horizontal demographic slider: thumb diameter                 
 const THUMB_MOBILE = 10;           // horizontal efficiency slider: thumb width
+const TRACK_THICKNESS = 12;
 const TRACK_COL   = '#dcdcdc';    // empty track
 const FILL_COL    = '#008500';    // fill, growing from the centre toward the thumb
 const COUNTER_COL = '#999999';    // darker, greyer mirror segment on the opposite half
@@ -3655,18 +3656,40 @@ function paintSlider(slider) {
    const horizontal = slider.classList.contains('h-slider') ||
      (slider.classList.contains('v-slider') && window.matchMedia('(max-width: 768px)').matches);
    const t = slider.classList.contains('h-slider') ? THUMB_H : horizontal ? THUMB_MOBILE : THUMB_V;
+   const partyColor = PARTY_COLORS[slider.id.replace("conc-", "")] || FILL_COL;
 
   const segs = v >= 0
-    ? [[0, m, TRACK_COL], [m, 0.5, COUNTER_COL], [0.5, p, PARTY_COLORS[slider.id.replace("conc-","")]], [p, 1, TRACK_COL]]
-    : [[0, p, TRACK_COL], [p, 0.5, PARTY_COLORS[slider.id.replace("conc-","")]], [0.5, m, COUNTER_COL], [m, 1, TRACK_COL]];
+    ? [[0, m, TRACK_COL], [m, 0.5, COUNTER_COL], [0.5, p, partyColor], [p, 1, TRACK_COL]]
+    : [[0, p, TRACK_COL], [p, 0.5, partyColor], [0.5, m, COUNTER_COL], [m, 1, TRACK_COL]];
 
-  const stops = segs
-    .filter(([a, b]) => b > a)
+  const visibleSegs = segs.filter(([a, b]) => b > a);
+  const stops = visibleSegs
     .map(([a, b, c]) => `${c} ${sliderPos(a, t)} ${sliderPos(b, t)}`);
 
-    const dir = horizontal ? 'to right' : 'to top';
-  slider.style.backgroundImage = `linear-gradient(${dir}, ${stops.join(', ')})`;
+  const dir = horizontal ? 'to right' : 'to top';
+  const startCap = visibleSegs[0][2];
+  const endCap = visibleSegs[visibleSegs.length - 1][2];
+  const startCapPosition = horizontal
+    ? `calc(${t / 2}px - ${TRACK_THICKNESS / 2}px) center`
+    : `center calc(100% - ${t / 2}px - ${TRACK_THICKNESS / 2}px)`;
+  const endCapPosition = horizontal
+    ? `calc(100% - ${t / 2}px - ${TRACK_THICKNESS / 2}px) center`
+    : `center calc(${t / 2}px - ${TRACK_THICKNESS / 2}px)`;
+  const capSize = `${TRACK_THICKNESS}px ${TRACK_THICKNESS}px`;
+  slider.style.backgroundImage = [
+    `radial-gradient(circle, ${startCap} 99%, transparent 100%)`,
+    `radial-gradient(circle, ${endCap} 99%, transparent 100%)`,
+    `linear-gradient(${dir}, ${stops.join(', ')})`
+  ].join(', ');
+  slider.style.backgroundSize = horizontal
+    ? `${capSize}, ${capSize}, 100% ${TRACK_THICKNESS}px`
+    : `${capSize}, ${capSize}, ${TRACK_THICKNESS}px 100%`;
+  slider.style.backgroundPosition = `${startCapPosition}, ${endCapPosition}, center`;
 }
+
+window.addEventListener("resize", () => {
+  document.querySelectorAll(".h-slider, .v-slider").forEach(paintSlider);
+});
 
 const NATION_NAMES = { ENG: "England", SCO: "Scotland", WAL: "Wales", NI: "Northern Ireland" };
 const NATION_TAB_NAMES = { UK: "England", SCO: "Scotland", WAL: "Wales", NI: "N. Ireland" };
