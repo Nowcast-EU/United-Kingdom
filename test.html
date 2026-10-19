@@ -610,7 +610,7 @@ tfoot td {
   -webkit-tap-highlight-color: transparent;
 }
 .nation-tab { flex: 1 1 0; min-width: 0; white-space: nowrap; }
-.nation-tab:hover, .tab-action:hover { background: #f1f5f9; }
+.nation-tab:hover { background: #f1f5f9; }
 .mobile-view-tab { flex: none; }
 
 .nation-tab.active, .mobile-view-tab.active {
@@ -622,8 +622,10 @@ tfoot td {
 }
 
 /* Reset / Randomise: shorter, so they read as secondary tabs */
-.tab-action { font-size: 13px; padding: 5px 14px 4px; }
-.tab-action:active { background: #dbe2ea; }
+.tab-action { font-size: 13px; padding: 5px 14px 4px; color: #fff; background: #166534; border-color: #14532d; }
+.tab-action:hover, .tab-action:active { background: #14532d; }
+#reset.has-changes { color: #422006; background: #f59e0b; border-color: #d97706; }
+#reset.has-changes:hover, #reset.has-changes:active { background: #d97706; }
 
 @media (max-width: 768px) {
   .tab-group-left { width: auto; flex: 0 0 auto; }
@@ -3602,6 +3604,31 @@ function resetNationSettings() {
 }
 resetNationSettings();
 
+const DEFAULT_SETTINGS_SIGNATURE = JSON.stringify({
+  votes: VOTES,
+  concentration: VOTE_CONCENTRATION,
+  incumbents: INCUMBENT_STRENGTH,
+  demographics: DEMO_EFFECTS
+});
+
+function updateResetButtonState() {
+  const resetButton = document.getElementById("reset");
+  if (!resetButton) return;
+  const currentSignature = JSON.stringify({
+    votes: VOTES,
+    concentration: VOTE_CONCENTRATION,
+    incumbents: INCUMBENT_STRENGTH,
+    demographics: DEMO_EFFECTS
+  });
+  resetButton.classList.toggle("has-changes", currentSignature !== DEFAULT_SETTINGS_SIGNATURE);
+}
+
+document.addEventListener("input", event => {
+  if (event.target.matches("#tbody input, .v-slider, .inc-input, #demo-slider")) {
+    updateResetButtonState();
+  }
+});
+
 const CONC_EDITABLE = ["LAB", "CON", "RFM", "LDM", "GRN", "RES", "SNP", "PLC"];
 
   // ---- Bipolar slider fill ----
@@ -3853,10 +3880,12 @@ function renderTable() {
         input.value = originalValue;
         VOTES[nation][party] = parseFloat(originalValue) || 0;
         refreshCalculated();
+        updateResetButtonState();
       } else {
         input.value = v.toFixed(1);
       }
       if (hasChanged && parseFloat(input.value) !== parseFloat(originalValue)) calculate();
+      updateResetButtonState();
     });
 
     input.addEventListener('keydown', (e) => {
@@ -4055,6 +4084,7 @@ document.getElementById('reset').addEventListener('click', () => {
 
   // ---- Recalculate everything ----
   calculate();
+  updateResetButtonState();
 
 });
 
@@ -4123,6 +4153,7 @@ document.getElementById('randomise').addEventListener('click', () => {
 
   renderTable();
   calculate();
+  updateResetButtonState();
 });
 
 renderTable();
