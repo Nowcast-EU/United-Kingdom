@@ -466,8 +466,26 @@ tfoot td {
   #settings-section { flex: none; width: 100%; margin-top: 0; }
   #slider-panel { flex: none; min-height: auto; }
   .effect-block.concentration-block { flex: none; }
-  .slider-wrap { flex: none; height: 150px; }
-  .slider-row { flex: none; }
+  .slider-row, .inc-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .slider-col, .inc-col { width: 100%; box-sizing: border-box; }
+  .slider-wrap { position: static; flex: none; width: 100%; height: auto; min-height: 0; }
+  .v-slider {
+    position: static;
+    writing-mode: horizontal-tb;
+    direction: ltr;
+    transform: none;
+    width: 100%;
+    height: 22px;
+    background-size: 100% 8px;
+  }
+  .v-slider::-webkit-slider-runnable-track { height: 22px; background: transparent; }
+  .v-slider::-webkit-slider-thumb { width: 10px; height: 18px; }
+  .v-slider::-moz-range-thumb { width: 10px; height: 18px; }
+  .inc-input { width: 100%; max-width: none; height: 26px; font-size: 13px; }
   .effect-block, #demo-section {
     box-sizing: border-box;
     padding: 12px;
@@ -519,6 +537,37 @@ tfoot td {
 .panel-heading.second { border-top: 1px solid #e2e8f0; padding-top: 8px; margin-top: 10px; }
 .slider-row { display: flex; justify-content: space-between; gap: 2px; flex: 1 1 0; min-height: 0; }
 .inc-row { display: flex; justify-content: space-between; gap: 2px; }
+
+@media (max-width: 768px) {
+  #slider-panel .slider-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  #slider-panel .slider-row { flex: none; }
+  #slider-panel .slider-col {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) 44px;
+    grid-template-areas: "party slider value";
+    align-items: center;
+    gap: 8px;
+  }
+  #slider-panel .slider-party {
+    grid-area: party;
+    width: auto;
+    text-align: left;
+    padding: 0 0 0 5px;
+    border-bottom: 0;
+    border-left: 3px solid var(--party-color);
+  }
+  #slider-panel .slider-value {
+    grid-area: value;
+    height: auto;
+    line-height: normal;
+    text-align: right;
+  }
+  #slider-panel .slider-wrap { grid-area: slider; }
+}
 
 /* ---- Notebook-style tabs ---- */
 #tab-bar {
@@ -3510,6 +3559,7 @@ const CONC_EDITABLE = ["LAB", "CON", "RFM", "LDM", "GRN", "RES", "SNP", "PLC"];
   // ---- Bipolar slider fill ----
 const THUMB_V = 10;               // vertical sliders: thumb size ALONG the track (CSS height)
 const THUMB_H = 14;               // horizontal demographic slider: thumb diameter                 
+const THUMB_MOBILE = 10;           // horizontal efficiency slider: thumb width
 const TRACK_COL   = '#e5e7eb';    // empty track
 const FILL_COL    = '#008500';    // fill, growing from the centre toward the thumb
 const COUNTER_COL = '#9ca3af';    // darker, greyer mirror segment on the opposite half
@@ -3525,7 +3575,9 @@ function paintSlider(slider) {
     const lo = parseFloat(slider.min), hi = parseFloat(slider.max);
    const p = (v - lo) / (hi - lo);   // thumb position, 0 to 1, works for any symmetric range
    const m = 1 - p;                // mirror position on the other side of 0
-   const t = slider.classList.contains('h-slider') ? THUMB_H : THUMB_V;
+   const horizontal = slider.classList.contains('h-slider') ||
+     (slider.classList.contains('v-slider') && window.matchMedia('(max-width: 768px)').matches);
+   const t = slider.classList.contains('h-slider') ? THUMB_H : horizontal ? THUMB_MOBILE : THUMB_V;
 
   const segs = v >= 0
     ? [[0, m, TRACK_COL], [m, 0.5, COUNTER_COL], [0.5, p, PARTY_COLORS[slider.id.replace("conc-","")]], [p, 1, TRACK_COL]]
@@ -3535,7 +3587,7 @@ function paintSlider(slider) {
     .filter(([a, b]) => b > a)
     .map(([a, b, c]) => `${c} ${sliderPos(a, t)} ${sliderPos(b, t)}`);
 
-    const dir = slider.classList.contains('h-slider') ? 'to right' : 'to top';
+    const dir = horizontal ? 'to right' : 'to top';
   slider.style.backgroundImage = `linear-gradient(${dir}, ${stops.join(', ')})`;
 }
 
