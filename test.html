@@ -3766,16 +3766,16 @@ function updateTable() {
   refreshCalculated();
 }
 
-// Smooth replacement for the old on/off step at strength = 1.
-// Returns -1 to +1: 0 at par, +/-1 at EFF_SATURATION times above/below par.
-const EFF_SATURATION = 2;   // strength at which the full effect is reached (2 = double, and half on the low side)
-const EFF_SHAPE = 2;        // 1 = straight ramp, 2 = flat middle, 3 = flatter still
-const EFF_WIDTH = Math.log(EFF_SATURATION);
+// Efficiency as an exponent on relative strength.
+// Slider -50 -> exponent -EFF_EXP_NEG (2 = full mirror flip); slider +50 -> exponent +EFF_EXP_POS.
+const EFF_EXP_NEG = 2;
+const EFF_EXP_POS = 1;     // 1 = effective strength is squared at +50. Try 0.5 for a gentler positive end.
 
-function efficiencyCurve(strength) {
-  if (strength <= 0) return -1;
-  const u = Math.log(strength) / EFF_WIDTH;          // 0 at par, +/-1 at saturation
-  return Math.sign(u) * Math.pow(Math.min(1, Math.abs(u)), EFF_SHAPE);
+function efficiencyMultiplier(strength, concVal) {
+  if (!concVal || strength <= 0) return 1;       // strength 0 stays 0 after multiplication anyway
+  const k = concVal / 0.5;                       // slider position, -1 to +1
+  const g = k < 0 ? k * EFF_EXP_NEG : k * EFF_EXP_POS;
+  return Math.pow(strength, g);
 }
 
 function applyStrengthToRow(row, target) {
@@ -3790,7 +3790,7 @@ function applyStrengthToRow(row, target) {
 
     // concentration: boosts seats where the party is above 100%, trims below
     const concVal = Number(conc[p] ?? 0);
-    let multiplier = 1 + concVal * efficiencyCurve(strength);
+    let multiplier = efficiencyMultiplier(strength, concVal);
 
     // incumbent effect: only for the sitting party
     if (p === incumbentParty) multiplier *= (1 + Number(inc[p] ?? 0));
