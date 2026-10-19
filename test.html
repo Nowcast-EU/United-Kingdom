@@ -411,7 +411,8 @@ tfoot td {
   background-color: transparent;
   background-repeat: no-repeat;
   background-position: center;
-  background-size: 8px 100%;
+  background-size: 10px 100%;
+  border-radius: 999px;
 }
 
 .v-slider::-webkit-slider-runnable-track { background: transparent; }
@@ -482,7 +483,7 @@ tfoot td {
     transform: none;
     width: 100%;
     height: 22px;
-    background-size: 100% 8px;
+    background-size: 100% 10px;
   }
   .v-slider::-webkit-slider-runnable-track { height: 22px; background: transparent; }
   .v-slider::-webkit-slider-thumb { width: 10px; height: 18px; }
@@ -527,7 +528,8 @@ tfoot td {
   background-color: transparent;
   background-repeat: no-repeat;
   background-position: center;
-  background-size: 100% 6px;
+  background-size: 100% 10px;
+  border-radius: 999px;
 }
 .h-slider::-webkit-slider-runnable-track { height: 22px; background: transparent; }
 .h-slider::-moz-range-track { background: transparent; }
@@ -3635,9 +3637,9 @@ const CONC_EDITABLE = ["LAB", "CON", "RFM", "LDM", "GRN", "RES", "SNP", "PLC"];
 const THUMB_V = 10;               // vertical sliders: thumb size ALONG the track (CSS height)
 const THUMB_H = 14;               // horizontal demographic slider: thumb diameter                 
 const THUMB_MOBILE = 10;           // horizontal efficiency slider: thumb width
-const TRACK_COL   = '#e5e7eb';    // empty track
+const TRACK_COL   = '#dcdcdc';    // empty track
 const FILL_COL    = '#008500';    // fill, growing from the centre toward the thumb
-const COUNTER_COL = '#9ca3af';    // darker, greyer mirror segment on the opposite half
+const COUNTER_COL = '#999999';    // darker, greyer mirror segment on the opposite half
 
 // x runs 0 (bottom) to 1 (top). The thumb's centre travels THUMB/2 in from each end,
 // so the stop positions are offset to line up with it.
