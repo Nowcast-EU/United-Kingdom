@@ -422,13 +422,13 @@ tfoot td {
 .h-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 8px; height: 22px; box-sizing: border-box;
+  width: 8px; height: 26px; box-sizing: border-box;
   border-radius: 2px;
   background: #fff;
   border: 3px solid var(--party-color, #008500);
 }
 .h-slider::-moz-range-thumb {
-  width: 8px; height: 22px; box-sizing: border-box;
+  width: 8px; height: 26px; box-sizing: border-box;
   border-radius: 2px;
   background: #fff;
   border: 3px solid var(--party-color, #008500);
@@ -533,7 +533,7 @@ tfoot td {
 }
 .h-slider::-webkit-slider-runnable-track { height: 22px; background: transparent; }
 .h-slider::-moz-range-track { background: transparent; }
-.h-slider::-webkit-slider-thumb { margin-top: 0; }
+.h-slider::-webkit-slider-thumb { margin-top: -2px; }
 
 #demo-chart {
   display: block;
@@ -3656,7 +3656,10 @@ function paintSlider(slider) {
    const horizontal = slider.classList.contains('h-slider') ||
      (slider.classList.contains('v-slider') && window.matchMedia('(max-width: 768px)').matches);
    const t = slider.classList.contains('h-slider') ? THUMB_H : horizontal ? THUMB_MOBILE : THUMB_V;
-   const partyColor = PARTY_COLORS[slider.id.replace("conc-", "")] || FILL_COL;
+   const party = slider.classList.contains('h-slider')
+     ? document.getElementById("demo-party").value
+     : slider.id.replace("conc-", "");
+   const partyColor = PARTY_COLORS[party] || FILL_COL;
 
   const segs = v >= 0
     ? [[0, m, TRACK_COL], [m, 0.5, COUNTER_COL], [0.5, p, partyColor], [p, 1, TRACK_COL]]
