@@ -114,7 +114,7 @@ h2.subtitle a:hover {
   thead th { border-bottom: 2px solid #111; }
   tbody tr:not(.divider-row) td { border-bottom: 1px solid #e2e8f0; }
   td.party-column { font-weight: bold; position: relative; padding-left: 14px; color: black; }
-  td.party-column::before { content: ""; position: absolute; left: 0; top: 3px; width: 8px; height: calc(100% - 6px); border-radius: 4px; background-color: var(--party-color); }
+  td.party-column::before { content: ""; position: absolute; left: 0; top: 4px; width: 6px; height: calc(100% - 8px); background-color: var(--party-color); }
   td.seats-column { font-weight: bold; text-align: left; white-space: nowrap; }
   .seat-change { font-weight: 500; }
   .diff-column.positive { color: #008500; }
@@ -154,6 +154,9 @@ th {
   text-align: center;     /* 👈 header text centered only */
   vertical-align: middle; /* 👈 keep it perfectly aligned vertically */
 }
+
+#table-col th { text-align: left; }
+#table-col th:first-child { padding-left: 14px; }
 
 td {
   height: 23px;           /* 👈 match th height */
