@@ -434,20 +434,20 @@ tfoot td {
   border: 2px solid #008500;
 }
 
-/* Vertical efficiency sliders: party-coloured rectangle, 18px across x 10px along the track */
+/* Efficiency slider nodes */
 .v-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 18px; height: 10px; box-sizing: border-box;
+  width: 22px; height: 8px; box-sizing: border-box;
   border-radius: 2px;
-  background: var(--party-color, #008500);
-  border: 1.5px solid rgba(0, 0, 0, 0.55);
+  background: #fff;
+  border: 3px solid var(--party-color, #008500);
 }
 .v-slider::-moz-range-thumb {
-  width: 18px; height: 10px; box-sizing: border-box;
+  width: 22px; height: 8px; box-sizing: border-box;
   border-radius: 2px;
-  background: var(--party-color, #008500);
-  border: 1.5px solid rgba(0, 0, 0, 0.55);
+  background: #fff;
+  border: 3px solid var(--party-color, #008500);
 }
 
 .slider-party {
@@ -486,8 +486,8 @@ tfoot td {
     background-size: 100% 100%;
   }
   .v-slider::-webkit-slider-runnable-track { height: 22px; background: transparent; }
-  .v-slider::-webkit-slider-thumb { width: 10px; height: 18px; }
-  .v-slider::-moz-range-thumb { width: 10px; height: 18px; }
+  .v-slider::-webkit-slider-thumb { width: 14px; height: 16px; }
+  .v-slider::-moz-range-thumb { width: 14px; height: 16px; }
   .inc-input { width: 100%; max-width: none; height: 26px; font-size: 13px; }
   .effect-block, #demo-section {
     box-sizing: border-box;
