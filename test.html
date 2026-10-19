@@ -125,31 +125,6 @@ h2.subtitle a:hover {
   }
   .percent-sign { font-size: 14px; }
 
-  /* --- BUTTONS --- */
-  .button-container { 
-    display: flex; 
-    gap: 0; 
-    margin-top: 14px; 
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-  }
-
-  button#calculate, button#reset, button#randomise {
-    background: #008500; 
-    color: #fff; 
-    border: none; 
-    border-radius: 6px;
-    padding: 8px 14px; 
-    cursor: pointer; 
-    transition: background 0.3s ease;
-  }
-
-/* Calculate = 50%, Reset = 25%, Randomise = 25% */
-  button#calculate { flex: 2 1 0; border-radius: 6px 0 0 6px; }
-  button#reset { flex: 1 1 0; border-radius: 0; border-left: 3px solid rgba(255,255,255,1); border-right: 3px solid rgba(255,255,255,1); }
-  button#randomise { flex: 1 1 0; border-radius: 0 6px 6px 0; background: #008500; }
-
   tfoot td { font-weight: bold; text-align: center; background: #f1f5f9; }
   tfoot td:first-child { text-align: left; padding-left: 14px; }
 
@@ -380,13 +355,17 @@ tfoot td {
     display: none;
 }
 
-.nation-tabs { display:flex; gap:0; margin-top:12px; border:1px solid #d0d0d0; border-radius:10px; background:#f4f4f4; padding:3px; }
-.nation-tab { flex:1; border:none; background:transparent; border-radius:8px; padding:7px 4px; font-size:14px; font-weight:500; color:#111; cursor:pointer; -webkit-tap-highlight-color:transparent; }
-.nation-tab.active { background:#fff; font-weight:700; box-shadow:0 1px 3px rgba(0,0,0,0.1); }
 .input-wrapper input:disabled { background:#f1f5f9; color:#888; cursor:not-allowed; }
 
 /* ---- Table + slider editor side by side ---- */
-#table-row { display: flex; align-items: stretch; gap: 16px; margin-top: 12px; }
+#table-row {
+  display: flex; align-items: stretch; gap: 16px;
+  margin-top: 0;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 0 8px 8px 8px;   /* square top-left so the first tab joins flush */
+  padding: 12px;
+}
 #table-col { flex: 0 0 44%; min-width: 0; }
 #table-col table { margin-top: 0; }
 
@@ -529,6 +508,51 @@ tfoot td {
 .slider-row { display: flex; justify-content: space-between; gap: 2px; flex: 1 1 0; min-height: 0; }
 .inc-row { display: flex; justify-content: space-between; gap: 2px; }
 
+/* ---- Notebook-style tabs ---- */
+#tab-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin: 12px 0 -1px;       /* -1px: the tab row overlaps the page's top border */
+  position: relative;
+  z-index: 2;                /* paints above the page, so the active tab can hide the border */
+}
+.tab-group { display: flex; align-items: flex-end; gap: 3px; }
+.tab-group-left { width: 50%; }
+
+.nation-tab, .tab-action {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: #475569;
+  background: #e8edf3;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px 8px 0 0;
+  padding: 7px 8px 6px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.nation-tab { flex: 1 1 0; min-width: 0; white-space: nowrap; }
+.nation-tab:hover, .tab-action:hover { background: #f1f5f9; }
+
+.nation-tab.active {
+  background: #fff;
+  color: #0f172a;
+  font-weight: 700;
+  border-bottom-color: #fff;   /* hides the page's top border under the active tab */
+  padding-top: 9px;            /* stands slightly taller than its neighbours */
+}
+
+/* Reset / Randomise: shorter, so they read as secondary tabs */
+.tab-action { font-size: 13px; padding: 5px 14px 4px; }
+.tab-action:active { background: #dbe2ea; }
+
+@media (max-width: 768px) {
+  .tab-group-left { width: auto; flex: 1 1 auto; }
+  .nation-tab, .tab-action { font-size: 12px; padding: 7px 6px 6px; }
+  .tab-action { padding: 5px 8px 4px; }
+}
+
 </style>
 </head>
 
@@ -548,13 +572,18 @@ tfoot td {
   </div>
 </div>
 
-  <div class="nation-tabs" id="nation-tabs">
-  <button class="nation-tab active" data-nation="UK">UK</button>
-  <button class="nation-tab" data-nation="SCO">Scotland</button>
-  <button class="nation-tab" data-nation="WAL">Wales</button>
-  <button class="nation-tab" data-nation="NI">N. Ireland</button>
+<div id="tab-bar">
+  <div class="tab-group tab-group-left">
+    <button class="nation-tab active" data-nation="UK">UK</button>
+    <button class="nation-tab" data-nation="SCO">Scotland</button>
+    <button class="nation-tab" data-nation="WAL">Wales</button>
+    <button class="nation-tab" data-nation="NI">N. Ireland</button>
+  </div>
+  <div class="tab-group tab-group-right">
+    <button class="tab-action" id="reset">Reset</button>
+    <button class="tab-action" id="randomise">Randomise</button>
+  </div>
 </div>
-<p id="tab-note" style="text-align:center; font-size:13px; color:#777; margin:8px 0 0;"></p>
 
   
 <div id="table-row">
@@ -585,12 +614,6 @@ tfoot td {
 </div>
 </div>
 
-<div class="button-container">
-  <button id="calculate">Calculate</button>
-  <button id="reset">Reset</button>
-  <button id="randomise">Randomise</button>
-</div>
-
 <div id="demo-section">
   <h3>Demographic Effects</h3>
   <div class="demo-controls">
@@ -602,10 +625,6 @@ tfoot td {
   <input type="range" class="h-slider" id="demo-slider" min="-100" max="100" step="1" value="0" aria-label="Demographic effect">
   <div class="demo-ends"><span id="demo-left"></span><span id="demo-right"></span></div>
 </div>
-
-<p style="text-align:center; font-size:clamp(0.65rem, 1.8vw, 1rem); margin: 12px 0;">
-  Advanced calculator including Your Party and Restore Britain can be found <a href="https://nowcast-eu.github.io/United-Kingdom/advanced-calculator"><em>here</em></a>.
-</p>
 
 </div><!-- end left-column -->
 <div id="right-column">
@@ -3677,8 +3696,6 @@ function renderTable() {
       </tr>`;
   }).join('');
 
-  document.getElementById('tab-note').textContent = TAB_NOTES[currentTab];
-
   const inputs = document.querySelectorAll('#tbody input:not(:disabled)');
   inputs.forEach((input, index) => {
     const party = input.dataset.party;
@@ -3696,7 +3713,7 @@ function renderTable() {
       const v = parseFloat(input.value);
       VOTES[nation][party] = isNaN(v) ? 0 : v;
       refreshCalculated();
-      document.getElementById('calculate').style.background = '#ffa500';
+      calculateThrottled();
     });
 
     input.addEventListener('blur', () => {
@@ -3764,7 +3781,6 @@ function updateTable() {
   });
 
   document.getElementById('total-seats').textContent = totalSeats;
-  document.getElementById('calculate').style.background = '#008500';
   refreshCalculated();
 }
 
@@ -3909,8 +3925,6 @@ document.getElementById('reset').addEventListener('click', () => {
   // ---- Recalculate everything ----
   calculate();
 
-  // ---- Return calculate button to green ----
-  document.getElementById('calculate').style.background = '#008500';
 });
 
 /* ---- Randomise settings ---- */
@@ -3979,8 +3993,7 @@ document.getElementById('randomise').addEventListener('click', () => {
   renderTable();
   calculate();
 });
-  
-document.getElementById('calculate').addEventListener('click', calculate);
+
 renderTable();
 
   document.querySelectorAll('.nation-tab').forEach(btn => {
