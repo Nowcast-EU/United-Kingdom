@@ -110,12 +110,12 @@ h2.subtitle a:hover {
     word-wrap: break-word; 
   }
 
-  th { background: transparent; font-weight: 600; }
+  th { background: transparent; font-weight: 600; text-align: right; }
   thead th { border-bottom: 2px solid #111; }
   tbody tr:not(.divider-row) td { border-bottom: 1px solid #e2e8f0; }
   td.party-column { font-weight: bold; position: relative; padding-left: 14px; color: black; }
-  td.party-column::before { content: ""; position: absolute; left: 0; top: 0; width: 8px; height: 100%; border-radius: 2px 0 0 2px; background-color: var(--party-color); }
-  td.seats-column { font-weight: bold; text-align: center; white-space: nowrap; }
+  td.party-column::before { content: ""; position: absolute; left: 0; top: 3px; width: 8px; height: calc(100% - 6px); border-radius: 4px; background-color: var(--party-color); }
+  td.seats-column { font-weight: bold; text-align: right; white-space: nowrap; }
   .seat-change { font-weight: 500; }
   .diff-column.positive { color: #008500; }
   .diff-column.negative { color: #bb0000; }
@@ -129,7 +129,7 @@ h2.subtitle a:hover {
   .percent-sign { font-size: 14px; }
 
   tfoot { border-top: 1px solid #111; }
-  tfoot td { font-weight: bold; text-align: center; background: transparent; }
+  tfoot td { font-weight: bold; text-align: right; background: transparent; }
   tfoot td:first-child { text-align: left; padding-left: 14px; }
 
   input[type=number]::-webkit-inner-spin-button,
@@ -374,9 +374,9 @@ tfoot td {
 #table-col table { margin-top: 0; }
 
 /* column widths: Party / Votes / Seats and change */
-#table-col th:nth-child(1) { width: 26%; }
+#table-col th:nth-child(1) { width: 22%; }
 #table-col th:nth-child(2) { width: 38%; }
-#table-col th:nth-child(3) { width: 36%; }
+#table-col th:nth-child(3) { width: 40%; }
 
 #settings-section { flex: 1 1 0; min-width: 0; margin-top: 0; display: flex; flex-direction: column; }
 #settings-section > h3 { text-align: center; margin: 0 0 4px; font-size: 15px; }
