@@ -4902,7 +4902,7 @@ document.addEventListener('DOMContentLoaded', () => calculate());
     ],
     maxBoundsViscosity: 1.0
 });
-    layer = L.geoJSON(GJ,{style:sty(winners()),onEachFeature:function(f,l){
+    layer = L.geoJSON(GJ,{smoothFactor:0,style:sty(winners()),onEachFeature:function(f,l){
       l.on({
         mouseover:function(e){e.target.setStyle({weight:2.5,color:'#222',fillOpacity:1});e.target.bringToFront();var w=winners()[f.properties.NAME]||'?';l.bindTooltip('<strong>'+f.properties.NAME+'</strong><br>'+((window.PARTY_ALIASES&&window.PARTY_ALIASES[w])||w),{sticky:true,className:'map-tooltip-clean'}).openTooltip();},
 
