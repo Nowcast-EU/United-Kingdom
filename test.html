@@ -418,20 +418,20 @@ tfoot td {
 .v-slider::-webkit-slider-runnable-track { background: transparent; }
 .v-slider::-moz-range-track { background: transparent; }
 
-/* Horizontal demographic slider: keeps the original round thumb */
+/* Demographic slider node, rotated 90 degrees from the concentration sliders */
 .h-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 14px; height: 14px; box-sizing: border-box;
-  border-radius: 50%;
+  width: 8px; height: 22px; box-sizing: border-box;
+  border-radius: 2px;
   background: #fff;
-  border: 2px solid #008500;
+  border: 3px solid var(--party-color, #008500);
 }
 .h-slider::-moz-range-thumb {
-  width: 14px; height: 14px; box-sizing: border-box;
-  border-radius: 50%;
+  width: 8px; height: 22px; box-sizing: border-box;
+  border-radius: 2px;
   background: #fff;
-  border: 2px solid #008500;
+  border: 3px solid var(--party-color, #008500);
 }
 
 /* Efficiency slider nodes */
@@ -533,7 +533,7 @@ tfoot td {
 }
 .h-slider::-webkit-slider-runnable-track { height: 22px; background: transparent; }
 .h-slider::-moz-range-track { background: transparent; }
-.h-slider::-webkit-slider-thumb { margin-top: 4px; }   /* (22px track - 14px thumb) / 2 */
+.h-slider::-webkit-slider-thumb { margin-top: 0; }
 
 #demo-chart {
   display: block;
@@ -3339,6 +3339,7 @@ function syncDemographicUI() {
   const slider = document.getElementById("demo-slider");
   const v = (DEMO_EFFECTS[c.key] && DEMO_EFFECTS[c.key][party]) || 0;
 
+  slider.style.setProperty("--party-color", PARTY_COLORS[party] || FILL_COL);
   slider.value = v;
   document.getElementById("demo-left").textContent = c.aLabel;
   document.getElementById("demo-right").textContent = c.bLabel;
