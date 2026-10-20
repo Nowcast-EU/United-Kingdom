@@ -170,14 +170,15 @@ tfoot td {
 
   /* --- Divider row styling --- */
 .divider-row td {
-  text-align: center;
+  text-align: left;
   font-weight: 600;
-  background-color: #f9fafb;
-  color: #333;
+  background-color: transparent;
+  color: #111;
   font-size: 13px;
-  height: 8px;
-  border-top: 2px solid #ccc;
-  border-bottom: 2px solid #ccc;
+  font-style: italic;
+  height: auto;
+  padding: 10px 6px 3px 14px;
+  border-bottom: 1px solid #111;
 }
 
   .disclaimer {
@@ -3852,11 +3853,14 @@ function renderTable() {
   const own = NATION_PARTIES[nation];
 
   const rows = own.slice();
-  if (currentTab === "UK") rows.push("--divider--", ...UK_EXTRA);
+  if (currentTab === "UK") {
+    rows.push("--divider-scotland-wales--", "SNP", "PLC", "--divider-northern-ireland--", ...UK_EXTRA.slice(2));
+  }
 
   document.getElementById('tbody').innerHTML = rows.map(p => {
-    if (p === "--divider--") {
-      return `<tr class="divider-row"><td colspan="3"><i>Calculated from the Scotland, Wales and Northern Ireland tabs</i></td></tr>`;
+    if (p === "--divider-scotland-wales--" || p === "--divider-northern-ireland--") {
+      const label = p === "--divider-scotland-wales--" ? "Scotland & Wales" : "Northern Ireland";
+      return `<tr class="divider-row"><td colspan="3">${label}</td></tr>`;
     }
     const editable = own.includes(p) && p !== "OTH";
     const val = editable ? (VOTES[nation][p] || 0).toFixed(1) : "0.0";
