@@ -219,6 +219,13 @@ tfoot td {
   #left-column, #right-column { width: 100%; padding: 0 8px 24px 8px; box-sizing: border-box; }
   #page-branding { display: none !important; }
   body { padding: 0; }
+  body.mobile-table-view #left-column {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    padding-bottom: 8px;
+  }
+  body.mobile-table-view #mobile-view-panel { flex: 1 0 auto; }
 }
 
 /* ---- Constituency Results (tweaked layout) ---- */
@@ -4299,13 +4306,74 @@ function setMobileView(view) {
 
 function fitMobileTable() {
   document.body.classList.remove('mobile-table-compact', 'mobile-table-vertical-tight', 'mobile-table-tiny');
+  const table = document.querySelector('#table-col table');
+  const dataRows = [...table.tBodies[0].rows].filter(row => !row.classList.contains('divider-row'));
+  dataRows.forEach(row => row.style.height = '');
   if (!mobileLayoutQuery.matches || !document.body.classList.contains('mobile-table-view')) return;
 
-  const fitsViewport = () => document.getElementById('mobile-view-tabs').getBoundingClientRect().bottom <= window.innerHeight - 8;
-  if (!fitsViewport()) {
+  const availableTableHeight = () => {
+    const tabs = document.getElementById('mobile-view-tabs');
+    const panel = document.getElementById('mobile-view-panel');
+    const tableRow = document.getElementById('table-row');
+    const leftColumn = document.getElementById('left-column');
+    const tableTop = table.getBoundingClientRect().top;
+    const tabsHeight = tabs.getBoundingClientRect().height;
+    const bottomPadding = parseFloat(getComputedStyle(tableRow).paddingBottom);
+    const panelBorder = parseFloat(getComputedStyle(panel).borderBottomWidth);
+    const leftPadding = parseFloat(getComputedStyle(leftColumn).paddingBottom);
+    const panelBottom = window.innerHeight - leftPadding - tabsHeight + 1;
+    return panelBottom - panelBorder - bottomPadding - tableTop;
+  };
+
+  const ukTable = table.cloneNode(true);
+  ukTable.removeAttribute('id');
+  ukTable.style.cssText = 'position:absolute; top:0; left:-10000px; visibility:hidden; pointer-events:none;';
+  const ukBody = ukTable.tBodies[0];
+  const rowTemplate = [...ukBody.rows].find(row => !row.classList.contains('divider-row'));
+  ukBody.replaceChildren();
+  const addUkRows = (count) => {
+    for (let i = 0; i < count; i++) ukBody.appendChild(rowTemplate.cloneNode(true));
+  };
+  const addDivider = label => {
+    const row = document.createElement('tr');
+    row.className = 'divider-row';
+    const cell = document.createElement('td');
+    cell.colSpan = 3;
+    cell.textContent = label;
+    row.appendChild(cell);
+    ukBody.appendChild(row);
+  };
+  addUkRows(7);
+  addDivider('Scotland & Wales');
+  addUkRows(2);
+  addDivider('Northern Ireland');
+  addUkRows(6);
+  table.parentElement.appendChild(ukTable);
+
+  const fitUkStyle = () => {
+    if (ukTable.getBoundingClientRect().height <= availableTableHeight()) return true;
     document.body.classList.add('mobile-table-compact');
-    if (!fitsViewport()) document.body.classList.add('mobile-table-vertical-tight');
-    if (!fitsViewport()) document.body.classList.add('mobile-table-tiny');
+    if (ukTable.getBoundingClientRect().height <= availableTableHeight()) return true;
+    document.body.classList.add('mobile-table-vertical-tight');
+    if (ukTable.getBoundingClientRect().height <= availableTableHeight()) return true;
+    document.body.classList.add('mobile-table-tiny');
+    return ukTable.getBoundingClientRect().height <= availableTableHeight();
+  };
+
+  try {
+    fitUkStyle();
+    const ukHeight = ukTable.getBoundingClientRect().height;
+    const ukRow = [...ukBody.rows].find(row => !row.classList.contains('divider-row'));
+    const additionalRowHeight = Math.max(0, availableTableHeight() - ukHeight) / 15;
+    let matchingRowHeight = ukRow.getBoundingClientRect().height + additionalRowHeight;
+    [...ukBody.rows]
+      .filter(row => !row.classList.contains('divider-row'))
+      .forEach(row => row.style.height = `${matchingRowHeight}px`);
+    const rowAdjustment = (availableTableHeight() - ukTable.getBoundingClientRect().height) / 15;
+    matchingRowHeight += rowAdjustment;
+    dataRows.forEach(row => row.style.height = `${matchingRowHeight}px`);
+  } finally {
+    ukTable.remove();
   }
 }
 
