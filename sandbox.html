@@ -217,6 +217,7 @@ tfoot td {
 @media (max-width: 768px) {
   #page-layout { display: block; padding-left: 0; padding-right: 0; }
   #left-column, #right-column { width: 100%; padding: 0 8px 24px 8px; box-sizing: border-box; }
+  #page-branding { display: none !important; }
   body { padding: 0; }
 }
 
@@ -474,6 +475,58 @@ tfoot td {
   #table-row { flex-direction: column; gap: 0; padding: 0; border: 0; background: transparent; }
   #table-col { display: none; flex: none; width: 100%; }
   body.mobile-table-view #table-col { display: block; }
+  #table-col th:nth-child(1) { width: 20%; }
+  #table-col th:nth-child(3) { width: 44%; }
+  body.mobile-table-compact #table-col th {
+    height: 20px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+  }
+  body.mobile-table-compact #table-row { padding-top: 6px; padding-bottom: 6px; }
+  body.mobile-table-compact #table-col td {
+    height: 18px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+  }
+  body.mobile-table-compact #table-col .input-wrapper input {
+    height: 22px;
+    box-sizing: border-box;
+    padding-top: 1px;
+    padding-bottom: 1px;
+  }
+  body.mobile-table-compact #table-col .divider-row td {
+    padding-top: 5px;
+    padding-bottom: 2px;
+  }
+  body.mobile-table-vertical-tight #table-col th {
+    height: 18px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  body.mobile-table-vertical-tight #table-col td {
+    height: 16px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  body.mobile-table-vertical-tight #table-col .input-wrapper input {
+    height: 18px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  body.mobile-table-vertical-tight #table-col .divider-row td {
+    padding-top: 2px;
+    padding-bottom: 0;
+  }
+  body.mobile-table-tiny #table-col table,
+  body.mobile-table-tiny #table-col th,
+  body.mobile-table-tiny #table-col td { font-size: 11px; }
+  body.mobile-table-tiny #table-row { padding-top: 0; padding-bottom: 0; }
+  body.mobile-table-tiny #table-col .input-wrapper input {
+    height: 17px;
+    font-size: 10px;
+  }
+  body.mobile-table-tiny #table-col .percent-sign { font-size: 12px; }
+  body.mobile-table-tiny #table-col .seat-change { font-size: 10px; }
   #settings-section { flex: none; width: 100%; margin-top: 0; }
   .effect-group { flex: none; }
   #slider-panel { flex: none; min-height: auto; }
@@ -703,7 +756,7 @@ tfoot td {
 <body class="mobile-map-view">
 <div id="page-layout">
 <div id="left-column">
-<div style="display:flex; align-items:center; justify-content:center; gap:12px; margin-top:24px; margin-bottom:16px; width:100%;">
+<div id="page-branding" style="display:flex; align-items:center; justify-content:center; gap:12px; margin-top:24px; margin-bottom:16px; width:100%;">
   <img src="https://github.com/Nowcast-EU/United-Kingdom/blob/main/NowcastUKlogo.png?raw=true"
        alt="Nowcast UK logo"
        style="height:clamp(40px, 8vw, 72px); width:auto; flex-shrink:0;">
@@ -4241,6 +4294,25 @@ function setMobileView(view) {
   if (view === 'map') requestAnimationFrame(() => {
     if (window.invalidateConstituencyMapSize) window.invalidateConstituencyMapSize();
   });
+  scheduleMobileTableFit();
+}
+
+function fitMobileTable() {
+  document.body.classList.remove('mobile-table-compact', 'mobile-table-vertical-tight', 'mobile-table-tiny');
+  if (!mobileLayoutQuery.matches || !document.body.classList.contains('mobile-table-view')) return;
+
+  const fitsViewport = () => document.getElementById('mobile-view-tabs').getBoundingClientRect().bottom <= window.innerHeight - 8;
+  if (!fitsViewport()) {
+    document.body.classList.add('mobile-table-compact');
+    if (!fitsViewport()) document.body.classList.add('mobile-table-vertical-tight');
+    if (!fitsViewport()) document.body.classList.add('mobile-table-tiny');
+  }
+}
+
+let mobileTableFitFrame;
+function scheduleMobileTableFit() {
+  cancelAnimationFrame(mobileTableFitFrame);
+  mobileTableFitFrame = requestAnimationFrame(fitMobileTable);
 }
 
 if (window.matchMedia('(max-width: 768px)').matches) setMobileView('map');
@@ -4278,6 +4350,7 @@ function syncMapPlacement() {
 }
 syncMapPlacement();
 mobileLayoutQuery.addEventListener('change', syncMapPlacement);
+window.addEventListener('resize', scheduleMobileTableFit);
   
 document.addEventListener('DOMContentLoaded', () => calculate());
   
