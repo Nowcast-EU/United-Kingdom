@@ -601,15 +601,27 @@ tfoot td {
   body.mobile-settings .effect-block { padding: 6px; }
   body.mobile-settings .panel-heading { margin-bottom: 3px; font-size: 14px; }
   body.mobile-settings .panel-heading.second { margin-top: 5px; padding-top: 4px; }
+  body.mobile-settings #demo-section > h3 {
+    text-align: left;
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 3px;
+  }
   body.mobile-settings #slider-panel .slider-row { gap: 3px 5px; }
   body.mobile-settings #slider-panel .slider-col {
     grid-template-columns: 34px minmax(0, 1fr) 38px;
     gap: 4px;
   }
   body.mobile-settings #slider-panel .slider-wrap { min-width: 0; }
-  body.mobile-settings .inc-row { gap: 3px; }
+  body.mobile-settings .inc-row { gap: 3px; margin-right: 4px; }
   body.mobile-settings .inc-input { height: 26px; padding: 1px; }
-  body.mobile-settings .demo-controls { gap: 4px; margin: 4px 0; flex-wrap: nowrap; }
+  body.mobile-settings .demo-controls {
+    justify-content: flex-start;
+    gap: 4px;
+    margin: 4px 0;
+    flex-wrap: nowrap;
+  }
   body.mobile-settings .demo-controls label { min-width: 0; gap: 3px; font-size: 12px; }
   body.mobile-settings .demo-controls label:first-child { gap: 11px; }
   body.mobile-settings .demo-controls label:last-child { gap: 15px; }
@@ -856,10 +868,14 @@ tfoot td {
   body.mobile-settings #table-row {
     flex: none;
     min-height: auto;
+    padding-left: 4px;
+    padding-right: 4px;
   }
   body.mobile-settings #settings-section {
     flex: none;
     min-height: auto;
+    padding-left: 4px;
+    padding-right: 4px;
   }
   body.mobile-settings #slider-panel,
   body.mobile-settings .effect-group,
@@ -874,12 +890,13 @@ tfoot td {
     grid-auto-rows: 23px;
     min-height: 0;
     gap: 2px;
-    margin-right: 14px;
+    margin-right: 4px;
   }
+  body.mobile-settings .effect-block { padding: 4px; }
   body.mobile-settings .concentration-block { flex: none; }
   body.mobile-settings #slider-panel .slider-col {
     display: grid;
-    grid-template-columns: 42px minmax(0, 1fr) 48px;
+    grid-template-columns: 42px minmax(0, 1fr) 52px;
     grid-template-areas: "party slider value";
     align-items: center;
     gap: 4px;
@@ -899,9 +916,10 @@ tfoot td {
   body.mobile-settings #slider-panel .slider-value {
     grid-area: value;
     height: auto;
+    padding-left: 6px;
     font-size: 9px;
     line-height: 11px;
-    text-align: right;
+    text-align: left;
     white-space: nowrap;
   }
   body.mobile-settings #slider-panel .slider-wrap {
@@ -1106,7 +1124,7 @@ tfoot td {
     font-size: clamp(7px, 1.8vh, 10px);
   }
   body.mobile-settings #demo-section > h3 {
-    font-size: clamp(10px, 2.4vh, 15px);
+    font-size: 14px;
     margin-bottom: 2px;
   }
   body.mobile-settings #demo-readout {
@@ -1133,7 +1151,7 @@ tfoot td {
   body.mobile-settings .slider-party { font-size: 8px; }
   body.mobile-settings #slider-panel .slider-value { font-size: 8px; }
   body.mobile-settings .inc-input { height: clamp(14px, 3.5vh, 18px); }
-  body.mobile-settings #demo-section > h3 { font-size: 12px; }
+  body.mobile-settings #demo-section > h3 { font-size: 11px; }
   body.mobile-settings #demo-readout { font-size: 10px; }
   body.mobile-settings #demo-slider { height: 10px; }
 }
