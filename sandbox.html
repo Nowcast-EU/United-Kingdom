@@ -222,7 +222,8 @@ tfoot td {
   body.mobile-table-view #left-column {
     display: flex;
     flex-direction: column;
-    min-height: 100dvh;
+    height: 100vh;
+    height: 100dvh;
     padding-bottom: 8px;
   }
   body.mobile-table-view #mobile-view-panel { flex: 1 0 auto; }
@@ -4321,7 +4322,7 @@ function fitMobileTable() {
     const bottomPadding = parseFloat(getComputedStyle(tableRow).paddingBottom);
     const panelBorder = parseFloat(getComputedStyle(panel).borderBottomWidth);
     const leftPadding = parseFloat(getComputedStyle(leftColumn).paddingBottom);
-    const panelBottom = window.innerHeight - leftPadding - tabsHeight + 1;
+    const panelBottom = leftColumn.getBoundingClientRect().bottom - leftPadding - tabsHeight + 1;
     return panelBottom - panelBorder - bottomPadding - tableTop;
   };
 
