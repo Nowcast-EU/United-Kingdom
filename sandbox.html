@@ -472,7 +472,8 @@ tfoot td {
 /* Phones: stack the editor under the table */
 @media (max-width: 768px) {
   #table-row { flex-direction: column; gap: 0; padding: 0; border: 0; background: transparent; }
-  #table-col { flex: none; width: 100%; }
+  #table-col { display: none; flex: none; width: 100%; }
+  body.mobile-table-view #table-col { display: block; }
   #settings-section { flex: none; width: 100%; margin-top: 0; }
   .effect-group { flex: none; }
   #slider-panel { flex: none; min-height: auto; }
@@ -504,18 +505,25 @@ tfoot td {
   }
   .effect-group, #demo-section {
     box-sizing: border-box;
-    border: 1px solid #cbd5e1;
-    border-radius: 0 0 6px 6px;
     background: #fff;
   }
-  .effect-block + .effect-block, #demo-section { margin-top: 12px; }
+  .effect-block + .effect-block { margin-top: 12px; }
   #settings-section, #demo-section, #right-column { display: none; }
   body.mobile-concentration #settings-section { display: flex; }
   body.mobile-demographics #demo-section { display: block; }
-  body.mobile-demographics #demo-section { margin-top: 0; }
   body.mobile-map-view #left-column { padding-bottom: 0; }
   body.mobile-map-view #right-column { display: block; margin-top: 0; }
-  body.mobile-map-view #constituency-map { border-radius: 0 0 10px 10px !important; }
+  #mobile-view-panel {
+    border: 1px solid #cbd5e1;
+    border-radius: 0 0 8px 0;
+    background: #fff;
+  }
+  #table-row { padding: 10px; }
+  #table-col { padding: 0; }
+  #settings-section { padding: 0 10px 10px; }
+  #demo-section { margin: 0; padding: 0 10px 10px; }
+  #right-column { padding: 0; }
+  #constituency-map { border: 0 !important; border-radius: 0 !important; }
 }
 
 #demo-section { margin-top: 28px; }
@@ -607,6 +615,7 @@ tfoot td {
 .tab-group { display: flex; align-items: flex-end; gap: 3px; }
 .tab-group-left { width: 50%; }
 #mobile-view-tabs { display: none; }
+.mobile-map-tab { display: none; }
 
 .nation-tab, .tab-action, .mobile-view-tab {
   font-family: inherit;
@@ -663,16 +672,29 @@ tfoot td {
   .tab-action { font-size: 12px; padding: 5px 8px 4px; }
   .mobile-view-tab { font-size: 12px; padding: 5px 8px 4px; }
   .mobile-view-tab.active { padding-top: 5px; }
+  .mobile-map-tab { display: inline-block; }
   #mobile-view-tabs {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    width: 100%;
-    margin: 12px 0 -1px;
-    position: relative;
-    z-index: 2;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 3px;
+    margin: -1px -1px 0;
+    padding: 0;
   }
   #mobile-view-tabs .tab-group { flex: 0 0 auto; }
+  #mobile-view-tabs .mobile-view-tab {
+    border-radius: 0 0 8px 8px;
+  }
+  #mobile-view-tabs .mobile-view-tab.active {
+    border-top-color: #fff;
+    border-bottom-color: #cbd5e1;
+    padding-top: 5px;
+    padding-bottom: 9px;
+  }
+  body.mobile-concentration #mobile-view-tabs,
+  body.mobile-demographics #mobile-view-tabs {
+    margin-top: -5px;
+  }
 }
 
 </style>
@@ -702,12 +724,14 @@ tfoot td {
   <button class="nation-tab" data-nation="NI" data-short="NI">N. Ireland</button>
   </div>
   <div class="tab-group tab-group-right">
+    <button class="mobile-view-tab mobile-map-tab active" type="button" role="tab" aria-selected="true" aria-controls="right-column" data-view="map">Map</button>
     <button class="tab-action" id="reset">Reset</button>
     <button class="tab-action" id="randomise">Randomise</button>
   </div>
 </div>
 
   
+<div id="mobile-view-panel">
 <div id="table-row">
   <div id="table-col">
     <table>
@@ -729,16 +753,6 @@ tfoot td {
     </table>
   </div>
 
-<div id="mobile-view-tabs" role="tablist" aria-label="Mobile calculator view">
-  <div class="tab-group">
-    <button class="mobile-view-tab active" type="button" role="tab" aria-selected="true" aria-controls="right-column" data-view="map">Map</button>
-  </div>
-  <div class="tab-group">
-    <button class="mobile-view-tab" type="button" role="tab" aria-selected="false" aria-controls="settings-section" data-view="concentration">Concentration</button>
-    <button class="mobile-view-tab" type="button" role="tab" aria-selected="false" aria-controls="demo-section" data-view="demographics">Demographics</button>
-  </div>
-</div>
-
 <div id="settings-section">
   <div id="slider-panel"></div>
 </div>
@@ -754,6 +768,14 @@ tfoot td {
   <div id="demo-readout"></div>
   <input type="range" class="h-slider" id="demo-slider" min="-100" max="100" step="1" value="0" aria-label="Demographic effect">
   <div class="demo-ends"><span id="demo-left"></span><span id="demo-right"></span></div>
+</div>
+</div>
+
+<div id="mobile-view-tabs" role="tablist" aria-label="Mobile calculator view">
+  <div class="tab-group">
+    <button class="mobile-view-tab" type="button" role="tab" aria-selected="false" aria-controls="settings-section" data-view="concentration">Concentration</button>
+    <button class="mobile-view-tab" type="button" role="tab" aria-selected="false" aria-controls="demo-section" data-view="demographics">Demographics</button>
+  </div>
 </div>
 
 </div><!-- end left-column -->
@@ -4199,6 +4221,30 @@ document.getElementById('randomise').addEventListener('click', () => {
 
 renderTable();
 
+function setMobileView(view) {
+  ['table', 'map', 'concentration', 'demographics'].forEach(name => {
+    const className = `mobile-${['table', 'map'].includes(name) ? `${name}-view` : name}`;
+    document.body.classList.toggle(className, name === view);
+  });
+
+  document.querySelectorAll('.nation-tab').forEach(tab => {
+    tab.classList.toggle('active', view === 'table' && tab.dataset.nation === currentTab);
+  });
+
+  document.querySelectorAll('.mobile-view-tab').forEach(tab => {
+    const active = tab.dataset.view === view;
+    tab.classList.toggle('active', active);
+    tab.setAttribute('aria-selected', String(active));
+  });
+
+  if (view === 'demographics') requestAnimationFrame(drawDemoChart);
+  if (view === 'map') requestAnimationFrame(() => {
+    if (window.invalidateConstituencyMapSize) window.invalidateConstituencyMapSize();
+  });
+}
+
+if (window.matchMedia('(max-width: 768px)').matches) setMobileView('map');
+
   document.querySelectorAll('.nation-tab').forEach(btn => {
   btn.addEventListener('click', () => {
     currentTab = btn.dataset.nation;
@@ -4206,27 +4252,32 @@ renderTable();
     renderTable();
     updateTable();
     refreshConcentrationPanel();
+    setMobileView('table');
   });
 });
 
 document.querySelectorAll('.mobile-view-tab').forEach(btn => {
   btn.addEventListener('click', () => {
-    const view = btn.dataset.view;
-    ['map', 'concentration', 'demographics'].forEach(name => {
-      const className = name === 'map' ? 'mobile-map-view' : `mobile-${name}`;
-      document.body.classList.toggle(className, name === view);
-    });
-    if (view === 'demographics') requestAnimationFrame(drawDemoChart);
-    if (view === 'map') requestAnimationFrame(() => {
-      if (window.invalidateConstituencyMapSize) window.invalidateConstituencyMapSize();
-    });
-    document.querySelectorAll('.mobile-view-tab').forEach(tab => {
-      const active = tab === btn;
-      tab.classList.toggle('active', active);
-      tab.setAttribute('aria-selected', String(active));
-    });
+    setMobileView(btn.dataset.view);
   });
 });
+
+const mobileViewPanel = document.getElementById('mobile-view-panel');
+const pageLayout = document.getElementById('page-layout');
+const rightColumn = document.getElementById('right-column');
+const mobileLayoutQuery = window.matchMedia('(max-width: 768px)');
+function syncMapPlacement() {
+  if (mobileLayoutQuery.matches) {
+    mobileViewPanel.appendChild(rightColumn);
+  } else {
+    pageLayout.appendChild(rightColumn);
+  }
+  if (mobileLayoutQuery.matches && window.invalidateConstituencyMapSize) {
+    requestAnimationFrame(() => window.invalidateConstituencyMapSize());
+  }
+}
+syncMapPlacement();
+mobileLayoutQuery.addEventListener('change', syncMapPlacement);
   
 document.addEventListener('DOMContentLoaded', () => calculate());
   
