@@ -116,7 +116,7 @@ h2.subtitle a:hover {
   td.party-column { font-weight: bold; position: relative; padding-left: 14px; color: black; }
   td.party-column::before { content: ""; position: absolute; left: 0; top: 4px; width: 6px; height: calc(100% - 8px); background-color: var(--party-color); }
   td.seats-column { font-weight: bold; text-align: left; white-space: nowrap; }
-  .seat-change { font-weight: 500; }
+  .seat-change { font-weight: 500; font-style: italic; margin-left: 0.25em; }
   .diff-column.positive { color: #008500; }
   .diff-column.negative { color: #bb0000; }
   .diff-column.equal { color: #555555; }
@@ -129,8 +129,8 @@ h2.subtitle a:hover {
   .percent-sign { font-size: 14px; }
 
   tfoot { border-top: 1px solid #111; }
-  tfoot td { font-weight: bold; text-align: left; background: transparent; }
-  tfoot td:first-child { text-align: left; padding-left: 14px; }
+  tfoot td { font-weight: bold; text-align: left; background: transparent; color: #64748b; font-style: italic; }
+  tfoot td:first-child { text-align: left; padding-left: 0; white-space: nowrap; }
 
   input[type=number]::-webkit-inner-spin-button,
   input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
