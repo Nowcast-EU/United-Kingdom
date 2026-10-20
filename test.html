@@ -529,6 +529,7 @@ tfoot td {
 }
 
 #demo-readout { text-align: center; font-size: 13px; font-weight: 600; height: 18px; margin-bottom: 2px; }
+#demo-readout .demo-value { color: #008500; font-style: italic; }
 .demo-ends { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; color: #555; }
 
 .h-slider {
@@ -3334,8 +3335,8 @@ function currentDemoCategory() {
 function updateDemoReadout(v) {
   const c = currentDemoCategory();
   const el = document.getElementById("demo-readout");
-  el.textContent = !v ? "No effect"
-    : `Towards ${v < 0 ? c.aLabel : c.bLabel}: ${Math.abs(v).toFixed(0)}`;
+  el.innerHTML = !v ? "No effect"
+    : `Towards ${v < 0 ? c.aLabel : c.bLabel} — <span class="demo-value">+${Math.abs(v).toFixed(0)}%</span>`;
 }
 
 // Load the stored value for the selected party + category into the slider
@@ -4170,6 +4171,9 @@ document.getElementById('randomise').addEventListener('click', () => {
     CONC_EDITABLE.filter(p => NATION_PARTIES[n].includes(p)).forEach(p => {
       const d = randomAround(efficiencyDefault(n, p), RANDOM_SD.efficiency, -50, 50, 0.5);
       VOTE_CONCENTRATION[n][p] = d / 100;
+    });
+    Object.keys(INCUMBENT_STRENGTH[n]).forEach(p => {
+      INCUMBENT_STRENGTH[n][p] = 0;
     });
   });
   refreshConcentrationPanel();
