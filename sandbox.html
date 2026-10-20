@@ -608,14 +608,16 @@ tfoot td {
   }
   body.mobile-settings #slider-panel .slider-wrap { min-width: 0; }
   body.mobile-settings .inc-row { gap: 3px; }
-  body.mobile-settings .inc-input { height: 22px; padding: 1px; }
+  body.mobile-settings .inc-input { height: 26px; padding: 1px; }
   body.mobile-settings .demo-controls { gap: 4px; margin: 4px 0; flex-wrap: nowrap; }
   body.mobile-settings .demo-controls label { min-width: 0; gap: 3px; font-size: 12px; }
-  body.mobile-settings #demo-party { max-width: 104px; }
-  body.mobile-settings #demo-cat { max-width: 84px; }
+  body.mobile-settings .demo-controls label:first-child { gap: 11px; }
+  body.mobile-settings .demo-controls label:last-child { gap: 15px; }
+  body.mobile-settings #demo-party { width: 130px; max-width: 38vw; }
+  body.mobile-settings #demo-cat { width: 105px; max-width: 30vw; }
   body.mobile-settings #demo-chart { height: 130px; }
   body.mobile-settings #demo-readout { height: 16px; margin-bottom: 0; }
-  body.mobile-settings #demo-slider { height: 18px; }
+  body.mobile-settings #demo-slider { height: 22px; }
   #right-column { flex: 1 1 auto; min-height: 0; padding: 0; }
   #constituency-map { height: 100%; }
   #constituency-map { border: 0 !important; border-radius: 0 !important; }
@@ -821,6 +823,37 @@ tfoot td {
 
 @media (max-width: 768px) {
   body.mobile-settings #mobile-view-panel { overflow: hidden; }
+  body.mobile-settings {
+    background: #111;
+    padding: 20px 30px 27px 18px;
+  }
+  body.mobile-settings #left-column {
+    height: calc(100vh - 47px);
+    height: calc(100dvh - 47px);
+    padding-bottom: 15px;
+    background: #fff;
+    border-radius: 4px;
+  }
+  body.mobile-settings .nation-tab {
+    width: 38px;
+    height: 38px;
+    flex-basis: 38px;
+  }
+  body.mobile-settings #tab-bar .mobile-view-tab {
+    font-size: 14px;
+    padding: 8px 12px 6px;
+  }
+  body.mobile-settings .tab-action {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  body.mobile-settings #randomise {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  body.mobile-settings #mobile-view-tabs .mobile-view-tab.active {
+    padding: 8px 10px 6px;
+  }
   body.mobile-settings #table-row {
     flex: 1 1 0;
     min-height: 0;
@@ -838,18 +871,22 @@ tfoot td {
   body.mobile-settings #slider-panel .slider-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    flex: 1 1 0;
+    flex: none;
+    grid-auto-rows: 23px;
     min-height: 0;
     gap: 2px;
+    margin-right: 14px;
   }
+  body.mobile-settings .concentration-block { flex: none; }
   body.mobile-settings #slider-panel .slider-col {
     display: grid;
-    grid-template-columns: 34px minmax(0, 1fr) 38px;
+    grid-template-columns: 42px minmax(0, 1fr) 48px;
     grid-template-areas: "party slider value";
     align-items: center;
     gap: 4px;
     min-width: 0;
   }
+  body.mobile-settings .concentration-block > .panel-heading { margin-bottom: 10px; }
   body.mobile-settings #slider-panel .slider-party {
     grid-area: party;
     width: auto;
@@ -900,10 +937,10 @@ tfoot td {
     width: 12px;
     height: 14px;
   }
-  body.mobile-settings .incumbent-block { margin-top: 4px; }
-  body.mobile-settings .panel-heading.second { margin-top: 0; padding-top: 4px; }
-  body.mobile-settings .inc-row { gap: 3px; }
-  body.mobile-settings .inc-col { min-width: 0; gap: 2px; }
+  body.mobile-settings .incumbent-block { margin-top: 17px; }
+  body.mobile-settings .panel-heading.second { margin-top: 0; padding-top: 10px; }
+  body.mobile-settings .inc-row { gap: 3px; margin-right: 14px; }
+  body.mobile-settings .inc-col { min-width: 0; gap: 6px; }
   body.mobile-settings #slider-panel .inc-col .slider-party {
     font-size: 9px;
     text-align: center;
@@ -920,14 +957,93 @@ tfoot td {
     margin-top: 0;
     border-top: 1px solid #e2e8f0;
     padding-top: 4px;
+    padding-left: 12px;
+    padding-right: 12px;
   }
   body.mobile-settings #demo-chart {
     flex: 1 1 0;
-    width: 100%;
+    width: calc(100% - 16px);
     height: 0;
     min-height: 80px;
+    max-height: 210px;
   }
   body.mobile-settings #demo-readout { margin-top: -4px; }
+}
+
+@media (max-width: 768px) and (min-height: 700px) {
+  body.mobile-settings #demo-readout { margin-top: -14px; }
+  body.mobile-settings #demo-slider { margin-top: 15px; }
+}
+
+@media (max-width: 430px) {
+  body.mobile-settings { padding: 16px 12px 20px; }
+  body.mobile-settings #left-column {
+    height: calc(100vh - 36px);
+    height: calc(100dvh - 36px);
+  }
+  body.mobile-settings .nation-tab {
+    width: 30px;
+    height: 30px;
+    flex-basis: 30px;
+  }
+  body.mobile-settings #tab-bar .mobile-view-tab {
+    font-size: 12px;
+    padding: 5px 8px 4px;
+  }
+  body.mobile-settings .tab-action {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  body.mobile-settings #randomise {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  body.mobile-settings .demo-controls label:first-child { gap: 7px; }
+  body.mobile-settings .demo-controls label:last-child { gap: 10px; }
+  body.mobile-settings #demo-party { width: 110px; max-width: 34vw; }
+  body.mobile-settings #demo-cat { width: 90px; max-width: 28vw; }
+  body.mobile-settings #demo-section {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}
+
+@media (max-width: 768px) and (max-height: 600px) {
+  body.mobile-settings #mobile-view-panel { overflow-y: auto; }
+  body.mobile-settings #mobile-view-panel { padding-bottom: 8px; }
+  body.mobile-settings #table-row,
+  body.mobile-settings #settings-section,
+  body.mobile-settings #slider-panel,
+  body.mobile-settings .effect-group,
+  body.mobile-settings .concentration-block,
+  body.mobile-settings #demo-section {
+    flex: none;
+    min-height: auto;
+  }
+  body.mobile-settings #slider-panel .slider-row {
+    grid-auto-rows: 16px;
+    gap: 1px;
+  }
+  body.mobile-settings .concentration-block > .panel-heading { margin-bottom: 2px; }
+  body.mobile-settings .incumbent-block { margin-top: 8px; }
+  body.mobile-settings .panel-heading.second { padding-top: 4px; }
+  body.mobile-settings .inc-col { gap: 2px; }
+  body.mobile-settings .inc-input { height: 22px; }
+  body.mobile-settings #demo-chart {
+    flex: none;
+    height: 96px;
+    min-height: 96px;
+    max-height: 96px;
+  }
+}
+
+@media (max-width: 768px) and (max-height: 540px) {
+  body.mobile-settings #slider-panel .slider-row { grid-auto-rows: 18px; }
+  body.mobile-settings #demo-chart {
+    height: 100px;
+    min-height: 100px;
+    max-height: 100px;
+  }
 }
 
 </style>
