@@ -215,10 +215,12 @@ tfoot td {
 
 /* Mobile: single column */
 @media (max-width: 768px) {
+  html, body { overscroll-behavior: none; }
   #page-layout { display: block; padding-left: 0; padding-right: 0; }
   #left-column, #right-column { width: 100%; padding: 0 8px 24px 8px; box-sizing: border-box; }
   #page-branding { display: none !important; }
   body { padding: 0; }
+  body.mobile-table-view { overflow-y: hidden; }
   body.mobile-table-view #left-column {
     display: flex;
     flex-direction: column;
@@ -4206,6 +4208,7 @@ document.getElementById('reset').addEventListener('click', () => {
   // ---- Recalculate everything ----
   calculate();
   updateResetButtonState();
+  scheduleMobileTableFit();
 
 });
 
@@ -4278,6 +4281,7 @@ document.getElementById('randomise').addEventListener('click', () => {
   renderTable();
   calculate();
   updateResetButtonState();
+  scheduleMobileTableFit();
 });
 
 renderTable();
