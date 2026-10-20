@@ -371,7 +371,7 @@ tfoot td {
   margin-top: 0;
   background: #fff;
   border: 1px solid #cbd5e1;
-  border-radius: 0 8px 8px 8px;   /* square top-left so the first tab joins flush */
+  border-radius: 0 0 8px 8px;   /* square top corners so the panel joins the tabs flush */
   padding: 12px;
 }
 #table-col { flex: 0 0 44%; min-width: 0; }
@@ -391,7 +391,9 @@ tfoot td {
 .effect-block { display: flex; flex-direction: column; min-width: 0; }
 .effect-block.concentration-block { flex: 1 1 0; min-height: 0; }
 .slider-col, .inc-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.slider-value { font-size: 11px; font-weight: 600; height: 14px; line-height: 14px; }
+.slider-value { font-size: 11px; font-weight: 600; font-style: italic; height: 14px; line-height: 14px; }
+.slider-value.positive { color: #008500; }
+.slider-value.negative { color: #bb0000; }
 
   .slider-wrap {
   position: relative;
@@ -558,8 +560,8 @@ tfoot td {
 .panel-heading { text-align: left; font-size: 15px; font-weight: 700; color: #0f172a; margin: 0 0 6px; }
 .panel-heading.second { border-top: 1px solid #e2e8f0; padding-top: 8px; margin-top: 10px; }
 .concentration-country { display: none; }
-.slider-row { display: flex; justify-content: space-between; gap: 2px; flex: 1 1 0; min-height: 0; }
-.inc-row { display: flex; justify-content: space-between; gap: 2px; }
+.slider-row { display: flex; justify-content: space-between; gap: 6px; flex: 1 1 0; min-height: 0; }
+.inc-row { display: flex; justify-content: space-between; gap: 6px; }
 
 @media (max-width: 768px) {
   .concentration-country { display: inline; font-weight: 400; color: #64748b; }
@@ -3691,6 +3693,14 @@ const NATION_NAMES = { ENG: "England", SCO: "Scotland", WAL: "Wales", NI: "North
 const NATION_TAB_NAMES = { UK: "England", SCO: "Scotland", WAL: "Wales", NI: "N. Ireland" };
 function currentNation() { return NATION_KEY[currentTab]; }
 
+function setConcentrationReadout(readout, value, active = true) {
+  readout.textContent = active
+    ? `${value > 0 ? "+" : ""}${value.toFixed(1)}%`
+    : "–";
+  readout.classList.toggle("positive", active && value > 0);
+  readout.classList.toggle("negative", active && value < 0);
+}
+
 // Load one party's stored values for the current nation; grey it out if it has no vote share there
 function syncConcentrationUI(p) {
   const n = currentNation();
@@ -3706,7 +3716,7 @@ function syncConcentrationUI(p) {
     const icol = document.getElementById(`inc-col-${p}`);
   if (icol) icol.classList.toggle("disabled", !active);
   if (slider) { slider.disabled = !active; slider.value = c; paintSlider(slider); }
-  if (readout) readout.textContent = active ? c.toFixed(1) : "–";
+  if (readout) setConcentrationReadout(readout, c, active);
   if (inc) {
     inc.disabled = !active;
     inc.placeholder = "–";
@@ -3766,7 +3776,7 @@ function bindConcentrationInputs() {
     slider.addEventListener("input", () => {
       const val = clampConcentration(parseFloat(slider.value));
       VOTE_CONCENTRATION[currentNation()][p] = val / 100;
-      readout.textContent = val.toFixed(1);
+      setConcentrationReadout(readout, val);
       paintSlider(slider);
       calculateThrottled();
     });
