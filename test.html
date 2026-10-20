@@ -3284,6 +3284,7 @@ const DEMOGRAPHICS = {
 
 /* ---- Demographic effects ---- */
 const DEMO_PARTIES = ["LAB", "CON", "RFM", "LDM", "GRN", "RES", "SNP", "PLC"];
+const DEMO_SELECTABLE_PARTIES = DEMO_PARTIES.filter(p => p !== "SNP" && p !== "PLC");
 const DEMO_MAX_EFFECT = 1;   // slider at ±100 = ±100% effect in a fully one-sided seat. Try 0.5 for half-strength.
 const DEMO_CATEGORIES = DEMOGRAPHICS.categories;
 
@@ -3466,7 +3467,7 @@ function renderDemographicEditor() {
   const catSel = document.getElementById("demo-cat");
   const slider = document.getElementById("demo-slider");
 
-  partySel.innerHTML = DEMO_PARTIES.map(p =>
+  partySel.innerHTML = DEMO_SELECTABLE_PARTIES.map(p =>
     `<option value="${p}">${PARTY_ALIASES[p] || p}</option>`).join("");
   catSel.innerHTML = DEMO_CATEGORIES.map(c =>
     `<option value="${c.key}">${c.label}</option>`).join("");
@@ -3875,11 +3876,15 @@ function renderTable() {
     }
     const editable = own.includes(p) && p !== "OTH";
     const val = editable ? (VOTES[nation][p] || 0).toFixed(1) : "0.0";
+    const calculatedFromTab = p === "SNP" ? "Scotland"
+      : p === "PLC" ? "Wales"
+      : UK_EXTRA.slice(2).includes(p) ? "N. Ireland"
+      : null;
     return `
       <tr data-party="${p}">
         <td class="party-column" style="--party-color:${PARTY_COLORS[p]}">${p}</td>
         <td>
-          <div class="input-wrapper">
+          <div class="input-wrapper"${calculatedFromTab ? ` title="Calculated from ${calculatedFromTab} tab"` : ""}>
             <input type="number" id="votes-${p}" data-party="${p}" value="${val}" ${editable ? 'min="0" max="100" step="0.1"' : 'disabled'}>
             <span class="percent-sign">%</span>
           </div>
