@@ -221,14 +221,20 @@ tfoot td {
   #page-branding { display: none !important; }
   body { padding: 0; }
   body.mobile-table-view { overflow-y: hidden; }
-  body.mobile-table-view #left-column {
+  #left-column {
     display: flex;
     flex-direction: column;
     height: 100vh;
     height: 100dvh;
     padding-bottom: 8px;
   }
-  body.mobile-table-view #mobile-view-panel { flex: 1 0 auto; }
+  #mobile-view-panel {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    min-height: 0;
+    overflow-y: auto;
+  }
 }
 
 /* ---- Constituency Results (tweaked layout) ---- */
@@ -572,20 +578,46 @@ tfoot td {
   }
   .effect-block + .effect-block { margin-top: 12px; }
   #settings-section, #demo-section, #right-column { display: none; }
-  body.mobile-concentration #settings-section { display: flex; }
-  body.mobile-demographics #demo-section { display: block; }
-  body.mobile-map-view #left-column { padding-bottom: 0; }
-  body.mobile-map-view #right-column { display: block; margin-top: 0; }
+  body.mobile-settings #settings-section { display: flex; }
+  body.mobile-settings #demo-section { display: block; }
+  body.mobile-map-view #table-row { display: none; }
+  body.mobile-map-view #right-column {
+    display: block;
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+    margin-top: 0;
+  }
   #mobile-view-panel {
     border: 1px solid #cbd5e1;
     border-radius: 0 0 8px 0;
     background: #fff;
   }
+  body.mobile-table-view #table-row { flex: 1 0 auto; }
   #table-row { padding: 10px; }
   #table-col { padding: 0; }
-  #settings-section { padding: 0 10px 10px; }
-  #demo-section { margin: 0; padding: 0 10px 10px; }
-  #right-column { padding: 0; }
+  #settings-section { padding: 0 8px 6px; }
+  #demo-section { flex: none; margin: 0; padding: 0 8px 6px; }
+  body.mobile-settings .effect-block { padding: 6px; }
+  body.mobile-settings .panel-heading { margin-bottom: 3px; font-size: 14px; }
+  body.mobile-settings .panel-heading.second { margin-top: 5px; padding-top: 4px; }
+  body.mobile-settings #slider-panel .slider-row { gap: 3px 5px; }
+  body.mobile-settings #slider-panel .slider-col {
+    grid-template-columns: 34px minmax(0, 1fr) 38px;
+    gap: 4px;
+  }
+  body.mobile-settings #slider-panel .slider-wrap { min-width: 0; }
+  body.mobile-settings .inc-row { gap: 3px; }
+  body.mobile-settings .inc-input { height: 22px; padding: 1px; }
+  body.mobile-settings .demo-controls { gap: 4px; margin: 4px 0; flex-wrap: nowrap; }
+  body.mobile-settings .demo-controls label { min-width: 0; gap: 3px; font-size: 12px; }
+  body.mobile-settings #demo-party { max-width: 104px; }
+  body.mobile-settings #demo-cat { max-width: 84px; }
+  body.mobile-settings #demo-chart { height: 130px; }
+  body.mobile-settings #demo-readout { height: 16px; margin-bottom: 0; }
+  body.mobile-settings #demo-slider { height: 18px; }
+  #right-column { flex: 1 1 auto; min-height: 0; padding: 0; }
+  #constituency-map { height: 100%; }
   #constituency-map { border: 0 !important; border-radius: 0 !important; }
 }
 
@@ -638,8 +670,8 @@ tfoot td {
   .concentration-country { display: inline; font-weight: 400; color: #64748b; }
   #slider-panel .slider-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px 6px;
   }
   #slider-panel .slider-row { flex: none; }
   #slider-panel .slider-col {
@@ -754,10 +786,148 @@ tfoot td {
     padding-top: 5px;
     padding-bottom: 9px;
   }
-  body.mobile-concentration #mobile-view-tabs,
-  body.mobile-demographics #mobile-view-tabs {
+  body.mobile-settings #mobile-view-tabs {
     margin-top: -5px;
   }
+  body.mobile-settings #mobile-view-tabs .mobile-view-tab.active {
+    padding-bottom: 8px;
+  }
+}
+
+@media (max-width: 768px) and (max-height: 600px) {
+  body.mobile-settings #table-row { padding: 4px 10px; }
+  body.mobile-settings .effect-block { padding: 4px; }
+  body.mobile-settings .effect-block + .effect-block { margin-top: 8px; }
+  body.mobile-settings #settings-section,
+  body.mobile-settings #demo-section { padding-bottom: 4px; }
+  body.mobile-settings .demo-controls { margin: 2px 0; }
+  body.mobile-settings #slider-panel .slider-row { row-gap: 2px; }
+  body.mobile-settings #demo-chart { height: 96px; }
+}
+
+@media (max-width: 768px) and (max-height: 540px) {
+  body.mobile-settings #table-row { padding: 2px 10px; }
+  body.mobile-settings .effect-block { padding: 3px; }
+  body.mobile-settings .effect-block + .effect-block { margin-top: 4px; }
+  body.mobile-settings #settings-section,
+  body.mobile-settings #demo-section { padding-bottom: 2px; }
+  body.mobile-settings .demo-controls select { font-size: 12px; padding: 2px 3px; }
+  body.mobile-settings .panel-heading { margin-bottom: 2px; }
+  body.mobile-settings #slider-panel .slider-row { row-gap: 1px; }
+  body.mobile-settings #slider-panel .slider-wrap,
+  body.mobile-settings #slider-panel .v-slider { height: 18px; }
+  body.mobile-settings #demo-chart { height: 100px; }
+}
+
+@media (max-width: 768px) {
+  body.mobile-settings #mobile-view-panel { overflow: hidden; }
+  body.mobile-settings #table-row {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+  body.mobile-settings #settings-section {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+  body.mobile-settings #slider-panel,
+  body.mobile-settings .effect-group,
+  body.mobile-settings .concentration-block {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+  body.mobile-settings #slider-panel .slider-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    flex: 1 1 0;
+    min-height: 0;
+    gap: 2px;
+  }
+  body.mobile-settings #slider-panel .slider-col {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) 38px;
+    grid-template-areas: "party slider value";
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+  }
+  body.mobile-settings #slider-panel .slider-party {
+    grid-area: party;
+    width: auto;
+    padding: 0 0 0 4px;
+    border: 0;
+    border-left: 3px solid var(--party-color);
+    font-size: 10px;
+    text-align: left;
+    white-space: nowrap;
+  }
+  body.mobile-settings #slider-panel .slider-value {
+    grid-area: value;
+    height: auto;
+    font-size: 9px;
+    line-height: 11px;
+    text-align: right;
+    white-space: nowrap;
+  }
+  body.mobile-settings #slider-panel .slider-wrap {
+    grid-area: slider;
+    position: static;
+    flex: none;
+    width: 100%;
+    height: 16px;
+    min-height: 0;
+  }
+  body.mobile-settings #slider-panel .v-slider {
+    position: static;
+    width: 100%;
+    height: 16px;
+    transform: none;
+    writing-mode: horizontal-tb;
+    direction: ltr;
+  }
+  body.mobile-settings #slider-panel .v-slider::-webkit-slider-runnable-track {
+    height: 4px;
+    background: transparent;
+  }
+  body.mobile-settings #slider-panel .v-slider::-webkit-slider-thumb {
+    width: 12px;
+    height: 14px;
+  }
+  body.mobile-settings #slider-panel .v-slider::-moz-range-track {
+    height: 4px;
+    background: transparent;
+  }
+  body.mobile-settings #slider-panel .v-slider::-moz-range-thumb {
+    width: 12px;
+    height: 14px;
+  }
+  body.mobile-settings .incumbent-block { margin-top: 4px; }
+  body.mobile-settings .panel-heading.second { margin-top: 0; padding-top: 4px; }
+  body.mobile-settings .inc-row { gap: 3px; }
+  body.mobile-settings .inc-col { min-width: 0; gap: 2px; }
+  body.mobile-settings #slider-panel .inc-col .slider-party {
+    font-size: 9px;
+    text-align: center;
+    padding: 0 0 2px;
+    border: 0;
+    border-bottom: 2px solid var(--party-color);
+  }
+  body.mobile-settings .inc-input { font-size: 10px; }
+  body.mobile-settings #demo-section {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    min-height: 0;
+    margin-top: 0;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 4px;
+  }
+  body.mobile-settings #demo-chart {
+    flex: 1 1 0;
+    width: 100%;
+    height: 0;
+    min-height: 80px;
+  }
+  body.mobile-settings #demo-readout { margin-top: -4px; }
 }
 
 </style>
@@ -836,8 +1006,7 @@ tfoot td {
 
 <div id="mobile-view-tabs" role="tablist" aria-label="Mobile calculator view">
   <div class="tab-group">
-    <button class="mobile-view-tab" type="button" role="tab" aria-selected="false" aria-controls="settings-section" data-view="concentration">Concentration</button>
-    <button class="mobile-view-tab" type="button" role="tab" aria-selected="false" aria-controls="demo-section" data-view="demographics">Demographics</button>
+    <button class="mobile-view-tab" type="button" role="tab" aria-selected="false" aria-controls="settings-section demo-section" data-view="settings">Additional settings</button>
   </div>
 </div>
 
@@ -4287,7 +4456,7 @@ document.getElementById('randomise').addEventListener('click', () => {
 renderTable();
 
 function setMobileView(view) {
-  ['table', 'map', 'concentration', 'demographics'].forEach(name => {
+  ['table', 'map', 'settings'].forEach(name => {
     const className = `mobile-${['table', 'map'].includes(name) ? `${name}-view` : name}`;
     document.body.classList.toggle(className, name === view);
   });
@@ -4302,7 +4471,7 @@ function setMobileView(view) {
     tab.setAttribute('aria-selected', String(active));
   });
 
-  if (view === 'demographics') requestAnimationFrame(drawDemoChart);
+  if (view === 'settings') requestAnimationFrame(drawDemoChart);
   if (view === 'map') requestAnimationFrame(() => {
     if (window.invalidateConstituencyMapSize) window.invalidateConstituencyMapSize();
   });
