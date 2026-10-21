@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Nowcast UK / Sandbox</title>
 
@@ -31,10 +31,8 @@
   --panel-background: #ffffff;
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 80%;
-  }
+html {
+  font-size: 80%;
 }
 
   body {
@@ -45,13 +43,6 @@
     padding: 0 64px 24px 64px;
     scrollbar-gutter: stable;
     overflow-x: hidden;
-  }
-
-  /* Narrower padding on mobile */
-  @media (max-width: 768px) {
-    body {
-      padding: 0 8px 24px 8px;
-    }
   }
 
 /* --- Shared title + subtitle styling --- */
@@ -91,13 +82,6 @@ h2.subtitle a {
 
 h2.subtitle a:hover {
   color: #005f00;           /* slightly darker green on hover */
-}
-
-/* --- Mobile view: expand width to 90% --- */
-@media (max-width: 768px) {
-  h1, h2.subtitle {
-    max-width: 99%;
-  }
 }
 
   table { 
@@ -140,17 +124,6 @@ h2.subtitle a:hover {
   input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
   input[type=number] { -moz-appearance: textfield; }
 
-  /* --- MOBILE VIEW --- */
-  @media (max-width: 768px) {
-    table, th, td { font-size: 13px; }
-    h3 { font-size: 16px; }
-    .input-wrapper input { width: 45px; }
-  }
-
-  @media (max-width: 480px) {
-    table, th, td { font-size: 12px; }
-    .input-wrapper input { width: 40px; }
-  }
 /* --- Uniform table header height + centered header text --- */
 th {
   height: 28px;           /* 👈 match td height for visual consistency */
@@ -211,7 +184,7 @@ tbody tr[data-party="PLC"] td {
   body { padding: 0; }
   #page-layout { display: flex; flex-direction: row; align-items: flex-start; width: 100%; }
   #left-column { width: 55%; padding: 0 32px 24px 64px; box-sizing: border-box; }
-  #mobile-view-panel {
+  #editor-panel {
     display: flex;
     flex-direction: column;
     border: 1px solid #cbd5e1;
@@ -219,7 +192,7 @@ tbody tr[data-party="PLC"] td {
     border-bottom-left-radius: 0;
     background: var(--panel-background);
   }
-  #mobile-view-panel > #table-row {
+  #editor-panel > #table-row {
     border: 0;
     border-radius: 0;
   }
@@ -233,9 +206,9 @@ tbody tr[data-party="PLC"] td {
     margin: 0;
     padding: 12px;
   }
-  body.desktop-demographics #table-row { display: none; }
-  body.desktop-demographics #demo-section { display: flex; flex-direction: column; }
-  #mobile-view-tabs {
+  body.show-demographics #table-row { display: none; }
+  body.show-demographics #demo-section { display: flex; flex-direction: column; }
+  #editor-view-tabs {
     display: flex;
     justify-content: flex-start;
     align-items: flex-start;
@@ -245,13 +218,13 @@ tbody tr[data-party="PLC"] td {
     position: relative;
     z-index: 2;
   }
-  #mobile-view-tabs .tab-group { flex: 0 0 auto; }
-  #mobile-view-tabs .mobile-view-tab {
+  #editor-view-tabs .tab-group { flex: 0 0 auto; }
+  #editor-view-tabs .editor-view-tab {
     display: none;
     border-radius: 0 0 8px 8px;
   }
-  #mobile-view-tabs .desktop-view-tab { display: inline-block; border-radius: 0 0 8px 8px; }
-  #mobile-view-tabs .desktop-view-tab.active {
+  #editor-view-tabs .demographics-tab { display: inline-block; border-radius: 0 0 8px 8px; }
+  #editor-view-tabs .demographics-tab.active {
     background: var(--panel-background);
     border-top-color: var(--panel-background);
     border-bottom-color: #cbd5e1;
@@ -266,30 +239,6 @@ tbody tr[data-party="PLC"] td {
     position: sticky;
     top: 0;
     overflow: hidden;
-  }
-}
-
-/* Mobile: single column */
-@media (max-width: 768px) {
-  html, body { overscroll-behavior: none; }
-  #page-layout { display: block; padding-left: 0; padding-right: 0; }
-  #left-column, #right-column { width: 100%; padding: 0 8px 24px 8px; box-sizing: border-box; }
-  #page-branding { display: none !important; }
-  body { padding: 0; }
-  body.mobile-table-view { overflow-y: hidden; }
-  #left-column {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    height: 100dvh;
-    padding-bottom: 8px;
-  }
-  #mobile-view-panel {
-    display: flex;
-    flex: 1 1 0;
-    flex-direction: column;
-    min-height: 0;
-    overflow-y: auto;
   }
 }
 
@@ -547,154 +496,6 @@ tbody tr[data-party="PLC"] td {
   border: 1px solid #cbd5e1; border-radius: 4px;
 }
 
-/* Phones: stack the editor under the table */
-@media (max-width: 768px) {
-  #table-row { flex-direction: column; gap: 0; padding: 0; border: 0; background: transparent; }
-  #table-col { display: none; flex: none; width: 100%; }
-  body.mobile-table-view #table-col { display: block; }
-  #table-col th:nth-child(1) { width: 20%; }
-  #table-col th:nth-child(3) { width: 44%; }
-  body.mobile-table-compact #table-col th {
-    height: 20px;
-    padding-top: 2px;
-    padding-bottom: 2px;
-  }
-  body.mobile-table-compact #table-row { padding-top: 6px; padding-bottom: 6px; }
-  body.mobile-table-compact #table-col td {
-    height: 18px;
-    padding-top: 1px;
-    padding-bottom: 1px;
-  }
-  body.mobile-table-compact #table-col .input-wrapper input {
-    height: 22px;
-    box-sizing: border-box;
-    padding-top: 1px;
-    padding-bottom: 1px;
-  }
-  body.mobile-table-compact #table-col .divider-row td {
-    padding-top: 5px;
-    padding-bottom: 2px;
-  }
-  body.mobile-table-vertical-tight #table-col th {
-    height: 18px;
-    padding-top: 0;
-    padding-bottom: 0;
-  }
-  body.mobile-table-vertical-tight #table-col td {
-    height: 16px;
-    padding-top: 0;
-    padding-bottom: 0;
-  }
-  body.mobile-table-vertical-tight #table-col .input-wrapper input {
-    height: 18px;
-    padding-top: 0;
-    padding-bottom: 0;
-  }
-  body.mobile-table-vertical-tight #table-col .divider-row td {
-    padding-top: 2px;
-    padding-bottom: 0;
-  }
-  body.mobile-table-tiny #table-col table,
-  body.mobile-table-tiny #table-col th,
-  body.mobile-table-tiny #table-col td { font-size: 11px; }
-  body.mobile-table-tiny #table-row { padding-top: 0; padding-bottom: 0; }
-  body.mobile-table-tiny #table-col .input-wrapper input {
-    height: 17px;
-    font-size: 10px;
-  }
-  body.mobile-table-tiny #table-col .percent-sign { font-size: 12px; }
-  body.mobile-table-tiny #table-col .seat-change { font-size: 10px; }
-  #settings-section { flex: none; width: 100%; margin-top: 0; }
-  .effect-group { flex: none; }
-  #slider-panel { flex: none; min-height: auto; }
-  .effect-block.concentration-block { flex: none; }
-  .slider-row, .inc-row {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-  }
-  .slider-col, .inc-col { width: 100%; box-sizing: border-box; }
-  .slider-wrap { position: static; flex: none; width: 100%; height: auto; min-height: 0; }
-  .v-slider {
-    position: static;
-    writing-mode: horizontal-tb;
-    direction: ltr;
-    transform: none;
-    width: 100%;
-    height: 22px;
-    background-size: 100% 100%;
-  }
-  .v-slider::-webkit-slider-runnable-track { height: 22px; background: transparent; }
-  .v-slider { --thumb-size: 14px; }
-  .inc-input { width: 100%; max-width: none; height: 26px; font-size: 13px; }
-  .effect-block, #demo-section {
-    box-sizing: border-box;
-    padding: 12px;
-    background: var(--panel-background);
-  }
-  .effect-group, #demo-section {
-    box-sizing: border-box;
-    background: var(--panel-background);
-  }
-  .effect-block + .effect-block { margin-top: 12px; }
-  #settings-section, #demo-section, #right-column { display: none; }
-  body.mobile-settings #settings-section { display: flex; }
-  body.mobile-settings #demo-section { display: block; }
-  body.mobile-map-view #table-row { display: none; }
-  body.mobile-map-view #right-column {
-    display: block;
-    flex: 1 1 auto;
-    height: auto;
-    min-height: 0;
-    margin-top: 0;
-  }
-  #mobile-view-panel {
-    border: 1px solid #cbd5e1;
-    border-radius: 0 0 8px 0;
-    background: var(--panel-background);
-  }
-  body.mobile-table-view #table-row { flex: 1 0 auto; }
-  #table-row { padding: 10px; }
-  #table-col { padding: 0; }
-  #settings-section { padding: 0 8px 6px; }
-  #demo-section { flex: none; margin: 0; padding: 0 8px 6px; }
-  body.mobile-settings .effect-block { padding: 6px; }
-  body.mobile-settings .panel-heading { margin-bottom: 3px; font-size: 14px; }
-  body.mobile-settings .panel-heading.second { margin-top: 5px; padding-top: 4px; }
-  body.mobile-settings #demo-section > h3 {
-    text-align: left;
-    font-size: 14px;
-    font-weight: 700;
-    color: #0f172a;
-    margin: 0 0 3px;
-  }
-  body.mobile-settings #slider-panel .slider-row { gap: 3px 5px; }
-  body.mobile-settings #slider-panel .slider-col {
-    grid-template-columns: 34px minmax(0, 1fr) 38px;
-    gap: 4px;
-  }
-  body.mobile-settings #slider-panel .slider-wrap { min-width: 0; }
-  body.mobile-settings .inc-row { gap: 3px; margin-right: 4px; }
-  body.mobile-settings .inc-input { height: 26px; padding: 1px; }
-  body.mobile-settings .demo-controls {
-    justify-content: flex-start;
-    gap: 4px;
-    margin: 4px 0;
-    flex-wrap: nowrap;
-  }
-  body.mobile-settings .demo-controls label { min-width: 0; gap: 3px; font-size: 12px; }
-  body.mobile-settings .demo-controls label:first-child { gap: 11px; }
-  body.mobile-settings .demo-controls label:last-child { gap: 15px; }
-  body.mobile-settings #demo-party { width: 130px; max-width: 38vw; }
-  body.mobile-settings #demo-cat { width: 105px; max-width: 30vw; }
-  body.mobile-settings #demo-chart { height: 130px; }
-  body.mobile-settings #demo-readout { height: 16px; margin-bottom: 0; }
-  body.mobile-settings #demo-slider { height: 22px; }
-  #right-column { flex: 1 1 auto; min-height: 0; padding: 0; }
-  #constituency-map { height: 100%; }
-  #constituency-map { border: 0 !important; border-radius: 0 !important; }
-}
-
 #demo-section { margin-top: 28px; }
 #demo-section > h3 { text-align: center; margin: 0 0 4px; font-size: 15px; }
   
@@ -746,37 +547,7 @@ tbody tr[data-party="PLC"] td {
 .slider-row { display: flex; justify-content: space-between; gap: 6px; flex: 1 1 0; min-height: 0; }
 .inc-row { display: flex; justify-content: space-between; gap: 6px; }
 
-@media (max-width: 768px) {
-  .concentration-country { display: inline; font-weight: 400; color: #64748b; }
-  #slider-panel .slider-row {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 4px 6px;
-  }
-  #slider-panel .slider-row { flex: none; }
-  #slider-panel .slider-col {
-    display: grid;
-    grid-template-columns: 42px minmax(0, 1fr) 44px;
-    grid-template-areas: "party slider value";
-    align-items: center;
-    gap: 8px;
-  }
-  #slider-panel .slider-party {
-    grid-area: party;
-    width: auto;
-    text-align: left;
-    padding: 0 0 0 5px;
-    border-bottom: 0;
-    border-left: 3px solid var(--party-color);
-  }
-  #slider-panel .slider-value {
-    grid-area: value;
-    height: auto;
-    line-height: normal;
-    text-align: right;
-  }
-  #slider-panel .slider-wrap { grid-area: slider; }
-}
+
 
 /* ---- Notebook-style tabs ---- */
 #tab-bar {
@@ -789,14 +560,13 @@ tbody tr[data-party="PLC"] td {
 }
 .tab-group { display: flex; align-items: flex-end; gap: 3px; }
 .tab-group-left { width: 50%; }
-#mobile-view-tabs { display: none; }
-.mobile-map-tab { display: none; }
+#editor-view-tabs { display: none; }
 
 @media (min-width: 769px) {
-  #mobile-view-tabs { display: flex; }
+  #editor-view-tabs { display: flex; }
 }
 
-.nation-tab, .tab-action, .mobile-view-tab {
+.nation-tab, .tab-action, .editor-view-tab {
   font-family: inherit;
   font-size: 14px;
   font-weight: 500;
@@ -810,9 +580,9 @@ tbody tr[data-party="PLC"] td {
 }
 .nation-tab { flex: 1 1 0; min-width: 0; white-space: nowrap; }
 .nation-tab:hover { background: #f1f5f9; }
-.mobile-view-tab { flex: none; }
+.editor-view-tab { flex: none; }
 
-.nation-tab.active, .mobile-view-tab.active {
+.nation-tab.active, .editor-view-tab.active {
   background: var(--panel-background);
   color: #0f172a;
   font-weight: 700;
@@ -827,429 +597,87 @@ tbody tr[data-party="PLC"] td {
 #reset.has-changes:hover, #reset.has-changes:active { background: #d97706; }
 
 @media (max-width: 768px) {
-  .tab-group-left { width: auto; flex: 0 0 auto; }
-  #mobile-view-tabs .desktop-view-tab { display: none; }
-
-  .nation-tab {
-    font-size: 0;
-    flex: 0 0 30px;
-    width: 30px;
-    height: 30px;
-    box-sizing: border-box;
-    padding: 0;
+  body { padding: 0; scrollbar-gutter: auto; }
+  #page-layout {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
+    align-items: stretch;
+    width: 768px;
+    zoom: var(--page-scale, 1);
   }
-
-  .nation-tab.active { padding-top: 0; }
-
-  .nation-tab::after {
-    content: attr(data-short);
-    font-size: 12px;
+  #left-column, #right-column {
+    width: 768px;
+    box-sizing: border-box;
   }
-
-  .tab-action { font-size: 12px; padding: 5px 8px 4px; }
-  .mobile-view-tab { font-size: 12px; padding: 5px 8px 4px; }
-  .mobile-view-tab.active { padding-top: 5px; }
-  .mobile-map-tab { display: inline-block; }
-  #mobile-view-tabs {
+  #left-column { padding: 0 32px 24px; }
+  #editor-panel {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #cbd5e1;
+    border-radius: 0 0 8px 0;
+    border-bottom-left-radius: 0;
+    background: var(--panel-background);
+  }
+  #editor-panel > #table-row {
+    border: 0;
+    border-radius: 0;
+  }
+  #table-row { box-sizing: border-box; }
+  #demo-section {
+    display: none;
+    flex: 1 0 auto;
+    margin: 0;
+    padding: 12px;
+  }
+  body.show-demographics #table-row { display: none; }
+  body.show-demographics #demo-section { display: flex; flex-direction: column; }
+  #editor-view-tabs {
     display: flex;
     justify-content: flex-start;
     align-items: flex-start;
     gap: 3px;
-    margin: -1px -1px 0;
+    margin: -2px 0 0;
     padding: 0;
+    position: relative;
+    z-index: 2;
   }
-  #mobile-view-tabs .tab-group { flex: 0 0 auto; }
-  #mobile-view-tabs .mobile-view-tab {
+  #editor-view-tabs .tab-group { flex: 0 0 auto; }
+  #editor-view-tabs .editor-view-tab { display: none; }
+  #editor-view-tabs .demographics-tab {
+    display: inline-block;
     border-radius: 0 0 8px 8px;
   }
-  #mobile-view-tabs .mobile-view-tab.active {
+  #editor-view-tabs .demographics-tab.active {
+    background: var(--panel-background);
     border-top-color: var(--panel-background);
     border-bottom-color: #cbd5e1;
-    padding-top: 5px;
     padding-bottom: 9px;
   }
-  body.mobile-settings #mobile-view-tabs {
-    margin-top: -5px;
-  }
-  body.mobile-settings #mobile-view-tabs .mobile-view-tab.active {
-    padding-bottom: 8px;
-  }
-}
-
-@media (max-width: 768px) and (max-height: 600px) {
-  body.mobile-settings #table-row { padding: 4px 10px; }
-  body.mobile-settings .effect-block { padding: 4px; }
-  body.mobile-settings .effect-block + .effect-block { margin-top: 8px; }
-  body.mobile-settings #settings-section,
-  body.mobile-settings #demo-section { padding-bottom: 4px; }
-  body.mobile-settings .demo-controls { margin: 2px 0; }
-  body.mobile-settings .panel-heading { margin-bottom: 2px; }
-}
-
-@media (max-width: 768px) and (max-height: 540px) {
-  body.mobile-settings #table-row { padding: 2px 10px; }
-  body.mobile-settings .effect-block { padding: 3px; }
-  body.mobile-settings .effect-block + .effect-block { margin-top: 4px; }
-  body.mobile-settings #settings-section,
-  body.mobile-settings #demo-section { padding-bottom: 2px; }
-  body.mobile-settings .demo-controls select { font-size: 12px; padding: 2px 3px; }
-  body.mobile-settings .panel-heading { margin-bottom: 2px; }
-}
-
-@media (max-width: 768px) {
-  body.mobile-settings #mobile-view-panel {
-    overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-  }
-  body.mobile-settings {
-    background: var(--page-background);
-    padding: 0;
-  }
-  body.mobile-settings #left-column {
+  #right-column {
     height: 100vh;
     height: 100dvh;
-    padding-bottom: 8px;
-    background: var(--page-background);
-    border-radius: 0;
-  }
-  body.mobile-settings .nation-tab {
-    width: 38px;
-    height: 38px;
-    flex-basis: 38px;
-  }
-  body.mobile-settings #tab-bar .mobile-view-tab {
-    font-size: 14px;
-    padding: 8px 12px 6px;
-  }
-  body.mobile-settings .tab-action {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-  body.mobile-settings #randomise {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-  body.mobile-settings #mobile-view-tabs .mobile-view-tab.active {
-    padding: 8px 10px 6px;
-  }
-  body.mobile-settings #table-row {
-    flex: none;
-    min-height: auto;
-    padding-left: 4px;
-    padding-right: 4px;
-  }
-  body.mobile-settings #settings-section {
-    flex: none;
-    min-height: auto;
-    padding-left: 4px;
-    padding-right: 4px;
-  }
-  body.mobile-settings #slider-panel,
-  body.mobile-settings .effect-group,
-  body.mobile-settings .concentration-block {
-    flex: none;
-    min-height: auto;
-  }
-  body.mobile-settings #slider-panel .slider-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    flex: none;
-    grid-auto-rows: 23px;
-    min-height: 0;
-    gap: 2px;
-    margin-right: 4px;
-  }
-  body.mobile-settings .effect-block { padding: 4px; }
-  body.mobile-settings .concentration-block { flex: none; }
-  body.mobile-settings #slider-panel .slider-col {
-    display: grid;
-    grid-template-columns: 42px minmax(0, 1fr) 52px;
-    grid-template-areas: "party slider value";
-    align-items: center;
-    gap: 4px;
-    min-width: 0;
-  }
-  body.mobile-settings .concentration-block > .panel-heading { margin-bottom: 10px; }
-  body.mobile-settings #slider-panel .slider-party {
-    grid-area: party;
-    width: auto;
-    padding: 0 0 0 4px;
-    border: 0;
-    border-left: 3px solid var(--party-color);
-    font-size: 10px;
-    text-align: left;
-    white-space: nowrap;
-  }
-  body.mobile-settings #slider-panel .slider-value {
-    grid-area: value;
-    height: auto;
-    padding-left: 6px;
-    font-size: 9px;
-    line-height: 11px;
-    text-align: left;
-    white-space: nowrap;
-  }
-  body.mobile-settings #slider-panel .slider-wrap {
-    grid-area: slider;
+    padding: 24px 32px;
     position: static;
-    flex: none;
-    width: 100%;
-    height: 16px;
-    min-height: 0;
+    top: auto;
+    overflow: hidden;
   }
-  body.mobile-settings #slider-panel .v-slider {
-    position: static;
-    width: 100%;
-    height: 16px;
-    --thumb-size: 22px;
-    transform: none;
-    writing-mode: horizontal-tb;
-    direction: ltr;
-  }
-  body.mobile-settings #slider-panel .v-slider::-webkit-slider-runnable-track {
-    height: 4px;
-    background: transparent;
-  }
-  body.mobile-settings #slider-panel .v-slider::-moz-range-track {
-    height: 4px;
-    background: transparent;
-  }
-  body.mobile-settings .incumbent-block {
-    flex: 0 0 auto;
-    margin-top: clamp(4px, 2vh, 17px);
-  }
-  body.mobile-settings .panel-heading.second { margin-top: 0; padding-top: clamp(4px, 1.2vh, 10px); }
-  body.mobile-settings .inc-row { gap: 3px; margin-right: 14px; }
-  body.mobile-settings .inc-col { min-width: 0; gap: clamp(2px, 0.7vh, 6px); }
-  body.mobile-settings #slider-panel .inc-col .slider-party {
-    font-size: 9px;
-    text-align: center;
-    padding: 0 0 2px;
-    border: 0;
-    border-bottom: 2px solid var(--party-color);
-  }
-  body.mobile-settings .inc-input {
-    height: clamp(16px, 3vh, 26px);
-    min-height: 16px;
-    flex: 0 0 auto;
-    font-size: clamp(8px, 1.2vh, 10px);
-  }
-  body.mobile-settings #demo-section {
-    display: flex;
-    flex: 1 0 auto;
-    flex-direction: column;
-    min-height: auto;
-    margin-top: 0;
-    border-top: 1px solid #e2e8f0;
-    padding-top: 4px;
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-  body.mobile-settings #demo-chart {
-    flex: 1 1 0;
-    width: calc(100% - 16px);
-    height: 0;
-    min-height: 56px;
-    max-height: none;
-  }
-  body.mobile-settings #demo-readout {
-    flex: 0 1 auto;
-    height: auto;
-    min-height: 0;
-    margin-top: 0;
-    position: relative;
-    top: clamp(-18px, calc((600px - 100vh) * 0.24), 0px);
-  }
-  body.mobile-settings #demo-slider {
-    flex: 0 0 auto;
-    height: clamp(12px, 2.5vh, 22px);
-    position: relative;
-    top: clamp(-4px, calc((100vh - 600px) * -0.06), 0px);
-  }
-  body.mobile-settings .demo-ends {
-    flex: 0 0 auto;
-    font-size: clamp(9px, 1.4vh, 12px);
-  }
+  #constituency-map { height: 100%; max-width: none; margin: 0; }
+  #demo-chart { height: 400px; }
+  #demo-readout { margin-top: -10px; margin-bottom: 12px; }
 }
-
-@media (max-width: 430px) {
-  body.mobile-settings { padding: 0; }
-  body.mobile-settings #left-column {
-    height: 100vh;
-    height: 100dvh;
-  }
-  body.mobile-settings .nation-tab {
-    width: 30px;
-    height: 30px;
-    flex-basis: 30px;
-  }
-  body.mobile-settings #tab-bar .mobile-view-tab {
-    font-size: 12px;
-    padding: 5px 8px 4px;
-  }
-  body.mobile-settings .tab-action {
-    padding-left: 8px;
-    padding-right: 8px;
-  }
-  body.mobile-settings #randomise {
-    padding-left: 10px;
-    padding-right: 10px;
-  }
-  body.mobile-settings .demo-controls label:first-child { gap: 7px; }
-  body.mobile-settings .demo-controls label:last-child { gap: 10px; }
-  body.mobile-settings #demo-party { width: 110px; max-width: 34vw; }
-  body.mobile-settings #demo-cat { width: 90px; max-width: 28vw; }
-  body.mobile-settings #demo-section {
-    padding-left: 8px;
-    padding-right: 8px;
-  }
-}
-
-@media (max-width: 768px) and (max-height: 600px) {
-  body.mobile-settings { padding: 0; }
-  body.mobile-settings #left-column {
-    height: 100vh;
-    height: 100dvh;
-    padding-bottom: 4px;
-  }
-  body.mobile-settings #mobile-view-panel {
-    min-height: 0;
-    padding-bottom: 8px;
-  }
-  body.mobile-settings #table-row,
-  body.mobile-settings #settings-section,
-  body.mobile-settings #slider-panel,
-  body.mobile-settings .effect-group,
-  body.mobile-settings .concentration-block,
-  body.mobile-settings #demo-section {
-    flex: 1 0 auto;
-    min-height: auto;
-  }
-  body.mobile-settings #slider-panel .slider-row {
-    flex: none;
-    grid-template-rows: none;
-    grid-auto-rows: clamp(10px, 2.8vh, 22px);
-    min-height: auto;
-    gap: 0;
-  }
-  body.mobile-settings #slider-panel .slider-col { min-height: 10px; gap: 0; }
-  body.mobile-settings #slider-panel .slider-wrap,
-  body.mobile-settings #slider-panel .v-slider {
-    height: 100%;
-  }
-  body.mobile-settings #slider-panel .v-slider {
-    --thumb-size: 16px;
-    background-size: 1px 100%, 100% 4px !important;
-  }
-  body.mobile-settings .incumbent-block {
-    flex: 0 0 auto;
-    margin-top: clamp(2px, 1vh, 6px);
-  }
-  body.mobile-settings .concentration-block > .panel-heading { margin-bottom: 4px; }
-  body.mobile-settings .panel-heading.second { padding-top: clamp(2px, 0.7vh, 4px); }
-  body.mobile-settings .inc-row,
-  body.mobile-settings .inc-col { min-height: auto; }
-  body.mobile-settings #demo-section {
-    flex: none;
-    min-height: auto;
-    padding-top: 2px;
-    padding-bottom: 6px;
-  }
-  body.mobile-settings .demo-controls { flex: none; min-height: auto; }
-  body.mobile-settings .demo-controls label,
-  body.mobile-settings .demo-controls select {
-    font-size: clamp(8px, 1.8vh, 12px);
-  }
-  body.mobile-settings #slider-panel .slider-party {
-    font-size: clamp(6px, 1.5vh, 10px);
-  }
-  body.mobile-settings #slider-panel .slider-value {
-    font-size: clamp(6px, 1.4vh, 9px);
-    line-height: 1;
-  }
-  body.mobile-settings .inc-col { gap: clamp(1px, 0.5vh, 3px); }
-  body.mobile-settings #slider-panel .inc-col .slider-party {
-    font-size: clamp(6px, 1.3vh, 9px);
-  }
-  body.mobile-settings .inc-input {
-    height: clamp(10px, 3vh, 22px);
-    min-height: 14px;
-    font-size: clamp(7px, 1.8vh, 10px);
-  }
-  body.mobile-settings #demo-section > h3 {
-    font-size: 14px;
-    margin-bottom: 2px;
-  }
-  body.mobile-settings #demo-readout {
-    font-size: clamp(9px, 2vh, 13px);
-    line-height: 1;
-  }
-  body.mobile-settings .demo-ends { line-height: 1; }
-  body.mobile-settings #demo-chart {
-    flex: 1 1 0;
-    height: clamp(40px, 12vh, 110px);
-    min-height: 40px;
-  }
-}
-
-@media (max-width: 768px) and (max-height: 420px) {
-  body.mobile-settings .effect-block { padding: 2px; }
-  body.mobile-settings .panel-heading,
-  body.mobile-settings .panel-heading.second,
-  body.mobile-settings .concentration-block > .panel-heading {
-    font-size: 11px;
-    padding-top: 1px;
-    margin-bottom: 1px;
-  }
-  body.mobile-settings .slider-party { font-size: 8px; }
-  body.mobile-settings #slider-panel .slider-value { font-size: 8px; }
-  body.mobile-settings .inc-input { height: clamp(14px, 3.5vh, 18px); }
-  body.mobile-settings #demo-section > h3 { font-size: 11px; }
-  body.mobile-settings #demo-readout { font-size: 10px; }
-  body.mobile-settings #demo-slider {
-    --thumb-size: 18px;
-    height: 10px;
-  }
-}
-
-@media (max-width: 360px) {
-  body.mobile-settings .nation-tab {
-    width: 26px;
-    flex-basis: 26px;
-  }
-  body.mobile-settings #tab-bar .mobile-view-tab { padding-left: 7px; padding-right: 7px; }
-  body.mobile-settings .tab-action { font-size: 11px; padding-left: 6px; padding-right: 6px; }
-  body.mobile-settings #randomise { padding-left: 6px; padding-right: 6px; }
-}
-
-@media (max-width: 300px) {
-  body.mobile-settings { padding: 0; }
-  body.mobile-settings #left-column {
-    height: 100vh;
-    height: 100dvh;
-  }
-  body.mobile-settings #tab-bar .mobile-view-tab { padding-left: 4px; padding-right: 4px; }
-  body.mobile-settings .tab-action { font-size: 10px; padding-left: 4px; padding-right: 4px; }
-  body.mobile-settings #randomise { padding-left: 4px; padding-right: 4px; }
-}
-
 </style>
 </head>
 
-<body class="mobile-map-view">
+<body>
 <div id="page-layout">
 <div id="left-column">
 <div id="page-branding" style="display:flex; align-items:center; justify-content:center; gap:12px; margin-top:24px; margin-bottom:16px; width:100%;">
   <img src="https://github.com/Nowcast-EU/United-Kingdom/blob/main/NowcastUKlogo.png?raw=true"
        alt="Nowcast UK logo"
-       style="height:clamp(40px, 8vw, 72px); width:auto; flex-shrink:0;">
+       style="height:var(--branding-logo-size, clamp(40px, 8vw, 72px)); width:auto; flex-shrink:0;">
   <div style="display:flex; flex-direction:column; justify-content:center; min-width:0; overflow:hidden;">
-    <h1 style="margin:0 0 2px 0; white-space:nowrap; font-size:clamp(0.8rem, 2.5vw, 2rem); text-align:left;">Nowcast UK | Election Sandbox</h1>
-    <h2 class="subtitle" style="margin:0; white-space:nowrap; font-size:clamp(0.65rem, 1.8vw, 1.3rem); text-align:left;">
+    <h1 style="margin:0 0 2px 0; white-space:nowrap; font-size:var(--branding-title-size, clamp(0.8rem, 2.5vw, 2rem)); text-align:left;">Nowcast UK | Election Sandbox</h1>
+    <h2 class="subtitle" style="margin:0; white-space:nowrap; font-size:var(--branding-subtitle-size, clamp(0.65rem, 1.8vw, 1.3rem)); text-align:left;">
       For the latest polling & projection averages, visit 
       <a href="https://nowcast-eu.github.io/United-Kingdom/"><em>www.nowcast.uk</em></a>
     </h2>
@@ -1264,14 +692,13 @@ tbody tr[data-party="PLC"] td {
   <button class="nation-tab" data-nation="NI" data-short="NI">N. Ireland</button>
   </div>
   <div class="tab-group tab-group-right">
-    <button class="mobile-view-tab mobile-map-tab active" type="button" role="tab" aria-selected="true" aria-controls="right-column" data-view="map">Map</button>
     <button class="tab-action" id="reset">Reset</button>
     <button class="tab-action" id="randomise">Randomise</button>
   </div>
 </div>
 
   
-<div id="mobile-view-panel">
+<div id="editor-panel">
 <div id="table-row">
   <div id="table-col">
     <table>
@@ -1311,10 +738,9 @@ tbody tr[data-party="PLC"] td {
 </div>
 </div>
 
-<div id="mobile-view-tabs" role="tablist" aria-label="Calculator view">
+<div id="editor-view-tabs" role="tablist" aria-label="Calculator view">
   <div class="tab-group">
-    <button class="mobile-view-tab" type="button" role="tab" aria-selected="false" aria-controls="settings-section demo-section" data-view="settings">Additional settings</button>
-    <button class="mobile-view-tab desktop-view-tab" type="button" role="tab" aria-selected="false" aria-controls="demo-section" data-view="desktop-demographics">Demographics</button>
+    <button class="editor-view-tab demographics-tab" type="button" role="tab" aria-selected="false" aria-controls="demo-section" data-view="demographics">Demographics</button>
   </div>
 </div>
 
@@ -4239,8 +3665,7 @@ function paintSlider(slider) {
    const p = (v - lo) / (hi - lo);   // thumb position, 0 to 1, works for any symmetric range
    const zero = (0 - lo) / (hi - lo);
    const m = 1 - p;                // mirror position on the other side of 0
-   const horizontal = slider.classList.contains('h-slider') ||
-     (slider.classList.contains('v-slider') && window.matchMedia('(max-width: 768px)').matches);
+   const horizontal = slider.classList.contains('h-slider');
    const t = parseFloat(getComputedStyle(slider).getPropertyValue("--thumb-size"));
    const party = slider.classList.contains('h-slider')
      ? document.getElementById("demo-party").value
@@ -4700,7 +4125,6 @@ document.getElementById('reset').addEventListener('click', () => {
   // ---- Recalculate everything ----
   calculate();
   updateResetButtonState();
-  scheduleMobileTableFit();
 
 });
 
@@ -4773,7 +4197,6 @@ document.getElementById('randomise').addEventListener('click', () => {
   renderTable();
   calculate();
   updateResetButtonState();
-  scheduleMobileTableFit();
 });
 
 renderTable();
@@ -4787,121 +4210,17 @@ function syncDesktopTableHeight() {
 
 syncDesktopTableHeight();
 
-function setMobileView(view) {
-  ['table', 'map', 'settings'].forEach(name => {
-    const className = `mobile-${['table', 'map'].includes(name) ? `${name}-view` : name}`;
-    document.body.classList.toggle(className, name === view);
-  });
-
-  document.querySelectorAll('.nation-tab').forEach(tab => {
-    tab.classList.toggle('active', view === 'table' && tab.dataset.nation === currentTab);
-  });
-
-  document.querySelectorAll('.mobile-view-tab:not(.desktop-view-tab)').forEach(tab => {
-    const active = tab.dataset.view === view;
-    tab.classList.toggle('active', active);
-    tab.setAttribute('aria-selected', String(active));
-  });
-
-  if (view === 'settings') requestAnimationFrame(drawDemoChart);
-  if (view === 'map') requestAnimationFrame(() => {
-    if (window.invalidateConstituencyMapSize) window.invalidateConstituencyMapSize();
-  });
-  scheduleMobileTableFit();
-}
-
-function setDesktopEditorView(view) {
-  const isDemographics = view === 'desktop-demographics';
-  document.body.classList.toggle('desktop-demographics', isDemographics);
+function setEditorView(view) {
+  const isDemographics = view === 'demographics';
+  document.body.classList.toggle('show-demographics', isDemographics);
   document.querySelectorAll('.nation-tab').forEach(tab => {
     tab.classList.toggle('active', !isDemographics && tab.dataset.nation === currentTab);
   });
-  const demographicsTab = document.querySelector('.desktop-view-tab');
+  const demographicsTab = document.querySelector('.demographics-tab');
   demographicsTab.classList.toggle('active', isDemographics);
   demographicsTab.setAttribute('aria-selected', String(isDemographics));
   if (isDemographics) requestAnimationFrame(drawDemoChart);
 }
-
-function fitMobileTable() {
-  document.body.classList.remove('mobile-table-compact', 'mobile-table-vertical-tight', 'mobile-table-tiny');
-  const table = document.querySelector('#table-col table');
-  const dataRows = [...table.tBodies[0].rows].filter(row => !row.classList.contains('divider-row'));
-  dataRows.forEach(row => row.style.height = '');
-  if (!mobileLayoutQuery.matches || !document.body.classList.contains('mobile-table-view')) return;
-
-  const availableTableHeight = () => {
-    const tabs = document.getElementById('mobile-view-tabs');
-    const panel = document.getElementById('mobile-view-panel');
-    const tableRow = document.getElementById('table-row');
-    const leftColumn = document.getElementById('left-column');
-    const tableTop = table.getBoundingClientRect().top;
-    const tabsHeight = tabs.getBoundingClientRect().height;
-    const bottomPadding = parseFloat(getComputedStyle(tableRow).paddingBottom);
-    const panelBorder = parseFloat(getComputedStyle(panel).borderBottomWidth);
-    const leftPadding = parseFloat(getComputedStyle(leftColumn).paddingBottom);
-    const panelBottom = leftColumn.getBoundingClientRect().bottom - leftPadding - tabsHeight + 1;
-    return panelBottom - panelBorder - bottomPadding - tableTop;
-  };
-
-  const ukTable = table.cloneNode(true);
-  ukTable.removeAttribute('id');
-  ukTable.style.cssText = 'position:absolute; top:0; left:-10000px; visibility:hidden; pointer-events:none;';
-  const ukBody = ukTable.tBodies[0];
-  const rowTemplate = [...ukBody.rows].find(row => !row.classList.contains('divider-row'));
-  ukBody.replaceChildren();
-  const addUkRows = (count) => {
-    for (let i = 0; i < count; i++) ukBody.appendChild(rowTemplate.cloneNode(true));
-  };
-  const addDivider = label => {
-    const row = document.createElement('tr');
-    row.className = 'divider-row';
-    const cell = document.createElement('td');
-    cell.colSpan = 3;
-    cell.textContent = label;
-    row.appendChild(cell);
-    ukBody.appendChild(row);
-  };
-  addUkRows(7);
-  addDivider('Scotland & Wales');
-  addUkRows(2);
-  addDivider('Northern Ireland');
-  addUkRows(6);
-  table.parentElement.appendChild(ukTable);
-
-  const fitUkStyle = () => {
-    if (ukTable.getBoundingClientRect().height <= availableTableHeight()) return true;
-    document.body.classList.add('mobile-table-compact');
-    if (ukTable.getBoundingClientRect().height <= availableTableHeight()) return true;
-    document.body.classList.add('mobile-table-vertical-tight');
-    if (ukTable.getBoundingClientRect().height <= availableTableHeight()) return true;
-    document.body.classList.add('mobile-table-tiny');
-    return ukTable.getBoundingClientRect().height <= availableTableHeight();
-  };
-
-  try {
-    fitUkStyle();
-    const ukHeight = ukTable.getBoundingClientRect().height;
-    const ukRow = [...ukBody.rows].find(row => !row.classList.contains('divider-row'));
-    const additionalRowHeight = Math.max(0, availableTableHeight() - ukHeight) / 15;
-    let matchingRowHeight = ukRow.getBoundingClientRect().height + additionalRowHeight;
-    [...ukBody.rows]
-      .filter(row => !row.classList.contains('divider-row'))
-      .forEach(row => row.style.height = `${matchingRowHeight}px`);
-    const rowAdjustment = (availableTableHeight() - ukTable.getBoundingClientRect().height) / 15;
-    matchingRowHeight += rowAdjustment;
-    dataRows.forEach(row => row.style.height = `${matchingRowHeight}px`);
-  } finally {
-    ukTable.remove();
-  }
-}
-
-let mobileTableFitFrame;
-function scheduleMobileTableFit() {
-  cancelAnimationFrame(mobileTableFitFrame);
-  mobileTableFitFrame = requestAnimationFrame(fitMobileTable);
-}
-
-if (window.matchMedia('(max-width: 768px)').matches) setMobileView('map');
 
   document.querySelectorAll('.nation-tab').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -4911,49 +4230,38 @@ if (window.matchMedia('(max-width: 768px)').matches) setMobileView('map');
     renderTable();
     updateTable();
     refreshConcentrationPanel();
-    if (!mobileLayoutQuery.matches) setDesktopEditorView('desktop-uk');
+    setEditorView('uk');
     if (currentTab === 'UK') syncDesktopTableHeight();
-    setMobileView('table');
   });
 });
 
-document.querySelectorAll('.mobile-view-tab').forEach(btn => {
+document.querySelectorAll('.demographics-tab').forEach(btn => {
   btn.addEventListener('click', () => {
-    if (btn.dataset.view.startsWith('desktop-')) {
-      setDesktopEditorView(document.body.classList.contains('desktop-demographics') ? 'desktop-uk' : btn.dataset.view);
-    } else {
-      setMobileView(btn.dataset.view);
-    }
+    setEditorView(document.body.classList.contains('show-demographics') ? 'uk' : btn.dataset.view);
   });
 });
 
-const mobileViewPanel = document.getElementById('mobile-view-panel');
 const pageLayout = document.getElementById('page-layout');
-const rightColumn = document.getElementById('right-column');
-const mobileLayoutQuery = window.matchMedia('(max-width: 768px)');
-let lastMobileLayout = mobileLayoutQuery.matches;
-function syncMapPlacement() {
-  if (mobileLayoutQuery.matches) {
-    mobileViewPanel.appendChild(rightColumn);
-    document.body.classList.remove('desktop-demographics');
-    const demographicsTab = document.querySelector('.desktop-view-tab');
-    demographicsTab.classList.remove('active');
-    demographicsTab.setAttribute('aria-selected', 'false');
+const stackedLayoutQuery = window.matchMedia('(max-width: 768px)');
+function updateResponsiveScale() {
+  if (stackedLayoutQuery.matches) {
+    const layoutWidth = document.documentElement.clientWidth;
+    const scale = Math.min(1, layoutWidth / 768);
+    pageLayout.style.setProperty('--page-scale', String(scale));
+    pageLayout.style.setProperty('--branding-logo-size', `clamp(40px, ${layoutWidth * 0.08 / scale}px, 72px)`);
+    pageLayout.style.setProperty('--branding-title-size', `clamp(0.8rem, ${layoutWidth * 0.025 / scale}px, 2rem)`);
+    pageLayout.style.setProperty('--branding-subtitle-size', `clamp(0.65rem, ${layoutWidth * 0.018 / scale}px, 1.3rem)`);
   } else {
-    pageLayout.appendChild(rightColumn);
-    if (lastMobileLayout) setDesktopEditorView('desktop-uk');
-  }
-  lastMobileLayout = mobileLayoutQuery.matches;
-  if (mobileLayoutQuery.matches && window.invalidateConstituencyMapSize) {
-    requestAnimationFrame(() => window.invalidateConstituencyMapSize());
+    pageLayout.style.removeProperty('--page-scale');
+    pageLayout.style.removeProperty('--branding-logo-size');
+    pageLayout.style.removeProperty('--branding-title-size');
+    pageLayout.style.removeProperty('--branding-subtitle-size');
   }
 }
-syncMapPlacement();
-mobileLayoutQuery.addEventListener('change', syncMapPlacement);
+updateResponsiveScale();
 window.addEventListener('resize', () => {
-  syncMapPlacement();
+  updateResponsiveScale();
   syncDesktopTableHeight();
-  scheduleMobileTableFit();
 });
   
 document.addEventListener('DOMContentLoaded', () => calculate());
