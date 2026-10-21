@@ -4053,21 +4053,19 @@ function applyStrengthToRow(row, target) {
 
   PARTIES.forEach(p => {
     const strength = (Number(row[p]) || 0) / 100;   // 100 -> 1.00
+    const demographicStrength = strength * demographicMultiplier(row.name, p);
 
-    // concentration: boosts seats where the party is above 100%, trims below
+    // Apply concentration to local strength after demographic effects.
     const concVal = Number(conc[p] ?? 0);
-    let multiplier = efficiencyMultiplier(strength, concVal);
+    let multiplier = efficiencyMultiplier(demographicStrength, concVal);
 
     // incumbent effect: only for the sitting party
     if (p === incumbentParty) multiplier *= (1 + Number(inc[p] ?? 0));
 
-        // demographic effect, applied after concentration and incumbency
-    multiplier *= demographicMultiplier(row.name, p);
-
     multiplier = Math.max(0, isFinite(multiplier) ? multiplier : 1);
 
     // the core formula: national share x relative strength x effects
-    out[p] = (target[p] || 0) * strength * multiplier;
+    out[p] = (target[p] || 0) * demographicStrength * multiplier;
   });
   return out;
 }
