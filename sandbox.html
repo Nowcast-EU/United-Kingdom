@@ -28,7 +28,7 @@
 
 :root {
   --page-background: #f8faf9;
-  --panel-background: #f8fcf9;
+  --panel-background: #fcfcfc;
 }
 
 html {
@@ -411,8 +411,24 @@ tbody tr[data-party="PLC"] td {
   -webkit-tap-highlight-color: transparent;
 }
 
-.map-mode-button:hover { background: #f1f5f9; }
-.map-mode-button[aria-pressed="true"] {
+.map-mode-button:not([data-map-mode="projection"]) {
+  border-color: #cbd5e1;
+  background: #e8edf3;
+  color: #334155;
+}
+.map-mode-button:not([data-map-mode="projection"]):hover {
+  background: #f1f5f9;
+}
+.map-mode-button:not([data-map-mode="projection"])[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--party-color) 75%, #000);
+  background: var(--party-color);
+  color: #fff;
+}
+.map-mode-button:not([data-map-mode="projection"])[aria-pressed="true"]:hover {
+  filter: brightness(0.92);
+}
+.map-mode-button[data-map-mode="projection"]:hover { background: #f1f5f9; }
+.map-mode-button[data-map-mode="projection"][aria-pressed="true"] {
   border-color: #005433;
   background: #005433;
   color: #fff;
@@ -602,7 +618,7 @@ tbody tr[data-party="PLC"] td {
   width: 100%;
   height: 502px;
   margin: 0;
-  background: #fff;
+  background: var(--panel-background);
 }
 
 @media (min-width: 769px) {
@@ -839,12 +855,12 @@ tbody tr[data-party="PLC"] td {
   </div>
   <div id="map-mode-controls" role="group" aria-label="Map display">
     <button class="map-mode-button" type="button" data-map-mode="projection" aria-pressed="true">Projection</button>
-    <button class="map-mode-button" type="button" data-map-mode="LAB" aria-pressed="false">LAB</button>
-    <button class="map-mode-button" type="button" data-map-mode="CON" aria-pressed="false">CON</button>
-    <button class="map-mode-button" type="button" data-map-mode="RFM" aria-pressed="false">RFM</button>
-    <button class="map-mode-button" type="button" data-map-mode="LDM" aria-pressed="false">LDM</button>
-    <button class="map-mode-button" type="button" data-map-mode="GRN" aria-pressed="false">GRN</button>
-    <button class="map-mode-button" type="button" data-map-mode="RES" aria-pressed="false">RES</button>
+    <button class="map-mode-button" type="button" data-map-mode="LAB" style="--party-color:#E4003B" aria-pressed="false">LAB</button>
+    <button class="map-mode-button" type="button" data-map-mode="CON" style="--party-color:#0087DC" aria-pressed="false">CON</button>
+    <button class="map-mode-button" type="button" data-map-mode="RFM" style="--party-color:#23C7DF" aria-pressed="false">RFM</button>
+    <button class="map-mode-button" type="button" data-map-mode="LDM" style="--party-color:#FAA61A" aria-pressed="false">LDM</button>
+    <button class="map-mode-button" type="button" data-map-mode="GRN" style="--party-color:#6AB023" aria-pressed="false">GRN</button>
+    <button class="map-mode-button" type="button" data-map-mode="RES" style="--party-color:#000055" aria-pressed="false">RES</button>
   </div>
 </div><!-- end right-column -->
 </div><!-- end page-layout -->
