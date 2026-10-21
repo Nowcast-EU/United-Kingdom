@@ -5135,11 +5135,31 @@ document.addEventListener('DOMContentLoaded', () => calculate());
     return maxWeight * (0.5 + zoomProgress * 0.5);
   }
   function sty(colors){ return function(f){ var fillColor=colors[f.properties.NAME]; return {fillColor:fillColor||'#dcdcdc',fillOpacity:1,color:'#fff',weight:borderWeight(0.6)}; }; }
-  function updateLayerStyle() {
-    if (!layer) return;
-    layer.options.style = sty(mapFillColors());
-    layer.setStyle(layer.options.style);
-  }
+
+function updateLayerStyle() {
+  if (!layer) return;
+
+  // Refresh constituency colours
+  layer.options.style = sty(mapFillColors());
+  layer.setStyle(layer.options.style);
+
+  // Refresh tooltip party names using the latest projection
+  var winningParties = winners();
+
+  layer.eachLayer(function(featureLayer) {
+    var name = featureLayer.feature.properties.NAME;
+    var winner = winningParties[name] || '?';
+    var partyName =
+      (window.PARTY_ALIASES && window.PARTY_ALIASES[winner]) || winner;
+
+    if (featureLayer.getTooltip()) {
+      featureLayer.setTooltipContent(
+        '<strong>' + name + '</strong><br>' + partyName
+      );
+    }
+  });
+}
+
   function initMap() {
     var hoveredLayer = null;
     var pinnedLayer = null;
