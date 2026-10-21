@@ -5147,9 +5147,9 @@ document.addEventListener('DOMContentLoaded', () => calculate());
     var closeFeatureTooltip = function(targetLayer) {
       if (targetLayer && targetLayer.getTooltip()) map.removeLayer(targetLayer.getTooltip());
     };
-    var defaultZoom = window.innerWidth < 768 ? 7.3348 : 6.3348;
+    var defaultZoom = window.innerWidth < 768 ? 6.5 : 5.5;
     map = L.map('constituency-map',{
-    center:[54.7858,-3.1598],
+    center:[54.5858,-3.1598],
     zoom:defaultZoom,
     zoomSnap:0,
     zoomDelta:1,
