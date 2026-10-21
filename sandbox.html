@@ -201,6 +201,48 @@ tfoot td {
   body { padding: 0; }
   #page-layout { display: flex; flex-direction: row; align-items: flex-start; width: 100%; }
   #left-column { width: 55%; padding: 0 32px 24px 64px; box-sizing: border-box; }
+  #mobile-view-panel {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #cbd5e1;
+    border-radius: 0 0 8px 0;
+    border-bottom-left-radius: 0;
+    background: #fff;
+  }
+  #mobile-view-panel > #table-row {
+    border: 0;
+    border-radius: 0;
+  }
+  #demo-section {
+    display: none;
+    flex: 1 0 auto;
+    margin: 0;
+    padding: 12px;
+  }
+  body.desktop-demographics #table-row { display: none; }
+  body.desktop-demographics #demo-section { display: flex; flex-direction: column; }
+  #mobile-view-tabs {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 3px;
+    margin: -2px 0 0;
+    padding: 0;
+    position: relative;
+    z-index: 2;
+  }
+  #mobile-view-tabs .tab-group { flex: 0 0 auto; }
+  #mobile-view-tabs .mobile-view-tab {
+    display: none;
+    border-radius: 0 0 8px 8px;
+  }
+  #mobile-view-tabs .desktop-view-tab { display: inline-block; border-radius: 0 0 8px 8px; }
+  #mobile-view-tabs .desktop-view-tab.active {
+    background: #fff;
+    border-top-color: #fff;
+    border-bottom-color: #cbd5e1;
+    padding-bottom: 9px;
+  }
   #right-column {
     width: 45%;
     height: 100vh;
@@ -726,6 +768,10 @@ tfoot td {
 #mobile-view-tabs { display: none; }
 .mobile-map-tab { display: none; }
 
+@media (min-width: 769px) {
+  #mobile-view-tabs { display: flex; }
+}
+
 .nation-tab, .tab-action, .mobile-view-tab {
   font-family: inherit;
   font-size: 14px;
@@ -758,6 +804,7 @@ tfoot td {
 
 @media (max-width: 768px) {
   .tab-group-left { width: auto; flex: 0 0 auto; }
+  #mobile-view-tabs .desktop-view-tab { display: none; }
 
   .nation-tab {
     font-size: 0;
@@ -1251,9 +1298,10 @@ tfoot td {
 </div>
 </div>
 
-<div id="mobile-view-tabs" role="tablist" aria-label="Mobile calculator view">
+<div id="mobile-view-tabs" role="tablist" aria-label="Calculator view">
   <div class="tab-group">
     <button class="mobile-view-tab" type="button" role="tab" aria-selected="false" aria-controls="settings-section demo-section" data-view="settings">Additional settings</button>
+    <button class="mobile-view-tab desktop-view-tab" type="button" role="tab" aria-selected="false" aria-controls="demo-section" data-view="desktop-demographics">Demographics</button>
   </div>
 </div>
 
@@ -4712,7 +4760,7 @@ function setMobileView(view) {
     tab.classList.toggle('active', view === 'table' && tab.dataset.nation === currentTab);
   });
 
-  document.querySelectorAll('.mobile-view-tab').forEach(tab => {
+  document.querySelectorAll('.mobile-view-tab:not(.desktop-view-tab)').forEach(tab => {
     const active = tab.dataset.view === view;
     tab.classList.toggle('active', active);
     tab.setAttribute('aria-selected', String(active));
@@ -4723,6 +4771,18 @@ function setMobileView(view) {
     if (window.invalidateConstituencyMapSize) window.invalidateConstituencyMapSize();
   });
   scheduleMobileTableFit();
+}
+
+function setDesktopEditorView(view) {
+  const isDemographics = view === 'desktop-demographics';
+  document.body.classList.toggle('desktop-demographics', isDemographics);
+  document.querySelectorAll('.nation-tab').forEach(tab => {
+    tab.classList.toggle('active', !isDemographics && tab.dataset.nation === currentTab);
+  });
+  const demographicsTab = document.querySelector('.desktop-view-tab');
+  demographicsTab.classList.toggle('active', isDemographics);
+  demographicsTab.setAttribute('aria-selected', String(isDemographics));
+  if (isDemographics) requestAnimationFrame(drawDemoChart);
 }
 
 function fitMobileTable() {
@@ -4813,13 +4873,18 @@ if (window.matchMedia('(max-width: 768px)').matches) setMobileView('map');
     renderTable();
     updateTable();
     refreshConcentrationPanel();
+    if (!mobileLayoutQuery.matches) setDesktopEditorView('desktop-uk');
     setMobileView('table');
   });
 });
 
 document.querySelectorAll('.mobile-view-tab').forEach(btn => {
   btn.addEventListener('click', () => {
-    setMobileView(btn.dataset.view);
+    if (btn.dataset.view.startsWith('desktop-')) {
+      setDesktopEditorView(document.body.classList.contains('desktop-demographics') ? 'desktop-uk' : btn.dataset.view);
+    } else {
+      setMobileView(btn.dataset.view);
+    }
   });
 });
 
@@ -4827,19 +4892,29 @@ const mobileViewPanel = document.getElementById('mobile-view-panel');
 const pageLayout = document.getElementById('page-layout');
 const rightColumn = document.getElementById('right-column');
 const mobileLayoutQuery = window.matchMedia('(max-width: 768px)');
+let lastMobileLayout = mobileLayoutQuery.matches;
 function syncMapPlacement() {
   if (mobileLayoutQuery.matches) {
     mobileViewPanel.appendChild(rightColumn);
+    document.body.classList.remove('desktop-demographics');
+    const demographicsTab = document.querySelector('.desktop-view-tab');
+    demographicsTab.classList.remove('active');
+    demographicsTab.setAttribute('aria-selected', 'false');
   } else {
     pageLayout.appendChild(rightColumn);
+    if (lastMobileLayout) setDesktopEditorView('desktop-uk');
   }
+  lastMobileLayout = mobileLayoutQuery.matches;
   if (mobileLayoutQuery.matches && window.invalidateConstituencyMapSize) {
     requestAnimationFrame(() => window.invalidateConstituencyMapSize());
   }
 }
 syncMapPlacement();
 mobileLayoutQuery.addEventListener('change', syncMapPlacement);
-window.addEventListener('resize', scheduleMobileTableFit);
+window.addEventListener('resize', () => {
+  syncMapPlacement();
+  scheduleMobileTableFit();
+});
   
 document.addEventListener('DOMContentLoaded', () => calculate());
   
