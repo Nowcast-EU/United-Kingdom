@@ -5647,6 +5647,12 @@ document.addEventListener('DOMContentLoaded', () => calculate());
   }
   function sty(lu){ return function(f){ var w=lu[f.properties.NAME]; return {fillColor:w?(PARTY_COLORS[w]||'#ccc'):'#ccc',fillOpacity:1,color:'#fff',weight:borderWeight(0.6)}; }; }
   function initMap() {
+    var hoveredLayer = null;
+    var pinnedLayer = null;
+    var featureLayers = {};
+    var closeFeatureTooltip = function(targetLayer) {
+      if (targetLayer && targetLayer.getTooltip()) map.removeLayer(targetLayer.getTooltip());
+    };
     var defaultZoom = window.innerWidth < 768 ? 5.3348 : 6.3348;
     map = L.map('constituency-map',{
     center:[54.7858,-3.1598],
@@ -5661,16 +5667,78 @@ document.addEventListener('DOMContentLoaded', () => calculate());
     ],
     maxBoundsViscosity: 1.0
 });
-    layer = L.geoJSON(GJ,{smoothFactor:0,style:sty(winners()),onEachFeature:function(f,l){
-      l.on({
-        mouseover:function(e){e.target.setStyle({weight:borderWeight(2.5),color:'#222',fillOpacity:1});e.target.bringToFront();var w=winners()[f.properties.NAME]||'?';l.bindTooltip('<strong>'+f.properties.NAME+'</strong><br>'+((window.PARTY_ALIASES&&window.PARTY_ALIASES[w])||w),{sticky:true,className:'map-tooltip-clean'}).openTooltip();},
-
-mouseout: function(e) {
-    e.target.setStyle(sty(winners())(f));
-    e.target.closeTooltip();
-}
-      });
-    }}).addTo(map);
+    layer = L.geoJSON(GJ,{smoothFactor:0,bubblingMouseEvents:false,style:sty(winners()),onEachFeature:function(f,l){
+     var winnerName = function() {
+       var winner = winners()[f.properties.NAME] || '?';
+       return (window.PARTY_ALIASES && window.PARTY_ALIASES[winner]) || winner;
+     };
+     var tooltipContent = '<strong>'+f.properties.NAME+'</strong><br>'+winnerName();
+     l.bindTooltip(tooltipContent,{sticky:false,className:'map-tooltip-clean'});
+     l.on('mouseout',function() {
+       if (pinnedLayer === l) l.openTooltip();
+     });
+     l.on({
+       click:function(e) {
+         L.DomEvent.stopPropagation(e.originalEvent);
+         if (pinnedLayer && pinnedLayer !== l) {
+           pinnedLayer.getTooltip().options.permanent = false;
+           closeFeatureTooltip(pinnedLayer);
+           layer.resetStyle(pinnedLayer);
+         }
+         if (hoveredLayer && hoveredLayer !== l) {
+           hoveredLayer.getTooltip().options.permanent = false;
+           closeFeatureTooltip(hoveredLayer);
+           layer.resetStyle(hoveredLayer);
+         }
+         hoveredLayer = l;
+         pinnedLayer = l;
+         l.getTooltip().options.permanent = true;
+         e.target.setStyle({weight:borderWeight(2.5),color:'#222',fillOpacity:1});
+         e.target.bringToFront();
+         l.openTooltip();
+       }
+     });
+   }}).addTo(map);
+   layer.eachLayer(function(featureLayer) {
+     if (featureLayer._path) featureLayers[featureLayer._path._leaflet_id] = featureLayer;
+   });
+   map.getContainer().addEventListener('mousemove',function(e) {
+     var path = e.target.closest && e.target.closest('path.leaflet-interactive');
+     var nextLayer = path && featureLayers[path._leaflet_id];
+     if (pinnedLayer) {
+       if (nextLayer && nextLayer !== pinnedLayer) closeFeatureTooltip(nextLayer);
+       if (!map.hasLayer(pinnedLayer.getTooltip())) pinnedLayer.openTooltip();
+       return;
+     }
+     if (nextLayer === hoveredLayer) return;
+     if (hoveredLayer) {
+       closeFeatureTooltip(hoveredLayer);
+       layer.resetStyle(hoveredLayer);
+     }
+     hoveredLayer = nextLayer || null;
+     if (!hoveredLayer) return;
+     hoveredLayer.setStyle({weight:borderWeight(2.5),color:'#222',fillOpacity:1});
+     hoveredLayer.bringToFront();
+     hoveredLayer.openTooltip();
+   });
+   map.getContainer().addEventListener('mouseleave',function() {
+     if (pinnedLayer) {
+       pinnedLayer.openTooltip();
+       return;
+     }
+     if (!hoveredLayer) return;
+     closeFeatureTooltip(hoveredLayer);
+     layer.resetStyle(hoveredLayer);
+     hoveredLayer = null;
+   });
+   map.on('click',function() {
+     if (!pinnedLayer) return;
+     pinnedLayer.getTooltip().options.permanent = false;
+     closeFeatureTooltip(pinnedLayer);
+     layer.resetStyle(pinnedLayer);
+     if (hoveredLayer === pinnedLayer) hoveredLayer = null;
+     pinnedLayer = null;
+   });
     map.on('zoomend', function() { layer.setStyle(sty(winners())); });
     window.invalidateConstituencyMapSize = function() { if (map) map.invalidateSize(); };
     map.invalidateSize();
