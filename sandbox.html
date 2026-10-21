@@ -128,7 +128,7 @@ h2.subtitle a:hover {
   .percent-sign { font-size: 14px; }
 
   tfoot { border-top: 1px solid #111; }
-  tfoot td { font-weight: bold; text-align: left; background: transparent; color: #64748b; font-style: italic; }
+  tfoot td { font-weight: bold; text-align: left; background: transparent; color: #999999; }
   tfoot td:first-child { text-align: left; padding-left: 0; white-space: nowrap; }
 
   input[type=number]::-webkit-inner-spin-button,
@@ -174,10 +174,15 @@ tfoot td {
   background-color: transparent;
   color: #111;
   font-size: 13px;
-  font-style: italic;
+  font-style: normal;
   height: auto;
   padding: 10px 6px 3px 0;
   border-bottom: 1px solid #111;
+}
+
+tbody tr[data-party="OTH"] td,
+tbody tr[data-party="PLC"] td {
+  border-bottom: 0;
 }
 
   .disclaimer {
@@ -461,6 +466,7 @@ tfoot td {
 }
 
 .v-slider {
+  --thumb-size: 26px;
   writing-mode: vertical-lr;
   direction: rtl;
   position: absolute;
@@ -489,32 +495,32 @@ tfoot td {
 .h-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 8px; height: 26px; box-sizing: border-box;
-  border-radius: 2px;
+  width: var(--thumb-size); height: var(--thumb-size); box-sizing: border-box;
+  border-radius: 50%;
   background: #fff;
-  border: 3px solid var(--party-color, #008500);
+  border: 4px solid var(--party-color, #008500);
 }
 .h-slider::-moz-range-thumb {
-  width: 8px; height: 26px; box-sizing: border-box;
-  border-radius: 2px;
+  width: var(--thumb-size); height: var(--thumb-size); box-sizing: border-box;
+  border-radius: 50%;
   background: #fff;
-  border: 3px solid var(--party-color, #008500);
+  border: 4px solid var(--party-color, #008500);
 }
 
 /* Efficiency slider nodes */
 .v-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 22px; height: 8px; box-sizing: border-box;
-  border-radius: 2px;
+  width: var(--thumb-size); height: var(--thumb-size); box-sizing: border-box;
+  border-radius: 50%;
   background: #fff;
-  border: 3px solid var(--party-color, #008500);
+  border: 4px solid var(--party-color, #008500);
 }
 .v-slider::-moz-range-thumb {
-  width: 22px; height: 8px; box-sizing: border-box;
-  border-radius: 2px;
+  width: var(--thumb-size); height: var(--thumb-size); box-sizing: border-box;
+  border-radius: 50%;
   background: #fff;
-  border: 3px solid var(--party-color, #008500);
+  border: 4px solid var(--party-color, #008500);
 }
 
 .slider-party {
@@ -606,8 +612,7 @@ tfoot td {
     background-size: 100% 100%;
   }
   .v-slider::-webkit-slider-runnable-track { height: 22px; background: transparent; }
-  .v-slider::-webkit-slider-thumb { width: 14px; height: 16px; }
-  .v-slider::-moz-range-thumb { width: 14px; height: 16px; }
+  .v-slider { --thumb-size: 14px; }
   .inc-input { width: 100%; max-width: none; height: 26px; font-size: 13px; }
   .effect-block, #demo-section {
     box-sizing: border-box;
@@ -691,6 +696,7 @@ tfoot td {
 .demo-ends { display: none; }
 
 .h-slider {
+  --thumb-size: 28px;
   width: 100%; height: 22px; margin: 0 0 4px; padding: 0; cursor: pointer;
   -webkit-appearance: none; appearance: none;
   background-color: transparent;
@@ -701,7 +707,7 @@ tfoot td {
 }
 .h-slider::-webkit-slider-runnable-track { height: 22px; background: transparent; }
 .h-slider::-moz-range-track { background: transparent; }
-.h-slider::-webkit-slider-thumb { margin-top: -2px; }
+.h-slider::-webkit-slider-thumb { margin-top: -3px; }
 
 #demo-chart {
   display: block;
@@ -709,6 +715,11 @@ tfoot td {
   height: 280px;
   margin: 0;
   background: #fff;
+}
+
+@media (min-width: 769px) {
+  #demo-chart { height: 400px; }
+  #demo-readout { margin-top: -10px; margin-bottom: 12px; }
 }
 
 .slider-col.disabled, .inc-col.disabled { opacity: 0.35; }
@@ -981,6 +992,7 @@ tfoot td {
     position: static;
     width: 100%;
     height: 16px;
+    --thumb-size: 22px;
     transform: none;
     writing-mode: horizontal-tb;
     direction: ltr;
@@ -989,17 +1001,9 @@ tfoot td {
     height: 4px;
     background: transparent;
   }
-  body.mobile-settings #slider-panel .v-slider::-webkit-slider-thumb {
-    width: 12px;
-    height: 14px;
-  }
   body.mobile-settings #slider-panel .v-slider::-moz-range-track {
     height: 4px;
     background: transparent;
-  }
-  body.mobile-settings #slider-panel .v-slider::-moz-range-thumb {
-    width: 12px;
-    height: 14px;
   }
   body.mobile-settings .incumbent-block {
     flex: 0 0 auto;
@@ -1124,15 +1128,8 @@ tfoot td {
   body.mobile-settings #slider-panel .v-slider {
     height: 100%;
   }
-  body.mobile-settings #slider-panel .v-slider::-webkit-slider-thumb {
-    width: 10px;
-    height: clamp(5px, 1.8vh, 10px);
-  }
-  body.mobile-settings #slider-panel .v-slider::-moz-range-thumb {
-    width: 10px;
-    height: clamp(5px, 1.8vh, 10px);
-  }
   body.mobile-settings #slider-panel .v-slider {
+    --thumb-size: 16px;
     background-size: 1px 100%, 100% 4px !important;
   }
   body.mobile-settings .incumbent-block {
@@ -1200,7 +1197,10 @@ tfoot td {
   body.mobile-settings .inc-input { height: clamp(14px, 3.5vh, 18px); }
   body.mobile-settings #demo-section > h3 { font-size: 11px; }
   body.mobile-settings #demo-readout { font-size: 10px; }
-  body.mobile-settings #demo-slider { height: 10px; }
+  body.mobile-settings #demo-slider {
+    --thumb-size: 18px;
+    height: 10px;
+  }
 }
 
 @media (max-width: 360px) {
@@ -4192,9 +4192,6 @@ document.addEventListener("input", event => {
 const CONC_EDITABLE = ["LAB", "CON", "RFM", "LDM", "GRN", "RES", "SNP", "PLC"];
 
   // ---- Bipolar slider fill ----
-const THUMB_V = 10;               // vertical sliders: thumb size ALONG the track (CSS height)
-const THUMB_H = 14;               // horizontal demographic slider: thumb diameter                 
-const THUMB_MOBILE = 10;           // horizontal efficiency slider: thumb width
 const TRACK_COL   = '#dcdcdc';    // empty track
 const FILL_COL    = '#008500';    // fill, growing from the centre toward the thumb
 const COUNTER_COL = '#c5c5c5';    // darker, greyer mirror segment on the opposite half
@@ -4213,7 +4210,7 @@ function paintSlider(slider) {
    const m = 1 - p;                // mirror position on the other side of 0
    const horizontal = slider.classList.contains('h-slider') ||
      (slider.classList.contains('v-slider') && window.matchMedia('(max-width: 768px)').matches);
-   const t = slider.classList.contains('h-slider') ? THUMB_H : horizontal ? THUMB_MOBILE : THUMB_V;
+   const t = parseFloat(getComputedStyle(slider).getPropertyValue("--thumb-size"));
    const party = slider.classList.contains('h-slider')
      ? document.getElementById("demo-party").value
      : slider.id.replace("conc-", "");
