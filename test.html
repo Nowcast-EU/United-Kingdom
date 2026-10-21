@@ -2,52 +2,47 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Primary Meta Tags -->
-<title>🇬🇧 UK | Interactive Seat Calculator</title>
-<meta name="title" content="🇬🇧 UK | Interactive Seat Calculator">
-<meta name="description" content="">
+<title>Nowcast UK / Sandbox</title>
 
-<!-- Open Graph / Facebook -->
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://nowcast-eu.github.io/United-Kingdom/calculator.html">
-<meta property="og:title" content="🇬🇧 UK | Interactive Seat Calculator">
-<meta property="og:description" content="">
-<meta property="og:image" content="https://nowcast-eu.github.io/United-Kingdom/thumbnail.png">
+  <!-- Social / Thumbnail preview -->
+  <meta property="og:title" content="Nowcast UK / Sandbox">
+  <meta property="og:description" content="">
+  <meta property="og:image" content="https://nowcast-eu.github.io/United-Kingdom/NowcastUK_thumbnail.png">
+  <meta property="og:url" content="https://nowcast-eu.github.io/United-Kingdom/sandbox.html">
+  <meta property="og:type" content="website">
+  <meta property="og:image:width" content="800">
+  <meta property="og:image:height" content="418">
+  <meta property="og:image:type" content="image/png">
 
-<!-- Twitter -->
-<meta name="twitter:card" content="summary">
-<meta name="twitter:url" content="https://nowcast-eu.github.io/United-Kingdom/calculator.html">
-<meta name="twitter:title" content="🇬🇧 UK | Interactive Seat Calculator">
-<meta name="twitter:description" content="">
-<meta name="twitter:image" content="https:nowcast-eu.github.io/United-Kingdom/thumbnail.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Nowcast UK / Sandbox">
+  <meta name="twitter:description" content="">
+  <meta name="twitter:image" content="https://nowcast-eu.github.io/United-Kingdom/NowcastUK_thumbnail.png">
 
-<link rel="icon" type="image/png" href="https://nowcast-eu.github.io/United-Kingdom/UK_favicon.png">
+  <!-- Favicon -->
+<link rel="icon" type="image/png" href="https://nowcast-eu.github.io/United-Kingdom/UK_favicon.png" />
 
 <style>
 
-@media (min-width: 768px) {
-  html {
-    font-size: 80%;
-  }
+:root {
+  --page-background: #f8faf9;
+  --panel-background: #fcfcfc;
+}
+
+html {
+  font-size: 80%;
 }
 
   body {
     font-family: Inter, system-ui, sans-serif;
-    background: #fff;
+    background: var(--page-background);
     color: #0f172a;
     margin: 0;
     padding: 0 64px 24px 64px;
     scrollbar-gutter: stable;
     overflow-x: hidden;
-  }
-
-  /* Narrower padding on mobile */
-  @media (max-width: 768px) {
-    body {
-      padding: 0 8px 24px 8px;
-    }
   }
 
 /* --- Shared title + subtitle styling --- */
@@ -89,13 +84,6 @@ h2.subtitle a:hover {
   color: #005f00;           /* slightly darker green on hover */
 }
 
-/* --- Mobile view: expand width to 90% --- */
-@media (max-width: 768px) {
-  h1, h2.subtitle {
-    max-width: 99%;
-  }
-}
-
   table { 
     width: 100%; 
     border-collapse: collapse; 
@@ -111,7 +99,7 @@ h2.subtitle a:hover {
   }
 
   th { background: transparent; font-weight: 600; text-align: left; }
-  thead th { border-bottom: 2px solid #111; }
+  thead th { border-bottom: 2px solid #005433; }
   tbody tr:not(.divider-row) td { border-bottom: 1px solid #e2e8f0; }
   td.party-column { font-weight: bold; position: relative; padding-left: 14px; color: black; }
   td.party-column::before { content: ""; position: absolute; left: 0; top: 4px; width: 6px; height: calc(100% - 8px); background-color: var(--party-color); }
@@ -129,24 +117,13 @@ h2.subtitle a:hover {
   .percent-sign { font-size: 14px; }
 
   tfoot { border-top: 1px solid #111; }
-  tfoot td { font-weight: bold; text-align: left; background: transparent; color: #64748b; font-style: italic; }
+  tfoot td { font-weight: bold; text-align: left; background: transparent; color: #999999; }
   tfoot td:first-child { text-align: left; padding-left: 0; white-space: nowrap; }
 
   input[type=number]::-webkit-inner-spin-button,
   input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
   input[type=number] { -moz-appearance: textfield; }
 
-  /* --- MOBILE VIEW --- */
-  @media (max-width: 768px) {
-    table, th, td { font-size: 13px; }
-    h3 { font-size: 16px; }
-    .input-wrapper input { width: 45px; }
-  }
-
-  @media (max-width: 480px) {
-    table, th, td { font-size: 12px; }
-    .input-wrapper input { width: 40px; }
-  }
 /* --- Uniform table header height + centered header text --- */
 th {
   height: 28px;           /* 👈 match td height for visual consistency */
@@ -157,6 +134,10 @@ th {
 
 #table-col th { text-align: left; }
 #table-col th:first-child { padding-left: 0; }
+#table-col th:nth-child(2),
+#table-col td:nth-child(2) { text-align: center; }
+#table-col td:nth-child(2) .input-wrapper { justify-content: center; }
+#table-col td:nth-child(2) .input-wrapper input { text-align: center; }
 
 td {
   height: 23px;           /* 👈 match th height */
@@ -175,10 +156,15 @@ tfoot td {
   background-color: transparent;
   color: #111;
   font-size: 13px;
-  font-style: italic;
+  font-style: normal;
   height: auto;
   padding: 10px 6px 3px 0;
-  border-bottom: 1px solid #111;
+  border-bottom: 1px solid #005433;
+}
+
+tbody tr[data-party="OTH"] td,
+tbody tr[data-party="PLC"] td {
+  border-bottom: 0;
 }
 
   .disclaimer {
@@ -202,23 +188,65 @@ tfoot td {
   body { padding: 0; }
   #page-layout { display: flex; flex-direction: row; align-items: flex-start; width: 100%; }
   #left-column { width: 55%; padding: 0 32px 24px 64px; box-sizing: border-box; }
+  #editor-panel {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #cbd5e1;
+    border-radius: 0 0 8px 0;
+    border-bottom-left-radius: 0;
+    background: var(--panel-background);
+  }
+  #editor-panel > #table-row {
+    border: 0;
+    border-radius: 0;
+  }
+  #table-row {
+    box-sizing: border-box;
+    min-height: var(--desktop-table-row-height, 0px);
+  }
+  #demo-section {
+    display: none;
+    flex: 1 0 auto;
+    margin: 0;
+    padding: 12px;
+  }
+  body.show-demographics #table-row { display: none; }
+  body.show-demographics #demo-section { display: flex; flex-direction: column; }
+  #editor-view-tabs {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 3px;
+    margin: -2px 0 0;
+    padding: 0;
+    position: relative;
+    z-index: 2;
+  }
+  #editor-view-tabs .tab-group { flex: 0 0 auto; }
+  #editor-view-tabs .editor-view-tab {
+    display: none;
+    border-radius: 0 0 8px 8px;
+  }
+  #editor-view-tabs .demographics-tab { display: inline-block; border-radius: 0 0 8px 8px; }
+  #editor-view-tabs .demographics-tab.active {
+    background: var(--panel-background);
+    border-top-color: var(--panel-background);
+    border-bottom-color: #cbd5e1;
+    padding-bottom: 9px;
+  }
   #right-column {
     width: 45%;
     height: 100vh;
     height: 100dvh;
     padding: 24px 64px 24px 32px;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
     position: sticky;
     top: 0;
     overflow: hidden;
   }
-}
-
-/* Mobile: single column */
-@media (max-width: 768px) {
-  #page-layout { display: block; padding-left: 0; padding-right: 0; }
-  #left-column, #right-column { width: 100%; padding: 0 8px 24px 8px; box-sizing: border-box; }
-  body { padding: 0; }
 }
 
 /* ---- Constituency Results (tweaked layout) ---- */
@@ -345,7 +373,69 @@ tfoot td {
   height: 520px;
   box-sizing: border-box; /* add this */
   overflow: hidden;       /* add this */
-  background: #fff;
+  position: relative;
+  background: var(--page-background);
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+#map-logo {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  width: 160px;
+  height: auto;
+  pointer-events: none;
+}
+
+#map-mode-controls {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  flex: 0 0 auto;
+}
+
+.map-mode-button {
+  min-width: 0;
+  padding: 7px 3px;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  background: #e8edf3;
+  color: #334155;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.map-mode-button:not([data-map-mode="projection"]) {
+  border-color: #cbd5e1;
+  background: #e8edf3;
+  color: #334155;
+}
+.map-mode-button:not([data-map-mode="projection"]):hover {
+  background: #f1f5f9;
+}
+.map-mode-button:not([data-map-mode="projection"])[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--party-color) 75%, #000);
+  background: var(--party-color);
+  color: #fff;
+}
+.map-mode-button:not([data-map-mode="projection"])[aria-pressed="true"]:hover {
+  filter: brightness(0.92);
+}
+.map-mode-button[data-map-mode="projection"]:hover { background: #f1f5f9; }
+.map-mode-button[data-map-mode="projection"][aria-pressed="true"] {
+  border-color: #005433;
+  background: #005433;
+  color: #fff;
+}
+
+#constituency-map .leaflet-overlay-pane svg {
+  shape-rendering: geometricPrecision;
 }
 
 @media (min-width: 769px) {
@@ -369,7 +459,7 @@ tfoot td {
 #table-row {
   display: flex; align-items: stretch; gap: 16px;
   margin-top: 0;
-  background: #fff;
+  background: var(--panel-background);
   border: 1px solid #cbd5e1;
   border-radius: 0 0 8px 8px;   /* square top corners so the panel joins the tabs flush */
   padding: 12px;
@@ -382,7 +472,15 @@ tfoot td {
 #table-col th:nth-child(2) { width: 36%; }
 #table-col th:nth-child(3) { width: 48%; white-space: nowrap; }
 
-#settings-section { flex: 1 1 0; min-width: 0; margin-top: 0; display: flex; flex-direction: column; }
+#settings-section { flex: 1 1 0; min-width: 0; margin-top: 0; display: flex; flex-direction: column; position: relative; }
+#settings-section::before {
+  content: "";
+  position: absolute;
+  left: -9px;
+  top: 8px;
+  bottom: 8px;
+  border-left: 0.5px solid #cbd5e1;
+}
 #settings-section > h3 { text-align: center; margin: 0 0 4px; font-size: 15px; }
 .slider-note { text-align: center; font-size: 11px; color: #777; margin: 0 0 8px; }
 
@@ -403,6 +501,7 @@ tfoot td {
 }
 
 .v-slider {
+  --thumb-size: 26px;
   writing-mode: vertical-lr;
   direction: rtl;
   position: absolute;
@@ -422,6 +521,10 @@ tfoot td {
   background-position: center;
   background-size: 100% 100%;
   border-radius: 999px;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
 }
 
 .v-slider::-webkit-slider-runnable-track { background: transparent; }
@@ -431,32 +534,36 @@ tfoot td {
 .h-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 8px; height: 26px; box-sizing: border-box;
-  border-radius: 2px;
-  background: #fff;
-  border: 3px solid var(--party-color, #008500);
+  width: var(--thumb-size); height: var(--thumb-size); box-sizing: border-box;
+  border-radius: 50%;
+  background: var(--party-color, #008500);
+  border: 4px solid #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.35);
 }
 .h-slider::-moz-range-thumb {
-  width: 8px; height: 26px; box-sizing: border-box;
-  border-radius: 2px;
-  background: #fff;
-  border: 3px solid var(--party-color, #008500);
+  width: var(--thumb-size); height: var(--thumb-size); box-sizing: border-box;
+  border-radius: 50%;
+  background: var(--party-color, #008500);
+  border: 4px solid #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.35);
 }
 
 /* Efficiency slider nodes */
 .v-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 22px; height: 8px; box-sizing: border-box;
-  border-radius: 2px;
-  background: #fff;
-  border: 3px solid var(--party-color, #008500);
+  width: var(--thumb-size); height: var(--thumb-size); box-sizing: border-box;
+  border-radius: 50%;
+  background: var(--party-color, #008500);
+  border: 4px solid #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.35);
 }
 .v-slider::-moz-range-thumb {
-  width: 22px; height: 8px; box-sizing: border-box;
-  border-radius: 2px;
-  background: #fff;
-  border: 3px solid var(--party-color, #008500);
+  width: var(--thumb-size); height: var(--thumb-size); box-sizing: border-box;
+  border-radius: 50%;
+  background: var(--party-color, #008500);
+  border: 4px solid #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.35);
 }
 
 .slider-party {
@@ -470,87 +577,52 @@ tfoot td {
   border: 1px solid #cbd5e1; border-radius: 4px;
 }
 
-/* Phones: stack the editor under the table */
-@media (max-width: 768px) {
-  #table-row { flex-direction: column; gap: 0; padding: 0; border: 0; background: transparent; }
-  #table-col { flex: none; width: 100%; }
-  #settings-section { flex: none; width: 100%; margin-top: 0; }
-  .effect-group { flex: none; }
-  #slider-panel { flex: none; min-height: auto; }
-  .effect-block.concentration-block { flex: none; }
-  .slider-row, .inc-row {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-  }
-  .slider-col, .inc-col { width: 100%; box-sizing: border-box; }
-  .slider-wrap { position: static; flex: none; width: 100%; height: auto; min-height: 0; }
-  .v-slider {
-    position: static;
-    writing-mode: horizontal-tb;
-    direction: ltr;
-    transform: none;
-    width: 100%;
-    height: 22px;
-    background-size: 100% 100%;
-  }
-  .v-slider::-webkit-slider-runnable-track { height: 22px; background: transparent; }
-  .v-slider::-webkit-slider-thumb { width: 14px; height: 16px; }
-  .v-slider::-moz-range-thumb { width: 14px; height: 16px; }
-  .inc-input { width: 100%; max-width: none; height: 26px; font-size: 13px; }
-  .effect-block, #demo-section {
-    box-sizing: border-box;
-    padding: 12px;
-    background: #fff;
-  }
-  .effect-group, #demo-section {
-    box-sizing: border-box;
-    border: 1px solid #cbd5e1;
-    border-radius: 0 0 6px 6px;
-    background: #fff;
-  }
-  .effect-block + .effect-block, #demo-section { margin-top: 12px; }
-  #settings-section, #demo-section, #right-column { display: none; }
-  body.mobile-concentration #settings-section { display: flex; }
-  body.mobile-demographics #demo-section { display: block; }
-  body.mobile-demographics #demo-section { margin-top: 0; }
-  body.mobile-map-view #left-column { padding-bottom: 0; }
-  body.mobile-map-view #right-column { display: block; margin-top: 0; }
-  body.mobile-map-view #constituency-map { border-radius: 0 0 10px 10px !important; }
-}
-
 #demo-section { margin-top: 28px; }
 #demo-section > h3 { text-align: center; margin: 0 0 4px; font-size: 15px; }
   
-  .demo-controls { display: flex; gap: 12px; justify-content: center; margin: 8px 0; flex-wrap: wrap; }
-.demo-controls label { font-size: 13px; display: flex; align-items: center; gap: 6px; }
+  .demo-controls { display: flex; gap: 8px; justify-content: center; align-items: center; margin: 8px 0; flex-wrap: wrap; }
+.demo-controls label { font-size: 13px; display: flex; align-items: center; gap: 5px; }
 .demo-controls select {
   font-size: 13px; padding: 3px 4px; border: 1px solid #cbd5e1; border-radius: 4px; background: #fff;
 }
+.demo-sentence { display: flex; align-items: center; gap: 5px; font-size: 13px; white-space: nowrap; }
+.demo-controls .demo-sentence select { max-width: 220px; }
+.demo-controls .demo-winner-toggle { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.demo-winner-toggle input { margin: 0; }
+.demo-control-divider { height: 20px; border-left: 1px solid #cbd5e1; }
 
 #demo-readout { text-align: center; font-size: 13px; font-weight: 600; height: 18px; margin-bottom: 2px; }
 #demo-readout .demo-value { color: #008500; font-style: italic; }
-.demo-ends { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; color: #555; }
+.demo-ends { display: none; }
 
 .h-slider {
-  width: 100%; height: 22px; margin: 0; padding: 0; cursor: pointer;
+  --thumb-size: 28px;
+  width: 100%; height: 22px; margin: 0 0 4px; padding: 0; cursor: pointer;
   -webkit-appearance: none; appearance: none;
   background-color: transparent;
   background-repeat: no-repeat;
   background-position: center;
   background-size: 100% 100%;
   border-radius: 999px;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
 }
 .h-slider::-webkit-slider-runnable-track { height: 22px; background: transparent; }
 .h-slider::-moz-range-track { background: transparent; }
-.h-slider::-webkit-slider-thumb { margin-top: -2px; }
+.h-slider::-webkit-slider-thumb { margin-top: -3px; }
 
 #demo-chart {
   display: block;
   width: 100%;
-  height: 280px;
+  height: 502px;
   margin: 0;
-  background: #fff;
+  background: var(--panel-background);
+}
+
+@media (min-width: 769px) {
+  #demo-readout { margin-top: -10px; margin-bottom: 12px; }
 }
 
 .slider-col.disabled, .inc-col.disabled { opacity: 0.35; }
@@ -564,37 +636,7 @@ tfoot td {
 .slider-row { display: flex; justify-content: space-between; gap: 6px; flex: 1 1 0; min-height: 0; }
 .inc-row { display: flex; justify-content: space-between; gap: 6px; }
 
-@media (max-width: 768px) {
-  .concentration-country { display: inline; font-weight: 400; color: #64748b; }
-  #slider-panel .slider-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
-  }
-  #slider-panel .slider-row { flex: none; }
-  #slider-panel .slider-col {
-    display: grid;
-    grid-template-columns: 42px minmax(0, 1fr) 44px;
-    grid-template-areas: "party slider value";
-    align-items: center;
-    gap: 8px;
-  }
-  #slider-panel .slider-party {
-    grid-area: party;
-    width: auto;
-    text-align: left;
-    padding: 0 0 0 5px;
-    border-bottom: 0;
-    border-left: 3px solid var(--party-color);
-  }
-  #slider-panel .slider-value {
-    grid-area: value;
-    height: auto;
-    line-height: normal;
-    text-align: right;
-  }
-  #slider-panel .slider-wrap { grid-area: slider; }
-}
+
 
 /* ---- Notebook-style tabs ---- */
 #tab-bar {
@@ -607,9 +649,26 @@ tfoot td {
 }
 .tab-group { display: flex; align-items: flex-end; gap: 3px; }
 .tab-group-left { width: 50%; }
-#mobile-view-tabs { display: none; }
+#editor-view-tabs { display: none; }
+.default-result-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  padding: 7px 0;
+  color: #aa0000;
+  font-size: 16px;
+  line-height: 1.2;
+  text-align: center;
+}
+.default-result-note[hidden] { display: none; }
+.default-result-note strong { font-size: 14px; }
 
-.nation-tab, .tab-action, .mobile-view-tab {
+@media (min-width: 769px) {
+  #editor-view-tabs { display: flex; }
+}
+
+.nation-tab, .tab-action, .editor-view-tab {
   font-family: inherit;
   font-size: 14px;
   font-weight: 500;
@@ -622,79 +681,102 @@ tfoot td {
   -webkit-tap-highlight-color: transparent;
 }
 .nation-tab { flex: 1 1 0; min-width: 0; white-space: nowrap; }
-.nation-tab:hover { background: #f1f5f9; }
-.mobile-view-tab { flex: none; }
+.nation-tab:hover, .editor-view-tab:hover { background: #f1f5f9; }
+.editor-view-tab { flex: none; }
 
-.nation-tab.active, .mobile-view-tab.active {
-  background: #fff;
+.nation-tab.active, .editor-view-tab.active {
+  background: var(--panel-background);
   color: #0f172a;
   font-weight: 700;
-  border-bottom-color: #fff;   /* hides the page's top border under the active tab */
+  border-bottom-color: var(--panel-background);   /* hides the page's top border under the active tab */
   padding-top: 9px;            /* stands slightly taller than its neighbours */
 }
 
 /* Reset / Randomise: shorter, so they read as secondary tabs */
-.tab-action { font-size: 13px; padding: 5px 14px 4px; color: #fff; background: #166534; border-color: #14532d; }
-.tab-action:hover, .tab-action:active { background: #14532d; }
+.tab-action { font-size: 13px; padding: 5px 14px 4px; color: #fff; background: #005433; border-color: #005433; }
+.tab-action:hover, .tab-action:active { background: #00442a; }
 #reset.has-changes { color: #422006; background: #f59e0b; border-color: #d97706; }
 #reset.has-changes:hover, #reset.has-changes:active { background: #d97706; }
 
 @media (max-width: 768px) {
-  .tab-group-left { width: auto; flex: 0 0 auto; }
-
-  .nation-tab {
-    font-size: 0;
-    flex: 0 0 30px;
-    width: 30px;
-    height: 30px;
+  body { padding: 0; scrollbar-gutter: auto; }
+  #page-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 768px;
+    zoom: var(--page-scale, 1);
+  }
+  #left-column, #right-column {
+    width: 768px;
     box-sizing: border-box;
+  }
+  #left-column { padding: 0 32px 24px; }
+  #editor-panel {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #cbd5e1;
+    border-radius: 0 0 8px 0;
+    border-bottom-left-radius: 0;
+    background: var(--panel-background);
+  }
+  #editor-panel > #table-row {
+    border: 0;
+    border-radius: 0;
+  }
+  #table-row {
+    box-sizing: border-box;
+    min-height: var(--mobile-table-row-height, 0px);
+  }
+  #demo-section {
+    display: none;
+    flex: 1 0 auto;
+    margin: 0;
+    padding: 12px;
+    box-sizing: border-box;
+    min-height: var(--mobile-table-row-height, 0px);
+  }
+  body.show-demographics #table-row { display: none; }
+  body.show-demographics #demo-section { display: flex; flex-direction: column; }
+  #editor-view-tabs {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 3px;
+    margin: -2px 0 0;
     padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .nation-tab.active { padding-top: 0; }
-
-  .nation-tab::after {
-    content: attr(data-short);
-    font-size: 12px;
-  }
-
-  .tab-action { font-size: 12px; padding: 5px 8px 4px; }
-  .mobile-view-tab { font-size: 12px; padding: 5px 8px 4px; }
-  .mobile-view-tab.active { padding-top: 5px; }
-  #mobile-view-tabs {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    width: 100%;
-    margin: 12px 0 -1px;
     position: relative;
     z-index: 2;
   }
-  #mobile-view-tabs .tab-group { flex: 0 0 auto; }
+  #editor-view-tabs .tab-group { flex: 0 0 auto; }
+  #editor-view-tabs .editor-view-tab { display: none; }
+  #editor-view-tabs .demographics-tab {
+    display: inline-block;
+    border-radius: 0 0 8px 8px;
+  }
+  #editor-view-tabs .demographics-tab.active {
+    background: var(--panel-background);
+    border-top-color: var(--panel-background);
+    border-bottom-color: #cbd5e1;
+    padding-bottom: 9px;
+  }
+  #right-column {
+    height: auto;
+    padding: 24px 32px;
+    box-sizing: border-box;
+    position: static;
+    top: auto;
+    overflow: visible;
+  }
+  #constituency-map { max-width: none; height: 1000px; margin: 0; }
+  #demo-readout { margin-top: -10px; margin-bottom: 12px; }
 }
-
 </style>
 </head>
 
-<body class="mobile-map-view">
+<body>
 <div id="page-layout">
 <div id="left-column">
-<div style="display:flex; align-items:center; justify-content:center; gap:12px; margin-top:24px; margin-bottom:16px; width:100%;">
-  <img src="https://github.com/Nowcast-EU/United-Kingdom/blob/main/NowcastUKlogo.png?raw=true"
-       alt="Nowcast UK logo"
-       style="height:clamp(40px, 8vw, 72px); width:auto; flex-shrink:0;">
-  <div style="display:flex; flex-direction:column; justify-content:center; min-width:0; overflow:hidden;">
-    <h1 style="margin:0 0 2px 0; white-space:nowrap; font-size:clamp(0.8rem, 2.5vw, 2rem); text-align:left;">Nowcast UK Interactive Seat Calculator</h1>
-    <h2 class="subtitle" style="margin:0; white-space:nowrap; font-size:clamp(0.65rem, 1.8vw, 1.3rem); text-align:left;">
-      For the latest polling & projection averages, visit 
-      <a href="https://nowcast-eu.github.io/United-Kingdom/"><em>www.nowcast.uk</em></a>
-    </h2>
-  </div>
-</div>
-
 <div id="tab-bar">
   <div class="tab-group tab-group-left">
   <button class="nation-tab active" data-nation="UK" data-short="UK">UK</button>
@@ -709,6 +791,7 @@ tfoot td {
 </div>
 
   
+<div id="editor-panel">
 <div id="table-row">
   <div id="table-col">
     <table>
@@ -730,36 +813,55 @@ tfoot td {
     </table>
   </div>
 
-<div id="mobile-view-tabs" role="tablist" aria-label="Mobile calculator view">
-  <div class="tab-group">
-    <button class="mobile-view-tab active" type="button" role="tab" aria-selected="true" aria-controls="right-column" data-view="map">Map</button>
-  </div>
-  <div class="tab-group">
-    <button class="mobile-view-tab" type="button" role="tab" aria-selected="false" aria-controls="settings-section" data-view="concentration">Concentration</button>
-    <button class="mobile-view-tab" type="button" role="tab" aria-selected="false" aria-controls="demo-section" data-view="demographics">Demographics</button>
-  </div>
-</div>
-
 <div id="settings-section">
   <div id="slider-panel"></div>
 </div>
 </div>
 
 <div id="demo-section">
-  <h3>Demographic Effects</h3>
+  <h3>Demography &amp; Geography</h3>
   <div class="demo-controls">
-    <label>Party <select id="demo-party"></select></label>
-    <label>Category <select id="demo-cat"></select></label>
+    <div class="demo-sentence">
+      <span>Show</span>
+      <select id="demo-party" aria-label="Party"></select>
+      <span>against</span>
+      <select id="demo-cat" aria-label="demographic category"></select>
+      <span>.</span>
+    </div>
+    <span class="demo-control-divider" aria-hidden="true"></span>
+    <label class="demo-winner-toggle"><input id="demo-color-by-winner" type="checkbox" checked>Colour by winning party</label>
   </div>
   <canvas id="demo-chart"></canvas>
   <div id="demo-readout"></div>
   <input type="range" class="h-slider" id="demo-slider" min="-100" max="100" step="1" value="0" aria-label="Demographic effect">
   <div class="demo-ends"><span id="demo-left"></span><span id="demo-right"></span></div>
 </div>
+</div>
+
+<div id="editor-view-tabs">
+  <div class="tab-group" role="tablist" aria-label="Calculator view">
+    <button class="editor-view-tab demographics-tab" type="button" role="tab" aria-selected="false" aria-controls="demo-section" data-view="demographics">Geography</button>
+  </div>
+  <span id="default-result-note" class="default-result-note" role="note" hidden>
+    <strong aria-hidden="true">!</strong>
+    Approximation of the 2024 UK General Election result
+  </span>
+</div>
 
 </div><!-- end left-column -->
 <div id="right-column">
-  <div id="constituency-map" style="border-radius:10px; overflow:hidden; border:1px solid #e2e8f0;"></div>
+  <div id="constituency-map" style="border-radius:10px; overflow:hidden; border:1px solid #e2e8f0;">
+    <img id="map-logo" src="SandboxLogo-sharp.png" alt="Nowcast UK Election Sandbox">
+  </div>
+  <div id="map-mode-controls" role="group" aria-label="Map display">
+    <button class="map-mode-button" type="button" data-map-mode="projection" aria-pressed="true">Projection</button>
+    <button class="map-mode-button" type="button" data-map-mode="LAB" style="--party-color:#E4003B" aria-pressed="false">LAB</button>
+    <button class="map-mode-button" type="button" data-map-mode="CON" style="--party-color:#0087DC" aria-pressed="false">CON</button>
+    <button class="map-mode-button" type="button" data-map-mode="RFM" style="--party-color:#23C7DF" aria-pressed="false">RFM</button>
+    <button class="map-mode-button" type="button" data-map-mode="LDM" style="--party-color:#FAA61A" aria-pressed="false">LDM</button>
+    <button class="map-mode-button" type="button" data-map-mode="GRN" style="--party-color:#6AB023" aria-pressed="false">GRN</button>
+    <button class="map-mode-button" type="button" data-map-mode="RES" style="--party-color:#000055" aria-pressed="false">RES</button>
+  </div>
 </div><!-- end right-column -->
 </div><!-- end page-layout -->
 
@@ -3294,6 +3396,21 @@ const DEMO_DEFAULTS = {};
 const DEMO_LOOKUP = {};
 DEMOGRAPHICS.constituencies.forEach(r => { DEMO_LOOKUP[r.name] = r; });
 
+// Average constituency shares approximate each side's available national transfer pool.
+const DEMO_TRANSFER_POOLS = {};
+DEMO_CATEGORIES.filter(c => ["in", "ag", "ed"].includes(c.key)).forEach(c => {
+  let aTotal = 0, bTotal = 0, count = 0;
+  DEMOGRAPHICS.constituencies.forEach(row => {
+    const a = Number(row[c.a]), b = Number(row[c.b]);
+    if (!isFinite(a) || !isFinite(b)) return;
+    aTotal += a;
+    bTotal += b;
+    count++;
+  });
+  if (!count) throw new Error(`Demographics: no transfer-pool data for ${c.key}`);
+  DEMO_TRANSFER_POOLS[c.key] = { a: aTotal / count / 100, b: bTotal / count / 100 };
+});
+
 // Console warning if any demographic row doesn't match a constituency name
 (function () {
   const known = new Set(RELATIVE_STRENGTH.constituencies.map(c => c.name));
@@ -3323,7 +3440,10 @@ function demographicMultiplier(name, p) {
     const s = (DEMO_EFFECTS[c.key] && DEMO_EFFECTS[c.key][p]) || 0;
     const a = Number(row[c.a]), b = Number(row[c.b]);
     if (!s || !isFinite(a) || !isFinite(b)) return;
-    m *= 1 + (s / 100) * DEMO_MAX_EFFECT * ((b - a) / 100);
+    const pools = DEMO_TRANSFER_POOLS[c.key];
+    // A direction's gain is limited by the population share on the opposing side.
+    const sourceShare = pools ? (s > 0 ? pools.a : pools.b) : 1;
+    m *= 1 + (s / 100) * DEMO_MAX_EFFECT * ((b - a) / 100) * sourceShare;
   });
   return Math.max(0, m);
 }
@@ -3363,6 +3483,7 @@ function drawDemoChart() {
   if (!canvas || !cat) return;
 
   const party = document.getElementById("demo-party").value;
+  const colorByWinner = document.getElementById("demo-color-by-winner").checked;
   const xKey = cat.x || cat.b;
   const results = window.latestConstituencyResults || [];
 
@@ -3375,7 +3496,10 @@ function drawDemoChart() {
     if (raw == null || raw === "") return;
     const x = Number(raw);
     if (!isFinite(x)) return;
-    pts.push([x, (r[party] || 0) * 100]);
+    const winningParty = PARTIES.reduce((winner, candidate) =>
+      (r[candidate] || 0) > (r[winner] || 0) ? candidate : winner
+    , PARTIES[0]);
+    pts.push({ x, y: (r[party] || 0) * 100, color: colorByWinner ? PARTY_COLORS[winningParty] : PARTY_COLORS[party] });
   });
 
   // Size the canvas for sharp rendering on high-DPI screens
@@ -3399,7 +3523,7 @@ function drawDemoChart() {
   const padL = 34, padR = 10, padT = 10, padB = 22;
   const plotW = W - padL - padR, plotH = H - padT - padB;
 
-  const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  const xs = pts.map(p => p.x), ys = pts.map(p => p.y);
   const xMin = Math.min(...xs), xMax = Math.max(...xs);
   const xSpan = (xMax - xMin) || 1;
   const yMax = 100;   // Y axis is always 0–100%
@@ -3417,9 +3541,9 @@ function drawDemoChart() {
   ctx.stroke();
 
   // points
-  ctx.fillStyle = PARTY_COLORS[party] || "#555";
   ctx.globalAlpha = 0.55;
-  pts.forEach(([x, y]) => {
+  pts.forEach(({ x, y, color }) => {
+    ctx.fillStyle = color || "#555";
     ctx.beginPath();
     ctx.arc(px(x), py(y), 2.2, 0, Math.PI * 2);
     ctx.fill();
@@ -3431,7 +3555,7 @@ function drawDemoChart() {
   const sx = xs.reduce((a, b) => a + b, 0);
   const sy = ys.reduce((a, b) => a + b, 0);
   const sxx = xs.reduce((a, x) => a + x * x, 0);
-  const sxy = pts.reduce((a, [x, y]) => a + x * y, 0);
+  const sxy = pts.reduce((a, point) => a + point.x * point.y, 0);
   const denom = n * sxx - sx * sx;
   if (Math.abs(denom) > 1e-9) {
     const m = (n * sxy - sx * sy) / denom;
@@ -3474,6 +3598,7 @@ function renderDemographicEditor() {
 
   partySel.addEventListener("change", syncDemographicUI);
   catSel.addEventListener("change", syncDemographicUI);
+  document.getElementById("demo-color-by-winner").addEventListener("change", drawDemoChart);
 
   slider.addEventListener("input", () => {
     const v = parseFloat(slider.value) || 0;
@@ -3517,10 +3642,10 @@ const TAB_NOTES = {
 
 // PLACEHOLDER defaults: edit these. OTH is always calculated as 100 minus the rest.
 const DEFAULTS_BY_NATION = {
-  ENG: { LAB:26.8, CON:19.6, RFM:22.7, LDM:9.4, GRN:9.7, RES:2.8 },
-  SCO: { LAB:21.3, CON:13.4, RFM:13.2, LDM:9.3,  GRN:7.0,  RES:1.0, SNP:33.3 },
-  WAL: { LAB:18.8, CON:14.3, RFM:22.5, LDM:5.4,  GRN:6.3,  RES:3.1, PLC:27.6 },
-  NI:  { SFN:22.1, DUP:17.2, ALL:10.4, UUP:16.9, SDL:15.0, TUV:9.7 }
+  ENG: { LAB:33.7, CON:23.7, RFM:14.3, LDM:12.2, GRN:6.7, RES:0.0 },
+  SCO: { LAB:35.3, CON:12.7, RFM:7.0, LDM:9.7,  GRN:3.8,  RES:0.0, SNP:30.0 },
+  WAL: { LAB:37.0, CON:18.2, RFM:16.9, LDM:6.5,  GRN:4.7,  RES:0.0, PLC:14.8 },
+  NI:  { SFN:27.0, DUP:22.1, ALL:15.0, UUP:12.2, SDL:11.1, TUV:6.2 }
 };
 
 // 2024 column for the nation tabs. Fill in your own figures; missing ones show "—".
@@ -3556,14 +3681,14 @@ RELATIVE_STRENGTH.constituencies.forEach(r => {
 // negative values reduce local strength in both comparisons.
 // Defaults: 0
 const VOTE_CONCENTRATION_DEFAULTS = {
-  "LAB": 0.10,
-  "CON": 0.05,
-  "RFM": 0.01,
+  "LAB": 0.00,
+  "CON": 0.00,
+  "RFM": 0.00,
   "LDM": 0.00,
-  "GRN": 0.10,
-  "RES": 0.10,
+  "GRN": 0.00,
+  "RES": 0.00,
   "SNP": 0.00,
-  "PLC": -0.10,
+  "PLC": 0.00,
   "SFN": 0.00,
   "DUP": 0.00,
   "ALL": 0.00,
@@ -3574,11 +3699,11 @@ const VOTE_CONCENTRATION_DEFAULTS = {
 };
 
   const INCUMBENT_STRENGTH_DEFAULTS = {
-  LAB: 0.01,
-  CON: 0.02,
-  RFM: -0.40,
+  LAB: 0.00,
+  CON: 0.00,
+  RFM: 0.00,
   LDM: 0.00,
-  GRN: -0.55,
+  GRN: 0.00,
   RES: 0.00,
   SNP: 0.00,
   PLC: 0.00
@@ -3590,12 +3715,12 @@ const NATIONS = Object.keys(NATION_PARTIES);          // ENG, SCO, WAL, NI
 // Values are fractions: 0.10 = 10.0 on the slider, -0.25 = -25.0.
 // Keys: ENG (also used by the UK tab), SCO, WAL.
 const VOTE_CONCENTRATION_DEFAULTS_BY_NATION = {
-  SCO: { SNP: 0.00, LAB: 0.13, CON: 0.00, RFM: 0.13, LDM: 0.15, GRN: -0.02, RES: 0.00 },
-  WAL: { PLC: -0.10, LAB: 0.05, CON: 0.05, RFM: 0.00, LDM: 0.10, GRN: 0.05, RES: 0.00 }
+  SCO: { SNP: 0.00, LAB: 0.00, CON: 0.00, RFM: 0.00, LDM: 0.00, GRN: 0.00, RES: 0.00 },
+  WAL: { PLC: 0.00, LAB: 0.00, CON: 0.00, RFM: 0.00, LDM: 0.00, GRN: 0.00, RES: 0.00 }
 };
 const INCUMBENT_STRENGTH_DEFAULTS_BY_NATION = {
-  SCO: { SNP: 0.00, LAB: 0.04, CON: 0.00, RFM: 0.00, LDM: 0.10, GRN: 0.00, RES: 0.00 },
-  WAL: { PLC: -0.25, LAB: 0.00, CON: 0.00, RFM: 0.00, LDM: 0.00, GRN: 0.00, RES: 0.00 }
+  SCO: { SNP: 0.00, LAB: 0.00, CON: 0.00, RFM: 0.00, LDM: 0.00, GRN: 0.00, RES: 0.00 },
+  WAL: { PLC: 0.00, LAB: 0.00, CON: 0.00, RFM: 0.00, LDM: 0.00, GRN: 0.00, RES: 0.00 }
 };
 
 const VOTE_CONCENTRATION = {};
@@ -3625,14 +3750,32 @@ const DEFAULT_SETTINGS_SIGNATURE = JSON.stringify({
 
 function updateResetButtonState() {
   const resetButton = document.getElementById("reset");
-  if (!resetButton) return;
+  const defaultResultNote = document.getElementById("default-result-note");
   const currentSignature = JSON.stringify({
     votes: VOTES,
     concentration: VOTE_CONCENTRATION,
     incumbents: INCUMBENT_STRENGTH,
     demographics: DEMO_EFFECTS
   });
-  resetButton.classList.toggle("has-changes", currentSignature !== DEFAULT_SETTINGS_SIGNATURE);
+  const hasChanges = currentSignature !== DEFAULT_SETTINGS_SIGNATURE;
+  if (resetButton) resetButton.classList.toggle("has-changes", hasChanges);
+  if (defaultResultNote) {
+    defaultResultNote.hidden = hasChanges || document.body.classList.contains("show-demographics");
+  }
+  alignDefaultResultNote();
+}
+
+function alignDefaultResultNote() {
+  const votesHeader = document.querySelector("#table-col th:nth-child(2)");
+  const tabGroup = document.querySelector("#editor-view-tabs > .tab-group");
+  const note = document.getElementById("default-result-note");
+  const pageLayout = document.getElementById("page-layout");
+  if (!votesHeader || !tabGroup || !note || !pageLayout) return;
+
+  const scale = pageLayout.getBoundingClientRect().width / pageLayout.offsetWidth;
+  const tabGap = parseFloat(getComputedStyle(note.parentElement).columnGap) || 0;
+  const offset = (votesHeader.getBoundingClientRect().right - tabGroup.getBoundingClientRect().right) / scale - tabGap;
+  note.style.marginLeft = `${Math.max(0, offset)}px`;
 }
 
 document.addEventListener("input", event => {
@@ -3640,13 +3783,12 @@ document.addEventListener("input", event => {
     updateResetButtonState();
   }
 });
+updateResetButtonState();
+window.addEventListener("resize", alignDefaultResultNote);
 
 const CONC_EDITABLE = ["LAB", "CON", "RFM", "LDM", "GRN", "RES", "SNP", "PLC"];
 
   // ---- Bipolar slider fill ----
-const THUMB_V = 10;               // vertical sliders: thumb size ALONG the track (CSS height)
-const THUMB_H = 14;               // horizontal demographic slider: thumb diameter                 
-const THUMB_MOBILE = 10;           // horizontal efficiency slider: thumb width
 const TRACK_COL   = '#dcdcdc';    // empty track
 const FILL_COL    = '#008500';    // fill, growing from the centre toward the thumb
 const COUNTER_COL = '#c5c5c5';    // darker, greyer mirror segment on the opposite half
@@ -3663,9 +3805,8 @@ function paintSlider(slider) {
    const p = (v - lo) / (hi - lo);   // thumb position, 0 to 1, works for any symmetric range
    const zero = (0 - lo) / (hi - lo);
    const m = 1 - p;                // mirror position on the other side of 0
-   const horizontal = slider.classList.contains('h-slider') ||
-     (slider.classList.contains('v-slider') && window.matchMedia('(max-width: 768px)').matches);
-   const t = slider.classList.contains('h-slider') ? THUMB_H : horizontal ? THUMB_MOBILE : THUMB_V;
+   const horizontal = slider.classList.contains('h-slider');
+   const t = parseFloat(getComputedStyle(slider).getPropertyValue("--thumb-size"));
    const party = slider.classList.contains('h-slider')
      ? document.getElementById("demo-party").value
      : slider.id.replace("conc-", "");
@@ -3681,7 +3822,7 @@ function paintSlider(slider) {
 
   const dir = horizontal ? 'to right' : 'to top';
   slider.style.backgroundImage = `linear-gradient(#000, #000), linear-gradient(${dir}, ${stops.join(', ')})`;
-  slider.style.backgroundSize = horizontal ? "1px 100%, 100% 100%" : "100% 1px, 100% 100%";
+  slider.style.backgroundSize = horizontal ? "1px 100%, 100% 100%" : "100% 1px, 80% 100%";
   slider.style.backgroundPosition = horizontal
     ? `${sliderPos(zero, t)} center, center`
     : `center ${sliderPos(1 - zero, t)}, center`;
@@ -3876,15 +4017,16 @@ function renderTable() {
     }
     const editable = own.includes(p) && p !== "OTH";
     const val = editable ? (VOTES[nation][p] || 0).toFixed(1) : "0.0";
-    const calculatedFromTab = p === "SNP" ? "Scotland"
-      : p === "PLC" ? "Wales"
-      : UK_EXTRA.slice(2).includes(p) ? "N. Ireland"
+    const calculatedTitle = p === "OTH" ? "Calculated automatically"
+      : p === "SNP" ? "Calculated from Scotland tab"
+      : p === "PLC" ? "Calculated from Wales tab"
+      : UK_EXTRA.slice(2).includes(p) ? "Calculated from N. Ireland tab"
       : null;
     return `
       <tr data-party="${p}">
         <td class="party-column" style="--party-color:${PARTY_COLORS[p]}">${p}</td>
         <td>
-          <div class="input-wrapper"${calculatedFromTab ? ` title="Calculated from ${calculatedFromTab} tab"` : ""}>
+          <div class="input-wrapper"${calculatedTitle ? ` title="${calculatedTitle}"` : ""}>
             <input type="number" id="votes-${p}" data-party="${p}" value="${val}" ${editable ? 'min="0" max="100" step="0.1"' : 'disabled'}>
             <span class="percent-sign">%</span>
           </div>
@@ -4003,21 +4145,19 @@ function applyStrengthToRow(row, target) {
 
   PARTIES.forEach(p => {
     const strength = (Number(row[p]) || 0) / 100;   // 100 -> 1.00
+    const demographicStrength = strength * demographicMultiplier(row.name, p);
 
-    // concentration: boosts seats where the party is above 100%, trims below
+    // Apply concentration to local strength after demographic effects.
     const concVal = Number(conc[p] ?? 0);
-    let multiplier = efficiencyMultiplier(strength, concVal);
+    let multiplier = efficiencyMultiplier(demographicStrength, concVal);
 
     // incumbent effect: only for the sitting party
     if (p === incumbentParty) multiplier *= (1 + Number(inc[p] ?? 0));
 
-        // demographic effect, applied after concentration and incumbency
-    multiplier *= demographicMultiplier(row.name, p);
-
     multiplier = Math.max(0, isFinite(multiplier) ? multiplier : 1);
 
     // the core formula: national share x relative strength x effects
-    out[p] = (target[p] || 0) * strength * multiplier;
+    out[p] = (target[p] || 0) * demographicStrength * multiplier;
   });
   return out;
 }
@@ -4199,32 +4339,79 @@ document.getElementById('randomise').addEventListener('click', () => {
 
 renderTable();
 
+function syncUkTableHeight() {
+  const editorPanel = document.getElementById('editor-panel');
+  if (currentTab !== 'UK' || document.body.classList.contains('show-demographics')) return;
+  const tableRow = document.getElementById('table-row');
+  if (!tableRow.getClientRects().length) return;
+  const rowHeight = tableRow.getBoundingClientRect().height;
+  if (!window.matchMedia('(max-width: 768px)').matches) {
+    tableRow.style.removeProperty('--desktop-table-row-height');
+    tableRow.style.setProperty('--desktop-table-row-height', `${rowHeight}px`);
+  }
+  editorPanel.style.setProperty('--mobile-table-row-height', `${rowHeight}px`);
+}
+
+syncUkTableHeight();
+
+function setEditorView(view) {
+  const isDemographics = view === 'demographics';
+  document.body.classList.toggle('show-demographics', isDemographics);
+  updateResetButtonState();
+  document.querySelectorAll('.nation-tab').forEach(tab => {
+    tab.classList.toggle('active', !isDemographics && tab.dataset.nation === currentTab);
+  });
+  const demographicsTab = document.querySelector('.demographics-tab');
+  demographicsTab.classList.toggle('active', isDemographics);
+  demographicsTab.setAttribute('aria-selected', String(isDemographics));
+  if (isDemographics) requestAnimationFrame(drawDemoChart);
+}
+
   document.querySelectorAll('.nation-tab').forEach(btn => {
   btn.addEventListener('click', () => {
+    if (currentTab === 'UK') syncUkTableHeight();
     currentTab = btn.dataset.nation;
     document.querySelectorAll('.nation-tab').forEach(b => b.classList.toggle('active', b === btn));
     renderTable();
     updateTable();
     refreshConcentrationPanel();
+    setEditorView('uk');
+    if (currentTab === 'UK') syncUkTableHeight();
   });
 });
 
-document.querySelectorAll('.mobile-view-tab').forEach(btn => {
+document.querySelectorAll('.demographics-tab').forEach(btn => {
   btn.addEventListener('click', () => {
-    const view = btn.dataset.view;
-    ['map', 'concentration', 'demographics'].forEach(name => {
-      const className = name === 'map' ? 'mobile-map-view' : `mobile-${name}`;
-      document.body.classList.toggle(className, name === view);
+    setEditorView(document.body.classList.contains('show-demographics') ? 'uk' : btn.dataset.view);
+  });
+});
+
+const pageLayout = document.getElementById('page-layout');
+const stackedLayoutQuery = window.matchMedia('(max-width: 768px)');
+function updateResponsiveScale() {
+  if (stackedLayoutQuery.matches) {
+    const layoutWidth = document.documentElement.clientWidth;
+    const scale = Math.min(1, layoutWidth / 768);
+    pageLayout.style.setProperty('--page-scale', String(scale));
+  } else {
+    pageLayout.style.removeProperty('--page-scale');
+  }
+  alignDefaultResultNote();
+  syncUkTableHeight();
+}
+updateResponsiveScale();
+window.addEventListener('resize', () => {
+  updateResponsiveScale();
+});
+
+let mapDisplayMode = 'projection';
+document.querySelectorAll('.map-mode-button').forEach(button => {
+  button.addEventListener('click', () => {
+    mapDisplayMode = button.dataset.mapMode;
+    document.querySelectorAll('.map-mode-button').forEach(modeButton => {
+      modeButton.setAttribute('aria-pressed', String(modeButton === button));
     });
-    if (view === 'demographics') requestAnimationFrame(drawDemoChart);
-    if (view === 'map') requestAnimationFrame(() => {
-      if (window.invalidateConstituencyMapSize) window.invalidateConstituencyMapSize();
-    });
-    document.querySelectorAll('.mobile-view-tab').forEach(tab => {
-      const active = tab === btn;
-      tab.classList.toggle('active', active);
-      tab.setAttribute('aria-selected', String(active));
-    });
+    if (window.updateMapColors) window.updateMapColors();
   });
 });
   
@@ -4913,16 +5100,79 @@ document.addEventListener('DOMContentLoaded', () => calculate());
     });
     return lu;
   }
+  function lighterColor(hex) {
+    var value = hex.replace('#', '');
+    var channels = value.length === 3
+      ? value.split('').map(function(channel) { return parseInt(channel + channel, 16); })
+      : [0, 2, 4].map(function(index) { return parseInt(value.slice(index, index + 2), 16); });
+    return '#' + channels.map(function(channel) {
+      return Math.round(channel + (255 - channel) * 0.55).toString(16).padStart(2, '0');
+    }).join('');
+  }
+  function mapFillColors() {
+    if (mapDisplayMode === 'projection') {
+      var winningParties = winners(), winningColors = {};
+      Object.keys(winningParties).forEach(function(name) {
+        winningColors[name] = PARTY_COLORS[winningParties[name]] || '#dcdcdc';
+      });
+      return winningColors;
+    }
+    var results = window.latestConstituencyResults || [], fills = {};
+    results.forEach(function(row) {
+      var selectedVotes = Number(row[mapDisplayMode]) || 0;
+      var rank = 1 + PARTIES.filter(function(party) {
+        return (Number(row[party]) || 0) > selectedVotes;
+      }).length;
+      var partyColor = PARTY_COLORS[mapDisplayMode] || '#dcdcdc';
+      fills[row.name] = rank === 1
+        ? partyColor
+        : rank === 2 ? lighterColor(partyColor) : '#dcdcdc';
+    });
+    return fills;
+  }
   function borderWeight(maxWeight) {
     var zoomProgress = Math.min(1, Math.max(0, (map.getZoom() - 4) / 2));
     return maxWeight * (0.5 + zoomProgress * 0.5);
   }
-  function sty(lu){ return function(f){ var w=lu[f.properties.NAME]; return {fillColor:w?(PARTY_COLORS[w]||'#ccc'):'#ccc',fillOpacity:1,color:'#fff',weight:borderWeight(0.6)}; }; }
+  function sty(colors){ return function(f){ var fillColor=colors[f.properties.NAME]; return {fillColor:fillColor||'#dcdcdc',fillOpacity:1,color:'#fff',weight:borderWeight(0.6)}; }; }
+
+function updateLayerStyle() {
+  if (!layer) return;
+
+  // Refresh constituency colours
+  layer.options.style = sty(mapFillColors());
+  layer.setStyle(layer.options.style);
+
+  // Refresh tooltip party names using the latest projection
+  var winningParties = winners();
+
+  layer.eachLayer(function(featureLayer) {
+    var name = featureLayer.feature.properties.NAME;
+    var winner = winningParties[name] || '?';
+    var partyName =
+      (window.PARTY_ALIASES && window.PARTY_ALIASES[winner]) || winner;
+
+    if (featureLayer.getTooltip()) {
+      featureLayer.setTooltipContent(
+        '<strong>' + name + '</strong><br>' + partyName
+      );
+    }
+  });
+}
+
   function initMap() {
-    var defaultZoom = window.innerWidth < 768 ? 5 : 6;
+    var hoveredLayer = null;
+    var pinnedLayer = null;
+    var featureLayers = {};
+    var closeFeatureTooltip = function(targetLayer) {
+      if (targetLayer && targetLayer.getTooltip()) map.removeLayer(targetLayer.getTooltip());
+    };
+    var defaultZoom = window.innerWidth < 768 ? 6.5 : 6.0;
     map = L.map('constituency-map',{
-    center:[54.5,-3.2],
+    center:[54.5858,-3.1598],
     zoom:defaultZoom,
+    zoomSnap:0,
+    zoomDelta:1,
     minZoom:4,
     maxZoom:12,
     maxBounds:[
@@ -4931,20 +5181,82 @@ document.addEventListener('DOMContentLoaded', () => calculate());
     ],
     maxBoundsViscosity: 1.0
 });
-    layer = L.geoJSON(GJ,{smoothFactor:0,style:sty(winners()),onEachFeature:function(f,l){
-      l.on({
-        mouseover:function(e){e.target.setStyle({weight:borderWeight(2.5),color:'#222',fillOpacity:1});e.target.bringToFront();var w=winners()[f.properties.NAME]||'?';l.bindTooltip('<strong>'+f.properties.NAME+'</strong><br>'+((window.PARTY_ALIASES&&window.PARTY_ALIASES[w])||w),{sticky:true,className:'map-tooltip-clean'}).openTooltip();},
-
-mouseout: function(e) {
-    e.target.setStyle(sty(winners())(f));
-    e.target.closeTooltip();
-}
-      });
-    }}).addTo(map);
-    map.on('zoomend', function() { layer.setStyle(sty(winners())); });
+    layer = L.geoJSON(GJ,{smoothFactor:0,bubblingMouseEvents:false,style:sty(mapFillColors()),onEachFeature:function(f,l){
+     var winnerName = function() {
+       var winner = winners()[f.properties.NAME] || '?';
+       return (window.PARTY_ALIASES && window.PARTY_ALIASES[winner]) || winner;
+     };
+     var tooltipContent = '<strong>'+f.properties.NAME+'</strong><br>'+winnerName();
+     l.bindTooltip(tooltipContent,{sticky:false,className:'map-tooltip-clean'});
+     l.on('mouseout',function() {
+       if (pinnedLayer === l) l.openTooltip();
+     });
+     l.on({
+       click:function(e) {
+         L.DomEvent.stopPropagation(e.originalEvent);
+         if (pinnedLayer && pinnedLayer !== l) {
+           pinnedLayer.getTooltip().options.permanent = false;
+           closeFeatureTooltip(pinnedLayer);
+           layer.resetStyle(pinnedLayer);
+         }
+         if (hoveredLayer && hoveredLayer !== l) {
+           hoveredLayer.getTooltip().options.permanent = false;
+           closeFeatureTooltip(hoveredLayer);
+           layer.resetStyle(hoveredLayer);
+         }
+         hoveredLayer = l;
+         pinnedLayer = l;
+         l.getTooltip().options.permanent = true;
+         e.target.setStyle({weight:borderWeight(2.5),color:'#222',fillOpacity:1});
+         e.target.bringToFront();
+         l.openTooltip();
+       }
+     });
+   }}).addTo(map);
+   layer.eachLayer(function(featureLayer) {
+     if (featureLayer._path) featureLayers[featureLayer._path._leaflet_id] = featureLayer;
+   });
+   map.getContainer().addEventListener('mousemove',function(e) {
+     var path = e.target.closest && e.target.closest('path.leaflet-interactive');
+     var nextLayer = path && featureLayers[path._leaflet_id];
+     if (pinnedLayer) {
+       if (nextLayer && nextLayer !== pinnedLayer) closeFeatureTooltip(nextLayer);
+       if (!map.hasLayer(pinnedLayer.getTooltip())) pinnedLayer.openTooltip();
+       return;
+     }
+     if (nextLayer === hoveredLayer) return;
+     if (hoveredLayer) {
+       closeFeatureTooltip(hoveredLayer);
+       layer.resetStyle(hoveredLayer);
+     }
+     hoveredLayer = nextLayer || null;
+     if (!hoveredLayer) return;
+     hoveredLayer.setStyle({weight:borderWeight(2.5),color:'#222',fillOpacity:1});
+     hoveredLayer.bringToFront();
+     hoveredLayer.openTooltip();
+   });
+   map.getContainer().addEventListener('mouseleave',function() {
+     if (pinnedLayer) {
+       pinnedLayer.openTooltip();
+       return;
+     }
+     if (!hoveredLayer) return;
+     closeFeatureTooltip(hoveredLayer);
+     layer.resetStyle(hoveredLayer);
+     hoveredLayer = null;
+   });
+   map.on('click',function() {
+     if (!pinnedLayer) return;
+     pinnedLayer.getTooltip().options.permanent = false;
+     closeFeatureTooltip(pinnedLayer);
+     layer.resetStyle(pinnedLayer);
+     if (hoveredLayer === pinnedLayer) hoveredLayer = null;
+     pinnedLayer = null;
+   });
+    map.on('zoomend', updateLayerStyle);
     window.invalidateConstituencyMapSize = function() { if (map) map.invalidateSize(); };
     map.invalidateSize();
-    window.updateMapColors=function(){if(layer)layer.setStyle(sty(winners()));};
+    window.updateMapColors = updateLayerStyle;
   }
 
 // After initMap(), add:
@@ -4955,5 +5267,8 @@ window.addEventListener('resize', function() {
 })();
 
 </script>
+
+<script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "849270cc0ead476b8dc89c9c1fe5f6c6"}'></script>
+
 </body>
 </html>
