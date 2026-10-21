@@ -26,6 +26,11 @@
 
 <style>
 
+:root {
+  --page-background: #f8faf9;
+  --panel-background: #ffffff;
+}
+
 @media (min-width: 768px) {
   html {
     font-size: 80%;
@@ -34,7 +39,7 @@
 
   body {
     font-family: Inter, system-ui, sans-serif;
-    background: #fff;
+    background: var(--page-background);
     color: #0f172a;
     margin: 0;
     padding: 0 64px 24px 64px;
@@ -110,7 +115,7 @@ h2.subtitle a:hover {
   }
 
   th { background: transparent; font-weight: 600; text-align: left; }
-  thead th { border-bottom: 2px solid #111; }
+  thead th { border-bottom: 2px solid #005433; }
   tbody tr:not(.divider-row) td { border-bottom: 1px solid #e2e8f0; }
   td.party-column { font-weight: bold; position: relative; padding-left: 14px; color: black; }
   td.party-column::before { content: ""; position: absolute; left: 0; top: 4px; width: 6px; height: calc(100% - 8px); background-color: var(--party-color); }
@@ -177,7 +182,7 @@ tfoot td {
   font-style: normal;
   height: auto;
   padding: 10px 6px 3px 0;
-  border-bottom: 1px solid #111;
+  border-bottom: 1px solid #005433;
 }
 
 tbody tr[data-party="OTH"] td,
@@ -212,7 +217,7 @@ tbody tr[data-party="PLC"] td {
     border: 1px solid #cbd5e1;
     border-radius: 0 0 8px 0;
     border-bottom-left-radius: 0;
-    background: #fff;
+    background: var(--panel-background);
   }
   #mobile-view-panel > #table-row {
     border: 0;
@@ -247,8 +252,8 @@ tbody tr[data-party="PLC"] td {
   }
   #mobile-view-tabs .desktop-view-tab { display: inline-block; border-radius: 0 0 8px 8px; }
   #mobile-view-tabs .desktop-view-tab.active {
-    background: #fff;
-    border-top-color: #fff;
+    background: var(--panel-background);
+    border-top-color: var(--panel-background);
     border-bottom-color: #cbd5e1;
     padding-bottom: 9px;
   }
@@ -412,7 +417,11 @@ tbody tr[data-party="PLC"] td {
   height: 520px;
   box-sizing: border-box; /* add this */
   overflow: hidden;       /* add this */
-  background: #fff;
+  background: var(--page-background);
+}
+
+#constituency-map .leaflet-overlay-pane svg {
+  shape-rendering: geometricPrecision;
 }
 
 @media (min-width: 769px) {
@@ -436,7 +445,7 @@ tbody tr[data-party="PLC"] td {
 #table-row {
   display: flex; align-items: stretch; gap: 16px;
   margin-top: 0;
-  background: #fff;
+  background: var(--panel-background);
   border: 1px solid #cbd5e1;
   border-radius: 0 0 8px 8px;   /* square top corners so the panel joins the tabs flush */
   padding: 12px;
@@ -501,13 +510,13 @@ tbody tr[data-party="PLC"] td {
   appearance: none;
   width: var(--thumb-size); height: var(--thumb-size); box-sizing: border-box;
   border-radius: 50%;
-  background: #fff;
+  background: var(--panel-background);
   border: 4px solid var(--party-color, #008500);
 }
 .h-slider::-moz-range-thumb {
   width: var(--thumb-size); height: var(--thumb-size); box-sizing: border-box;
   border-radius: 50%;
-  background: #fff;
+  background: var(--panel-background);
   border: 4px solid var(--party-color, #008500);
 }
 
@@ -517,13 +526,13 @@ tbody tr[data-party="PLC"] td {
   appearance: none;
   width: var(--thumb-size); height: var(--thumb-size); box-sizing: border-box;
   border-radius: 50%;
-  background: #fff;
+  background: var(--panel-background);
   border: 4px solid var(--party-color, #008500);
 }
 .v-slider::-moz-range-thumb {
   width: var(--thumb-size); height: var(--thumb-size); box-sizing: border-box;
   border-radius: 50%;
-  background: #fff;
+  background: var(--panel-background);
   border: 4px solid var(--party-color, #008500);
 }
 
@@ -621,11 +630,11 @@ tbody tr[data-party="PLC"] td {
   .effect-block, #demo-section {
     box-sizing: border-box;
     padding: 12px;
-    background: #fff;
+    background: var(--panel-background);
   }
   .effect-group, #demo-section {
     box-sizing: border-box;
-    background: #fff;
+    background: var(--panel-background);
   }
   .effect-block + .effect-block { margin-top: 12px; }
   #settings-section, #demo-section, #right-column { display: none; }
@@ -642,7 +651,7 @@ tbody tr[data-party="PLC"] td {
   #mobile-view-panel {
     border: 1px solid #cbd5e1;
     border-radius: 0 0 8px 0;
-    background: #fff;
+    background: var(--panel-background);
   }
   body.mobile-table-view #table-row { flex: 1 0 auto; }
   #table-row { padding: 10px; }
@@ -804,16 +813,16 @@ tbody tr[data-party="PLC"] td {
 .mobile-view-tab { flex: none; }
 
 .nation-tab.active, .mobile-view-tab.active {
-  background: #fff;
+  background: var(--panel-background);
   color: #0f172a;
   font-weight: 700;
-  border-bottom-color: #fff;   /* hides the page's top border under the active tab */
+  border-bottom-color: var(--panel-background);   /* hides the page's top border under the active tab */
   padding-top: 9px;            /* stands slightly taller than its neighbours */
 }
 
 /* Reset / Randomise: shorter, so they read as secondary tabs */
-.tab-action { font-size: 13px; padding: 5px 14px 4px; color: #fff; background: #166534; border-color: #14532d; }
-.tab-action:hover, .tab-action:active { background: #14532d; }
+.tab-action { font-size: 13px; padding: 5px 14px 4px; color: #fff; background: #005433; border-color: #005433; }
+.tab-action:hover, .tab-action:active { background: #00442a; }
 #reset.has-changes { color: #422006; background: #f59e0b; border-color: #d97706; }
 #reset.has-changes:hover, #reset.has-changes:active { background: #d97706; }
 
@@ -857,7 +866,7 @@ tbody tr[data-party="PLC"] td {
     border-radius: 0 0 8px 8px;
   }
   #mobile-view-tabs .mobile-view-tab.active {
-    border-top-color: #fff;
+    border-top-color: var(--panel-background);
     border-bottom-color: #cbd5e1;
     padding-top: 5px;
     padding-bottom: 9px;
@@ -897,14 +906,14 @@ tbody tr[data-party="PLC"] td {
     overscroll-behavior: contain;
   }
   body.mobile-settings {
-    background: #fff;
+    background: var(--page-background);
     padding: 0;
   }
   body.mobile-settings #left-column {
     height: 100vh;
     height: 100dvh;
     padding-bottom: 8px;
-    background: #fff;
+    background: var(--page-background);
     border-radius: 0;
   }
   body.mobile-settings .nation-tab {
@@ -3846,6 +3855,21 @@ const DEMO_DEFAULTS = {};
 const DEMO_LOOKUP = {};
 DEMOGRAPHICS.constituencies.forEach(r => { DEMO_LOOKUP[r.name] = r; });
 
+// Average constituency shares approximate each side's available national transfer pool.
+const DEMO_TRANSFER_POOLS = {};
+DEMO_CATEGORIES.filter(c => ["in", "ag", "ed"].includes(c.key)).forEach(c => {
+  let aTotal = 0, bTotal = 0, count = 0;
+  DEMOGRAPHICS.constituencies.forEach(row => {
+    const a = Number(row[c.a]), b = Number(row[c.b]);
+    if (!isFinite(a) || !isFinite(b)) return;
+    aTotal += a;
+    bTotal += b;
+    count++;
+  });
+  if (!count) throw new Error(`Demographics: no transfer-pool data for ${c.key}`);
+  DEMO_TRANSFER_POOLS[c.key] = { a: aTotal / count / 100, b: bTotal / count / 100 };
+});
+
 // Console warning if any demographic row doesn't match a constituency name
 (function () {
   const known = new Set(RELATIVE_STRENGTH.constituencies.map(c => c.name));
@@ -3875,7 +3899,10 @@ function demographicMultiplier(name, p) {
     const s = (DEMO_EFFECTS[c.key] && DEMO_EFFECTS[c.key][p]) || 0;
     const a = Number(row[c.a]), b = Number(row[c.b]);
     if (!s || !isFinite(a) || !isFinite(b)) return;
-    m *= 1 + (s / 100) * DEMO_MAX_EFFECT * ((b - a) / 100);
+    const pools = DEMO_TRANSFER_POOLS[c.key];
+    // A direction's gain is limited by the population share on the opposing side.
+    const sourceShare = pools ? (s > 0 ? pools.a : pools.b) : 1;
+    m *= 1 + (s / 100) * DEMO_MAX_EFFECT * ((b - a) / 100) * sourceShare;
   });
   return Math.max(0, m);
 }
@@ -5620,10 +5647,12 @@ document.addEventListener('DOMContentLoaded', () => calculate());
   }
   function sty(lu){ return function(f){ var w=lu[f.properties.NAME]; return {fillColor:w?(PARTY_COLORS[w]||'#ccc'):'#ccc',fillOpacity:1,color:'#fff',weight:borderWeight(0.6)}; }; }
   function initMap() {
-    var defaultZoom = window.innerWidth < 768 ? 5 : 6;
+    var defaultZoom = window.innerWidth < 768 ? 5.3348 : 6.3348;
     map = L.map('constituency-map',{
-    center:[54.5,-3.2],
+    center:[54.7858,-3.1598],
     zoom:defaultZoom,
+    zoomSnap:0,
+    zoomDelta:1,
     minZoom:4,
     maxZoom:12,
     maxBounds:[
