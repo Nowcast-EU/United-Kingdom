@@ -373,9 +373,20 @@ tbody tr[data-party="PLC"] td {
   height: 520px;
   box-sizing: border-box; /* add this */
   overflow: hidden;       /* add this */
+  position: relative;
   background: var(--page-background);
   flex: 1 1 auto;
   min-height: 0;
+}
+
+#map-logo {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  width: 160px;
+  height: auto;
+  pointer-events: none;
 }
 
 #map-mode-controls {
@@ -623,6 +634,19 @@ tbody tr[data-party="PLC"] td {
 .tab-group { display: flex; align-items: flex-end; gap: 3px; }
 .tab-group-left { width: 50%; }
 #editor-view-tabs { display: none; }
+.default-result-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  padding: 7px 0;
+  color: #aa0000;
+  font-size: 16px;
+  line-height: 1.2;
+  text-align: center;
+}
+.default-result-note[hidden] { display: none; }
+.default-result-note strong { font-size: 14px; }
 
 @media (min-width: 769px) {
   #editor-view-tabs { display: flex; }
@@ -684,12 +708,17 @@ tbody tr[data-party="PLC"] td {
     border: 0;
     border-radius: 0;
   }
-  #table-row { box-sizing: border-box; }
+  #table-row {
+    box-sizing: border-box;
+    min-height: var(--mobile-table-row-height, 0px);
+  }
   #demo-section {
     display: none;
     flex: 1 0 auto;
     margin: 0;
     padding: 12px;
+    box-sizing: border-box;
+    min-height: var(--mobile-table-row-height, 0px);
   }
   body.show-demographics #table-row { display: none; }
   body.show-demographics #demo-section { display: flex; flex-direction: column; }
@@ -784,7 +813,7 @@ tbody tr[data-party="PLC"] td {
       <span>.</span>
     </div>
     <span class="demo-control-divider" aria-hidden="true"></span>
-    <label class="demo-winner-toggle"><input id="demo-color-by-winner" type="checkbox">Colour by winning party</label>
+    <label class="demo-winner-toggle"><input id="demo-color-by-winner" type="checkbox" checked>Colour by winning party</label>
   </div>
   <canvas id="demo-chart"></canvas>
   <div id="demo-readout"></div>
@@ -793,15 +822,21 @@ tbody tr[data-party="PLC"] td {
 </div>
 </div>
 
-<div id="editor-view-tabs" role="tablist" aria-label="Calculator view">
-  <div class="tab-group">
+<div id="editor-view-tabs">
+  <div class="tab-group" role="tablist" aria-label="Calculator view">
     <button class="editor-view-tab demographics-tab" type="button" role="tab" aria-selected="false" aria-controls="demo-section" data-view="demographics">Geography</button>
   </div>
+  <span id="default-result-note" class="default-result-note" role="note" hidden>
+    <strong aria-hidden="true">!</strong>
+    Approximation of the 2024 UK General Election result
+  </span>
 </div>
 
 </div><!-- end left-column -->
 <div id="right-column">
-  <div id="constituency-map" style="border-radius:10px; overflow:hidden; border:1px solid #e2e8f0;"></div>
+  <div id="constituency-map" style="border-radius:10px; overflow:hidden; border:1px solid #e2e8f0;">
+    <img id="map-logo" src="SandboxLogo.png" alt="Nowcast UK Election Sandbox">
+  </div>
   <div id="map-mode-controls" role="group" aria-label="Map display">
     <button class="map-mode-button" type="button" data-map-mode="projection" aria-pressed="true">Projection</button>
     <button class="map-mode-button" type="button" data-map-mode="LAB" aria-pressed="false">LAB</button>
@@ -3591,10 +3626,10 @@ const TAB_NOTES = {
 
 // PLACEHOLDER defaults: edit these. OTH is always calculated as 100 minus the rest.
 const DEFAULTS_BY_NATION = {
-  ENG: { LAB:26.8, CON:19.6, RFM:22.7, LDM:9.4, GRN:9.7, RES:2.8 },
-  SCO: { LAB:21.3, CON:13.4, RFM:13.2, LDM:9.3,  GRN:7.0,  RES:1.0, SNP:33.3 },
-  WAL: { LAB:18.8, CON:14.3, RFM:22.5, LDM:5.4,  GRN:6.3,  RES:3.1, PLC:27.6 },
-  NI:  { SFN:22.1, DUP:17.2, ALL:10.4, UUP:16.9, SDL:15.0, TUV:9.7 }
+  ENG: { LAB:33.7, CON:23.7, RFM:14.3, LDM:12.2, GRN:6.7, RES:0.0 },
+  SCO: { LAB:35.3, CON:12.7, RFM:7.0, LDM:9.7,  GRN:3.8,  RES:0.0, SNP:30.0 },
+  WAL: { LAB:37.0, CON:18.2, RFM:16.9, LDM:6.5,  GRN:4.7,  RES:0.0, PLC:14.8 },
+  NI:  { SFN:27.0, DUP:22.1, ALL:15.0, UUP:12.2, SDL:11.1, TUV:6.2 }
 };
 
 // 2024 column for the nation tabs. Fill in your own figures; missing ones show "—".
@@ -3630,14 +3665,14 @@ RELATIVE_STRENGTH.constituencies.forEach(r => {
 // negative values reduce local strength in both comparisons.
 // Defaults: 0
 const VOTE_CONCENTRATION_DEFAULTS = {
-  "LAB": 0.10,
-  "CON": 0.05,
-  "RFM": 0.01,
+  "LAB": 0.00,
+  "CON": 0.00,
+  "RFM": 0.00,
   "LDM": 0.00,
-  "GRN": 0.10,
-  "RES": 0.10,
+  "GRN": 0.00,
+  "RES": 0.00,
   "SNP": 0.00,
-  "PLC": -0.10,
+  "PLC": 0.00,
   "SFN": 0.00,
   "DUP": 0.00,
   "ALL": 0.00,
@@ -3648,11 +3683,11 @@ const VOTE_CONCENTRATION_DEFAULTS = {
 };
 
   const INCUMBENT_STRENGTH_DEFAULTS = {
-  LAB: 0.01,
-  CON: 0.02,
-  RFM: -0.40,
+  LAB: 0.00,
+  CON: 0.00,
+  RFM: 0.00,
   LDM: 0.00,
-  GRN: -0.55,
+  GRN: 0.00,
   RES: 0.00,
   SNP: 0.00,
   PLC: 0.00
@@ -3664,12 +3699,12 @@ const NATIONS = Object.keys(NATION_PARTIES);          // ENG, SCO, WAL, NI
 // Values are fractions: 0.10 = 10.0 on the slider, -0.25 = -25.0.
 // Keys: ENG (also used by the UK tab), SCO, WAL.
 const VOTE_CONCENTRATION_DEFAULTS_BY_NATION = {
-  SCO: { SNP: 0.00, LAB: 0.13, CON: 0.00, RFM: 0.13, LDM: 0.15, GRN: -0.02, RES: 0.00 },
-  WAL: { PLC: -0.10, LAB: 0.05, CON: 0.05, RFM: 0.00, LDM: 0.10, GRN: 0.05, RES: 0.00 }
+  SCO: { SNP: 0.00, LAB: 0.00, CON: 0.00, RFM: 0.00, LDM: 0.00, GRN: 0.00, RES: 0.00 },
+  WAL: { PLC: 0.00, LAB: 0.00, CON: 0.00, RFM: 0.00, LDM: 0.00, GRN: 0.00, RES: 0.00 }
 };
 const INCUMBENT_STRENGTH_DEFAULTS_BY_NATION = {
-  SCO: { SNP: 0.00, LAB: 0.04, CON: 0.00, RFM: 0.00, LDM: 0.10, GRN: 0.00, RES: 0.00 },
-  WAL: { PLC: -0.25, LAB: 0.00, CON: 0.00, RFM: 0.00, LDM: 0.00, GRN: 0.00, RES: 0.00 }
+  SCO: { SNP: 0.00, LAB: 0.00, CON: 0.00, RFM: 0.00, LDM: 0.00, GRN: 0.00, RES: 0.00 },
+  WAL: { PLC: 0.00, LAB: 0.00, CON: 0.00, RFM: 0.00, LDM: 0.00, GRN: 0.00, RES: 0.00 }
 };
 
 const VOTE_CONCENTRATION = {};
@@ -3699,14 +3734,32 @@ const DEFAULT_SETTINGS_SIGNATURE = JSON.stringify({
 
 function updateResetButtonState() {
   const resetButton = document.getElementById("reset");
-  if (!resetButton) return;
+  const defaultResultNote = document.getElementById("default-result-note");
   const currentSignature = JSON.stringify({
     votes: VOTES,
     concentration: VOTE_CONCENTRATION,
     incumbents: INCUMBENT_STRENGTH,
     demographics: DEMO_EFFECTS
   });
-  resetButton.classList.toggle("has-changes", currentSignature !== DEFAULT_SETTINGS_SIGNATURE);
+  const hasChanges = currentSignature !== DEFAULT_SETTINGS_SIGNATURE;
+  if (resetButton) resetButton.classList.toggle("has-changes", hasChanges);
+  if (defaultResultNote) {
+    defaultResultNote.hidden = hasChanges || document.body.classList.contains("show-demographics");
+  }
+  alignDefaultResultNote();
+}
+
+function alignDefaultResultNote() {
+  const votesHeader = document.querySelector("#table-col th:nth-child(2)");
+  const tabGroup = document.querySelector("#editor-view-tabs > .tab-group");
+  const note = document.getElementById("default-result-note");
+  const pageLayout = document.getElementById("page-layout");
+  if (!votesHeader || !tabGroup || !note || !pageLayout) return;
+
+  const scale = pageLayout.getBoundingClientRect().width / pageLayout.offsetWidth;
+  const tabGap = parseFloat(getComputedStyle(note.parentElement).columnGap) || 0;
+  const offset = (votesHeader.getBoundingClientRect().right - tabGroup.getBoundingClientRect().right) / scale - tabGap;
+  note.style.marginLeft = `${Math.max(0, offset)}px`;
 }
 
 document.addEventListener("input", event => {
@@ -3714,6 +3767,8 @@ document.addEventListener("input", event => {
     updateResetButtonState();
   }
 });
+updateResetButtonState();
+window.addEventListener("resize", alignDefaultResultNote);
 
 const CONC_EDITABLE = ["LAB", "CON", "RFM", "LDM", "GRN", "RES", "SNP", "PLC"];
 
@@ -4268,18 +4323,25 @@ document.getElementById('randomise').addEventListener('click', () => {
 
 renderTable();
 
-function syncDesktopTableHeight() {
-  if (window.matchMedia('(max-width: 768px)').matches || currentTab !== 'UK') return;
+function syncUkTableHeight() {
+  const editorPanel = document.getElementById('editor-panel');
+  if (currentTab !== 'UK' || document.body.classList.contains('show-demographics')) return;
   const tableRow = document.getElementById('table-row');
-  tableRow.style.removeProperty('--desktop-table-row-height');
-  tableRow.style.setProperty('--desktop-table-row-height', `${tableRow.getBoundingClientRect().height}px`);
+  if (!tableRow.getClientRects().length) return;
+  const rowHeight = tableRow.getBoundingClientRect().height;
+  if (!window.matchMedia('(max-width: 768px)').matches) {
+    tableRow.style.removeProperty('--desktop-table-row-height');
+    tableRow.style.setProperty('--desktop-table-row-height', `${rowHeight}px`);
+  }
+  editorPanel.style.setProperty('--mobile-table-row-height', `${rowHeight}px`);
 }
 
-syncDesktopTableHeight();
+syncUkTableHeight();
 
 function setEditorView(view) {
   const isDemographics = view === 'demographics';
   document.body.classList.toggle('show-demographics', isDemographics);
+  updateResetButtonState();
   document.querySelectorAll('.nation-tab').forEach(tab => {
     tab.classList.toggle('active', !isDemographics && tab.dataset.nation === currentTab);
   });
@@ -4291,14 +4353,14 @@ function setEditorView(view) {
 
   document.querySelectorAll('.nation-tab').forEach(btn => {
   btn.addEventListener('click', () => {
-    if (currentTab === 'UK') syncDesktopTableHeight();
+    if (currentTab === 'UK') syncUkTableHeight();
     currentTab = btn.dataset.nation;
     document.querySelectorAll('.nation-tab').forEach(b => b.classList.toggle('active', b === btn));
     renderTable();
     updateTable();
     refreshConcentrationPanel();
     setEditorView('uk');
-    if (currentTab === 'UK') syncDesktopTableHeight();
+    if (currentTab === 'UK') syncUkTableHeight();
   });
 });
 
@@ -4318,11 +4380,12 @@ function updateResponsiveScale() {
   } else {
     pageLayout.style.removeProperty('--page-scale');
   }
+  alignDefaultResultNote();
+  syncUkTableHeight();
 }
 updateResponsiveScale();
 window.addEventListener('resize', () => {
   updateResponsiveScale();
-  syncDesktopTableHeight();
 });
 
 let mapDisplayMode = 'projection';
