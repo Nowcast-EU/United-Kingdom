@@ -768,7 +768,7 @@ tbody tr[data-party="PLC"] td {
     top: auto;
     overflow: visible;
   }
-  #constituency-map { max-width: none; height: 800px; margin: 0; }
+  #constituency-map { max-width: none; height: 1000px; margin: 0; }
   #demo-readout { margin-top: -10px; margin-bottom: 12px; }
 }
 </style>
@@ -5147,7 +5147,7 @@ document.addEventListener('DOMContentLoaded', () => calculate());
     var closeFeatureTooltip = function(targetLayer) {
       if (targetLayer && targetLayer.getTooltip()) map.removeLayer(targetLayer.getTooltip());
     };
-    var defaultZoom = window.innerWidth < 768 ? 5.3348 : 6.3348;
+    var defaultZoom = window.innerWidth < 768 ? 7.3348 : 6.3348;
     map = L.map('constituency-map',{
     center:[54.7858,-3.1598],
     zoom:defaultZoom,
