@@ -218,6 +218,10 @@ tbody tr[data-party="PLC"] td {
     border: 0;
     border-radius: 0;
   }
+  #table-row {
+    box-sizing: border-box;
+    min-height: var(--desktop-table-row-height, 0px);
+  }
   #demo-section {
     display: none;
     flex: 1 0 auto;
@@ -4747,6 +4751,15 @@ document.getElementById('randomise').addEventListener('click', () => {
 
 renderTable();
 
+function syncDesktopTableHeight() {
+  if (window.matchMedia('(max-width: 768px)').matches || currentTab !== 'UK') return;
+  const tableRow = document.getElementById('table-row');
+  tableRow.style.removeProperty('--desktop-table-row-height');
+  tableRow.style.setProperty('--desktop-table-row-height', `${tableRow.getBoundingClientRect().height}px`);
+}
+
+syncDesktopTableHeight();
+
 function setMobileView(view) {
   ['table', 'map', 'settings'].forEach(name => {
     const className = `mobile-${['table', 'map'].includes(name) ? `${name}-view` : name}`;
@@ -4865,12 +4878,14 @@ if (window.matchMedia('(max-width: 768px)').matches) setMobileView('map');
 
   document.querySelectorAll('.nation-tab').forEach(btn => {
   btn.addEventListener('click', () => {
+    if (currentTab === 'UK') syncDesktopTableHeight();
     currentTab = btn.dataset.nation;
     document.querySelectorAll('.nation-tab').forEach(b => b.classList.toggle('active', b === btn));
     renderTable();
     updateTable();
     refreshConcentrationPanel();
     if (!mobileLayoutQuery.matches) setDesktopEditorView('desktop-uk');
+    if (currentTab === 'UK') syncDesktopTableHeight();
     setMobileView('table');
   });
 });
@@ -4910,6 +4925,7 @@ syncMapPlacement();
 mobileLayoutQuery.addEventListener('change', syncMapPlacement);
 window.addEventListener('resize', () => {
   syncMapPlacement();
+  syncDesktopTableHeight();
   scheduleMobileTableFit();
 });
   
