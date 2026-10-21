@@ -134,6 +134,10 @@ th {
 
 #table-col th { text-align: left; }
 #table-col th:first-child { padding-left: 0; }
+#table-col th:nth-child(2),
+#table-col td:nth-child(2) { text-align: center; }
+#table-col td:nth-child(2) .input-wrapper { justify-content: center; }
+#table-col td:nth-child(2) .input-wrapper input { text-align: center; }
 
 td {
   height: 23px;           /* 👈 match th height */
@@ -441,7 +445,15 @@ tbody tr[data-party="PLC"] td {
 #table-col th:nth-child(2) { width: 36%; }
 #table-col th:nth-child(3) { width: 48%; white-space: nowrap; }
 
-#settings-section { flex: 1 1 0; min-width: 0; margin-top: 0; display: flex; flex-direction: column; }
+#settings-section { flex: 1 1 0; min-width: 0; margin-top: 0; display: flex; flex-direction: column; position: relative; }
+#settings-section::before {
+  content: "";
+  position: absolute;
+  left: -9px;
+  top: 8px;
+  bottom: 8px;
+  border-left: 0.5px solid #cbd5e1;
+}
 #settings-section > h3 { text-align: center; margin: 0 0 4px; font-size: 15px; }
 .slider-note { text-align: center; font-size: 11px; color: #777; margin: 0 0 8px; }
 
@@ -482,6 +494,10 @@ tbody tr[data-party="PLC"] td {
   background-position: center;
   background-size: 100% 100%;
   border-radius: 999px;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
 }
 
 .v-slider::-webkit-slider-runnable-track { background: transparent; }
@@ -493,14 +509,16 @@ tbody tr[data-party="PLC"] td {
   appearance: none;
   width: var(--thumb-size); height: var(--thumb-size); box-sizing: border-box;
   border-radius: 50%;
-  background: var(--panel-background);
-  border: 4px solid var(--party-color, #008500);
+  background: var(--party-color, #008500);
+  border: 4px solid #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.35);
 }
 .h-slider::-moz-range-thumb {
   width: var(--thumb-size); height: var(--thumb-size); box-sizing: border-box;
   border-radius: 50%;
-  background: var(--panel-background);
-  border: 4px solid var(--party-color, #008500);
+  background: var(--party-color, #008500);
+  border: 4px solid #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.35);
 }
 
 /* Efficiency slider nodes */
@@ -509,14 +527,16 @@ tbody tr[data-party="PLC"] td {
   appearance: none;
   width: var(--thumb-size); height: var(--thumb-size); box-sizing: border-box;
   border-radius: 50%;
-  background: var(--panel-background);
-  border: 4px solid var(--party-color, #008500);
+  background: var(--party-color, #008500);
+  border: 4px solid #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.35);
 }
 .v-slider::-moz-range-thumb {
   width: var(--thumb-size); height: var(--thumb-size); box-sizing: border-box;
   border-radius: 50%;
-  background: var(--panel-background);
-  border: 4px solid var(--party-color, #008500);
+  background: var(--party-color, #008500);
+  border: 4px solid #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.35);
 }
 
 .slider-party {
@@ -557,6 +577,10 @@ tbody tr[data-party="PLC"] td {
   background-position: center;
   background-size: 100% 100%;
   border-radius: 999px;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
 }
 .h-slider::-webkit-slider-runnable-track { height: 22px; background: transparent; }
 .h-slider::-moz-range-track { background: transparent; }
@@ -565,13 +589,12 @@ tbody tr[data-party="PLC"] td {
 #demo-chart {
   display: block;
   width: 100%;
-  height: 280px;
+  height: 502px;
   margin: 0;
   background: #fff;
 }
 
 @media (min-width: 769px) {
-  #demo-chart { height: 400px; }
   #demo-readout { margin-top: -10px; margin-bottom: 12px; }
 }
 
@@ -693,16 +716,14 @@ tbody tr[data-party="PLC"] td {
     padding-bottom: 9px;
   }
   #right-column {
-    height: 100vh;
-    height: 100dvh;
+    height: auto;
     padding: 24px 32px;
     box-sizing: border-box;
     position: static;
     top: auto;
-    overflow: hidden;
+    overflow: visible;
   }
-  #constituency-map { max-width: none; margin: 0; }
-  #demo-chart { height: 400px; }
+  #constituency-map { max-width: none; height: 800px; margin: 0; }
   #demo-readout { margin-top: -10px; margin-bottom: 12px; }
 }
 </style>
@@ -753,7 +774,7 @@ tbody tr[data-party="PLC"] td {
 </div>
 
 <div id="demo-section">
-  <h3>Demographic Effects</h3>
+  <h3>Demography &amp; Geography</h3>
   <div class="demo-controls">
     <div class="demo-sentence">
       <span>Show</span>
@@ -774,7 +795,7 @@ tbody tr[data-party="PLC"] td {
 
 <div id="editor-view-tabs" role="tablist" aria-label="Calculator view">
   <div class="tab-group">
-    <button class="editor-view-tab demographics-tab" type="button" role="tab" aria-selected="false" aria-controls="demo-section" data-view="demographics">Demographics</button>
+    <button class="editor-view-tab demographics-tab" type="button" role="tab" aria-selected="false" aria-controls="demo-section" data-view="demographics">Geography</button>
   </div>
 </div>
 
@@ -3730,7 +3751,7 @@ function paintSlider(slider) {
 
   const dir = horizontal ? 'to right' : 'to top';
   slider.style.backgroundImage = `linear-gradient(#000, #000), linear-gradient(${dir}, ${stops.join(', ')})`;
-  slider.style.backgroundSize = horizontal ? "1px 100%, 100% 100%" : "100% 1px, 100% 100%";
+  slider.style.backgroundSize = horizontal ? "1px 100%, 100% 100%" : "100% 1px, 80% 100%";
   slider.style.backgroundPosition = horizontal
     ? `${sliderPos(zero, t)} center, center`
     : `center ${sliderPos(1 - zero, t)}, center`;
