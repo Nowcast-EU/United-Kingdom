@@ -3435,18 +3435,43 @@ resetDemographicEffects();
 
 // Negative = toward the category's left attribute (a), positive = toward the right (b).
 // No data row for the constituency (Scotland, Wales, NI for now) = no effect.
+// Max share of the DONOR group's support that a slider at +/-100 can move away (0 to 1).
+// 1.0 = the donor group's support can be wiped out entirely (the mathematical limit).
+const DEMO_DONOR_MAX_SMALL = 1.0;   // when the smaller national group is the donor
+const DEMO_DONOR_MAX_LARGE = 0.5;   // when the larger national group is the donor
+
 function demographicMultiplier(name, p) {
   const row = DEMO_LOOKUP[name];
   if (!row) return 1;
   let m = 1;
   DEMO_CATEGORIES.forEach(c => {
     const s = (DEMO_EFFECTS[c.key] && DEMO_EFFECTS[c.key][p]) || 0;
-    const a = Number(row[c.a]), b = Number(row[c.b]);
-    if (!s || !isFinite(a) || !isFinite(b)) return;
-    const pools = DEMO_TRANSFER_POOLS[c.key];
-    // A direction's gain is limited by the population share on the opposing side.
-    const sourceShare = pools ? (s > 0 ? pools.a : pools.b) : 1;
-    m *= 1 + (s / 100) * DEMO_MAX_EFFECT * ((b - a) / 100) * sourceShare;
+    const aRaw = Number(row[c.a]), bRaw = Number(row[c.b]);
+    if (!s || !isFinite(aRaw) || !isFinite(bRaw)) return;
+
+    const pool = DEMO_TRANSFER_POOLS[c.key];
+
+    // ns, ur, br: original symmetric effect, unchanged
+    if (!pool) {
+      m *= 1 + (s / 100) * DEMO_MAX_EFFECT * ((bRaw - aRaw) / 100);
+      return;
+    }
+
+    // in, ag, ed, et: conserving transfer sized from the donor group
+    const a = aRaw / 100, b = bRaw / 100;
+    const donorIsA = s > 0;                         // s > 0 moves support toward b
+    const donorPool = donorIsA ? pool.a : pool.b;
+    const recipPool = donorIsA ? pool.b : pool.a;
+    const donorMax = donorPool <= recipPool ? DEMO_DONOR_MAX_SMALL : DEMO_DONOR_MAX_LARGE;
+
+    const lossFrac = Math.min(1, Math.abs(s) / 100) * donorMax;   // fraction of donor support moved
+    const chunk = lossFrac * donorPool;                           // in national-vote units
+    const donorGain = -lossFrac;                                  // per-head change in donor seats
+    const recipGain = chunk / recipPool;                          // per-head change in recipient seats
+
+    const gainA = donorIsA ? donorGain : recipGain;
+    const gainB = donorIsA ? recipGain : donorGain;
+    m *= Math.max(0, 1 + a * gainA + b * gainB);
   });
   return Math.max(0, m);
 }
@@ -4186,6 +4211,16 @@ function ukShare(p) {
   return Object.keys(NATION_WEIGHTS).reduce((a, n) => a + NATION_WEIGHTS[n] * nationShare(n, p), 0);
 }
 
+/* ---- National normalisation ("raking") ---- */
+const NORMALISE_ITERATIONS = 25;    // 0 disables raking entirely
+const GRACE_MIN = 0.005;            // minimum tolerance: 0.5 percentage points
+const GRACE_REL = 0.05;             // or 5% of the party's own share, whichever is larger
+
+// e.g. LAB at 33.7% -> +/-1.7pp, GRN at 6.8% -> +/-0.5pp
+function graceFor(target) {
+  return Math.max(GRACE_MIN, GRACE_REL * target);
+}
+
 function computeConstituencyShares() {
   const targets = {};
   Object.keys(NATION_PARTIES).forEach(n => {
@@ -4193,15 +4228,68 @@ function computeConstituencyShares() {
     PARTIES.forEach(p => targets[n][p] = nationShare(n, p) / 100);
   });
 
-  return RELATIVE_STRENGTH.constituencies.map(row => {
+  // 1. All user adjustments (demographics, concentration, incumbency)
+  const rows = RELATIVE_STRENGTH.constituencies.map(row => {
     const out = applyStrengthToRow(row, targets[row.nation]);
-    let sum = 0;
-    PARTIES.forEach(p => sum += out[p]);
-    if (sum > 0) PARTIES.forEach(p => out[p] /= sum);
     out.name = row.name;
     out.nation = row.nation;
     return out;
   });
+
+  // 2. Rake each nation's seats back towards its input shares, within the grace band
+  if (NORMALISE_ITERATIONS > 0) {
+    Object.keys(NATION_PARTIES).forEach(n => {
+      const seats = rows.filter(r => r.nation === n);
+      if (!seats.length) return;
+
+      // England's inputs sum to less than 1 (SNP/PLC/NI are carved out), and inputs can exceed 100,
+      // so compare against the targets rescaled to sum to 1
+      const tSum = PARTIES.reduce((a, p) => a + targets[n][p], 0) || 1;
+      const goal = {}, grace = {}, factor = {};
+      PARTIES.forEach(p => {
+        goal[p] = targets[n][p] / tSum;
+        grace[p] = graceFor(goal[p]);
+        factor[p] = 1;
+      });
+
+      for (let it = 0; it < NORMALISE_ITERATIONS; it++) {
+        const mean = {};
+        PARTIES.forEach(p => mean[p] = 0);
+
+        seats.forEach(r => {
+          let sum = 0;
+          PARTIES.forEach(p => sum += (r[p] || 0) * factor[p]);
+          if (sum > 0) PARTIES.forEach(p => mean[p] += (r[p] || 0) * factor[p] / sum);
+        });
+
+        let worstExcess = 0;
+        PARTIES.forEach(p => {
+          if (goal[p] <= 0) return;
+          const m = mean[p] / seats.length;
+          if (m <= 1e-9) return;
+          const dev = m - goal[p];
+          if (Math.abs(dev) <= grace[p]) return;            // inside the band: leave alone
+          const edge = goal[p] + Math.sign(dev) * grace[p]; // nearest band edge
+          factor[p] *= edge / m;
+          worstExcess = Math.max(worstExcess, Math.abs(dev) - grace[p]);
+        });
+        if (worstExcess < 1e-4) break;                      // everyone within band (to 0.01pp)
+      }
+
+      seats.forEach(r => {
+        PARTIES.forEach(p => r[p] = (r[p] || 0) * factor[p]);
+      });
+    });
+  }
+
+  // 3. Final per-seat normalisation to 100%
+  rows.forEach(r => {
+    let sum = 0;
+    PARTIES.forEach(p => sum += r[p] || 0);
+    if (sum > 0) PARTIES.forEach(p => r[p] = (r[p] || 0) / sum);
+  });
+
+  return rows;
 }
 
 /* ---- D’Hondt ---- */
