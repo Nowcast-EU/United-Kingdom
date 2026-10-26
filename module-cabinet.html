@@ -11,11 +11,12 @@
     --gap:48px;
     --chart-width: 6fr;
     --panel-width: 4fr;
+    --cab-aspect: 16 / 9;
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
   *{box-sizing:border-box;}
-  body{margin:0;padding:4px;background:var(--bg);color:var(--ink);}
-  .wrap{max-width:1250px;margin:0 auto;}
+  body{margin:0;padding:0;background:var(--bg);color:var(--ink);}
+  .wrap{max-width:none;margin:0 auto;}
 
   /* ---------- layout ---------- */
   .cab-grid{
@@ -24,6 +25,9 @@
     grid-template-columns: minmax(0, var(--chart-width)) minmax(0, var(--panel-width));
     column-gap: var(--gap);
     align-items:stretch;
+    aspect-ratio: var(--cab-aspect);
+    grid-template-rows: minmax(0, 1fr);   /* lets the row shrink below its content size */
+    min-height: 0;                        /* stops content from forcing the box taller */
   }
   .cab-line{
     position:absolute;left:0;top:0;width:100%;height:100%;
@@ -38,7 +42,7 @@
   /* ---------- bar chart ---------- */
   .cab-chart{
   background:transparent;
-  padding:6px 8px 6px 0;
+  padding:6px 0;
   height:0;            /* stops the chart's own content setting the row height */
   min-height:100%;     /* then stretches it to match the panel */
   display:flex;
@@ -73,24 +77,29 @@
   .cab-gap{flex: 0 0 26px;}
 
   /* ---------- info panel ---------- */
-  .cab-panel{
+    .cab-panel{
     border:3px solid #999;background:#fff;padding:14px 16px 20px;
+    display:flex;flex-direction:column;
+    min-height:0;overflow:hidden;
   }
+  .cab-panel > *:not(.p-photo){flex:none;}
   .p-name{font-size:2.1rem;font-weight:700;margin:0 0 14px;text-align:center;line-height:1.1;}
-  .p-photo{
-    width:100%;aspect-ratio:1/1.05;background:#e4e4e4;overflow:hidden;
+    .p-photo{
+    position:relative;
+    width:100%;background:#e4e4e4;overflow:hidden;
     display:flex;align-items:center;justify-content:center;
+    flex:1 1 0;min-height:60px;
   }
-  .p-photo img{width:100%;height:100%;object-fit:cover;object-position:top;display:block;}
+  .p-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top;display:block;}
   .p-photo .initials{font-size:3.5rem;font-weight:700;color:#aaa;}
   .p-meta{margin:10px 0 0;font-size:1.05rem;line-height:1.45;}
   .p-chance{margin:12px 0 12px;font-size:1.15rem;font-weight:700;font-style:italic;}
   .p-row{
     display:grid;grid-template-columns:38px minmax(0,1fr);
-    align-items:center;column-gap:10px;margin-bottom:10px;
+    align-items:center;column-gap:10px;margin-bottom:8px;
   }
   .p-label{font-size:0.78rem;text-align:left;color:#333;}
-  .p-track{position:relative;height:30px;}
+  .p-track{position:relative;height:24px;}
   .p-fill{height:100%;min-width:3px;}
   .p-pct{
     position:absolute;top:0;height:100%;display:flex;align-items:center;
@@ -106,7 +115,8 @@
     .cab-name{font-size:0.78rem;}
     .cab-chart{padding-right:0;}
     .p-name{font-size:1.6rem;}
-    .p-photo{aspect-ratio:4/3;}
+    .p-photo{aspect-ratio:4/3;flex:none;}
+    .cab-panel{overflow:visible;}
     .cab-chart{ height:auto; min-height:0; }
     .cab-row{ flex:none; }
     .cab-track{ height:32px; }
