@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nowcast UK — Cabinet Module</title>
+<style>
+  :root{
+    --lab:#e4003b; --con:#0087DC; --rfm:#34d8ef; --ldm:#FAA61A; --grn:#6ab023; --snp:#fdf38e;
+    --ink:#1a1a1a; --muted:#666; --line:#e2e2e2; --bg:#f8faf9; --track:#eceeed;
+    --gap:48px;
+    --chart-width: 6fr;
+    --panel-width: 4fr;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;padding:4px;background:var(--bg);color:var(--ink);}
+  .wrap{max-width:1250px;margin:0 auto;}
+
+  /* ---------- layout ---------- */
+  .cab-grid{
+    position:relative;
+    display:grid;
+    grid-template-columns: minmax(0, var(--chart-width)) minmax(0, var(--panel-width));
+    column-gap: var(--gap);
+    align-items:stretch;
+  }
+  .cab-line{
+    position:absolute;left:0;top:0;width:100%;height:100%;
+    overflow:visible;pointer-events:none;z-index:2;
+  }
+  .cab-line path{
+    fill:none;stroke:var(--ink);stroke-width:2;
+    stroke-dasharray:1 6;stroke-linecap:round;stroke-linejoin:round;
+  }
+  .cab-line circle{fill:var(--ink);}
+
+  /* ---------- bar chart ---------- */
+  .cab-chart{
+  background:transparent;
+  padding:6px 8px 6px 0;
+  height:0;            /* stops the chart's own content setting the row height */
+  min-height:100%;     /* then stretches it to match the panel */
+  display:flex;
+  flex-direction:column;
+  }
+  .cab-row{
+    display:grid;grid-template-columns:170px minmax(0,1fr);
+    align-items: stretch;   /* was: center */
+    flex: 1 1 0;
+    min-height: 16px;       /* floor so rows can't collapse completely */
+    width:100%;margin:0 0 6px;padding:0;border:0;background:none;
+    font:inherit;color:inherit;text-align:left;cursor:pointer;
+  }
+  .cab-name{
+    text-align:right;font-size:0.85rem;font-weight:400;color:var(--ink);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    align-self: center;
+  }
+  .cab-track{
+    position:relative;height:auto;background:var(--track);
+    border-left:1px solid var(--ink);
+  }
+  .cab-bar{position:absolute;left:0;top:0;height:100%;}
+  .cab-val{
+    position:absolute;top:0;height:100%;display:flex;align-items:center;
+    font-size:0.85rem;font-weight:400;color:var(--ink);white-space:nowrap;
+  }
+  .cab-row:hover .cab-track{background:#e3e6e5;}
+  .cab-row.sel .cab-name{font-weight:700;color:var(--ink);}
+  .cab-row.sel .cab-track{outline:2px solid var(--ink);outline-offset:1px;}
+  .cab-row:focus-visible .cab-track{outline:2px solid #006548;outline-offset:1px;}
+  .cab-gap{flex: 0 0 26px;}
+
+  /* ---------- info panel ---------- */
+  .cab-panel{
+    border:3px solid #999;background:#fff;padding:14px 16px 20px;
+  }
+  .p-name{font-size:2.1rem;font-weight:700;margin:0 0 14px;text-align:center;line-height:1.1;}
+  .p-photo{
+    width:100%;aspect-ratio:1/1.05;background:#e4e4e4;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .p-photo img{width:100%;height:100%;object-fit:cover;object-position:top;display:block;}
+  .p-photo .initials{font-size:3.5rem;font-weight:700;color:#aaa;}
+  .p-meta{margin:10px 0 0;font-size:1.05rem;line-height:1.45;}
+  .p-chance{margin:12px 0 12px;font-size:1.15rem;font-weight:700;font-style:italic;}
+  .p-row{
+    display:grid;grid-template-columns:38px minmax(0,1fr);
+    align-items:center;column-gap:10px;margin-bottom:10px;
+  }
+  .p-label{font-size:0.78rem;text-align:left;color:#333;}
+  .p-track{position:relative;height:30px;}
+  .p-fill{height:100%;min-width:3px;}
+  .p-pct{
+    position:absolute;top:0;height:100%;display:flex;align-items:center;
+    font-size:1rem;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums;
+  }
+  .p-row:first-child .p-pct{font-size:1.25rem;}
+
+  /* ---------- mobile ---------- */
+  @media (max-width:700px){
+    .cab-grid{grid-template-columns:1fr;row-gap:16px;}
+    .cab-line{display:none;}
+    .cab-row{grid-template-columns:110px minmax(0,1fr);}
+    .cab-name{font-size:0.78rem;}
+    .cab-chart{padding-right:0;}
+    .p-name{font-size:1.6rem;}
+    .p-photo{aspect-ratio:4/3;}
+    .cab-chart{ height:auto; min-height:0; }
+    .cab-row{ flex:none; }
+    .cab-track{ height:32px; }
+    .cab-gap{ flex:none; }
+  }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="cab-grid" id="cabGrid">
+    <svg class="cab-line" id="cabLine" aria-hidden="true"></svg>
+
+    <div class="cab-chart" id="cabChart" role="listbox" aria-label="Cabinet members by projected margin"></div>
+
+    <aside class="cab-panel" id="cabPanel" aria-live="polite">
+      <h2 class="p-name" id="pName"></h2>
+      <div class="p-photo" id="pPhoto"></div>
+      <div class="p-meta">
+        <div id="pSeat"></div>
+        <div id="pRole"></div>
+      </div>
+      <div class="p-chance" id="pChance">Chance of winning</div>
+      <div id="pBars"></div>
+    </aside>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// PARTIES
+// ============================================================
+const PARTIES = {
+  LAB:{ label:'LAB', color:'#e4003b', text:'#fff' },
+  CON:{ label:'CON', color:'#0087DC', text:'#fff' },
+  RFM:{ label:'RFM', color:'#34d8ef', text:'#1a1a1a' },
+  LDM:{ label:'LDM', color:'#FAA61A', text:'#fff' },
+  GRN:{ label:'GRN', color:'#6ab023', text:'#fff' },
+  SNP:{ label:'SNP', color:'#fdf38e', text:'#1a1a1a' },
+  PLC:{ label:'PLC', color:'#005B54', text:'#fff' },
+  RES:{ label:'RES', color:'#000055', text:'#fff' },
+  OTH:{ label:'OTH', color:'#999999', text:'#fff' },
+};
+
+// ============================================================
+// DATA  — REPLACE WITH YOUR REAL TABLE
+// Each member:
+//   name   : MP name
+//   seat   : constituency
+//   role   : government position
+//   party  : the member's own party key (defaults to 'LAB')
+//   winner : projected winning party key in that seat
+//   margin : winning party's lead over 2nd place, in points (always positive)
+//   probs  : { LAB:0.62, RFM:0.30, ... }  chance of winning (0–1 or 0–100, auto-detected)
+//   photo  : (optional) image URL
+// A bar is shown as +margin if winner === party, otherwise -margin.
+// ============================================================
+const SAMPLE_ROLE = 'Secretary of State for XXXXX, XXXXX, XXXXX';
+
+// --- PLACEHOLDER probability generator (delete once you have real probs) ---
+function mockProbs(winner, margin){
+  const pw = 1 / (1 + Math.exp(-margin / 4.5));
+  const runner = winner === 'LAB' ? 'RFM' : 'LAB';
+  const third  = winner === 'CON' || winner === 'RFM' ? 'LDM' : 'CON';
+  const rest = 1 - pw;
+  const out = {}; out[winner] = pw; out[runner] = rest * 0.72; out[third] = rest * 0.2; out.GRN = rest * 0.08;
+  return out;
+}
+const RAW = [
+  ['Anneliese Midgley','Knowsley','LAB',29.9],
+  ['Angela Eagle','Wallasey','LAB',23.0],
+  ['Louise Haigh','Sheffield Heeley','LAB',21.2],
+  ['Matthew Pennycook','Greenwich and Woolwich','LAB',20.0],
+  ['Alan Campbell','Tynemouth','LAB',19.4],
+  ['Lucy Powell','Manchester Central','LAB',18.7],
+  ['Shabana Mahmood','Birmingham Ladywood','LAB',18.5],
+  ['Andy Burnham','Makerfield','LAB',15.1],
+  ['Ellie Reeves','Lewisham West and East Dulwich','LAB',13.7],
+  ['Miatta Fahnbulleh','Peckham','LAB',13.3],
+  ['Heidi Alexander','Swindon South','LAB',12.3],
+  ['Douglas Alexander','Lothian East','LAB',10.2],
+  ['Pat McFadden','Wolverhampton South East','LAB',4.9],
+  ['Ed Miliband','Doncaster North','LAB',4.7],
+  ['Hamish Falconer','Lincoln','LAB',4.5],
+  ['Emma Reynolds','Croydon East','LAB',4.4],
+  ['Jonathan Reynolds','Stalybridge and Hyde','LAB',4.2],
+  ['Alex Norris','Nottingham North and Kimberley','LAB',4.0],
+  ['Lisa Nandy','Wigan','LAB',3.2],
+  ['Wes Streeting','Ilford North','LAB',2.2],
+  ['Kanishka Narayan','Vale of Glamorgan','LAB',2.0],
+  ['Angela Rayner','Ashton-under-Lyne','RFM',0.8],
+  ['Stephen Kinnock','Aberafan Maesteg','PLC',1.1],
+  ['John Healey','Rawmarsh and Conisbrough','RFM',1.5],
+  ['Bridget Phillipson','Houghton and Sunderland South','RFM',1.5],
+  ['Yvette Cooper','Pontefract, Castleford and Knottingley','RFM',2.4],
+  ['Chris Bryant','Rhondda and Ogmore','PLC',2.8],
+];
+const MEMBERS = RAW.map(([name, seat, winner, margin]) => ({
+  name, seat, role: SAMPLE_ROLE, party: 'LAB', winner, margin,
+  probs: mockProbs(winner, margin), photo: ''
+}));
+
+// ============================================================
+// CONFIG
+// ============================================================
+const SAFE_THRESHOLD   = 5;    // margin (pts) at/above which a hold counts as "safe" → first group
+const LABEL_GAP        = 8;    // px gap between the end of a bar and its value label
+const PANEL_PARTIES = ['LAB','RFM','CON','LDM','GRN','SNP','PLC', 'OTH'];
+const PANEL_BAR_SCALE   = 0.82; // 100% chance = this fraction of the track width (leaves room for the label)
+const MOBILE_BREAKPOINT = 700; // px — connector line is hidden below this
+
+// ============================================================
+// HELPERS
+// ============================================================
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const partyOf = k => PARTIES[k] || PARTIES.OTH;
+
+const members = MEMBERS
+  .map(m => ({ ...m, party: m.party || 'LAB', v: (m.winner === (m.party || 'LAB')) ? m.margin : -m.margin }))
+  .sort((a, b) => b.v - a.v);
+
+const maxAbs = Math.max(...members.map(m => Math.abs(m.v)), 1);
+const domain = maxAbs / 0.88; // longest bar fills ~88% of the track
+
+function fmtMargin(v){
+  if (v > 0) return '+' + v.toFixed(1);
+  if (v < 0) return '\u2212' + Math.abs(v).toFixed(1);
+  return '0.0';
+}
+function groupOf(v){ return v >= SAFE_THRESHOLD ? 0 : (v >= 0 ? 1 : 2); }
+
+// ============================================================
+// CHART
+// ============================================================
+const chart = $('cabChart');
+let selected = -1;
+
+function renderChart(){
+  chart.innerHTML = '';
+  let last = null;
+  members.forEach((m, i) => {
+    const g = groupOf(m.v);
+    if (last !== null && g !== last){
+      const gap = document.createElement('div');
+      gap.className = 'cab-gap';
+      chart.appendChild(gap);
+    }
+    last = g;
+
+    const p = partyOf(m.winner);
+    const pct = Math.max(Math.abs(m.v) / domain * 100, 1.2);
+
+    const row = document.createElement('button');
+    row.type = 'button';
+    row.className = 'cab-row';
+    row.dataset.i = i;
+    row.setAttribute('role', 'option');
+    row.innerHTML = `
+      <span class="cab-name">${esc(m.name)}</span>
+      <span class="cab-track">
+        <span class="cab-bar" style="width:${pct}%;background:${p.color};"></span>
+        <span class="cab-val" style="left:calc(${pct}% + ${LABEL_GAP}px);">${fmtMargin(m.v)}</span>
+      </span>`;
+    chart.appendChild(row);
+  });
+}
+
+chart.addEventListener('click', e => {
+  const row = e.target.closest('.cab-row');
+  if (row) select(+row.dataset.i);
+});
+chart.addEventListener('keydown', e => {
+  if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+  e.preventDefault();
+  const n = Math.min(members.length - 1, Math.max(0, selected + (e.key === 'ArrowDown' ? 1 : -1)));
+  select(n, true);
+});
+
+// ============================================================
+// INFO PANEL
+// ============================================================
+function normaliseProbs(probs){
+  const entries = Object.entries(probs || {}).map(([k, v]) => [k, +v || 0]);
+  const sum = entries.reduce((s, [, v]) => s + v, 0);
+  const scale = sum > 1.5 ? 100 : 1; // accept 0–1 or 0–100
+  return entries.map(([k, v]) => [k, v / scale]).sort((a, b) => b[1] - a[1]);
+}
+
+function renderPanel(m){
+  $('pName').textContent = m.name;
+  $('pSeat').textContent = 'MP for ' + m.seat;
+  $('pRole').textContent = m.role;
+
+  const photo = $('pPhoto');
+  photo.innerHTML = '';
+  if (m.photo){
+    const img = document.createElement('img');
+    img.src = m.photo; img.alt = m.name;
+    photo.appendChild(img);
+  } else {
+    const d = document.createElement('div');
+    d.className = 'initials';
+    d.textContent = m.name.split(' ').map(w => w[0]).slice(0, 2).join('');
+    photo.appendChild(d);
+  }
+
+const raw = m.probs || {};
+
+// A party "stands" if its value is present; missing / null / '' = not standing
+const standing = PANEL_PARTIES.filter(k => raw[k] !== undefined && raw[k] !== null && raw[k] !== '');
+
+// accept 0–1 or 0–100
+const sum = Object.values(raw).reduce((s, v) => s + (+v || 0), 0);
+const scale = sum > 1.5 ? 100 : 1;
+
+const rows = standing
+  .map(k => [k, (+raw[k] || 0) / scale])
+  .sort((a, b) => b[1] - a[1]);
+
+const placeholder = `
+  <div class="p-row" style="visibility:hidden">
+    <div class="p-label">&nbsp;</div>
+    <div class="p-track"></div>
+  </div>`;
+
+$('pBars').innerHTML =
+  rows.map(([k, v]) => {
+    const p = partyOf(k);
+    const pct = v * 100;
+    return `<div class="p-row">
+      <div class="p-label">${esc(p.label)}</div>
+      <div class="p-track">
+        <div class="p-fill" style="width:${pct * PANEL_BAR_SCALE}%;background:${p.color};"></div>
+        <div class="p-pct" style="left:calc(${pct * PANEL_BAR_SCALE}% + ${LABEL_GAP}px);">${pct < 1 ? '&lt;1%' : Math.round(pct) + '%'}</div>
+      </div>
+    </div>`;
+  }).join('')
+  + placeholder.repeat(PANEL_PARTIES.length - rows.length);
+}
+
+// ============================================================
+// SELECTION + DOTTED CONNECTOR
+// ============================================================
+function select(i, focus){
+  if (i === selected && !focus) return;
+  selected = i;
+  chart.querySelectorAll('.cab-row').forEach(r => {
+    const on = +r.dataset.i === i;
+    r.classList.toggle('sel', on);
+    r.setAttribute('aria-selected', on);
+    if (on && focus) r.focus();
+  });
+  renderPanel(members[i]);
+  requestAnimationFrame(drawLine);
+}
+
+function drawLine(){
+  const svg = $('cabLine');
+  if (window.innerWidth <= MOBILE_BREAKPOINT || selected < 0){ svg.innerHTML = ''; return; }
+
+  const grid = $('cabGrid').getBoundingClientRect();
+  const row  = chart.querySelector('.cab-row.sel');
+  if (!row) return;
+
+  const bar   = row.querySelector('.cab-bar').getBoundingClientRect();
+  const val   = row.querySelector('.cab-val');
+  const valR  = val.getBoundingClientRect();
+  const chartR  = chart.getBoundingClientRect();
+  const panelR  = $('cabPanel').getBoundingClientRect();
+  const anchorR = $('pChance').getBoundingClientRect();
+
+  const startX = valR.right + 10 - grid.left;
+  const startY = bar.top + bar.height / 2 - grid.top;
+  const endX   = panelR.left - grid.left;
+  const endY   = anchorR.top + anchorR.height / 2 - grid.top;
+  let elbowX   = (chartR.right + panelR.left) / 2 - grid.left;
+  elbowX = Math.max(elbowX, startX + 14);
+
+  svg.setAttribute('width', grid.width);
+  svg.setAttribute('height', grid.height);
+  svg.innerHTML = `
+    <circle cx="${startX}" cy="${startY}" r="3"></circle>
+    <path d="M${startX} ${startY} H${elbowX} V${endY} H${endX}"></path>`;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderChart();
+select(0);
+
+window.addEventListener('resize', drawLine);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawLine);
+new ResizeObserver(drawLine).observe($('cabGrid'));
+
+// ============================================================
+// IFRAME HEIGHT MESSAGING (same pattern as the probability module)
+// ============================================================
+function sendHeight(){
+  window.parent.postMessage({
+    sender: 'nowcast-module',
+    height: document.documentElement.scrollHeight
+  }, '*');
+}
+window.addEventListener('load', sendHeight);
+window.addEventListener('resize', sendHeight);
+new ResizeObserver(sendHeight).observe(document.body);
+setTimeout(sendHeight, 100);
+setTimeout(sendHeight, 500);
+setTimeout(sendHeight, 1000);
+</script>
+</body>
+</html>
