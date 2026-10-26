@@ -9,8 +9,8 @@
     --lab:#e4003b; --con:#0087DC; --rfm:#34d8ef; --ldm:#FAA61A; --grn:#6ab023; --snp:#fdf38e;
     --ink:#1a1a1a; --muted:#666; --line:#e2e2e2; --bg:#f8faf9; --track:#eceeed;
     --gap:48px;
-    --chart-width: 6fr;
-    --panel-width: 4fr;
+    --chart-width: 7fr;
+    --panel-width: 3fr;
     --cab-aspect: 16 / 9;
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
@@ -49,7 +49,7 @@
   flex-direction:column;
   }
   .cab-row{
-    display:grid;grid-template-columns:170px minmax(0,1fr);
+    display:grid;grid-template-columns: var(--name-col, 170px) minmax(0,1fr);
     align-items: stretch;   /* was: center */
     flex: 1 1 0;
     min-height: 16px;       /* floor so rows can't collapse completely */
@@ -83,7 +83,7 @@
     min-height:0;overflow:hidden;
   }
   .cab-panel > *:not(.p-photo){flex:none;}
-  .p-name{font-size:2.1rem;font-weight:700;margin:0 0 14px;text-align:center;line-height:1.1;}
+  .p-name{font-size: clamp(1.4rem, 2.2vw, 2.1rem);font-weight:700;margin:0 0 14px;text-align:center;line-height:1.1;}
     .p-photo{
     position:relative;
     width:100%;background:#e4e4e4;overflow:hidden;
@@ -283,6 +283,22 @@ function renderChart(){
       </span>`;
     chart.appendChild(row);
   });
+
+    fitNameColumn();
+}
+
+function fitNameColumn(){
+  const probe = document.createElement('span');
+  probe.className = 'cab-name';
+  probe.style.cssText = 'position:absolute;visibility:hidden;width:auto;overflow:visible;font-weight:700;';
+  chart.appendChild(probe);
+  let w = 0;
+  members.forEach(m => {
+    probe.textContent = m.name;
+    w = Math.max(w, probe.getBoundingClientRect().width);
+  });
+  probe.remove();
+  chart.style.setProperty('--name-col', (Math.ceil(w) + 2) + 'px');
 }
 
 chart.addEventListener('click', e => {
@@ -410,7 +426,7 @@ renderChart();
 select(0);
 
 window.addEventListener('resize', drawLine);
-if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawLine);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { fitNameColumn(); drawLine(); });
 new ResizeObserver(drawLine).observe($('cabGrid'));
 
 // ============================================================
