@@ -50,6 +50,7 @@
   }
   .cab-row{
     display:grid;grid-template-columns: var(--name-col, 170px) minmax(0,1fr);
+    column-gap: 24px;
     align-items: stretch;   /* was: center */
     flex: 1 1 0;
     min-height: 16px;       /* floor so rows can't collapse completely */
@@ -62,7 +63,7 @@
     align-self: center;
   }
   .cab-track{
-    position:relative;height:auto;background:var(--track);
+    position:relative;height:auto;background:transparent;
     border-left:1px solid var(--ink);
   }
   .cab-bar{position:absolute;left:0;top:0;height:100%;}
@@ -72,7 +73,6 @@
   }
   .cab-row:hover .cab-track{background:#e3e6e5;}
   .cab-row.sel .cab-name{font-weight:700;color:var(--ink);}
-  .cab-row.sel .cab-track{outline:2px solid var(--ink);outline-offset:1px;}
   .cab-row:focus-visible .cab-track{outline:2px solid #006548;outline-offset:1px;}
   .cab-gap{flex: 0 0 26px;}
 
