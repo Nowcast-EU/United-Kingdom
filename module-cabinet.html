@@ -106,6 +106,12 @@
     font-size:1rem;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums;
   }
   .p-row:first-child .p-pct{font-size:1.25rem;}
+  .p-row.out{opacity:0.4;}
+  .p-row.out .p-label{text-decoration:line-through;}
+  .p-row.out .p-track::after{
+  content:'';position:absolute;left:0;right:0;top:50%;
+  border-top:2px solid #999;
+ }
 
   /* ---------- mobile ---------- */
   @media (max-width:700px){
@@ -161,63 +167,38 @@ const PARTIES = {
   OTH:{ label:'OTH', color:'#999999', text:'#fff' },
 };
 
-// ============================================================
-// DATA  — REPLACE WITH YOUR REAL TABLE
-// Each member:
-//   name   : MP name
-//   seat   : constituency
-//   role   : government position
-//   party  : the member's own party key (defaults to 'LAB')
-//   winner : projected winning party key in that seat
-//   margin : winning party's lead over 2nd place, in points (always positive)
-//   probs  : { LAB:0.62, RFM:0.30, ... }  chance of winning (0–1 or 0–100, auto-detected)
-//   photo  : (optional) image URL
-// A bar is shown as +margin if winner === party, otherwise -margin.
-// ============================================================
-const SAMPLE_ROLE = 'Secretary of State for XXXXX, XXXXX, XXXXX';
+const m = (name, seat, role, winner, margin, probs, nation = 'ENG') =>
+  ({ name, seat, role, party: 'LAB', winner, margin, probs, photo: '', nation });
 
-// --- PLACEHOLDER probability generator (delete once you have real probs) ---
-function mockProbs(winner, margin){
-  const pw = 1 / (1 + Math.exp(-margin / 4.5));
-  const runner = winner === 'LAB' ? 'RFM' : 'LAB';
-  const third  = winner === 'CON' || winner === 'RFM' ? 'LDM' : 'CON';
-  const rest = 1 - pw;
-  const out = {}; out[winner] = pw; out[runner] = rest * 0.72; out[third] = rest * 0.2; out.GRN = rest * 0.08;
-  return out;
-}
-const RAW = [
-  ['Anneliese Midgley','Knowsley','LAB',29.9],
-  ['Angela Eagle','Wallasey','LAB',23.0],
-  ['Louise Haigh','Sheffield Heeley','LAB',21.2],
-  ['Matthew Pennycook','Greenwich and Woolwich','LAB',20.0],
-  ['Alan Campbell','Tynemouth','LAB',19.4],
-  ['Lucy Powell','Manchester Central','LAB',18.7],
-  ['Shabana Mahmood','Birmingham Ladywood','LAB',18.5],
-  ['Andy Burnham','Makerfield','LAB',15.1],
-  ['Ellie Reeves','Lewisham West and East Dulwich','LAB',13.7],
-  ['Miatta Fahnbulleh','Peckham','LAB',13.3],
-  ['Heidi Alexander','Swindon South','LAB',12.3],
-  ['Douglas Alexander','Lothian East','LAB',10.2],
-  ['Pat McFadden','Wolverhampton South East','LAB',4.9],
-  ['Ed Miliband','Doncaster North','LAB',4.7],
-  ['Hamish Falconer','Lincoln','LAB',4.5],
-  ['Emma Reynolds','Croydon East','LAB',4.4],
-  ['Jonathan Reynolds','Stalybridge and Hyde','LAB',4.2],
-  ['Alex Norris','Nottingham North and Kimberley','LAB',4.0],
-  ['Lisa Nandy','Wigan','LAB',3.2],
-  ['Wes Streeting','Ilford North','LAB',2.2],
-  ['Kanishka Narayan','Vale of Glamorgan','LAB',2.0],
-  ['Angela Rayner','Ashton-under-Lyne','RFM',0.8],
-  ['Stephen Kinnock','Aberafan Maesteg','PLC',1.1],
-  ['John Healey','Rawmarsh and Conisbrough','RFM',1.5],
-  ['Bridget Phillipson','Houghton and Sunderland South','RFM',1.5],
-  ['Yvette Cooper','Pontefract, Castleford and Knottingley','RFM',2.4],
-  ['Chris Bryant','Rhondda and Ogmore','PLC',2.8],
+const MEMBERS = [
+  m('Angela Rayner','Ashton-under-Lyne','Secretary of State for Housing, Communities and Local Government','LAB',4.5,{LAB:58.7,RFM:41.3}),
+  m('Shabana Mahmood','Birmingham Ladywood','Secretary of State for the Home Department','LAB',21.1,{LAB:98.1,GRN:1.6,OTH:0.3}),
+  m('Ed Miliband','Doncaster North','Secretary of State for Foreign, Commonwealth and Development Affairs','LAB',8.2,{LAB:73.6,RFM:26.4}),
+  m('Matthew Pennycook','Greenwich and Woolwich','Minister of State (Minister for Housing and Planning)','LAB',16.6,{LAB:93.4,GRN:6.6}),
+  m('Bridget Phillipson','Houghton and Sunderland South','Minister for Women and Equalities','LAB',1.6,{LAB:49.4,RFM:50.6}),
+  m('Wes Streeting','Ilford North','Secretary of State for Defence','LAB',4.1,{LAB:67,CON:10.2,RFM:0.3,OTH:22.5}),
+  m('Anneliese Midgley','Knowsley','Parliamentary Secretary to the Treasury (Chief Whip)','LAB',34.0,{LAB:99.5,RFM:0.5}),
+  m('Ellie Reeves','Lewisham West and East Dulwich','Attorney General','LAB',8.7,{LAB:75.2,GRN:24.8}),
+  m('Hamish Falconer','Lincoln','Minister of State (Minister for Intergovernmental Relations and European Relations)','LAB',11.2,{LAB:84.1,CON:0.8,RFM:15.1}),
+  m('Andy Burnham','Makerfield','Prime Minister','LAB',19.8,{LAB:91.4,RFM:8.6}),
+  m('Lucy Powell','Manchester Central','Secretary of State for Education','LAB',19.5,{LAB:95.9,GRN:4.1}),
+  m('Alex Norris','Nottingham North and Kimberley','Lord Chancellor and Secretary of State for Justice','LAB',10.5,{LAB:84.1,CON:0.1,RFM:15.8}),
+  m('Miatta Fahnbulleh','Peckham','Secretary of State for Energy Security and Net Zero','LAB',7.0,{LAB:71.4,GRN:28.6}),
+  m('Yvette Cooper','Pontefract, Castleford and Knottingley','Secretary of State for Health and Social Care','LAB',1.4,{LAB:47.3,RFM:52.7}),
+  m('John Healey','Rawmarsh and Conisbrough','Chancellor of the Exchequer','LAB',1.8,{LAB:48.1,RFM:51.9}),
+  m('Louise Haigh','Sheffield Heeley','First Secretary of State','LAB',21.9,{LAB:98.6,RFM:0.5,GRN:0.9}),
+  m('Jonathan Reynolds','Stalybridge and Hyde','Secretary of State for Business, Innovation, Science and Trade','LAB',9.1,{LAB:77.3,RFM:22.7}),
+  m('Heidi Alexander','Swindon South','Secretary of State for Transport','LAB',12.8,{LAB:92,CON:4.5,RFM:3.5}),
+  m('Alan Campbell','Tynemouth','Leader of the House of Commons','LAB',22.7,{LAB:97.8,RFM:2.2}),
+  m('Angela Eagle','Wallasey','Secretary of State for Environment, Food and Rural Affairs','LAB',26.9,{LAB:98.7,RFM:1.3}),
+  m('Lisa Nandy','Wigan','Secretary of State for Digital, Culture, Media and Sport','LAB',7.9,{LAB:70.3,RFM:29.7}),
+  m('Pat McFadden','Wolverhampton South East','Secretary of State for Work and Pensions','LAB',8.3,{LAB:75.6,RFM:24.4}),
+  m('Emma Reynolds','Wycombe','Chief Secretary to the Treasury','LAB',5.9,{LAB:75.2,CON:18.8,RFM:6}),
+  m('Douglas Alexander','Lothian East','Secretary of State for Scotland','LAB',12.6,{LAB:94.7,SNP:5.3},'SCO'),
+  m('Stephen Kinnock','Aberafan Maesteg','Secretary of State for Wales','RFM',0.7,{LAB:39.1,RFM:41.9,PLC:19},'WAL'),
+  m('Chris Bryant','Rhondda and Ogmore','Secretary of State for Northern Ireland','RFM',1.8,{LAB:6.7,RFM:72.7,PLC:20.6},'WAL'),
+  m('Kanishka Narayan','Vale of Glamorgan','Minister of State (Minister for Artificial Intelligence)','CON',3.9,{LAB:22.6,CON:59.5,RFM:17.3,PLC:0.6},'WAL'),
 ];
-const MEMBERS = RAW.map(([name, seat, winner, margin]) => ({
-  name, seat, role: SAMPLE_ROLE, party: 'LAB', winner, margin,
-  probs: mockProbs(winner, margin), photo: ''
-}));
 
 // ============================================================
 // CONFIG
@@ -225,7 +206,7 @@ const MEMBERS = RAW.map(([name, seat, winner, margin]) => ({
 const SAFE_THRESHOLD   = 5;    // margin (pts) at/above which a hold counts as "safe" → first group
 const LABEL_GAP        = 8;    // px gap between the end of a bar and its value label
 const PANEL_PARTIES = ['LAB','RFM','CON','LDM','GRN','SNP','PLC', 'OTH'];
-const PANEL_BAR_SCALE   = 0.82; // 100% chance = this fraction of the track width (leaves room for the label)
+const PANEL_MAX_BAR = 75; // the longest bar in each panel = this % of the track width
 const MOBILE_BREAKPOINT = 700; // px — connector line is hidden below this
 
 // ============================================================
@@ -342,36 +323,40 @@ function renderPanel(m){
 
 const raw = m.probs || {};
 
-// A party "stands" if its value is present; missing / null / '' = not standing
-const standing = PANEL_PARTIES.filter(k => raw[k] !== undefined && raw[k] !== null && raw[k] !== '');
-
 // accept 0–1 or 0–100
 const sum = Object.values(raw).reduce((s, v) => s + (+v || 0), 0);
 const scale = sum > 1.5 ? 100 : 1;
 
-const rows = standing
-  .map(k => [k, (+raw[k] || 0) / scale])
-  .sort((a, b) => b[1] - a[1]);
+// SNP only stands in Scotland, PLC only in Wales; everyone else always stands
+const NATION_ONLY = { SNP: 'SCO', PLC: 'WAL' };
+const stands = k => !NATION_ONLY[k] || m.nation === NATION_ONLY[k];
 
-const placeholder = `
-  <div class="p-row" style="visibility:hidden">
-    <div class="p-label">&nbsp;</div>
-    <div class="p-track"></div>
-  </div>`;
+// standing parties first (by chance, descending), non-standing parties last
+const rows = PANEL_PARTIES
+  .map(k => [k, stands(k), (+raw[k] || 0) / scale])
+  .sort((a, b) => (b[1] - a[1]) || (b[2] - a[2]));
 
-$('pBars').innerHTML =
-  rows.map(([k, v]) => {
-    const p = partyOf(k);
-    const pct = v * 100;
-    return `<div class="p-row">
+  // longest bar among standing parties; tiny floor avoids divide-by-zero
+const maxPct = Math.max(...rows.filter(r => r[1]).map(r => r[2] * 100), 1e-9);
+
+$('pBars').innerHTML = rows.map(([k, on, v]) => {
+  const p = partyOf(k);
+  if (!on) {
+    return `<div class="p-row out">
       <div class="p-label">${esc(p.label)}</div>
-      <div class="p-track">
-        <div class="p-fill" style="width:${pct * PANEL_BAR_SCALE}%;background:${p.color};"></div>
-        <div class="p-pct" style="left:calc(${pct * PANEL_BAR_SCALE}% + ${LABEL_GAP}px);">${pct < 1 ? '&lt;1%' : Math.round(pct) + '%'}</div>
-      </div>
+      <div class="p-track"></div>
     </div>`;
-  }).join('')
-  + placeholder.repeat(PANEL_PARTIES.length - rows.length);
+  }
+    const pct = v * 100;
+  const w = pct / maxPct * PANEL_MAX_BAR;
+  return `<div class="p-row">
+    <div class="p-label">${esc(p.label)}</div>
+    <div class="p-track">
+      <div class="p-fill" style="width:${w}%;background:${p.color};"></div>
+      <div class="p-pct" style="left:calc(${w}% + ${LABEL_GAP}px);">${pct < 1 ? '&lt;1%' : pct > 99 ? '&gt;99%' : Math.round(pct) + '%'}</div>
+    </div>
+  </div>`;
+}).join('');
 }
 
 // ============================================================
