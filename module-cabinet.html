@@ -42,7 +42,7 @@
   /* ---------- bar chart ---------- */
   .cab-chart{
   background:transparent;
-  padding:6px 0;
+  padding:0;
   height:0;            /* stops the chart's own content setting the row height */
   min-height:100%;     /* then stretches it to match the panel */
   display:flex;
@@ -57,6 +57,7 @@
     width:100%;margin:0 0 6px;padding:0;border:0;background:none;
     font:inherit;color:inherit;text-align:left;cursor:pointer;
   }
+  .cab-row:last-child{margin-bottom:0;}
   .cab-name{
     text-align:right;font-size:0.85rem;font-weight:400;color:var(--ink);
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
@@ -203,7 +204,6 @@ const MEMBERS = [
 // ============================================================
 // CONFIG
 // ============================================================
-const SAFE_THRESHOLD   = 5;    // margin (pts) at/above which a hold counts as "safe" → first group
 const LABEL_GAP        = 8;    // px gap between the end of a bar and its value label
 const PANEL_PARTIES = ['LAB','RFM','CON','LDM','GRN','SNP','PLC', 'OTH'];
 const PANEL_MAX_BAR = 75; // the longest bar in each panel = this % of the track width
@@ -228,7 +228,7 @@ function fmtMargin(v){
   if (v < 0) return '\u2212' + Math.abs(v).toFixed(1);
   return '0.0';
 }
-function groupOf(v){ return v >= SAFE_THRESHOLD ? 0 : (v >= 0 ? 1 : 2); }
+function groupOf(v){ return v >= 0 ? 0 : 1; }
 
 // ============================================================
 // CHART
