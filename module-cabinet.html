@@ -58,6 +58,7 @@
     display:flex;flex-direction:column;gap:22px;
     min-width:0;min-height:0;
   }
+  .s-divider{flex:none;height:1px;background:var(--divider);}
   .s-title{font-size:0.95rem;font-weight:700;margin:0 0 10px;line-height:1.2;}
   .s-pie-block{flex:none;text-align:center;}
   .s-pie-block .s-title{text-align:left;}
@@ -267,6 +268,7 @@
     <!-- LEFT: stats (pie + histogram) -->
     <section class="cab-stats" id="cabStats" aria-label="Cabinet summary statistics">
       <div class="s-pie-block" id="sPie"></div>
+      <div class="s-divider" aria-hidden="true"></div>
       <div class="s-hist-block" id="sHist"></div>
     </section>
 
@@ -350,6 +352,10 @@ const PANEL_PARTIES = ['LAB','RFM','CON','LDM','GRN','SNP','PLC', 'OTH'];
 const PANEL_MAX_BAR = 75; // the longest bar in each panel = this % of the track width
 const MOBILE_BREAKPOINT = 700; // px — connector line is hidden below this
 const HIST_BIN = 5;     // histogram bin width, in percentage points of margin
+const PARTY_NAMES = {   // full names, used in the pie legend
+  LAB:'Labour', CON:'Conservatives', RFM:'Reform UK', LDM:'Liberal Democrats',
+  GRN:'Greens', SNP:'SNP', PLC:'Plaid Cymru', OTH:'Others'
+};
 
 // ============================================================
 // HELPERS
@@ -396,10 +402,10 @@ function renderPie(){
   const loseBy = {};
   members.forEach(x => { if (x.winner !== x.party) loseBy[x.winner] = (loseBy[x.winner] || 0) + 1; });
 
-  const slices = [{ label:'Holding seat', color:partyOf(holdParty).color, n:holdN }]
+  const slices = [{ hold:true, label:'Holding seat', color:partyOf(holdParty).color, n:holdN }]
     .concat(Object.entries(loseBy)
       .sort((a, b) => b[1] - a[1])
-      .map(([k, n]) => ({ label:'Losing to ' + partyOf(k).label, color:partyOf(k).color, n })))
+      .map(([k, n]) => ({ label:'Losing to ' + (PARTY_NAMES[k] || partyOf(k).label), color:partyOf(k).color, n })))
     .filter(s => s.n > 0);
 
   let a = 0;
@@ -422,11 +428,11 @@ function renderPie(){
     <div class="s-big">${holdPct}</div>
     <div class="s-sub">${holdN} of ${total} projected to hold</div>
     <div class="s-legend">
-      ${slices.map(s => `
+      ${slices.filter(s => !s.hold).map(s => `
         <div class="s-leg-row">
           <span class="s-swatch" style="background:${s.color};"></span>
           <span>${esc(s.label)}</span>
-          <span class="s-leg-n">${s.n} · ${pct(s.n)}</span>
+          <span class="s-leg-n">${pct(s.n)}</span>
         </div>`).join('')}
     </div>`;
 }
