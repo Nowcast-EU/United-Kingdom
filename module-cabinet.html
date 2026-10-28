@@ -56,6 +56,7 @@
   /* ---------- stats section (pie + histogram) ---------- */
   .cab-stats{
     display:flex;flex-direction:column;gap:22px;
+    justify-content:flex-end;          /* any spare height collects as a gap above the pie */
     min-width:0;min-height:0;
   }
   .s-divider{flex:none;height:1px;background:var(--divider);}
@@ -75,7 +76,10 @@
   .s-swatch{width:12px;height:12px;}
   .s-leg-n{font-variant-numeric:tabular-nums;color:var(--muted);}
 
-  .s-hist-block{flex:1 1 0;min-height:140px;display:flex;flex-direction:column;}
+  .s-hist-block{
+    flex:none;height:var(--hist-height, 38%);   /* share of the section height; lower = shorter */
+    min-height:140px;display:flex;flex-direction:column;
+  }
   .h-plot{
     position:relative;flex:1 1 0;min-height:0;
     display:flex;align-items:stretch;
@@ -379,7 +383,7 @@ function fmtMargin(v){
   if (v < 0) return '\u2212' + Math.abs(v).toFixed(1);
   return '0.0';
 }
-function fmtEdge(v){ return v < 0 ? '\u2212' + Math.abs(v) : String(v); }
+function fmtEdge(v){ return v < 0 ? '\u2212' + Math.abs(v) : v > 0 ? '+' + v : '0'; }
 function groupOf(v){ return v >= 0 ? 0 : 1; }
 
 // ============================================================
