@@ -59,6 +59,10 @@
     justify-content:flex-end;          /* any spare height collects as a gap above the pie */
     min-width:0;min-height:0;
   }
+  .s-text{
+    flex:1 1 0;min-height:0;overflow:hidden;   /* fills the spare space above the pie */
+    margin:0;font-size:0.9rem;line-height:1.5;color:var(--ink);
+  }
   .s-divider{flex:none;height:1px;background:var(--divider);}
   .s-title{font-size:0.95rem;font-weight:700;margin:0 0 10px;line-height:1.2;}
   .s-pie-block{flex:none;text-align:center;}
@@ -80,6 +84,7 @@
     flex:none;height:var(--hist-height, 38%);   /* share of the section height; lower = shorter */
     min-height:140px;display:flex;flex-direction:column;
   }
+  .h-plot,.h-axis{margin-left:var(--hist-pad-left, 18px);}   /* room for the "−5" label to overhang the first bar edge */
   .h-plot{
     position:relative;flex:1 1 0;min-height:0;
     display:flex;align-items:stretch;
@@ -249,6 +254,7 @@
     }
     .cab-divider{width:100%;height:1px;}
     .s-hist-block{flex:none;height:240px;}
+    .s-text{flex:none;overflow:visible;}
     .cab-grid{grid-template-columns:1fr;grid-template-rows:auto;row-gap:16px;}
     .cab-line{display:none;}
     .cab-row{grid-template-columns:110px minmax(0,1fr);}
@@ -271,6 +277,7 @@
 
     <!-- LEFT: stats (pie + histogram) -->
     <section class="cab-stats" id="cabStats" aria-label="Cabinet summary statistics">
+      <p class="s-text" id="sText">Placeholder text. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
       <div class="s-pie-block" id="sPie"></div>
       <div class="s-divider" aria-hidden="true"></div>
       <div class="s-hist-block" id="sHist"></div>
