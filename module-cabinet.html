@@ -11,6 +11,10 @@
     --gap:48px;
     --chart-width: 7fr;
     --panel-width: 3fr;
+    --stats-width: 3fr;      /* left-hand stats section */
+    --main-width: 10fr;      /* bar chart + panel together */
+    --stats-gap: 32px;       /* space either side of the divider */
+    --divider: #cfcfcf;
     --cab-aspect: 16 / 9;
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
@@ -19,13 +23,23 @@
   .wrap{max-width:none;margin:0 auto;}
 
   /* ---------- layout ---------- */
+  .cab-layout{
+    display:grid;
+    grid-template-columns: minmax(0, var(--stats-width)) 1px minmax(0, var(--main-width));
+    grid-template-rows: minmax(0, 1fr);
+    column-gap: var(--stats-gap);
+    align-items:stretch;
+    aspect-ratio: var(--cab-aspect);   /* the overall height is set here now */
+    min-height:0;
+  }
+  .cab-divider{background:var(--divider);width:1px;}
+
   .cab-grid{
     position:relative;
     display:grid;
     grid-template-columns: minmax(0, var(--chart-width)) minmax(0, var(--panel-width));
     column-gap: var(--gap);
     align-items:stretch;
-    aspect-ratio: var(--cab-aspect);
     grid-template-rows: minmax(0, 1fr);   /* lets the row shrink below its content size */
     min-height: 0;                        /* stops content from forcing the box taller */
   }
@@ -38,6 +52,57 @@
     stroke-dasharray:1 6;stroke-linecap:round;stroke-linejoin:round;
   }
   .cab-line circle{fill:var(--ink);}
+
+  /* ---------- stats section (pie + histogram) ---------- */
+  .cab-stats{
+    display:flex;flex-direction:column;gap:22px;
+    min-width:0;min-height:0;
+  }
+  .s-title{font-size:0.95rem;font-weight:700;margin:0 0 10px;line-height:1.2;}
+  .s-pie-block{flex:none;text-align:center;}
+  .s-pie-block .s-title{text-align:left;}
+  .s-pie{display:block;width:100%;max-width:170px;aspect-ratio:1;margin:0 auto 10px;}
+  .s-pie path,.s-pie circle{stroke:var(--bg);stroke-width:1;}
+  .s-big{font-size:1.7rem;font-weight:700;line-height:1;}
+  .s-sub{font-size:0.8rem;color:var(--muted);margin:4px 0 10px;}
+  .s-legend{text-align:left;}
+  .s-leg-row{
+    display:grid;grid-template-columns:12px minmax(0,1fr) auto;
+    column-gap:8px;align-items:center;
+    font-size:0.8rem;line-height:1.6;
+  }
+  .s-swatch{width:12px;height:12px;}
+  .s-leg-n{font-variant-numeric:tabular-nums;color:var(--muted);}
+
+  .s-hist-block{flex:1 1 0;min-height:140px;display:flex;flex-direction:column;}
+  .h-plot{
+    position:relative;flex:1 1 0;min-height:0;
+    display:flex;align-items:stretch;
+    padding-top:18px;                  /* room for the count label on the tallest bar */
+    border-bottom:1px solid var(--ink);
+  }
+  .h-col{position:relative;flex:1 1 0;min-width:0;}
+  .h-stack{
+    position:absolute;left:1px;right:1px;bottom:0;
+    display:flex;flex-direction:column-reverse;
+  }
+  .h-seg{min-height:0;}
+  .h-n{
+    position:absolute;left:0;right:0;bottom:100%;
+    text-align:center;font-size:0.75rem;font-weight:700;line-height:16px;
+    font-variant-numeric:tabular-nums;
+  }
+  .h-zero{
+    position:absolute;top:18px;bottom:0;width:0;
+    border-left:1px dashed #999;pointer-events:none;
+  }
+  .h-axis{position:relative;height:18px;}
+  .h-tick{
+    position:absolute;top:3px;transform:translateX(-50%);
+    font-size:0.7rem;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;
+  }
+  .h-tick.zero{color:var(--ink);font-weight:700;}
+  .h-cap{font-size:0.75rem;color:var(--muted);text-align:center;margin-top:2px;}
 
   /* ---------- bar chart ---------- */
   .cab-chart{
@@ -173,7 +238,13 @@
 
   /* ---------- mobile ---------- */
   @media (max-width:700px){
-    .cab-grid{grid-template-columns:1fr;row-gap:16px;}
+    .cab-layout{
+      grid-template-columns:1fr;grid-template-rows:auto;
+      row-gap:24px;aspect-ratio:auto;
+    }
+    .cab-divider{width:100%;height:1px;}
+    .s-hist-block{flex:none;height:240px;}
+    .cab-grid{grid-template-columns:1fr;grid-template-rows:auto;row-gap:16px;}
     .cab-line{display:none;}
     .cab-row{grid-template-columns:110px minmax(0,1fr);}
     .cab-name{font-size:0.78rem;}
@@ -191,21 +262,34 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="cab-grid" id="cabGrid">
-    <svg class="cab-line" id="cabLine" aria-hidden="true"></svg>
+  <div class="cab-layout">
 
-    <div class="cab-chart" id="cabChart" role="listbox" aria-label="Cabinet members by projected margin"></div>
+    <!-- LEFT: stats (pie + histogram) -->
+    <section class="cab-stats" id="cabStats" aria-label="Cabinet summary statistics">
+      <div class="s-pie-block" id="sPie"></div>
+      <div class="s-hist-block" id="sHist"></div>
+    </section>
 
-    <aside class="cab-panel" id="cabPanel" aria-live="polite">
-      <h2 class="p-name" id="pName"></h2>
-      <div class="p-photo" id="pPhoto"></div>
-      <div class="p-meta">
-        <div id="pSeat"></div>
-        <div id="pRole"></div>
-      </div>
-      <div class="p-chance" id="pChance">Chance of winning</div>
-      <div id="pBars"></div>
-    </aside>
+    <div class="cab-divider" aria-hidden="true"></div>
+
+    <!-- RIGHT: existing bar chart + panel -->
+    <div class="cab-grid" id="cabGrid">
+      <svg class="cab-line" id="cabLine" aria-hidden="true"></svg>
+
+      <div class="cab-chart" id="cabChart" role="listbox" aria-label="Cabinet members by projected margin"></div>
+
+      <aside class="cab-panel" id="cabPanel" aria-live="polite">
+        <h2 class="p-name" id="pName"></h2>
+        <div class="p-photo" id="pPhoto"></div>
+        <div class="p-meta">
+          <div id="pSeat"></div>
+          <div id="pRole"></div>
+        </div>
+        <div class="p-chance" id="pChance">Chance of winning</div>
+        <div id="pBars"></div>
+      </aside>
+    </div>
+
   </div>
 </div>
 
@@ -265,6 +349,7 @@ const LABEL_GAP        = 8;    // px gap between the end of a bar and its value 
 const PANEL_PARTIES = ['LAB','RFM','CON','LDM','GRN','SNP','PLC', 'OTH'];
 const PANEL_MAX_BAR = 75; // the longest bar in each panel = this % of the track width
 const MOBILE_BREAKPOINT = 700; // px — connector line is hidden below this
+const HIST_BIN = 5;     // histogram bin width, in percentage points of margin
 
 // ============================================================
 // HELPERS
@@ -288,7 +373,117 @@ function fmtMargin(v){
   if (v < 0) return '\u2212' + Math.abs(v).toFixed(1);
   return '0.0';
 }
+function fmtEdge(v){ return v < 0 ? '\u2212' + Math.abs(v) : String(v); }
 function groupOf(v){ return v >= 0 ? 0 : 1; }
+
+// ============================================================
+// STATS SECTION: PIE + HISTOGRAM
+// ============================================================
+function arcPath(a0, a1){
+  // angles in radians, 0 = 12 o'clock, clockwise
+  const r = 48, c = 50;
+  const pt = a => [c + r * Math.sin(a), c - r * Math.cos(a)];
+  const [x0, y0] = pt(a0), [x1, y1] = pt(a1);
+  const large = (a1 - a0) > Math.PI ? 1 : 0;
+  return `M${c} ${c} L${x0.toFixed(3)} ${y0.toFixed(3)} A${r} ${r} 0 ${large} 1 ${x1.toFixed(3)} ${y1.toFixed(3)} Z`;
+}
+
+function renderPie(){
+  const total = members.length;
+  const holdN = members.filter(x => x.winner === x.party).length;
+  const holdParty = members[0].party;
+
+  const loseBy = {};
+  members.forEach(x => { if (x.winner !== x.party) loseBy[x.winner] = (loseBy[x.winner] || 0) + 1; });
+
+  const slices = [{ label:'Holding seat', color:partyOf(holdParty).color, n:holdN }]
+    .concat(Object.entries(loseBy)
+      .sort((a, b) => b[1] - a[1])
+      .map(([k, n]) => ({ label:'Losing to ' + partyOf(k).label, color:partyOf(k).color, n })))
+    .filter(s => s.n > 0);
+
+  let a = 0;
+  const shapes = slices.map(s => {
+    const span = s.n / total * Math.PI * 2;
+    const el = slices.length === 1
+      ? `<circle cx="50" cy="50" r="48" fill="${s.color}"></circle>`
+      : `<path d="${arcPath(a, a + span)}" fill="${s.color}"></path>`;
+    a += span;
+    return el;
+  }).join('');
+
+  const pct = n => Math.round(n / total * 100) + '%';
+  const holdPct = pct(holdN);
+
+  $('sPie').innerHTML = `
+    <h3 class="s-title">Cabinet members holding their seat</h3>
+    <svg class="s-pie" viewBox="0 0 100 100" role="img"
+         aria-label="${holdPct} of cabinet members projected to hold their seat">${shapes}</svg>
+    <div class="s-big">${holdPct}</div>
+    <div class="s-sub">${holdN} of ${total} projected to hold</div>
+    <div class="s-legend">
+      ${slices.map(s => `
+        <div class="s-leg-row">
+          <span class="s-swatch" style="background:${s.color};"></span>
+          <span>${esc(s.label)}</span>
+          <span class="s-leg-n">${s.n} · ${pct(s.n)}</span>
+        </div>`).join('')}
+    </div>`;
+}
+
+function renderHistogram(){
+  const vals = members.map(x => x.v);
+  const lo = Math.floor(Math.min(...vals, 0) / HIST_BIN);
+  const hi = Math.floor(Math.max(...vals, 0) / HIST_BIN);
+  const nb = hi - lo + 1;
+
+  const bins = Array.from({ length: nb }, (_, i) => ({
+    from: (lo + i) * HIST_BIN, to: (lo + i + 1) * HIST_BIN, n: 0, by: {}
+  }));
+  members.forEach(x => {
+    const b = bins[Math.floor(x.v / HIST_BIN) - lo];
+    b.n++;
+    b.by[x.winner] = (b.by[x.winner] || 0) + 1;
+  });
+  const maxN = Math.max(...bins.map(b => b.n), 1);
+
+  const order = k => { const i = PANEL_PARTIES.indexOf(k); return i < 0 ? 99 : i; };
+
+  const cols = bins.map(b => {
+    const segs = Object.entries(b.by)
+      .sort((p, q) => order(p[0]) - order(q[0]))
+      .map(([k, n]) => `<div class="h-seg" style="flex:${n} 0 0;background:${partyOf(k).color};"></div>`)
+      .join('');
+    const tip = `${fmtEdge(b.from)} to ${fmtEdge(b.to)}: ${b.n} seat${b.n === 1 ? '' : 's'}`;
+    return `<div class="h-col" title="${esc(tip)}">
+      <div class="h-stack" style="height:${b.n / maxN * 100}%;">
+        ${b.n ? `<span class="h-n">${b.n}</span>` : ''}${segs}
+      </div>
+    </div>`;
+  }).join('');
+
+  const step = nb > 10 ? 2 : 1;
+  let ticks = '';
+  for (let i = 0; i <= nb; i += step){
+    const edge = (lo + i) * HIST_BIN;
+    ticks += `<span class="h-tick${edge === 0 ? ' zero' : ''}" style="left:${i / nb * 100}%;">${fmtEdge(edge)}</span>`;
+  }
+
+  const zeroLine = lo < 0
+    ? `<div class="h-zero" style="left:${(-lo) / nb * 100}%;"></div>`
+    : '';
+
+  $('sHist').innerHTML = `
+    <h3 class="s-title">Seats by margin of victory</h3>
+    <div class="h-plot" role="img" aria-label="Histogram of cabinet seats by projected margin of victory">${cols}${zeroLine}</div>
+    <div class="h-axis">${ticks}</div>
+    <div class="h-cap">Margin (percentage points)</div>`;
+}
+
+function renderStats(){
+  renderPie();
+  renderHistogram();
+}
 
 // ============================================================
 // CHART
@@ -468,6 +663,7 @@ function drawLine(){
 // INIT
 // ============================================================
 $('pChance').innerHTML = `${ICON_DICE}<span>Chance of winning</span>`;
+renderStats();
 renderChart();
 select(0);
 
