@@ -740,7 +740,7 @@ function drawLine(){
 $('pChance').innerHTML = `${ICON_DICE}<span>Chance of winning</span>`;
 renderStats();
 renderChart();
-select(0);
+select(members.findIndex(m => m.name === 'Andy Burnham'));
 
 let wasMobile = isMobile();
 window.addEventListener('resize', () => {
