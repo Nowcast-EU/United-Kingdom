@@ -59,10 +59,10 @@
     justify-content:flex-end;          /* any spare height collects as a gap above the pie */
     min-width:0;min-height:0;
   }
-  .s-text{
-    flex:1 1 0;min-height:0;overflow:hidden;   /* fills the spare space above the pie */
-    margin:0;font-size:0.85rem;line-height:1.4;color:var(--ink);
-  }
+.s-text{
+  flex:1 0 auto;            /* grow into spare space, never shrink below its content */
+  margin:0;font-size:0.85rem;line-height:1.4;color:var(--ink);
+}
   .s-divider{flex:none;height:1px;background:var(--divider);}
   .s-title{font-size:0.95rem;font-weight:700;margin:0 0 10px;line-height:1.2;}
   .s-pie-block{flex:none;text-align:center;}
@@ -80,10 +80,11 @@
   .s-swatch{width:12px;height:12px;}
   .s-leg-n{font-variant-numeric:tabular-nums;color:var(--muted);}
 
-  .s-hist-block{
-    flex:none;height:var(--hist-height, 38%);   /* share of the section height; lower = shorter */
-    min-height:140px;display:flex;flex-direction:column;
-  }
+.s-hist-block{
+  flex:0 1 var(--hist-height, 38%);   /* wants 38% of the section, but may shrink */
+  min-height:100px;                   /* the floor; lower it to allow a squatter histogram */
+  display:flex;flex-direction:column;
+}
   .h-plot,.h-axis{margin-left:var(--hist-pad-left, 18px);}   /* room for the "−5" label to overhang the first bar edge */
   .h-plot{
     position:relative;flex:1 1 0;min-height:0;
