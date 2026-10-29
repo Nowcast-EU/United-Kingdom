@@ -258,8 +258,33 @@
       row-gap:24px;aspect-ratio:auto;
     }
     .cab-divider{width:100%;height:1px;}
-    .s-hist-block{flex:none;height:240px;}
-    .s-text{flex:none;overflow:visible;}
+
+    /* --- stats: text on top, then pie | divider | histogram side by side --- */
+    .cab-stats{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 1px minmax(0,1fr);
+      column-gap:12px;row-gap:16px;
+      align-items:stretch;
+    }
+    .s-text{grid-column:1 / -1;flex:none;overflow:visible;}
+    .s-divider{width:1px;height:auto;}              /* vertical divider between pie and histogram */
+
+    /* pie, scaled down */
+    .s-pie{max-width:104px;margin-bottom:6px;}
+    .s-big{font-size:1.25rem;}
+    .s-sub{font-size:0.64rem;margin:3px 0 6px;}
+    .s-leg-row{grid-template-columns:9px minmax(0,1fr) auto;column-gap:5px;font-size:0.62rem;line-height:1.45;}
+    .s-swatch{width:9px;height:9px;}
+
+    /* histogram, scaled down */
+    .s-hist-block{flex:none;height:auto;min-height:0;--hist-pad-left:10px;}
+    .s-title{font-size:0.7rem;margin-bottom:6px;}
+    .h-plot{min-height:120px;padding-top:14px;}
+    .h-n{font-size:0.6rem;line-height:12px;}
+    .h-zero{top:14px;}
+    .h-axis{height:14px;}
+    .h-tick{font-size:0.5rem;top:2px;}
+    .h-cap{font-size:0.58rem;}
 
     /* --- bar chart + panel: same layout and behaviour as desktop, in a ~1:1 box --- */
     :root{
