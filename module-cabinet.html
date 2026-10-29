@@ -59,10 +59,10 @@
     justify-content:flex-end;          /* any spare height collects as a gap above the pie */
     min-width:0;min-height:0;
   }
-.s-text{
-  flex:1 0 auto;            /* grow into spare space, never shrink below its content */
-  margin:0;font-size:0.85rem;line-height:1.4;color:var(--ink);
-}
+  .s-text{
+    flex:1 1 0;min-height:0;overflow:hidden;   /* fills the spare space above the pie */
+    margin:0;font-size:0.85rem;line-height:1.4;color:var(--ink);
+  }
   .s-divider{flex:none;height:1px;background:var(--divider);}
   .s-title{font-size:0.95rem;font-weight:700;margin:0 0 10px;line-height:1.2;}
   .s-pie-block{flex:none;text-align:center;}
@@ -80,11 +80,10 @@
   .s-swatch{width:12px;height:12px;}
   .s-leg-n{font-variant-numeric:tabular-nums;color:var(--muted);}
 
-.s-hist-block{
-  flex:0 1 var(--hist-height, 38%);   /* wants 38% of the section, but may shrink */
-  min-height:100px;                   /* the floor; lower it to allow a squatter histogram */
-  display:flex;flex-direction:column;
-}
+  .s-hist-block{
+    flex:none;height:var(--hist-height, 38%);   /* share of the section height; lower = shorter */
+    min-height:140px;display:flex;flex-direction:column;
+  }
   .h-plot,.h-axis{margin-left:var(--hist-pad-left, 18px);}   /* room for the "−5" label to overhang the first bar edge */
   .h-plot{
     position:relative;flex:1 1 0;min-height:0;
@@ -106,7 +105,6 @@
   .h-zero{
     position:absolute;top:18px;bottom:0;width:0;
     border-left:1px dashed #999;pointer-events:none;
-    transform:translateX(-50%);
   }
   .h-axis{position:relative;height:18px;}
   .h-tick{
@@ -261,18 +259,37 @@
     .cab-divider{width:100%;height:1px;}
     .s-hist-block{flex:none;height:240px;}
     .s-text{flex:none;overflow:visible;}
-    .cab-grid{grid-template-columns:1fr;grid-template-rows:auto;row-gap:16px;}
-    .cab-line{display:none;}
-    .cab-row{grid-template-columns:110px minmax(0,1fr);}
-    .cab-name{font-size:0.78rem;}
-    .cab-chart{padding-right:0;}
-    .p-name{font-size:1.3rem;}
-    .p-photo{aspect-ratio:4/5;flex:none;}   /* was 4/3: taller portrait crop on mobile */
-    .cab-panel{overflow:visible;height:auto;}
-    .cab-chart{ height:auto; min-height:0; }
-    .cab-row{ flex:none; }
-    .cab-track{ height:32px; }
-    .cab-gap{ flex:none; }
+
+    /* --- bar chart + panel: same layout and behaviour as desktop, in a ~1:1 box --- */
+    :root{
+      --gap:12px;                 /* space between chart and panel (connector line runs through it) */
+      --chart-width:5.8fr;
+      --panel-width:4.2fr;
+      --panel-trim:0px;           /* desktop trims the panel; mobile is too tight vertically, so 0 */
+      --main-aspect:1 / 1;        /* mobile shape of the chart + panel section; e.g. 4 / 5 for taller */
+    }
+    .cab-grid{aspect-ratio:var(--main-aspect);align-self:start;}
+
+    /* bar chart: rows share the height, so they get thin; text scales to match */
+    .cab-row{column-gap:10px;min-height:0;margin-bottom:2px;}
+    .cab-row:last-child{margin-bottom:0;}
+    .cab-name{font-size:0.58rem;}
+    .cab-val{font-size:0.58rem;padding-bottom:1px;}
+    .cab-track::before{left:-8px;width:8px;height:1.5px;}
+    .cab-gap{flex:0 0 12px;}
+
+    /* panel */
+    .cab-panel{border-width:2px;padding:6px 7px 8px;}
+    .p-name{font-size:0.8rem;margin:0 0 5px;}
+    .p-photo{min-height:50px;}
+    .p-meta{font-size:0.62rem;margin:5px 0 0;}
+    #pSeat{padding-bottom:4px;gap:5px;}
+    #pRole{padding:4px 0 5px;gap:5px;min-height:calc(2 * 1.4em + 9px);}
+    .p-chance{font-size:0.68rem;margin:5px 0;gap:5px;}
+    .p-row{grid-template-columns:24px minmax(0,1fr);column-gap:5px;margin-bottom:3px;}
+    .p-label{font-size:0.6rem;}
+    .p-track{height:11px;}
+    .p-pct,.p-row:first-child .p-pct{font-size:0.62rem;padding-bottom:1px;}
   }
 
 </style>
@@ -367,7 +384,16 @@ const MEMBERS = [
 const LABEL_GAP        = 8;    // px gap between the end of a bar and its value label
 const PANEL_PARTIES = ['LAB','RFM','CON','LDM','GRN','SNP','PLC', 'OTH'];
 const PANEL_MAX_BAR = 75; // the longest bar in each panel = this % of the track width
-const MOBILE_BREAKPOINT = 700; // px — connector line is hidden below this
+const MOBILE_BREAKPOINT = 700; // px — must match the @media (max-width) value in the CSS
+const isMobile    = () => window.innerWidth <= MOBILE_BREAKPOINT;
+const barFill     = () => isMobile() ? 0.55 : 0.88;   // longest bar as a share of the track (mobile leaves room for the label)
+const panelMaxBar = () => isMobile() ? 65 : PANEL_MAX_BAR;
+const labelGap    = () => isMobile() ? 5 : LABEL_GAP;
+const displayName = n => {
+  if (!isMobile()) return n;                       // desktop keeps full names
+  const parts = n.split(' ');
+  return parts.length < 2 ? n : parts[0][0] + '. ' + parts.slice(1).join(' ');
+};
 const HIST_BIN = 5;     // histogram bin width, in percentage points of margin
 const PARTY_NAMES = {   // full names, used in the pie legend
   LAB:'Labour', CON:'Conservatives', RFM:'Reform UK', LDM:'Liberal Democrats',
@@ -389,7 +415,7 @@ const members = MEMBERS
   .sort((a, b) => b.v - a.v);
 
 const maxAbs = Math.max(...members.map(m => Math.abs(m.v)), 1);
-const domain = maxAbs / 0.88; // longest bar fills ~88% of the track
+const getDomain = () => maxAbs / barFill();
 
 function fmtMargin(v){
   if (v > 0) return '+' + v.toFixed(1);
@@ -526,7 +552,7 @@ function renderChart(){
     last = g;
 
     const p = partyOf(m.winner);
-    const pct = Math.max(Math.abs(m.v) / domain * 100, 1.2);
+    const pct = Math.max(Math.abs(m.v) / getDomain() * 100, 1.2);
 
     const row = document.createElement('button');
     row.type = 'button';
@@ -534,10 +560,10 @@ function renderChart(){
     row.dataset.i = i;
     row.setAttribute('role', 'option');
     row.innerHTML = `
-      <span class="cab-name">${esc(m.name)}</span>
+      <span class="cab-name">${esc(displayName(m.name))}</span>
       <span class="cab-track">
         <span class="cab-bar" style="width:${pct}%;background:${p.color};"></span>
-        <span class="cab-val" style="left:calc(${pct}% + ${LABEL_GAP}px);">${fmtMargin(m.v)}</span>
+        <span class="cab-val" style="left:calc(${pct}% + ${labelGap()}px);">${fmtMargin(m.v)}</span>
       </span>`;
     chart.appendChild(row);
   });
@@ -552,7 +578,7 @@ function fitNameColumn(){
   chart.appendChild(probe);
   let w = 0;
   members.forEach(m => {
-    probe.textContent = m.name;
+    probe.textContent = displayName(m.name);
     w = Math.max(w, probe.getBoundingClientRect().width);
   });
   probe.remove();
@@ -625,12 +651,12 @@ $('pBars').innerHTML = rows.map(([k, on, v]) => {
     </div>`;
   }
     const pct = v * 100;
-  const w = pct / maxPct * PANEL_MAX_BAR;
+  const w = pct / maxPct * panelMaxBar();
   return `<div class="p-row">
     <div class="p-label">${esc(p.label)}</div>
     <div class="p-track">
       <div class="p-fill" style="width:${w}%;background:${p.color};"></div>
-      <div class="p-pct" style="left:calc(${w}% + ${LABEL_GAP}px);">${pct < 1 ? '&lt;1%' : pct > 99 ? '&gt;99%' : Math.round(pct) + '%'}</div>
+      <div class="p-pct" style="left:calc(${w}% + ${labelGap()}px);">${pct < 1 ? '&lt;1%' : pct > 99 ? '&gt;99%' : Math.round(pct) + '%'}</div>
     </div>
   </div>`;
 }).join('');
@@ -654,7 +680,7 @@ function select(i, focus){
 
 function drawLine(){
   const svg = $('cabLine');
-  if (window.innerWidth <= MOBILE_BREAKPOINT || selected < 0){ svg.innerHTML = ''; return; }
+  if (selected < 0){ svg.innerHTML = ''; return; }
 
   const grid = $('cabGrid').getBoundingClientRect();
   const row  = chart.querySelector('.cab-row.sel');
@@ -689,7 +715,17 @@ renderStats();
 renderChart();
 select(0);
 
-window.addEventListener('resize', drawLine);
+let wasMobile = isMobile();
+window.addEventListener('resize', () => {
+  if (isMobile() !== wasMobile){          // crossed the breakpoint: bar lengths and label gaps change, so rebuild
+    wasMobile = isMobile();
+    renderChart();
+    const i = selected; selected = -1; select(i);
+  } else {
+    fitNameColumn();                      // name column width depends on the current font size
+  }
+  drawLine();
+});
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { fitNameColumn(); drawLine(); });
 new ResizeObserver(drawLine).observe($('cabGrid'));
 
