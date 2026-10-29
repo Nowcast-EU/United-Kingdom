@@ -167,50 +167,52 @@
   .cab-gap{flex: 0 0 26px;}
 
   /* ---------- info panel ---------- */
+  /* Text, spacing and party bars are compacted so the portrait photo (flex:1) gets the spare height */
     .cab-panel{
-    border:3px solid #999;background:#fff;padding:14px 16px 20px;
+    border:3px solid #999;background:#fff;padding:10px 14px 14px;
     display:flex;flex-direction:column;
     min-height:0;overflow:hidden;
   }
   .cab-panel > *:not(.p-photo){flex:none;}
-  .p-name{font-size: clamp(1.4rem, 2.2vw, 1.25rem);font-weight:700;margin:0 0 14px;text-align:center;line-height:1.1;}
+  .p-name{font-size:1.15rem;font-weight:700;margin:0 0 8px;text-align:center;line-height:1.1;}
     .p-photo{
     position:relative;
     width:100%;background:#e4e4e4;overflow:hidden;
     display:flex;align-items:center;justify-content:center;
-    flex:1 1 0;min-height:60px;
+    flex:1 1 0;min-height:120px;
   }
   .p-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top;display:block;}
   .p-photo .initials{font-size:3.5rem;font-weight:700;color:#aaa;}
 .p-meta{
-  margin:10px 0 0;
-  font-size:1.05rem;line-height:1.45;
+  margin:8px 0 0;
+  font-size:0.9rem;line-height:1.4;
 }
 #pSeat{
-  padding-bottom:8px;
+  padding-bottom:6px;
   border-bottom:1px solid #ddd;
-  display:flex;align-items:flex-start;gap:10px;
+  display:flex;align-items:flex-start;gap:8px;
 }
 #pRole{
-  padding:8px 0 12px;
+  padding:6px 0 8px;
   border-bottom:1px solid #ddd;
-  min-height:calc(2 * 1.45em + 20px);   /* two text lines + the 8px and 12px padding */
-  display:flex;align-items:flex-start;gap:10px;
+  min-height:calc(2 * 1.4em + 14px);   /* two text lines + the 6px and 8px padding */
+  display:flex;align-items:flex-start;gap:8px;
 }
-  .p-chance{margin:12px 0 12px;font-size:1.15rem;font-weight:700;font-style:normal;display:flex;align-items:flex-start;gap:10px;}
+  .p-chance{margin:8px 0 8px;font-size:1rem;font-weight:700;font-style:normal;display:flex;align-items:flex-start;gap:8px;}
   .p-row{
-    display:grid;grid-template-columns:38px minmax(0,1fr);
-    align-items:center;column-gap:10px;margin-bottom:8px;
+    display:grid;grid-template-columns:34px minmax(0,1fr);
+    align-items:center;column-gap:8px;margin-bottom:5px;
   }
-  .p-label{font-size:0.9rem;text-align:center;color:#333;font-weight:500}
-  .p-track{position:relative;height:24px;}
+  .p-row:last-child{margin-bottom:0;}
+  .p-label{font-size:0.8rem;text-align:center;color:#333;font-weight:500}
+  .p-track{position:relative;height:18px;}
   .p-fill{height:100%;min-width:3px;}
   .p-pct{
     position:absolute;top:0;height:100%;display:flex;align-items:center;
-    font-size:1rem;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums;
-    padding-bottom:4px;
+    font-size:0.85rem;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums;
+    padding-bottom:3px;
   }
-  .p-row:first-child .p-pct{font-size:1rem;}
+  .p-row:first-child .p-pct{font-size:0.85rem;}
   .p-row.out{opacity:0.4;}
   .p-row.out .p-label{text-decoration:line-through;}
   .p-row.out .p-track::after{
@@ -234,7 +236,7 @@
   -webkit-box-orient:vertical;
   -webkit-line-clamp:2;
   overflow:hidden;
-  min-height:calc(2 * 1.45em);
+  min-height:calc(2 * 1.4em);
   flex:1 1 0;
   min-width:0;
 }
@@ -260,8 +262,8 @@
     .cab-row{grid-template-columns:110px minmax(0,1fr);}
     .cab-name{font-size:0.78rem;}
     .cab-chart{padding-right:0;}
-    .p-name{font-size:1.6rem;}
-    .p-photo{aspect-ratio:4/3;flex:none;}
+    .p-name{font-size:1.3rem;}
+    .p-photo{aspect-ratio:4/5;flex:none;}   /* was 4/3: taller portrait crop on mobile */
     .cab-panel{overflow:visible;}
     .cab-chart{ height:auto; min-height:0; }
     .cab-row{ flex:none; }
