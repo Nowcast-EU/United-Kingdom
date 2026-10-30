@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Projection — Nowcast UK</title>
+<title>Systems — Nowcast UK</title>
 <style>
   :root {
     --bg: #f8faf9;
@@ -12,1307 +12,634 @@
     --muted: #8A8F98;
     --divider: #E2E2DE;
     --accent-soft: #E7ECF3;
+    --col-gap: 12px;
+    --bar-h: clamp(260px, 52vw, 440px);
   }
-  * { box-sizing: border-box; }
-body {
-  margin: 0;
-  padding: 0;
-  background: var(--bg);
-  color: var(--ink);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-  line-height: 1.5;
-}
-  h2 { font-size: 1.3rem; margin: 0 0 4px; }
-  
-  h3 { font-size: 1rem; margin: 0; }
-
-.builder-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: 0 2px;
-  margin-bottom: 12px;
-}
-  .wip-note { color: var(--muted); font-size: 0.85rem; margin: 0 0 20px; }
-
-  .chart-panel-title {
-  font-size: 1.4rem;
-  color: #000000;
-  margin-left: -12px;
-  margin-top: 0;
-  padding-top: 4px;
-}
-
-  .chart-title {
-    color: #000000;
-    font-size: 0.85rem;
-    margin: -4px 0 12px -12px;
-}
-
-  .chart-title a {
-    color: #000000;
-}
-
-.chart-note {
-    color: #000000;
-    font-size: 0.85rem;
-    margin-left: -12px;
-}
-
-  @media (max-width: 780px) {
-  .chart-title {
-  margin: -12px 0 12px -8px;
- }
-
-  .chart-panel-title {
-    margin: -4px 0 12px -8px;
-    padding-top: 0;
- }
-
-  .chart-note {
-    margin: 4px 0 12px -8px;
- }
-}
-
-  /* ---------------- layout ---------------- */
-.module-grid {
-  display: grid;
-  grid-template-columns: 2fr 3fr;
-  grid-template-areas: "chart map" "builder builder";
-  gap: 20px;
-  max-width: 1250px;
-}
-
-  @media (max-width: 780px) {
-.module-grid {
-  grid-template-columns: 1fr;
-  grid-template-areas: "chart" "map" "builder";
-}
-    
-  }
-
-  /* ---------------- map panel ---------------- */
-.map-panel {
-  grid-area: map;
-  aspect-ratio: 3 / 5;
-  width: 100%;
-  max-width: 900px;
-  margin: 0 auto;
-  border-radius: 0;
-  overflow: hidden;
-  min-width: 0;
-  position: relative;
-}
-
-  .map-scale-wrap {
-  position: absolute;
-  top: 0;
-  left: 0;
-  transform-origin: top left;
-}
-
-  .map-placeholder {
-    height: 100%;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    background:
-      repeating-linear-gradient(135deg, var(--accent-soft) 0 10px, transparent 10px 20px),
-      #fff;
-    border: 1px solid var(--divider);
-    color: var(--muted);
-    text-align: center;
-    padding: 16px;
-  }
-
-  .map-placeholder strong { color: var(--ink-soft); font-size: 0.95rem; }
-  .map-placeholder span { font-size: 0.78rem; }
-
-  /* ---------------- builder panel ---------------- */
-.builder-panel {
-  grid-area: builder;
-  display: flex;
-  flex-direction: column;
-  height: auto;
-  min-height: 0;
-  min-width: 0;
- position: relative;
-}
-
-.party-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-  margin-top: 12px;
-}
-
-.party-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px 10px;
-  font-size: 0.74rem;
-  font-weight: 500;
-  border: 1px solid var(--divider);
-  background: #e9ecef; /* Neutral grey background */
-  border-radius: 8px;
-  cursor: pointer;
-  color: var(--ink-soft);
-  opacity: 0.75;
-  transition: all 0.2s ease;
-}
-
-.party-btn:hover {
-  transform: translateY(-1px);
-  opacity: 1;
-}
-
-/* Selected state: inherits the party color */
-.party-btn[aria-pressed="true"] {
-  opacity: 1;
-  background: var(--party-color);
-  border-color: var(--party-color);
-  color: #ffffff; /* White text for contrast */
-  font-weight: bold;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-}
 
   @media (min-width: 781px) {
-  .party-btn {
-    padding: 6px 12px;
-    font-size: 0.8rem;
-    gap: 8px;
+    :root { --bar-h: 560px; }
   }
-      .builder-counter {
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    line-height: 1.5;
+  }
+  h3 { font-size: 1rem; margin: 0; }
+
+  /* ---------------- builder panel ---------------- */
+  .builder-panel {
+    max-width: 1250px;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    position: relative;
+  }
+
+  .builder-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0 2px;
+    margin-bottom: 12px;
+  }
+
+  /* three rows (labels / bars / counts) share one 7-column grid template,
+     so every column lines up and the majority line can span all bars */
+  .systems-row {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    column-gap: var(--col-gap);
+  }
+
+  .system-label {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    min-height: 2.4em;
+    padding-bottom: 6px;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.15;
+    color: var(--ink-soft);
+  }
+
+  .system-label { gap: 5px; }
+
+  .sys-info {
+    flex: none;
+    align-self: center;
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    border: 1.5px solid var(--muted);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--muted);
+    font: italic bold 0.65rem/1 Georgia, "Times New Roman", serif;
+    cursor: help;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+
+  @media (min-width: 601px) {
+    .sys-info {
+      align-self: flex-end;
+      margin-bottom: 1px;
+    }
+  }
+
+  .sys-info:hover,
+  .sys-info:focus-visible {
+    color: var(--ink);
+    border-color: var(--ink);
+    outline: none;
+  }
+
+  .sys-popup {
+    position: fixed;
+    z-index: 11;
+    display: none;
+    width: max-content;
+    max-width: min(260px, calc(100vw - 16px));
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: var(--bg);
+    color: #000;
+    border: 1px solid var(--divider);
+    font-size: 0.8rem;
+    line-height: 1.35;
+    text-align: left;
+    pointer-events: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  }
+
+  .bars-row { position: relative; }
+
+  .system-bar {
+    position: relative;
+    display: flex;
+    flex-direction: column-reverse; /* lowest-ordered block sits at the bottom */
+    height: var(--bar-h);
+    border: 1px solid var(--divider);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  /* solid block of colour for each party, stacked from the bottom up */
+  .seg {
+    flex: none;
+    width: 100%;
+    height: 0;
+    transition: height 0.35s ease, filter 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .seg.is-hovered {
+    filter: brightness(1.12);
+    box-shadow: inset 0 0 0 1px #fff;
+    z-index: 1;
+  }
+
+  .seg-tooltip {
+    position: fixed;
+    z-index: 10;
+    display: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: rgba(26, 30, 35, 0.94);
+    color: #fff;
+    font-size: 0.8rem;
+    line-height: 1.3;
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  }
+
+  .seg-tooltip strong { display: block; }
+  .seg-tooltip .rep { display: block; opacity: 0.85; }
+
+  /* one line across all seven bars. --maj-frac is set from MAJORITY / TOTAL_SEATS.
+     The 1px / 2px offsets account for the bars' 1px border. */
+  .majority-line {
     position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(1px + (100% - 2px) * var(--maj-frac, 0.5));
+    height: 2px;
+    margin-bottom: -1px;
+    background: #000;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.8);
+    pointer-events: none;
     z-index: 2;
   }
-}
 
-.fill-bar-wrap {
-  flex: none;
-  aspect-ratio: 7.5 / 1;
-  width: 100%;
-  position: relative;
-  border: 1px solid var(--divider);
-  border-radius: 8px;
-  overflow: hidden;
-  background: #fff;
-}
-
-  @media (max-width: 500px) {
-  .fill-bar-wrap {
-    aspect-ratio: 3.5 / 1;
+  .system-count {
+    margin-top: 6px;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: bold;
   }
-}
 
-.fill-bar {
-  position: absolute;
-  inset: 6px;
-  width: calc(100% - 12px);
-  height: calc(100% - 12px);
-  display: block;
-}
+  .party-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 14px;
+  }
 
-.seat-dot {
-  fill: transparent;
-  transform-box: fill-box;
-  transform-origin: center;
-  transform: scale(0);
-  transition: transform 0.1s ease, fill 0.1s ease;
-  transition-delay: var(--dot-delay, 0s);
-}
+  .party-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    font-size: 0.74rem;
+    font-weight: 500;
+    border: 1px solid var(--divider);
+    background: #e9ecef; /* Neutral grey background */
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--ink-soft);
+    opacity: 0.75;
+    transition: all 0.2s ease;
+  }
 
-.seat-dot.seat-dot-filled {
-  fill: var(--dot-color, var(--divider));
-  transform: scale(1);
-}
+  .party-btn:hover {
+    transform: translateY(-1px);
+    opacity: 1;
+  }
 
-.builder-counter {
-  font-size: 1rem;
-  font-weight: bold;
-  margin: 0;
-}
+  /* Selected state: inherits the party color */
+  .party-btn[aria-pressed="true"] {
+    opacity: 1;
+    background: var(--party-color);
+    border-color: var(--party-color);
+    color: #ffffff;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  }
 
-.builder-note {
-  font-size: 0.8rem;
-  color: #000000;
-  text-align: center;
-  width: 65%;
-  line-height: 1.2;
-  margin-top: 8px;
-  margin-right: auto;
-  margin-bottom: 0;
-  margin-left: auto;
-}
+  @media (min-width: 781px) {
+    .party-btn {
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      gap: 8px;
+    }
+  }
+
+  /* "Toggle all" pill: same look as the party buttons, with a checkbox on the left */
+  .party-btn.toggle-all-btn {
+    --party-color: var(--ink-soft);
+    gap: 6px;
+  }
+
+  .toggle-all-btn .check-box {
+    position: relative;
+    flex: none;
+    width: 13px;
+    height: 13px;
+    border: 1.5px solid currentColor;
+    border-radius: 3px;
+    background: transparent;
+  }
+
+  .toggle-all-btn[aria-pressed="true"] .check-box {
+    background: #fff;
+    border-color: #fff;
+  }
+
+  .toggle-all-btn[aria-pressed="true"] .check-box::after {
+    content: '';
+    position: absolute;
+    left: 3.5px;
+    top: 0.5px;
+    width: 3px;
+    height: 7px;
+    border: solid var(--party-color);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  .builder-note {
+    font-size: 0.8rem;
+    color: #000000;
+    text-align: center;
+    width: 65%;
+    line-height: 1.2;
+    margin: 8px auto 0;
+  }
 
   @media (max-width: 700px) {
-.builder-note {
-  font-style: italic;
-  color: #555555;
-  width: 95%;
-}
-
-    .map-panel {
-  position: relative;
-  z-index: 1;
-}
-    
+    .builder-note {
+      font-style: italic;
+      color: #555555;
+      width: 95%;
+    }
   }
 
-  .majority-line {
-  stroke: #000;
-  stroke-width: 1;
-  pointer-events: none;
-}
-
-.h2h-section {
-  max-width: 1250px;
-  width: 100%;
-  margin: 32px auto 0;
-}
-
-.h2h-subtitle {
-  color: #000000;
-  font-size: 0.85rem;
-  margin: 0 0 20px;
-}
-
-.h2h-middle {
-  min-width: 0;
-}
-
-.h2h-card {
-  display: grid;
-  grid-template-columns: 100px 1fr 100px;
-  align-items: center;
-  gap: 20px;
-  padding: 20px 0;
-}
-
-.h2h-portrait {
-  width: 84px;
-  height: 84px;
-  border-radius: 50%;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--ink-soft);
-  overflow: hidden;
-}
-
-  .h2h-portrait img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.h2h-numbers {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.h2h-number-group {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  font-size: 1.6rem;
-  font-weight: 800;
-  color: var(--ink);
-}
-
-.h2h-number-group.align-end { justify-content: flex-end; }
-
-.h2h-pct {
-  font-style: normal;
-  font-weight: normal;
-  font-size: 0.95rem;
-  color: var(--muted);
-}
-
-.h2h-bars {
-  position: relative;
-}
-
-.h2h-bar-vote,
-.h2h-bar-seats {
-  display: flex;
-  overflow: hidden;
-}
-
-.h2h-bar-vote { height: 8px; margin-bottom: 4px; border-radius: 3px; }
-.h2h-bar-seats { height: 22px; border-radius: 4px; }
-
-.h2h-center-line {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 2px;
-  background: #000;
-  transform: translateX(-1px);
-}
-
-.h2h-list {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-  position: relative;
-}
-
-.h2h-list::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 1px;
-  background: var(--divider);
-  transform: translateX(-0.5px);
-}
-
-@media (max-width: 1000px) {
-  .h2h-list {
-    grid-template-columns: 1fr;
-    gap: 10px;
+  @media (max-width: 600px) {
+    :root { --col-gap: 5px; }
+    .system-label { font-size: 0.62rem; }
+    .system-label {
+      flex-direction: column-reverse;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 3px;
+    }
+    .system-count { font-size: 0.8rem; }
+    .system-bar { border-radius: 5px; }
   }
-
-.h2h-card {
-  grid-template-columns: 76px 1fr 76px;
-  gap: 12px;
-  padding: 16px 4px;
-}
-
-  .h2h-numbers {
-  margin-bottom: 4px;
-}
-
-.h2h-portrait {
-  width: 68px;
-  height: 68px;
-  font-size: 0.68rem;
-}
-
-  .h2h-list::before {
-  display: none;
-}
-
-  .h2h-number-group {
-  font-size: 1.2rem;
-  gap: 4px;
-}
-
-.h2h-pct {
-  font-size: 0.8rem;
-}
-  
-}
-
-  @media (max-width: 500px) {
-  .h2h-list {
-    grid-template-columns: 1fr;
-    gap: 8px;
+  @media (min-width: 781px) {
+    :root { --col-gap: 28px; }
   }
-
-.h2h-card {
-  grid-template-columns: 76px 1fr 76px;
-  gap: 8px;
-  padding: 12px 2px;
-}
-
-    .h2h-bar-vote,
-.h2h-bar-seats {
-  display: flex;
-  overflow: hidden;
-  border-radius: 4px;
-}
-
-.h2h-bar-vote { height: 4px; margin-bottom: 2px; }
-.h2h-bar-seats { height: 11px; }
-
-  .h2h-numbers {
-  margin-bottom: 3px;
-}
-
-.h2h-portrait {
-  width: 50px;
-  height: 50px;
-  font-size: 0.5rem;
-}
-
-  .h2h-list::before {
-  display: none;
-}
-
-  .h2h-number-group {
-  font-size: 1rem;
-  gap: 3px;
-}
-
-.h2h-pct {
-  font-size: 0.6rem;
-}
-
-      .h2h-section h2 {
-    font-size: 1rem;
-  }
-
-  .h2h-subtitle {
-    font-size: 0.75rem;
-  }
-  
-}
-
-.chart-panel {
-  grid-area: chart;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  padding: 0px 12px 12px;
-  border: none;
-  border-radius: 0;
-  border-right: 1px solid var(--divider);
-  background: transparent;
-  min-width: 0;
-  overflow: visible;
-}
-
-.chart-bars {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.chart-majority-line {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 0;
-  border-left: 2px dashed #999;
-  pointer-events: none;
-}
-
-.chart-bar-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.85rem;
-}
-
-.chart-bar-label {
-  width: 40px;
-  flex: none;
-  font-weight: 600;
-  color: var(--ink-soft);
-  text-align: center;
-  margin-left: -10px;
-  padding-right: 10px;
-}
-
-.chart-bar-track {
-  flex: 1;
-  height: 30px;
-  background: transparent;
-  border-radius: 0;
-  overflow: visible;
-  min-width: 0;
-  position: relative;
-  margin-left: -4px;
-}
-
-.chart-bar-fill {
-  height: 100%;
-}
-
-.chart-bar-value {
-  width: 45px;
-  flex: none;
-  font-weight: 700;
-  font-size: 1rem;
-  color: var(--ink);
-  text-align: right;
-  padding-right: 10px;
-}
-
-.chart-range {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.chart-range-cap {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 2px;
-  height: 10px;
-  background: rgba(0, 0, 0, 0.7);
-}
-
-.chart-range-line {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 2px;
-  background: rgba(0, 0, 0, 0.7);
-}
-
-.chart-panel.hide-confidence .chart-range {
-  display: none;
-}
-
-.chart-toggle {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.85rem;
-  color: var(--ink-soft);
-  margin-top: 8px;
-  cursor: pointer;
-}
-
-  .chart-toggle input[type="checkbox"] {
-  width: 12px;
-  height: 12px;
-}
-
-  @media (max-width: 780px) {
-
-  .chart-panel {
-  min-height: 120px;
-  padding: 8px;
-  border-right: none;
-  position: relative;
-  z-index: 10;
-}
-
-.chart-bars {
-  gap: 3px;
-}
-
-.chart-bar-row {
-  font-size: 0.6rem;
-  gap: 4px;
-}
-
-.chart-bar-track {
-  height: 18px;
-}
-  }
-
-        @media (min-width: 781px) {
-    .chart-range-cap {
-    height: 15px;
-  }
-}
-
-.analysis-toggle {
-  display: none;
-}
-
-  .analysis-collapse-btn {
-  display: none;
-}
-
-  @media (max-width: 780px) {
-.analysis-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  width: 100%;
-  text-align: left;
-  background: var(--accent-soft);
-  border: none;
-  border-radius: 6px;
-  padding: 10px 12px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--ink-soft);
-  cursor: pointer;
-  margin-top: 8px;
-}
-
-      .analysis-collapse-btn {
-    display: block;
-    width: 100%;
-    background: var(--accent-soft);
-    border: none;
-    border-radius: 6px;
-    padding: 8px 12px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--ink-soft);
-    cursor: pointer;
-    margin: 4px 0;
-  }
-
-.analysis-toggle-arrow {
-  flex: none;
-  font-size: 0.9rem;
-  transition: transform 0.25s ease;
-}
-
-.analysis-toggle[aria-expanded="true"] .analysis-toggle-arrow {
-  transform: rotate(180deg);
-}
-
-.chart-note {
-  display: none;
-}
-
-.chart-note.is-expanded {
-  display: block;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  z-index: 5;
-  background: var(--bg);
-  padding: 8px 0 12px;
-  margin-top: 4px;
-  max-height: 60vh;
-  overflow-y: auto;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
-  border-radius: 6px;
-}
-
-    .desktop-only-text {
-  display: none;
-}
-  }
-
-  .analysis-wrap {
-  position: relative;
-}
-  
 </style>
 </head>
 <body>
 
-<div class="module-grid">
-<div class="chart-panel" id="chartPanelOuter">
-<h2 class="chart-panel-title">Central Seat Projection</h2>
-<p class="chart-title">This is Nowcast UK’s deterministic seat projection calculated based on a two week polling average. Confidence bars represent the middle 50% of potential outcomes. Our full probabilistic breakdown can be viewed <a href="https://www.nowcast.uk/projection#probabilities" target="_top">here</a>.</p>
-  <div id="chartPanel"></div>
-  <label class="chart-toggle">
-    <input type="checkbox" id="confidenceToggle" checked>
-    Show interquartile range
-  </label>
-  <div class="analysis-wrap">
-<button type="button" class="analysis-toggle" id="analysisToggle" aria-expanded="false" aria-controls="analysisText">
-  <span id="analysisToggleLabel">Click here to read our analysis</span>
-  <span class="analysis-toggle-arrow" aria-hidden="true">▾</span>
-</button>
-<p class="chart-note" id="analysisText">Based on current polling averages, the Labour Party led by Andy Burnham is projected to win 300 seats. 26 short of a simple majority in the House of Commons, but enough to form a coalition or confidence & supply agreement with the Liberal Democrats as their closest viable partner. 78% of our simulations result in Labour remaining the largest party short of a majority, as opposed to 20% putting them above the 325 seat mark.<br>
-<br>
-Reform are on course to gain 67 seats since the 2024 General Election, making them the largest net 'winner' of an election held today. However, the combined right continues to suffer from vote splitting among Reform, Restore and the Conservatives, and the prospect of a fairly disciplined tactical voting campaign forming against them. Our lower end estimates for Reform take the party back below 50 seats, while the Conservatives have a more robust rural-leaning electoral geography to aid their post-GE2024 recovery.<br>
-<br>
-The Liberal Democrats and Greens continue to hover around 10% in our polling averages, but the geography of their vote leads to two very different outcomes in terms of projected seats. Lib Dems are leading in 48 of the 68 seats they're likely to face a Conservative as their main challenger. Greens, on the other hand, face a much stronger Labour Party under Andy Burnham than Keir Starmer. We project the Green vote to shift in higher concentrations towards urban constituencies, putting North Herefordshire and Waveney Valley at risk. This opens up more opportunity to gain seats from Labour in central London, despite falling short in Holborn & St Pancras. Overall change to the Greens' seat prospects is minimal.<br>
-<br>
-The current political landscape lends itself to a hung parliament as the most likely outcome of an election held today. The 'left-of-centre' is at an advantage for the first time since April 2025, without having to rely on Plaid Cymru or the SNP for a parliamentary majority.<br>
-<br>
-<span class="desktop-only-text">Explore constituency-level projections using our interactive map ➔</span><br><button type="button" class="analysis-collapse-btn" id="analysisCollapseBtn">Collapse ▴</button></p>
+<div class="builder-panel">
+
+  <div class="systems-row" id="labelsRow"></div>
+  <div class="systems-row bars-row" id="barsRow"></div>
+  <div class="systems-row" id="countsRow"></div>
+
+  <div class="party-list" id="partyList"></div>
+  <p class="builder-note" id="builderNote"></p>
 </div>
-  </div>
-  <div class="map-panel">
-  <div class="map-scale-wrap" id="mapScaleWrap">
-    <iframe
-      src="https://flo.uri.sh/visualisation/26928540/embed"
-      loading="lazy"
-      style="width:100%;height:100%;border:0;display:block;"
-      frameborder="0"
-      scrolling="no">
-    </iframe>
-  </div>
-</div>
-
-  <div class="builder-panel">
-<div class="builder-header">
-  <h3>Coalition builder</h3>
-  <p class="builder-counter" id="builderCounter"></p>
-</div>
-<div class="fill-bar-wrap">
-  <svg class="fill-bar" id="fillBar" xmlns="http://www.w3.org/2000/svg"></svg>
-</div>
-<div class="party-list" id="partyList"></div>
-<p class="builder-note" id="builderNote">Majority = 326 seats</p>
-  </div>
-
-</div>
-
-  <section class="h2h-section">
-  <h2>Head to Head — Who Has The Edge Under FPTP?</h2>
-  <p class="h2h-subtitle">Aggregate of seats where both parties are in either first or second place</p>
-  <div class="h2h-list" id="h2hList"></div>
-</section>
-
-  <script>
-(function () {
-  var toggle = document.getElementById('analysisToggle');
-  var text = document.getElementById('analysisText');
-  if (!toggle || !text) return;
-
-  var label = document.getElementById('analysisToggleLabel');
-
-  var collapseBtn = document.getElementById('analysisCollapseBtn');
-
-  function setExpanded(expanded) {
-    text.classList.toggle('is-expanded', expanded);
-    toggle.setAttribute('aria-expanded', expanded);
-    label.textContent = expanded ? 'Hide our analysis' : 'Click here to read our analysis';
-  }
-
-  toggle.addEventListener('click', function () {
-    setExpanded(!text.classList.contains('is-expanded'));
-  });
-
-  if (collapseBtn) {
-    collapseBtn.addEventListener('click', function () {
-      setExpanded(false);
-    });
-  }
-})();
-</script>
-
-  <script>
-(function () {
-var FLOURISH_BASE_WIDTH = window.matchMedia("(max-width: 768px)").matches
-  ? 675
-  : 950;
-  var panel = document.querySelector('.map-panel');
-  var wrap = document.getElementById('mapScaleWrap');
-
-  function scaleMap() {
-    var panelWidth = panel.clientWidth;
-    var panelHeight = panel.clientHeight;
-    if (panelWidth < 1 || panelHeight < 1) return;
-    var scale = panelWidth / FLOURISH_BASE_WIDTH;
-    wrap.style.width = FLOURISH_BASE_WIDTH + 'px';
-    wrap.style.height = (panelHeight / scale) + 'px';
-    wrap.style.transform = 'scale(' + scale + ')';
-  }
-
-  scaleMap();
-  window.addEventListener('resize', scaleMap);
-  if ('ResizeObserver' in window) {
-    new ResizeObserver(scaleMap).observe(panel);
-  }
-})();
-</script>
 
 <script>
 (function () {
-  // Placeholder data — replace with the real projection once available.
+  // ---------------------------------------------------------------
+  // DATA — edit here
+  // ---------------------------------------------------------------
+  // Parties: button order follows this array. Colours match the projection module.
+  var PARTIES = [
+    { id: 'lab', name: 'LAB', color: '#E4003B' },
+    { id: 'con', name: 'CON', color: '#0087dc' },
+    { id: 'ref', name: 'RFM', color: '#34D8EF' },
+    { id: 'ld',  name: 'LDM', color: '#faa61a' },
+    { id: 'grn', name: 'GRN', color: '#6ab023' },
+    { id: 'res', name: 'RES', color: '#000055' },
+    { id: 'snp', name: 'SNP', color: '#fdf38e' },
+    { id: 'pc',  name: 'PLC', color: '#005b54' },
+    { id: 'sf',  name: 'SFN', color: '#326760' },
+    { id: 'dup', name: 'DUP', color: '#d46a4c' },
+    { id: 'all', name: 'ALL', color: '#FFD700' },
+    { id: 'uup', name: 'UUP', color: '#3399ff' },
+    { id: 'sdl', name: 'SDL', color: '#2aa82c' },
+    { id: 'tuv', name: 'TUV', color: '#0C3A6A' },
+    { id: 'oth', name: 'OTH', color: '#999999' }
+  ];
 
-  var parties = [
-    { id: 'lab', name: 'LAB', seats: 300, color: '#E4003B' },
-    { id: 'con', name: 'CON', seats: 146, color: '#0087dc' },
-    { id: 'ref', name: 'RFM', seats: 72, color: '#34D8EF' },
-    { id: 'ld', name: 'LDM', seats: 62, color: '#faa61a' },
-    { id: 'snp', name: 'SNP', seats: 34, color: '#fdf38e' },
-    { id: 'grn', name: 'GRN', seats: 6, color: '#6ab023' },
-    { id: 'dup', name: 'DUP', seats: 3, color: '#d46a4c' },
-    { id: 'sf', name: 'SFN', seats: 8, color: '#326760' },
-    { id: 'pc', name: 'PLC', seats: 9, color: '#005b54' },
-    { id: 'uup', name: 'UUP', seats: 3, color: '#3399ff' },
-    { id: 'sdl', name: 'SDL', seats: 2, color: '#2aa82c' },
-    { id: 'tuv', name: 'TUV', seats: 1, color: '#0C3A6A' },
-    { id: 'res', name: 'RES', seats: 1, color: '#000055' },
-    { id: 'oth', name: 'OTH', seats: 3, color: '#999999' }
+  // Seats per party per system. PLACEHOLDER FIGURES — replace with the real ones.
+  // Each system should sum to TOTAL_SEATS (a console warning fires if not).
+  // Columns appear left to right in this order.
+  var SYSTEMS = [
+    { id: 'tworound',    name: 'Two-Round',    info: 'Two round / runoff voting — in constituencies where the largest party is below 50% vote share, the top two contenders go to a runoff. This can either be instant or held at a later date. See France or England (for mayors).',                                                               seats: { lab: 292, con: 191, ref: 57,  ld: 47, snp: 23, grn: 6,  dup: 4, sf: 7, pc: 13, uup: 3, sdl: 2, tuv: 1, all: 0, res: 1, oth: 3 } },
+    { id: 'fptp',        name: 'FPTP',         info: 'First Past The Post — the current electoral system used in the United Kingdom. Parties only need a plurality of votes to win any given constituency. This makes victories as a result of vote splitting far more commonplace.',                                                               seats: { lab: 300, con: 146, ref: 72,  ld: 62, snp: 34, grn: 6, dup: 3, sf: 8, pc: 9, uup: 3, sdl: 2, tuv: 1, all: 0, res: 1, oth: 3 } },
+    { id: 'mmm',         name: 'MMM (50/50)',          info: 'Mixed Member Majoritarian — a combination of FPTP seats and proportionally distributed seats. Neither component is designed to compensate for the other. See Hungary or Japan.',                                                                                                      seats: { lab: 235, con: 153, ref: 110, ld: 57, snp: 27, grn: 31, dup: 2, sf: 7, pc: 12,  uup: 2, sdl: 3, tuv: 2, all: 1, res: 7, oth: 1 } },
+    { id: 'stvpr',       name: 'STV-PR',       info: 'Single Transferable Vote in multi-member districts — voters rank candidates in order of preference. Candidates with the least amount of votes are eliminated, and preferences are transferred until the required number of seats per constituency are filled. Currently used in Ireland.',    seats: { lab: 205, con: 155, ref: 137, ld: 56, snp: 21, grn: 48, dup: 3, sf: 5, pc: 8,  uup: 4, sdl: 3, tuv: 1, all: 1, res: 0, oth: 3 } },
+    { id: 'dhondt',      name: 'd\'Hondt PR',  info: 'd\'Hondt PR — a proportional system that often utilises multi-member constituencies, slightly biased towards larger parties. Estimates for this version are inspired by the Spanish system of apportioning seats at the province/county level.',                                              seats: { lab: 189, con: 152, ref: 152, ld: 58, snp: 22, grn: 44, dup: 3, sf: 5, pc: 9,  uup: 3, sdl: 3, tuv: 2, all: 2, res: 6, oth: 0 } },
+    { id: 'mmpr',        name: 'MMPR (50/50)',         info: 'Mixed Member PR — a combination of FPTP and proportional seats similar to MMM. However, the PR list seats are compensatory to ensure overall proportionality. See Germany or New Zealand.',                                                                                           seats: { lab: 184, con: 142, ref: 138, ld: 62, snp: 20, grn: 58, dup: 3, sf: 5, pc: 9,  uup: 3, sdl: 2, tuv: 2, all: 2, res: 19, oth: 1 } },
+    { id: 'perfect',     name: 'Perfect PR',   info: 'Perfect PR — as close to \'perfect\' proportionality as you can get. One nation-wide constituency, as used in the Netherlands and Slovakia. Our own estimates are based on the Sainte-Laguë method with no electoral thresholds.',                                                            seats: { lab: 182, con: 139, ref: 139, ld: 61, snp: 19, grn: 60, dup: 3, sf: 5, pc: 9,  uup: 3, sdl: 3, tuv: 2, all: 2, res: 23, oth: 0 } }
   ];
 
   var TOTAL_SEATS = 650;
-var MAJORITY = 326;
-var NON_SITTING_IDS = ['sf']; // parties whose seats don't count toward a working majority
+  var MAJORITY = 326;
 
-function getFunctionalMajority() {
-  var nonSittingSeats = parties
-    .filter(function (p) { return NON_SITTING_IDS.indexOf(p.id) !== -1; })
-    .reduce(function (sum, p) { return sum + p.seats; }, 0);
-  return Math.floor((TOTAL_SEATS - nonSittingSeats) / 2) + 1;
-}
+  // Parties selected when the page loads, bottom of the bar first.
+  var DEFAULT_SELECTED = ['lab', 'ld'];
 
-var currentMajorityLinePos = null;
-var currentMajorityOrientation = null;
+  // Order used by the "Toggle all" button, bottom of the bar first.
+  // Any party left out is added at the end automatically.
+  var TOGGLE_ALL_ORDER = ['sf', 'pc', 'sdl', 'grn', 'snp', 'lab', 'ld', 'all', 'oth', 'uup', 'con', 'ref', 'dup', 'tuv', 'res'];
 
-var selectedOrder = []; // party ids in the order they were selected
-var sortedParties = [];
-var dotElements = [];
-var dotLineIndex = []; // which line (in fill order) each dot in dotElements belongs to
-var previousFilledCount = 0;
-var ROW_DELAY = 0.005; // seconds of stagger between each row/column as it appears
+  // The column treated as "perfect PR": the benchmark for over/under-representation.
+  // Defaults to the last column in SYSTEMS - change the index if you reorder.
+  var PR_REFERENCE_INDEX = SYSTEMS.length - 1;
 
-function computeGridLayout(alongDim, acrossDim, count, gap) {
-  // "along" = the dimension each line runs across; "across" = the dimension
-  // lines are stacked along. Try every line length, keep the largest dot size
-  // that fits both dimensions.
-  var best = { size: 0, lineLength: 1, lineCount: count };
-  for (var lineLength = 1; lineLength <= count; lineLength++) {
-    var lineCount = Math.ceil(count / lineLength);
-    var sizeAlong = (alongDim - (lineLength - 1) * gap) / lineLength;
-    var sizeAcross = (acrossDim - (lineCount - 1) * gap) / lineCount;
-    var size = Math.min(sizeAlong, sizeAcross);
-    if (size > best.size) {
-      best = { size: size, lineLength: lineLength, lineCount: lineCount };
-    }
-  }
-  return best;
-}
+  // ---------------------------------------------------------------
+  // STATE + DOM
+  // ---------------------------------------------------------------
+  var selectedOrder = []; // party ids, in the order they were selected
+  var stackSeq = {};      // party id -> stacking position (higher = nearer the top of the bar)
+  var seqCounter = 0;
 
-var SVG_NS = 'http://www.w3.org/2000/svg';
-
-function buildDotGrid() {
-  var w = fillBarEl.clientWidth;
-  var h = fillBarEl.clientHeight;
-  if (w < 1 || h < 1) return;
-
-  // Set gap to 1px on mobile (<= 500px), and 3px on desktop. 
-  // You can change "1" to whatever spacing looks best on mobile!
-  var dynamicGap = window.innerWidth <= 500 ? 1 : 3; 
-
-  var orientation = h >= w ? 'portrait' : 'landscape';
-  var layout = orientation === 'portrait'
-    ? computeGridLayout(w, h, TOTAL_SEATS, dynamicGap)
-    : computeGridLayout(h, w, TOTAL_SEATS, dynamicGap);
-
-  var remainder = TOTAL_SEATS % layout.lineLength;
-  var fullLines = remainder === 0 ? layout.lineCount : layout.lineCount - 1;
-  var lineLengths = [];
-  if (remainder === 0) {
-    for (var i = 0; i < layout.lineCount; i++) lineLengths.push(layout.lineLength);
-  } else {
-    for (var i2 = 0; i2 < fullLines; i2++) lineLengths.push(layout.lineLength);
-    lineLengths.push(remainder);
-  }
-
-    var halfwaySeat = TOTAL_SEATS / 2;
-  var majorityLineIndex = 0;
-  var cumulativeSeats = 0;
-  for (var li = 0; li < lineLengths.length; li++) {
-    cumulativeSeats += lineLengths[li];
-    if (cumulativeSeats >= halfwaySeat) { majorityLineIndex = li; break; }
-  }
-
-  fillBarEl.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
-  fillBarEl.setAttribute('width', w);
-  fillBarEl.setAttribute('height', h);
-  fillBarEl.innerHTML = '';
-  dotElements = [];
-  dotLineIndex = [];
-  previousFilledCount = 0;
-
-  var dotSize = layout.size;
-  var gap = dynamicGap;
-  var lineCount = lineLengths.length;
-  var lineSpan = lineCount * dotSize + (lineCount - 1) * gap;
-  var crossStart = (orientation === 'portrait' ? h : w) / 2 - lineSpan / 2;
-  var majorityLinePos = 0;
-
-  lineLengths.forEach(function (len, lineIndex) {
-    var lineSpanAlong = len * dotSize + (len - 1) * gap;
-    var alongStart = (orientation === 'portrait' ? w : h) / 2 - lineSpanAlong / 2;
-    var crossIndex = orientation === 'portrait' ? (lineCount - 1 - lineIndex) : lineIndex;
-    var crossPos = crossStart + crossIndex * (dotSize + gap);
-
-    if (lineIndex === majorityLineIndex) {
-      majorityLinePos = crossPos + dotSize / 2;
-    }
-
-    for (var dotIndex = 0; dotIndex < len; dotIndex++) {
-      var alongPos = alongStart + dotIndex * (dotSize + gap);
-      var rect = document.createElementNS(SVG_NS, 'rect');
-      rect.setAttribute('x', orientation === 'portrait' ? alongPos : crossPos);
-      rect.setAttribute('y', orientation === 'portrait' ? crossPos : alongPos);
-      rect.setAttribute('width', dotSize);
-      rect.setAttribute('height', dotSize);
-      rect.setAttribute('rx', dotSize / 2);
-      rect.setAttribute('class', 'seat-dot');
-      fillBarEl.appendChild(rect);
-      dotElements.push(rect);
-      dotLineIndex.push(lineIndex);
-    }
-  });
-
-  var majorityLine = document.createElementNS(SVG_NS, 'line');
-  if (orientation === 'portrait') {
-    majorityLine.setAttribute('x1', 0);
-    majorityLine.setAttribute('x2', w);
-    majorityLine.setAttribute('y1', majorityLinePos);
-    majorityLine.setAttribute('y2', majorityLinePos);
-  } else {
-    majorityLine.setAttribute('y1', 0);
-    majorityLine.setAttribute('y2', h);
-    majorityLine.setAttribute('x1', majorityLinePos);
-    majorityLine.setAttribute('x2', majorityLinePos);
-  }
-  majorityLine.setAttribute('class', 'majority-line');
-  fillBarEl.appendChild(majorityLine);
-
-  currentMajorityLinePos = majorityLinePos;
-  currentMajorityOrientation = orientation;
-  positionDesktopCounter();
-
-  updateDotFills();
-}
-
-  function positionDesktopCounter() {
-  if (!window.matchMedia('(min-width: 781px)').matches) return;
-  var counter = document.getElementById('builderCounter');
-  var panel = document.querySelector('.builder-panel');
-  var wrap = document.querySelector('.fill-bar-wrap');
-  if (!counter || !panel || !wrap || currentMajorityLinePos == null) return;
-
-  var wrapRect = wrap.getBoundingClientRect();
-  var panelRect = panel.getBoundingClientRect();
-  var lineX = currentMajorityOrientation === 'landscape'
-    ? currentMajorityLinePos
-    : wrapRect.width / 2;
-
-  var left = (wrapRect.left - panelRect.left) + lineX - (counter.offsetWidth / 2);
-  var top = (wrapRect.top - panelRect.top) - counter.offsetHeight - 6;
-
-  counter.style.left = left + 'px';
-  counter.style.top = top + 'px';
-}
-
-function updateDotFills() {
-  if (!dotElements.length) return;
-
-  var seats = [];
-  selectedOrder.forEach(function (id) {
-    var p = partyById(id);
-    for (var s = 0; s < p.seats; s++) {
-      seats.push({ color: p.color, name: p.name });
-    }
-  });
-  var filledCount = seats.length;
-  sortedParties.forEach(function (p) {
-    if (selectedOrder.indexOf(p.id) === -1) {
-      for (var s2 = 0; s2 < p.seats; s2++) {
-        seats.push({ color: null, name: p.name });
-      }
-    }
-  });
-
-  // Only the dots between the old and new fill boundary actually changed —
-  // cascade their delay outward from that boundary, not from the start of the bar.
-  var rangeStart = Math.min(previousFilledCount, filledCount);
-  var rangeEnd = Math.max(previousFilledCount, filledCount);
-  var startLineIndex = dotLineIndex[Math.min(rangeStart, dotLineIndex.length - 1)];
-
-
-dotElements.forEach(function (dot, i) {
-  var seat = seats[i];
-  var isFilled = i < filledCount;
-
-  if (dot.classList.contains('seat-dot-filled') !== isFilled) {
-    dot.classList.toggle('seat-dot-filled', isFilled);
-  }
-
-  if (isFilled && dot.getAttribute('data-dot-color') !== seat.color) {
-    dot.style.setProperty('--dot-color', seat.color);
-    dot.setAttribute('data-dot-color', seat.color);
-  }
-
-  if (i >= rangeStart && i < rangeEnd) {
-    var delay = (dotLineIndex[i] - startLineIndex) * ROW_DELAY;
-    dot.style.setProperty('--dot-delay', Math.max(delay, 0).toFixed(3) + 's');
-  }
-});
-
-  previousFilledCount = filledCount;
-}
-  
+  var labelsRow = document.getElementById('labelsRow');
+  var barsRow = document.getElementById('barsRow');
+  var countsRow = document.getElementById('countsRow');
   var partyListEl = document.getElementById('partyList');
-  var fillBarEl = document.getElementById('fillBar');
-var counterEl = document.getElementById('builderCounter');
+
+  var segs = [];     // segs[systemIndex][partyId] -> element
+  var counts = [];   // counts[systemIndex] -> element
+  var allBtn = null; // the "Toggle all" button
+  var buttons = {};
 
   function partyById(id) {
-    return parties.filter(function (p) { return p.id === id; })[0];
+    return PARTIES.filter(function (p) { return p.id === id; })[0];
   }
 
-function render() {
-  // party buttons, sorted by seats (most to least), then alphabetically by name
-  sortedParties = parties.slice().sort(function (a, b) {
-    if (b.seats !== a.seats) return b.seats - a.seats;
-    return a.name.localeCompare(b.name);
+  // ---- hover tooltip + highlight ----
+  var tip = document.createElement('div');
+  tip.className = 'seg-tooltip';
+  document.body.appendChild(tip);
+  var hoveredSeg = null;
+
+  // Over/under-representation of a party versus the PR benchmark column.
+  function repText(n, ref) {
+    var diff = n - ref;
+    if (diff === 0) return 'Matches PR';
+    var seats = Math.abs(diff);
+    return (diff > 0 ? 'Over' : 'Under') + 'represented by ' + seats + (seats === 1 ? ' seat' : ' seats');
+  }
+
+  function showTip(seg, party, sys, e) {
+    if (hoveredSeg && hoveredSeg !== seg) hoveredSeg.classList.remove('is-hovered');
+    hoveredSeg = seg;
+    seg.classList.add('is-hovered');
+    var n = sys.seats[party.id] || 0;
+    var refSys = SYSTEMS[PR_REFERENCE_INDEX];
+    var repLine = (sys === refSys)
+      ? 'Proportional benchmark'
+      : repText(n, refSys.seats[party.id] || 0);
+    tip.innerHTML = '<strong>' + party.name + ' \u2014 ' + sys.name + '</strong>' +
+      n + (n === 1 ? ' seat' : ' seats') + '<span class="rep">' + repLine + '</span>';
+    tip.style.display = 'block';
+    moveTip(e);
+  }
+
+  function moveTip(e) {
+    var x = e.clientX + 14;
+    var y = e.clientY - tip.offsetHeight - 12;
+    if (y < 4) y = e.clientY + 18;
+    x = Math.min(x, window.innerWidth - tip.offsetWidth - 4);
+    tip.style.left = Math.max(4, x) + 'px';
+    tip.style.top = y + 'px';
+  }
+
+  function hideTip() {
+    if (hoveredSeg) hoveredSeg.classList.remove('is-hovered');
+    hoveredSeg = null;
+    tip.style.display = 'none';
+  }
+
+  // ---- system info popup ----
+  var infoPopup = document.createElement('div');
+  infoPopup.className = 'sys-popup';
+  infoPopup.setAttribute('role', 'tooltip');
+  document.body.appendChild(infoPopup);
+
+  var infoOwner = null; // which icon the popup currently belongs to
+
+  function showInfo(btn, text) {
+    infoOwner = btn;
+    infoPopup.textContent = text;
+    infoPopup.style.display = 'block';
+    var r = btn.getBoundingClientRect();
+    var w = infoPopup.offsetWidth;
+    var h = infoPopup.offsetHeight;
+    var left = Math.min(Math.max(4, r.left + r.width / 2 - w / 2), window.innerWidth - w - 4);
+    var top = r.bottom + 8;
+    if (top + h > window.innerHeight - 4) top = Math.max(4, r.top - h - 8);
+    infoPopup.style.left = left + 'px';
+    infoPopup.style.top = top + 'px';
+  }
+
+  function hideInfo() {
+    infoOwner = null;
+    infoPopup.style.display = 'none';
+  }
+
+  document.addEventListener('pointerdown', function (e) {
+    if (!e.target.closest('.sys-info')) hideInfo();
+    if (e.pointerType !== 'mouse' && !e.target.closest('.seg')) hideTip();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') hideInfo();
   });
 
-  partyListEl.innerHTML = '';
-  sortedParties.forEach(function (p) {
+  function build() {
+    barsRow.style.setProperty('--maj-frac', MAJORITY / TOTAL_SEATS);
+
+    SYSTEMS.forEach(function (sys, si) {
+      var sum = 0;
+      PARTIES.forEach(function (p) { sum += sys.seats[p.id] || 0; });
+      if (sum !== TOTAL_SEATS) {
+        console.warn('module-systems: "' + sys.name + '" sums to ' + sum + ', expected ' + TOTAL_SEATS);
+      }
+
+      var label = document.createElement('div');
+      label.className = 'system-label';
+      var nameEl = document.createElement('span');
+      nameEl.textContent = sys.name;
+      if (sys.id === 'fptp') nameEl.style.fontWeight = '700';
+      label.appendChild(nameEl);
+      if (sys.info) {
+        var infoBtn = document.createElement('button');
+        infoBtn.type = 'button';
+        infoBtn.className = 'sys-info';
+        infoBtn.textContent = 'i';
+        infoBtn.setAttribute('aria-label', 'About ' + sys.name);
+        var lastType = 'mouse';
+        infoBtn.addEventListener('pointerdown', function (e) { lastType = e.pointerType; });
+        infoBtn.addEventListener('pointerenter', function (e) {
+          if (e.pointerType === 'mouse') showInfo(infoBtn, sys.info);
+        });
+        infoBtn.addEventListener('pointerleave', function (e) {
+          if (e.pointerType === 'mouse') hideInfo();
+        });
+        infoBtn.addEventListener('focus', function () {
+          if (infoBtn.matches(':focus-visible')) showInfo(infoBtn, sys.info);
+        });
+        infoBtn.addEventListener('blur', hideInfo);
+        infoBtn.addEventListener('click', function () {
+          if (lastType !== 'mouse' && infoOwner === infoBtn) hideInfo();
+          else showInfo(infoBtn, sys.info);
+        });
+        label.appendChild(infoBtn);
+      }
+      labelsRow.appendChild(label);
+
+      var bar = document.createElement('div');
+      bar.className = 'system-bar';
+      segs[si] = {};
+      PARTIES.forEach(function (p) {
+        var seg = document.createElement('div');
+        seg.className = 'seg';
+        seg.style.background = p.color;
+        segs[si][p.id] = seg;
+        seg.addEventListener('pointerenter', function (e) {
+          if (e.pointerType === 'mouse') showTip(seg, p, sys, e);
+        });
+        seg.addEventListener('pointermove', function (e) {
+          if (e.pointerType === 'mouse') moveTip(e);
+        });
+        seg.addEventListener('pointerleave', function (e) {
+          if (e.pointerType === 'mouse') hideTip();
+        });
+        var segTap = { touch: false, wasOpen: false };
+        seg.addEventListener('pointerdown', function (e) {
+          segTap.touch = e.pointerType !== 'mouse';
+          segTap.wasOpen = segTap.touch && hoveredSeg === seg;
+        });
+        seg.addEventListener('click', function (e) {
+          if (!segTap.touch) return;
+          if (segTap.wasOpen) hideTip(); else showTip(seg, p, sys, e);
+        });
+        bar.appendChild(seg);
+      });
+      barsRow.appendChild(bar);
+
+      var count = document.createElement('div');
+      count.className = 'system-count';
+      counts[si] = count;
+      countsRow.appendChild(count);
+    });
+
+    var line = document.createElement('div');
+    line.className = 'majority-line';
+    barsRow.appendChild(line);
+
+    PARTIES.forEach(function (p) {
       var btn = document.createElement('button');
       btn.className = 'party-btn';
       btn.type = 'button';
-      btn.setAttribute('aria-pressed', selectedOrder.indexOf(p.id) !== -1);
-    btn.style.setProperty('--party-color', p.color);
-    btn.innerHTML = p.name + ' (' + p.seats + ')';
+      btn.setAttribute('aria-pressed', 'false');
+      btn.style.setProperty('--party-color', p.color);
+      btn.textContent = p.name;
       btn.addEventListener('click', function () { toggle(p.id); });
       partyListEl.appendChild(btn);
+      buttons[p.id] = btn;
     });
 
-updateDotFills();
+    allBtn = document.createElement('button');
+    allBtn.className = 'party-btn toggle-all-btn';
+    allBtn.type = 'button';
+    allBtn.setAttribute('aria-pressed', 'false');
+    allBtn.innerHTML = '<span class="check-box" aria-hidden="true"></span>Toggle all';
+    allBtn.addEventListener('click', toggleAll);
+    partyListEl.appendChild(allBtn);
 
-   document.getElementById('builderNote').textContent =
-  "Select parties to participate in a coalition using the buttons above. Note: a working majority in this scenario is " + getFunctionalMajority() + ", as Sinn Féin don't take their seats in parliament and the Speaker of the House doesn't vote - except to break a tie.";
+    document.getElementById('builderNote').textContent =
+      'Select parties to participate in a coalition using the buttons above. For hypothetical scenarios, the majority threshold is fixed at 326';
+  }
 
-    // status text
-    var total = selectedOrder.reduce(function (sum, id) {
-      return sum + partyById(id).seats;
-    }, 0);
+  // Positions every party's block in every column from the shared selection.
+  // Selected parties stack from the bottom in selection order; unselected ones
+  // collapse to zero height at the top of the stack.
+  function update() {
+    PARTIES.forEach(function (p) {
+      buttons[p.id].setAttribute('aria-pressed', selectedOrder.indexOf(p.id) !== -1);
+    });
+    allBtn.setAttribute('aria-pressed', selectedOrder.length === PARTIES.length);
 
-counterEl.textContent = total + ' / ' + TOTAL_SEATS;
-counterEl.style.color = total >= MAJORITY ? '#2BA84A' : 'var(--ink)';
+    SYSTEMS.forEach(function (sys, si) {
+      var cumulative = 0;
+      selectedOrder.forEach(function (id) {
+        var n = sys.seats[id] || 0;
+        var seg = segs[si][id];
+        seg.style.order = stackSeq[id];
+        seg.style.height = (n / TOTAL_SEATS * 100) + '%';
+        cumulative += n;
+      });
+      PARTIES.forEach(function (p) {
+        if (selectedOrder.indexOf(p.id) === -1) segs[si][p.id].style.height = '0%';
+      });
+
+      counts[si].textContent = cumulative;
+      counts[si].style.color = cumulative >= MAJORITY ? '#008500' : 'var(--ink)';
+    });
+  }
+
+  // TOGGLE_ALL_ORDER, with unknown ids dropped and any missing parties appended
+  function allOrder() {
+    var ids = TOGGLE_ALL_ORDER.filter(function (id) { return partyById(id); });
+    PARTIES.forEach(function (p) { if (ids.indexOf(p.id) === -1) ids.push(p.id); });
+    return ids;
+  }
+
+  function toggleAll() {
+    if (selectedOrder.length === PARTIES.length) {
+      selectedOrder = [];
+    } else {
+      selectedOrder = allOrder();
+      selectedOrder.forEach(function (id) { stackSeq[id] = ++seqCounter; });
+    }
+    update();
+    sendHeight();
   }
 
   function toggle(id) {
     var idx = selectedOrder.indexOf(id);
-    if (idx === -1) {
+    if (idx === -1) { selectedOrder.push(id); stackSeq[id] = ++seqCounter; }
+    else selectedOrder.splice(idx, 1);
+    update();
+    sendHeight();
+  }
+
+  build();
+  DEFAULT_SELECTED.forEach(function (id) {
+    if (partyById(id) && selectedOrder.indexOf(id) === -1) {
       selectedOrder.push(id);
-    } else {
-      selectedOrder.splice(idx, 1);
+      stackSeq[id] = ++seqCounter;
     }
-    render();
-    postHeight();
-  }
-
-render();
-requestAnimationFrame(function () {
-  requestAnimationFrame(buildDotGrid);
-});
-
-// ---------------- report height to the parent site ----------------
-  function postHeight() {
-    var h = Math.ceil(document.body.getBoundingClientRect().height);
-    try { window.parent.postMessage({ sender: 'nowcast-module', height: h }, '*'); } catch (e) {}
-  }
-window.addEventListener('load', postHeight);
-window.addEventListener('resize', function () { postHeight(); buildDotGrid(); });
-if ('ResizeObserver' in window) {
-  new ResizeObserver(postHeight).observe(document.body);
-  new ResizeObserver(buildDotGrid).observe(fillBarEl);
-}
-postHeight();
-})();
-</script>
-
-  <script>
-(function () {
-  // ---- Add new head-to-head matchups here ----
-  var h2hData = [
-
-            {
-      partyA: { name: 'Labour', shortName: 'LAB', color: '#E4003B', seats: 150, votePct: 37.1, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/BurnhamPortrait.png' },
-      partyB: { name: 'Reform UK', shortName: 'RFM', color: '#34d8ef', seats: 29, votePct: 28.1, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/FaragePortrait.png' }
-    },
-
-                    {
-      partyA: { name: 'Conservative', shortName: 'CON', color: '#0087dc', seats: 77, votePct: 32.5, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/BadenochPortraitLeft.png' },
-      partyB: { name: 'Reform UK', shortName: 'RFM', color: '#34d8ef', seats: 32, votePct: 28.4, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/FaragePortrait.png' }
-    },
-
-                {
-      partyA: { name: 'Labour', shortName: 'LAB', color: '#E4003B', seats: 69, votePct: 32.8, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/BurnhamPortrait.png' },
-      partyB: { name: 'Conservative', shortName: 'CON', color: '#0087DC', seats: 37, votePct: 29.4, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/BadenochPortraitRight.png' }
-    },
-
-                        {
-      partyA: { name: 'Lib Dem', shortName: 'LDM', color: '#FAA61A', seats: 48, votePct: 36.3, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/DaveyPortrait.png' },
-      partyB: { name: 'Conservative', shortName: 'CON', color: '#0087DC', seats: 20, votePct: 30.6, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/BadenochPortraitRight.png' }
-    },
-
-        {
-      partyA: { name: 'Labour', shortName: 'LAB', color: '#e4003b', seats: 59, votePct: 40.4, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/BurnhamPortrait.png' },
-      partyB: { name: 'Green', shortName: 'GRN', color: '#6AB023', seats: 6, votePct: 28.3, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/PolanskiPortrait.png' }
-    },
-
-                        {
-      partyA: { name: 'Lib Dem', shortName: 'LDM', color: '#FAA61A', seats: 6, votePct: 37.2, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/DaveyPortrait.png' },
-      partyB: { name: 'Reform UK', shortName: 'RFM', color: '#34d8ef', seats: 1, votePct: 25.3, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/FaragePortrait.png' }
-    }
-
-    // Add more matchups by copying the object above, e.g.:
-    // {
-    //   partyA: { name: 'Conservative', shortName: 'CON', color: '#0087dc', seats: 40, votePct: 24.1 },
-    //   partyB: { name: 'Lib Dem', shortName: 'LDM', color: '#faa61a', seats: 15, votePct: 18.3 }
-    // }
-  ];
-
-  var listEl = document.getElementById('h2hList');
-
-  function renderH2H() {
-    listEl.innerHTML = '';
-    h2hData.forEach(function (matchup) {
-      var a = matchup.partyA;
-      var b = matchup.partyB;
-      var seatTotal = a.seats + b.seats;
-      var seatShareA = seatTotal > 0 ? (a.seats / seatTotal * 100) : 50;
-      var seatShareB = 100 - seatShareA;
-      var voteGrey = Math.max(0, 100 - a.votePct - b.votePct);
-
-      var card = document.createElement('div');
-      card.className = 'h2h-card';
-      card.innerHTML =
-'<div class="h2h-portrait">' + (a.photoUrl ? '<img src="' + a.photoUrl + '" alt="' + a.name + '">' : a.shortName) + '</div>' +
-        '<div class="h2h-middle">' +
-          '<div class="h2h-numbers">' +
-            '<div class="h2h-number-group">' +
-              '<span>' + a.seats + '</span>' +
-              '<span class="h2h-pct">(' + a.votePct.toFixed(1) + '%)</span>' +
-            '</div>' +
-            '<div class="h2h-number-group align-end">' +
-              '<span class="h2h-pct">(' + b.votePct.toFixed(1) + '%)</span>' +
-              '<span>' + b.seats + '</span>' +
-            '</div>' +
-          '</div>' +
-          '<div class="h2h-bars">' +
-            '<div class="h2h-bar-vote">' +
-              '<div style="flex:0 0 ' + a.votePct + '%; background:' + a.color + ';"></div>' +
-              '<div style="flex:0 0 ' + voteGrey + '%; background:var(--divider);"></div>' +
-              '<div style="flex:0 0 ' + b.votePct + '%; background:' + b.color + ';"></div>' +
-            '</div>' +
-            '<div class="h2h-bar-seats">' +
-              '<div style="flex:0 0 ' + seatShareA + '%; background:' + a.color + ';"></div>' +
-              '<div style="flex:0 0 ' + seatShareB + '%; background:' + b.color + ';"></div>' +
-            '</div>' +
-            '<div class="h2h-center-line"></div>' +
-          '</div>' +
-        '</div>' +
-'<div class="h2h-portrait">' + (b.photoUrl ? '<img src="' + b.photoUrl + '" alt="' + b.name + '">' : b.shortName) + '</div>';
-      listEl.appendChild(card);
-    });
-  }
-
-  renderH2H();
-})();
-</script>
-
-  <script>
-(function () {
-  // ---- Placeholder seat data — replace with real figures when ready ----
-  var chartData = [
-    { name: 'LAB', color: '#e4003b', seats: 300 },
-    { name: 'CON', color: '#0087dc', seats: 146 },
-    { name: 'RFM', color: '#34d8ef', seats: 72 },
-    { name: 'LDM', color: '#faa61a', seats: 62 },
-    { name: 'SNP', color: '#fdf38e', seats: 34 },
-    { name: 'GRN', color: '#6AB023', seats: 6 },
-    { name: 'PLC', color: '#005B54', seats: 9 },
-    { name: 'RES', color: '#000055', seats: 1 }
-  ];
-
-  var panel = document.getElementById('chartPanel');
-
-var CHART_SCALE_SEATS = 350; // bar width is a % of this fixed number, not the largest party's seats
-var MAJORITY_MARKER_SEATS = 325;
-
-  // ---- Confidence ranges — match by party name, add/remove entries as needed ----
-var CONFIDENCE_RANGES = {
-  LAB: { low: 260, high: 319 },
-  CON: { low: 109, high: 179 },
-  RFM: { low: 42, high: 118 },
-  LDM: { low: 48, high: 69 },
-  SNP: { low: 29, high: 42 },
-  GRN: { low: 4, high: 12 },
-  PLC: { low: 9, high: 13 }
-};
-
-function renderChart() {
-  var sorted = chartData.slice().sort(function (a, b) { return b.seats - a.seats; });
-
-  panel.innerHTML = '';
-  var barsWrap = document.createElement('div');
-  barsWrap.className = 'chart-bars';
-
-  sorted.forEach(function (d) {
-    var range = CONFIDENCE_RANGES[d.name];
-    var rangeHtml = '';
-    if (range) {
-      rangeHtml =
-        '<div class="chart-range" data-low="' + range.low + '" data-high="' + range.high + '">' +
-          '<span class="chart-range-cap cap-low"></span>' +
-          '<span class="chart-range-line"></span>' +
-          '<span class="chart-range-cap cap-high"></span>' +
-        '</div>';
-    }
-
-    var row = document.createElement('div');
-    row.className = 'chart-bar-row';
-    row.innerHTML =
-      '<div class="chart-bar-label">' + d.name + '</div>' +
-      '<div class="chart-bar-track">' +
-        '<div class="chart-bar-fill" style="width:' + (d.seats / CHART_SCALE_SEATS * 100) + '%; background:' + d.color + ';"></div>' +
-        rangeHtml +
-      '</div>' +
-      '<div class="chart-bar-value">' + d.seats + '</div>';
-    barsWrap.appendChild(row);
   });
+  update();
 
-  var marker = document.createElement('div');
-  marker.className = 'chart-majority-line';
-  barsWrap.appendChild(marker);
-
-  panel.appendChild(barsWrap);
-  positionMajorityMarker(barsWrap, marker);
-  positionConfidenceRanges(barsWrap);
-}
-
-function positionMajorityMarker(barsWrap, marker) {
-  var track = barsWrap.querySelector('.chart-bar-track');
-  if (!track) return;
-  var barsRect = barsWrap.getBoundingClientRect();
-  var trackRect = track.getBoundingClientRect();
-  var fraction = MAJORITY_MARKER_SEATS / CHART_SCALE_SEATS;
-  var x = (trackRect.left - barsRect.left) + trackRect.width * fraction;
-  marker.style.left = x + 'px';
-}
-
-function positionConfidenceRanges(barsWrap) {
-  var MIN_GAP = 6; // minimum px between the two caps, so they can never overlap
-  barsWrap.querySelectorAll('.chart-range').forEach(function (rangeEl) {
-    var track = rangeEl.closest('.chart-bar-track');
-    if (!track) return;
-    var trackWidth = track.clientWidth;
-    var low = parseFloat(rangeEl.dataset.low);
-    var high = parseFloat(rangeEl.dataset.high);
-    var lowPx = Math.round((low / CHART_SCALE_SEATS) * trackWidth);
-    var highPx = Math.round((high / CHART_SCALE_SEATS) * trackWidth);
-
-    if (highPx - lowPx < MIN_GAP) {
-      var mid = Math.round((lowPx + highPx) / 2);
-      lowPx = mid - MIN_GAP / 2;
-      highPx = mid + MIN_GAP / 2;
-    }
-
-    rangeEl.querySelector('.cap-low').style.left = lowPx + 'px';
-    rangeEl.querySelector('.cap-high').style.left = (highPx - 2) + 'px';
-    var line = rangeEl.querySelector('.chart-range-line');
-    line.style.left = (lowPx + 2) + 'px';
-    line.style.width = Math.max(0, highPx - lowPx - 4) + 'px';
-  });
-}
-
-  renderChart();
-
-  window.addEventListener('resize', renderChart);
-if ('ResizeObserver' in window) {
-  new ResizeObserver(renderChart).observe(panel);
-}
-
-  document.getElementById('confidenceToggle').addEventListener('change', function (e) {
-  document.getElementById('chartPanelOuter').classList.toggle('hide-confidence', !e.target.checked);
-});
-  
+  // ---------------- report height to the parent site ----------------
+  function sendHeight() {
+    var h = document.documentElement.scrollHeight;
+    window.parent.postMessage({ sender: 'nowcast-module', height: h }, '*');
+  }
+  window.addEventListener('load', sendHeight);
+  window.addEventListener('resize', sendHeight);
+  if ('ResizeObserver' in window) {
+    new ResizeObserver(sendHeight).observe(document.body);
+  }
+  sendHeight();
 })();
 </script>
 
