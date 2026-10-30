@@ -245,10 +245,11 @@
 }
 
 .seat-text{
-  flex:1 1 0;min-width:0;       /* lets the span shrink inside the flex row, which the ellipsis needs */
-  white-space:nowrap;
+  flex:1 1 0;min-width:0;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;      /* wraps to 2 lines, ellipsis only if it needs a 3rd */
   overflow:hidden;
-  text-overflow:ellipsis;
 }
 
   /* ---------- mobile ---------- */
@@ -312,6 +313,7 @@
     #pSeat{padding-bottom:4px;gap:5px;}
     #pRole{padding:4px 0 5px;gap:5px;min-height:calc(2 * 1.4em + 9px);}
     .p-chance{font-size:0.68rem;margin:5px 0;gap:5px;}
+    .seat-word{display:none;}
     .p-row{grid-template-columns:24px minmax(0,1fr);column-gap:5px;margin-bottom:3px;}
     .p-label{font-size:0.6rem;}
     .p-track{height:11px;}
@@ -737,7 +739,7 @@ function drawLine(){
 // ============================================================
 // INIT
 // ============================================================
-$('pChance').innerHTML = `${ICON_DICE}<span>Chance of winning seat</span>`;
+$('pChance').innerHTML = `${ICON_DICE}<span>Chance of winning<span class="seat-word"> seat</span></span>`;
 renderStats();
 renderChart();
 select(members.findIndex(m => m.name === 'Andy Burnham'));
