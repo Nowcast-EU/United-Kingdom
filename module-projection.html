@@ -714,11 +714,11 @@ body {
   <span id="analysisToggleLabel">Click here to read our analysis</span>
   <span class="analysis-toggle-arrow" aria-hidden="true">▾</span>
 </button>
-<p class="chart-note" id="analysisText">Based on current polling averages, the Labour Party led by Andy Burnham is projected to win 291 seats. 35 short of a simple majority in the House of Commons, but enough to form a coalition or confidence & supply agreement with the Liberal Democrats as their closest viable partner. 79% of our simulations result in Labour remaining the largest party short of a majority, as opposed to 16% putting them above the 325 seat mark.<br>
+<p class="chart-note" id="analysisText">Based on current polling averages, the Labour Party led by Andy Burnham is projected to win 300 seats. 26 short of a simple majority in the House of Commons, but enough to form a coalition or confidence & supply agreement with the Liberal Democrats as their closest viable partner. 78% of our simulations result in Labour remaining the largest party short of a majority, as opposed to 20% putting them above the 325 seat mark.<br>
 <br>
-Reform are on course to gain 109 seats since the 2024 General Election, making them the largest net 'winner' of an election held today. However, the combined right continues to suffer from vote splitting among Reform, Restore and the Conservatives, and the prospect of a fairly disciplined tactical voting campaign forming against them. Our lower end estimates for Reform take the party back below 100 seats, while the Conservatives have a more robust rural-leaning electoral geography to aid their post-GE2024 recovery — which is yet to fully materialise.<br>
+Reform are on course to gain 67 seats since the 2024 General Election, making them the largest net 'winner' of an election held today. However, the combined right continues to suffer from vote splitting among Reform, Restore and the Conservatives, and the prospect of a fairly disciplined tactical voting campaign forming against them. Our lower end estimates for Reform take the party back below 50 seats, while the Conservatives have a more robust rural-leaning electoral geography to aid their post-GE2024 recovery.<br>
 <br>
-The Liberal Democrats and Greens continue to hover around 10% in our polling averages, but the geography of their vote leads to two very different outcomes in terms of projected seats. Lib Dems are leading in 44 of the 61 seats they're likely to face a Conservative as their main challenger. Greens, on the other hand, face a much stronger Labour Party under Andy Burnham than Keir Starmer. We project the Green vote to shift in higher concentrations towards urban constituencies, putting North Herefordshire and Waveney Valley at risk. This opens up more opportunity to gain seats from Labour in central London, despite falling short in Holborn & St Pancras. Overall change to the Greens' seat prospects is minimal.<br>
+The Liberal Democrats and Greens continue to hover around 10% in our polling averages, but the geography of their vote leads to two very different outcomes in terms of projected seats. Lib Dems are leading in 48 of the 68 seats they're likely to face a Conservative as their main challenger. Greens, on the other hand, face a much stronger Labour Party under Andy Burnham than Keir Starmer. We project the Green vote to shift in higher concentrations towards urban constituencies, putting North Herefordshire and Waveney Valley at risk. This opens up more opportunity to gain seats from Labour in central London, despite falling short in Holborn & St Pancras. Overall change to the Greens' seat prospects is minimal.<br>
 <br>
 The current political landscape lends itself to a hung parliament as the most likely outcome of an election held today. The 'left-of-centre' is at an advantage for the first time since April 2025, without having to rely on Plaid Cymru or the SNP for a parliamentary majority.<br>
 <br>
@@ -816,20 +816,20 @@ var FLOURISH_BASE_WIDTH = window.matchMedia("(max-width: 768px)").matches
   // Placeholder data — replace with the real projection once available.
 
   var parties = [
-    { id: 'lab', name: 'LAB', seats: 291, color: '#E4003B' },
-    { id: 'con', name: 'CON', seats: 106, color: '#0087dc' },
-    { id: 'ref', name: 'RFM', seats: 114, color: '#34D8EF' },
-    { id: 'ld', name: 'LDM', seats: 65, color: '#faa61a' },
+    { id: 'lab', name: 'LAB', seats: 300, color: '#E4003B' },
+    { id: 'con', name: 'CON', seats: 146, color: '#0087dc' },
+    { id: 'ref', name: 'RFM', seats: 72, color: '#34D8EF' },
+    { id: 'ld', name: 'LDM', seats: 62, color: '#faa61a' },
     { id: 'snp', name: 'SNP', seats: 34, color: '#fdf38e' },
-    { id: 'grn', name: 'GRN', seats: 9, color: '#6ab023' },
+    { id: 'grn', name: 'GRN', seats: 6, color: '#6ab023' },
     { id: 'dup', name: 'DUP', seats: 3, color: '#d46a4c' },
-    { id: 'sf', name: 'SFN', seats: 7, color: '#326760' },
+    { id: 'sf', name: 'SFN', seats: 8, color: '#326760' },
     { id: 'pc', name: 'PLC', seats: 9, color: '#005b54' },
-    { id: 'uup', name: 'UUP', seats: 4, color: '#3399ff' },
+    { id: 'uup', name: 'UUP', seats: 3, color: '#3399ff' },
     { id: 'sdl', name: 'SDL', seats: 2, color: '#2aa82c' },
     { id: 'tuv', name: 'TUV', seats: 1, color: '#0C3A6A' },
     { id: 'res', name: 'RES', seats: 1, color: '#000055' },
-    { id: 'oth', name: 'OTH', seats: 4, color: '#999999' }
+    { id: 'oth', name: 'OTH', seats: 3, color: '#999999' }
   ];
 
   var TOTAL_SEATS = 650;
@@ -1112,33 +1112,33 @@ postHeight();
   var h2hData = [
 
             {
-      partyA: { name: 'Labour', shortName: 'LAB', color: '#E4003B', seats: 164, votePct: 36.2, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/BurnhamPortrait.png' },
-      partyB: { name: 'Reform UK', shortName: 'RFM', color: '#34d8ef', seats: 43, votePct: 28.9, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/FaragePortrait.png' }
+      partyA: { name: 'Labour', shortName: 'LAB', color: '#E4003B', seats: 150, votePct: 37.1, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/BurnhamPortrait.png' },
+      partyB: { name: 'Reform UK', shortName: 'RFM', color: '#34d8ef', seats: 29, votePct: 28.1, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/FaragePortrait.png' }
     },
 
                     {
-      partyA: { name: 'Conservative', shortName: 'CON', color: '#0087dc', seats: 56, votePct: 30.8, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/BadenochPortraitLeft.png' },
-      partyB: { name: 'Reform UK', shortName: 'RFM', color: '#34d8ef', seats: 57, votePct: 29.9, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/FaragePortrait.png' }
+      partyA: { name: 'Conservative', shortName: 'CON', color: '#0087dc', seats: 77, votePct: 32.5, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/BadenochPortraitLeft.png' },
+      partyB: { name: 'Reform UK', shortName: 'RFM', color: '#34d8ef', seats: 32, votePct: 28.4, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/FaragePortrait.png' }
     },
 
                 {
-      partyA: { name: 'Labour', shortName: 'LAB', color: '#E4003B', seats: 46, votePct: 33.3, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/BurnhamPortrait.png' },
-      partyB: { name: 'Conservative', shortName: 'CON', color: '#0087DC', seats: 20, votePct: 29.1, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/BadenochPortraitRight.png' }
+      partyA: { name: 'Labour', shortName: 'LAB', color: '#E4003B', seats: 69, votePct: 32.8, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/BurnhamPortrait.png' },
+      partyB: { name: 'Conservative', shortName: 'CON', color: '#0087DC', seats: 37, votePct: 29.4, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/BadenochPortraitRight.png' }
     },
 
                         {
-      partyA: { name: 'Lib Dem', shortName: 'LDM', color: '#FAA61A', seats: 44, votePct: 36.4, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/DaveyPortrait.png' },
-      partyB: { name: 'Conservative', shortName: 'CON', color: '#0087DC', seats: 17, votePct: 29.4, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/BadenochPortraitRight.png' }
+      partyA: { name: 'Lib Dem', shortName: 'LDM', color: '#FAA61A', seats: 48, votePct: 36.3, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/DaveyPortrait.png' },
+      partyB: { name: 'Conservative', shortName: 'CON', color: '#0087DC', seats: 20, votePct: 30.6, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/BadenochPortraitRight.png' }
     },
 
         {
-      partyA: { name: 'Labour', shortName: 'LAB', color: '#e4003b', seats: 60, votePct: 39.8, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/BurnhamPortrait.png' },
-      partyB: { name: 'Green', shortName: 'GRN', color: '#6AB023', seats: 8, votePct: 28.9, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/PolanskiPortrait.png' }
+      partyA: { name: 'Labour', shortName: 'LAB', color: '#e4003b', seats: 59, votePct: 40.4, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/BurnhamPortrait.png' },
+      partyB: { name: 'Green', shortName: 'GRN', color: '#6AB023', seats: 6, votePct: 28.3, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/PolanskiPortrait.png' }
     },
 
                         {
-      partyA: { name: 'Lib Dem', shortName: 'LDM', color: '#FAA61A', seats: 13, votePct: 37.7, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/DaveyPortrait.png' },
-      partyB: { name: 'Reform UK', shortName: 'RFM', color: '#34d8ef', seats: 1, votePct: 26.1, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/FaragePortrait.png' }
+      partyA: { name: 'Lib Dem', shortName: 'LDM', color: '#FAA61A', seats: 6, votePct: 37.2, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/DaveyPortrait.png' },
+      partyB: { name: 'Reform UK', shortName: 'RFM', color: '#34d8ef', seats: 1, votePct: 25.3, photoUrl: 'https://raw.githubusercontent.com/nowcast-eu/united-kingdom/main/FaragePortrait.png' }
     }
 
     // Add more matchups by copying the object above, e.g.:
@@ -1201,12 +1201,12 @@ postHeight();
 (function () {
   // ---- Placeholder seat data — replace with real figures when ready ----
   var chartData = [
-    { name: 'LAB', color: '#e4003b', seats: 291 },
-    { name: 'RFM', color: '#34d8ef', seats: 114 },
-    { name: 'CON', color: '#0087dc', seats: 106 },
-    { name: 'LDM', color: '#faa61a', seats: 65 },
+    { name: 'LAB', color: '#e4003b', seats: 300 },
+    { name: 'CON', color: '#0087dc', seats: 146 },
+    { name: 'RFM', color: '#34d8ef', seats: 72 },
+    { name: 'LDM', color: '#faa61a', seats: 62 },
     { name: 'SNP', color: '#fdf38e', seats: 34 },
-    { name: 'GRN', color: '#6AB023', seats: 9 },
+    { name: 'GRN', color: '#6AB023', seats: 6 },
     { name: 'PLC', color: '#005B54', seats: 9 },
     { name: 'RES', color: '#000055', seats: 1 }
   ];
@@ -1218,13 +1218,13 @@ var MAJORITY_MARKER_SEATS = 325;
 
   // ---- Confidence ranges — match by party name, add/remove entries as needed ----
 var CONFIDENCE_RANGES = {
-  LAB: { low: 245, high: 311 },
-  RFM: { low: 75, high: 162 },
-  CON: { low: 81, high: 140 },
-  LDM: { low: 54, high: 70 },
-  SNP: { low: 30, high: 43 },
-  GRN: { low: 5, high: 16 },
-  PLC: { low: 8, high: 12 }
+  LAB: { low: 260, high: 319 },
+  CON: { low: 109, high: 179 },
+  RFM: { low: 42, high: 118 },
+  LDM: { low: 48, high: 69 },
+  SNP: { low: 29, high: 42 },
+  GRN: { low: 4, high: 12 },
+  PLC: { low: 9, high: 13 }
 };
 
 function renderChart() {
