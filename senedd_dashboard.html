@@ -167,7 +167,7 @@
     <div class="mc-grid">
       <div class="panel">
         <div class="mc-heading">
-          <img class="mc-heading-logo" src="https://raw.githubusercontent.com/Nowcast-EU/Spain/main/ES_logo.png" alt="Nowcast EU">
+          <img class="mc-heading-logo" src="https://raw.githubusercontent.com/Nowcast-EU/Wales/main/WalesLogo.png" alt="Nowcast EU">
           <div>
             <h2 id="mcTitle">Average vote share</h2>
             <p class="hint" id="mcSubtitle"></p>
@@ -273,7 +273,7 @@ Sir Gaerfyrddin	6	7.7	7	43.1	4.6	2	32.8	0	2.8
   const dateParts = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric" })
     .formatToParts(new Date())
     .reduce((parts, part) => { parts[part.type] = part.value; return parts; }, {});
-  $("mcSubtitle").textContent = `Based on Spanish polling averages • ${dateParts.day} ${dateParts.month}, ${dateParts.year}`;
+  $("mcSubtitle").textContent = `Based on Welsh polling averages • ${dateParts.day} ${dateParts.month}, ${dateParts.year}`;
   const state = { rows: [], parties: [] };   // rows: {name, seats, shares:{party:value}}
   const prev = { rows: [], parties: [] };    // previous election results, same shape as state
   let chart = null;
@@ -665,8 +665,8 @@ Sir Gaerfyrddin	6	7.7	7	43.1	4.6	2	32.8	0	2.8
     $("mcOutcomesPanel").style.display = "";
     $("mcOutcomesTitle").textContent = N === 1 ? "Projected seat allocation" : "Most likely seat outcomes";
     $("mcTitle").textContent = name
-      ? `Nowcast EU | ${name} constituency seat projection`
-      : "Nowcast EU | Constituency seat projection";
+      ? `Nowcast UK | ${name} constituency seat projection`
+      : "Nowcast UK | Constituency seat projection";
     if (mcChart) mcChart.destroy();
     const effTh = threshold(seats);   // effective threshold (%) for this magnitude: 75 / (M + 1)
     const yMax = Math.max(...stats.map(s => Math.max(s.max, s.prev ?? 0)), effTh, 1);
