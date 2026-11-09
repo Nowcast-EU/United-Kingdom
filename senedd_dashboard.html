@@ -711,29 +711,6 @@ Sir Gaerfyrddin	6	7.7	7	43.1	4.6	2	32.8	0	2.8
         }
       },
       plugins: [{
-        id: "thresholdLine",
-        afterDatasetsDraw(c) {
-          const { ctx, chartArea, scales: { y } } = c;
-          const yh = y.getPixelForValue(MC_THRESHOLD);
-          ctx.save();
-          ctx.setLineDash([2, 4]); ctx.lineWidth = 1.5; ctx.strokeStyle = "#000";
-          ctx.beginPath(); ctx.moveTo(chartArea.left, yh); ctx.lineTo(chartArea.right, yh); ctx.stroke();
-          ctx.restore();
-        },
-        afterDraw(c) {
-          const { ctx, chartArea, scales: { y } } = c;
-          const yh = y.getPixelForValue(MC_THRESHOLD);
-          const label = MC_THRESHOLD + "% legal threshold";
-          ctx.save();
-          ctx.setLineDash([]); ctx.fillStyle = "#000"; ctx.font = "11px system-ui, sans-serif";
-          ctx.textAlign = "right"; ctx.textBaseline = "bottom";
-          ctx.lineJoin = "round"; ctx.lineWidth = 3; ctx.strokeStyle = "#fff";
-          ctx.strokeText(label, chartArea.right - 4, yh - 3);
-          ctx.fillText(label, chartArea.right - 4, yh - 3);
-          ctx.restore();
-        }
-
-              }, {
         id: "effectiveThresholdLine",
         afterDatasetsDraw(c) {
           const { ctx, chartArea, scales: { y } } = c;
