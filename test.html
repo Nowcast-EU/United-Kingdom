@@ -3,609 +3,776 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Nowcast UK / Projection</title>
-
-  <!-- Social / Thumbnail preview -->
-  <meta property="og:title" content="Nowcast UK / Projection">
-  <meta property="og:description" content="">
-  <meta property="og:image" content="https://nowcast-eu.github.io/United-Kingdom/NowcastUK_thumbnail.png">
-  <meta property="og:url" content="https://nowcast-eu.github.io/United-Kingdom">
-  <meta property="og:type" content="website">
-  <meta property="og:image:width" content="800">
-  <meta property="og:image:height" content="418">
-  <meta property="og:image:type" content="image/png">
-
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Nowcast UK / Projection">
-  <meta name="twitter:description" content="">
-  <meta name="twitter:image" content="https://nowcast-eu.github.io/United-Kingdom/NowcastUK_thumbnail.png">
-
-  <meta name="referrer" content="no-referrer">
-
-  <!-- Favicon -->
-<link rel="icon" type="image/png" href="https://nowcast-eu.github.io/United-Kingdom/UK_favicon.png" />
-  
+<title>Nowcast UK — Cabinet Module</title>
 <style>
-  :root {
-    --bg: #f8faf9;
-    --ink: #1A1E23;
-    --ink-soft: #4A4F57;
-    --muted: #8A8F98;
-    --accent: #005434;
-    --accent-soft: #E7ECF3;
-    --divider: #006548;
-    --topbar-h: 56px;
-    --page-max: 1250px;
-    --gutter: 8px;
+  :root{
+    --lab:#e4003b; --con:#0087DC; --rfm:#34d8ef; --ldm:#FAA61A; --grn:#6ab023; --snp:#fdf38e;
+    --ink:#1a1a1a; --muted:#666; --line:#e2e2e2; --bg:#f8faf9; --track:#eceeed;
+    --gap:48px;
+    --chart-width: 6.5fr;
+    --panel-width: 3.5fr;
+    --stats-width: 3fr;      /* left-hand stats section */
+    --main-width: 10fr;      /* bar chart + panel together */
+    --stats-gap: 32px;       /* space either side of the divider */
+    --divider: #cfcfcf;
+    --cab-aspect: 16 / 9;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  *{box-sizing:border-box;}
+  body{margin:0;padding:0;background:var(--bg);color:var(--ink);}
+  .wrap{max-width:none;margin:0 auto;}
 
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--ink);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-    line-height: 1.5;
+  /* ---------- layout ---------- */
+  .cab-layout{
+    display:grid;
+    grid-template-columns: minmax(0, var(--stats-width)) 1px minmax(0, var(--main-width));
+    grid-template-rows: minmax(0, 1fr);
+    column-gap: var(--stats-gap);
+    align-items:stretch;
+    aspect-ratio: var(--cab-aspect);   /* the overall height is set here now */
+    min-height:0;
   }
+  .cab-divider{background:var(--divider);width:1px;}
 
-  /* ---- sticky top nav ---- */
-  .topbar {
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    background: rgba(250, 250, 248, 0.94);
-    backdrop-filter: blur(6px);
-    border-bottom: 1px solid var(--divider);
+  .cab-grid{
+    position:relative;
+    display:grid;
+    grid-template-columns: minmax(0, var(--chart-width)) minmax(0, var(--panel-width));
+    column-gap: var(--gap);
+    align-items:stretch;
+    grid-template-rows: minmax(0, 1fr);   /* lets the row shrink below its content size */
+    min-height: 0;                        /* stops content from forcing the box taller */
   }
-  .topbar-inner {
-    max-width: var(--page-max);
-    margin: 0 auto;
-    height: var(--topbar-h);
-    padding: 0 var(--gutter);
-    display: flex;
-    align-items: center;
-    gap: 20px;
+  .cab-line{
+    position:absolute;left:0;top:0;width:100%;height:100%;
+    overflow:visible;pointer-events:none;z-index:2;
   }
-  .tabs {
-    display: flex;
-    gap: 2px;
-    overflow-x: auto;
-    scrollbar-width: none;
-    flex: 1;
+  .cab-line path{
+    fill:none;stroke:var(--ink);stroke-width:2;
+    stroke-dasharray:1 6;stroke-linecap:round;stroke-linejoin:round;
   }
-  .tabs::-webkit-scrollbar { display: none; }
+  .cab-line circle{fill:var(--ink);}
 
-  .brand {
-    flex: none;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-    color: var(--ink);
-    font-weight: 700;
-    font-size: 1rem;
-    white-space: nowrap;
+  /* ---------- stats section (pie + histogram) ---------- */
+  .cab-stats{
+    display:flex;flex-direction:column;gap:22px;
+    justify-content:flex-end;          /* any spare height collects as a gap above the pie */
+    min-width:0;min-height:0;
+  }
+.s-text{
+  flex:1 0 auto;            /* grow into spare space, never shrink below its content */
+  margin:0;font-size:0.85rem;line-height:1.4;color:var(--ink);
 }
-.brand-logo {
-    height: 32px;
-    width: auto;
-    display: block;
+  .s-divider{flex:none;height:1px;background:var(--divider);}
+  .s-title{font-size:0.95rem;font-weight:700;margin:0 0 10px;line-height:1.2;}
+  .s-pie-block{flex:none;text-align:center;}
+  .s-pie-block .s-title{text-align:left;}
+  .s-pie{display:block;width:100%;max-width:170px;aspect-ratio:1;margin:0 auto 10px;}
+  .s-pie path,.s-pie circle{stroke:var(--bg);stroke-width:1;}
+  .s-big{font-size:1.7rem;font-weight:700;line-height:1;}
+  .s-sub{font-size:0.8rem;color:var(--muted);margin:4px 0 10px;}
+  .s-legend{text-align:left;}
+  .s-leg-row{
+    display:grid;grid-template-columns:12px minmax(0,1fr) auto;
+    column-gap:8px;align-items:center;
+    font-size:0.8rem;line-height:1.6;
+  }
+  .s-swatch{width:12px;height:12px;}
+  .s-leg-n{font-variant-numeric:tabular-nums;color:var(--muted);}
+
+.s-hist-block{
+  flex:0 1 var(--hist-height, 38%);   /* wants 38% of the section, but may shrink */
+  min-height:100px;                   /* the floor; lower it to allow a squatter histogram */
+  display:flex;flex-direction:column;
+}
+  .h-plot,.h-axis{margin-left:var(--hist-pad-left, 18px);}   /* room for the "−5" label to overhang the first bar edge */
+  .h-plot{
+    position:relative;flex:1 1 0;min-height:0;
+    display:flex;align-items:stretch;
+    padding-top:18px;                  /* room for the count label on the tallest bar */
+    border-bottom:1px solid var(--ink);
+  }
+  .h-col{position:relative;flex:1 1 0;min-width:0;}
+  .h-stack{
+    position:absolute;left:1px;right:1px;bottom:0;
+    display:flex;flex-direction:column-reverse;
+  }
+  .h-seg{min-height:0;}
+  .h-n{
+    position:absolute;left:0;right:0;bottom:100%;
+    text-align:center;font-size:0.75rem;font-weight:700;line-height:16px;
+    font-variant-numeric:tabular-nums;
+  }
+  .h-zero{
+    position:absolute;top:18px;bottom:0;width:0;
+    border-left:1px dashed #999;pointer-events:none;
+  }
+  .h-axis{position:relative;height:18px;}
+  .h-tick{
+    position:absolute;top:3px;transform:translateX(-50%);
+    font-size:0.7rem;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;
+  }
+  .h-tick.zero{color:var(--ink);font-weight:700;}
+  .h-cap{font-size:0.75rem;color:var(--muted);text-align:center;margin-top:2px;}
+
+  /* ---------- bar chart ---------- */
+  .cab-chart{
+  background:transparent;
+  padding:0;
+  height:0;            /* stops the chart's own content setting the row height */
+  min-height:100%;     /* then stretches it to match the panel */
+  display:flex;
+  flex-direction:column;
+  }
+  .cab-row{
+    display:grid;grid-template-columns: var(--name-col, 170px) minmax(0,1fr);
+    column-gap: 24px;
+    align-items: stretch;   /* was: center */
+    flex: 1 1 0;
+    min-height: 16px;       /* floor so rows can't collapse completely */
+    width:100%;margin:0 0 6px;padding:0;border:0;background:none;
+    font:inherit;color:inherit;text-align:left;cursor:pointer;
+  }
+  .cab-row:last-child{margin-bottom:0;}
+  .cab-name{
+    text-align:right;font-size:0.85rem;font-weight:400;color:var(--ink);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    align-self: center;
+  }
+  .cab-track{
+    position:relative;height:auto;background:transparent;
+    border-left:1px solid var(--ink);
+  }
+
+  .cab-track::before{
+  content:'';
+  position:absolute;
+  left:-15px;              /* tick length, extends into the gap */
+  top:calc(50% - 0.5px);
+  width:15px;
+  height:2px;
+  background:var(--ink);
 }
 
-.donate {
-  flex: none;
-  display: flex;
-  align-items: center;
+  .cab-bar{position:absolute;left:0;top:0;height:100%;}
+  .cab-val{
+    position:absolute;top:0;height:100%;display:flex;align-items:center;
+    font-size:0.85rem;font-weight:400;color:var(--ink);white-space:nowrap;
+    padding-bottom:2px;
+  }
+  .cab-row.sel .cab-name{font-weight:700;color:var(--ink);}
+  .cab-row.sel .cab-val{font-weight:700;}
+  .cab-row:focus-visible .cab-track{outline:2px solid #006548;outline-offset:1px;}
+  .cab-bar{transition:opacity .12s ease;}
+  .cab-row:hover .cab-bar{opacity:0.65;}
+  .cab-gap{flex: 0 0 26px;}
+
+  /* ---------- info panel ---------- */
+  /* Text, spacing and party bars are compacted so the portrait photo (flex:1) gets the spare height */
+    .cab-panel{
+    border:3px solid #999;background:#fff;padding:10px 14px 14px;
+    display:flex;flex-direction:column;
+    min-height:0;overflow:hidden;
+    align-self:start;                                  /* panel sits at the top instead of stretching to the bottom */
+    height:calc(100% - var(--panel-trim, 80px));       /* raise --panel-trim to make the panel (and photo) shorter */
+  }
+  .cab-panel > *:not(.p-photo){flex:none;}
+  .p-name{font-size:1.15rem;font-weight:700;margin:0 0 8px;text-align:center;line-height:1.1;}
+    .p-photo{
+    position:relative;
+    width:100%;background:#ffffff;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+    flex:1 1 0;min-height:120px;
+  }
+  .p-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top;display:block;}
+  .p-photo .initials{font-size:3.5rem;font-weight:700;color:#aaa;}
+.p-meta{
+  margin:8px 0 0;
+  font-size:0.9rem;line-height:1.4;
 }
-.donate img {
-  display: block;
-  height: 28px;   /* adjust to taste */
-  width: auto;
+#pSeat{
+  padding-bottom:6px;
+  border-bottom:1px solid #ddd;
+  display:flex;align-items:flex-start;gap:8px;
+}
+#pRole{
+  padding:6px 0 8px;
+  border-bottom:1px solid #ddd;
+  min-height:calc(2 * 1.4em + 14px);   /* two text lines + the 6px and 8px padding */
+  display:flex;align-items:flex-start;gap:8px;
+}
+  .p-chance{margin:8px 0 8px;font-size:1rem;font-weight:700;font-style:normal;display:flex;align-items:flex-start;gap:8px;}
+  .p-row{
+    display:grid;grid-template-columns:34px minmax(0,1fr);
+    align-items:center;column-gap:8px;margin-bottom:5px;
+  }
+  .p-row:last-child{margin-bottom:0;}
+  .p-label{font-size:0.8rem;text-align:center;color:#333;font-weight:500}
+  .p-track{position:relative;height:18px;}
+  .p-fill{height:100%;min-width:3px;}
+  .p-pct{
+    position:absolute;top:0;height:100%;display:flex;align-items:center;
+    font-size:0.85rem;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums;
+    padding-bottom:3px;
+  }
+  .p-row:first-child .p-pct{font-size:0.85rem;}
+  .p-row.out{opacity:0.4;}
+  .p-row.out .p-label{text-decoration:line-through;}
+  .p-row.out .p-track::after{
+  content:'';position:absolute;left:0;right:0;top:50%;
+  border-top:2px solid #999;
+ }
+
+ .p-icon{
+  flex:none;
+  width:1.1em;height:1.1em;
+  margin-top:0.18em;            /* centres the icon on the first text line */
+  fill:none;stroke:currentColor;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round;
 }
 
-@media (max-width: 600px) {
-  :root { --topbar-h: 86px; }
+.p-icon.dice .front{fill:var(--bg);}
+.p-icon.dice circle{fill:currentColor;}
 
-  .topbar-inner {
-    height: auto;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-      "brand donate"
-      "tabs  tabs";
-    align-items: center;
-    gap: 0;
-    width: 100%;
-    min-width: 0;
-  }
-
-  .brand  { grid-area: brand; padding: 8px 0 4px; }
-  .donate { grid-area: donate; justify-self: end; padding: 8px 0 4px; }
-
-  .tabs {
-    grid-area: tabs;
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;        /* lets the tabs scroll sideways instead of stretching the grid */
-    overflow-x: auto;
-  }
-}
-  
-  .tab {
-    flex: none;
-    position: relative;
-    padding: 8px 10px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-decoration: none;
-    color: var(--ink-soft);
-    border-radius: 6px;
-    white-space: nowrap;
-  }
-@media (hover: hover) {
-    .tab:hover { background: var(--accent-soft); color: var(--ink); }
-}
-  .tab.is-active { color: var(--accent); }
-  .tab.is-active::after {
-    content: "";
-    position: absolute;
-    left: 10px; right: 10px; bottom: 1px;
-    height: 2px;
-    background: var(--accent);
-    border-radius: 2px;
-  }
-
-  /* ---- modules ---- */
-main { max-width: var(--page-max); margin: 0 auto; }
-
-  .module {
-    scroll-margin-top: calc(var(--topbar-h) + 10px);
-padding: 20px var(--gutter);
-  }
-
-  #projection {
-  padding-top: 2px;
+ .role-text{
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  overflow:hidden;
+  min-height:calc(2 * 1.4em);
+  flex:1 1 0;
+  min-width:0;
 }
 
-  .module h2 {
-    font-size: 1.4rem;
-    margin: 0 0 4px;
-  }
+.seat-text{
+  flex:1 1 0;min-width:0;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;      /* wraps to 2 lines, ellipsis only if it needs a 3rd */
+  overflow:hidden;
+}
 
-.module .wip-note {
-    color: #000000;
-    font-size: 0.85rem;
-    margin: 0 0 18px;
-    max-width: 66%;
-  }
-
-  @media (max-width: 768px) {
-    .module .wip-note {
-      max-width: 100%;
+  /* ---------- mobile ---------- */
+  @media (max-width:700px){
+    .cab-layout{
+      grid-template-columns:1fr;grid-template-rows:auto;
+      row-gap:24px;aspect-ratio:auto;
     }
-  }
+    .cab-divider{width:100%;height:1px;}
 
-  .module .wip-note-sys {
-    color: #000000;
-    font-size: 0.85rem;
-    margin: 0 0 18px;
-    max-width: 75%;
-  }
-
-  @media (max-width: 768px) {
-    .module .wip-note-sys {
-      max-width: 100%;
+    /* --- stats: text on top, then pie | divider | histogram side by side --- */
+    .cab-stats{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 1px minmax(0,1fr);
+      column-gap:12px;row-gap:16px;
+      align-items:stretch;
     }
+    .s-text{grid-column:1 / -1;flex:none;overflow:visible;}
+    .s-divider{width:1px;height:auto;}              /* vertical divider between pie and histogram */
+
+    /* pie, scaled down */
+    .s-pie{max-width:104px;margin-bottom:6px;}
+    .s-big{font-size:1.25rem;}
+    .s-sub{font-size:0.64rem;margin:3px 0 6px;}
+    .s-leg-row{grid-template-columns:9px minmax(0,1fr) auto;column-gap:5px;font-size:0.62rem;line-height:1.45;}
+    .s-swatch{width:9px;height:9px;}
+
+    /* histogram, scaled down */
+    .s-hist-block{flex:none;height:auto;min-height:0;--hist-pad-left:10px;}
+    .s-title{font-size:0.7rem;margin-bottom:6px;}
+    .h-plot{min-height:120px;padding-top:14px;}
+    .h-n{font-size:0.6rem;line-height:12px;}
+    .h-zero{top:14px;}
+    .h-axis{height:14px;}
+    .h-tick{font-size:0.5rem;top:2px;}
+    .h-cap{font-size:0.58rem;}
+
+    /* --- bar chart + panel: same layout and behaviour as desktop, in a ~1:1 box --- */
+    :root{
+      --gap:12px;                 /* space between chart and panel (connector line runs through it) */
+      --chart-width:5.8fr;
+      --panel-width:4.2fr;
+      --panel-trim:0px;           /* desktop trims the panel; mobile is too tight vertically, so 0 */
+      --main-aspect:1 / 1;        /* mobile shape of the chart + panel section; e.g. 4 / 5 for taller */
+    }
+    .cab-grid{aspect-ratio:var(--main-aspect);align-self:start;}
+
+    /* bar chart: rows share the height, so they get thin; text scales to match */
+    .cab-row{column-gap:10px;min-height:0;margin-bottom:2px;}
+    .cab-row:last-child{margin-bottom:0;}
+    .cab-name{font-size:0.58rem;}
+    .cab-val{font-size:0.58rem;padding-bottom:1px;}
+    .cab-track::before{left:-8px;width:8px;height:1.5px;}
+    .cab-gap{flex:0 0 12px;}
+
+    /* panel */
+    .cab-panel{border-width:2px;padding:6px 7px 8px;}
+    .p-name{font-size:0.8rem;margin:0 0 5px;}
+    .p-photo{min-height:50px;}
+    .p-meta{font-size:0.62rem;margin:5px 0 0;}
+    #pSeat{padding-bottom:4px;gap:5px;}
+    #pRole{padding:4px 0 5px;gap:5px;min-height:calc(2 * 1.4em + 9px);}
+    .p-chance{font-size:0.68rem;margin:5px 0;gap:5px;}
+    .seat-word{display:none;}
+    .p-row{grid-template-columns:24px minmax(0,1fr);column-gap:5px;margin-bottom:3px;}
+    .p-label{font-size:0.6rem;}
+    .p-track{height:11px;}
+    .p-pct,.p-row:first-child .p-pct{font-size:0.62rem;padding-bottom:1px;}
   }
 
-  /* wrapper keeps embedded pages/Flourish charts responsive */
-  .embed-wrap {
-    position: relative;
-    width: 100%;
-    min-height: 100px;
-    border-radius: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--muted);
-    font-size: 0.85rem;
-    overflow: hidden;
-  }
-
-  .embed-wrap iframe {
-    width: 100%;
-    border: 0;
-    display: block;
-  }
-
-  .divider {
-    border: none;
-    border-top: 1px solid var(--divider);
-    margin: 0 var(--gutter);
-  }
-
-.module-frame {
-  height: 400px;                      /* fallback until the module reports its height */
-  min-height: var(--frame-min, 400px);
-  overflow: hidden;
-}
-
-/* Desktop values: placeholders, replace with your measured numbers */
-.module-frame[data-slug="projection"]    { --frame-min: 2000px; }
-.module-frame[data-slug="polling"]       { --frame-min: 900px; }
-.module-frame[data-slug="probabilities"] { --frame-min: 900px; }
-.module-frame[data-slug="geography"]     { --frame-min: 600px; }
-.module-frame[data-slug="systems"]       { --frame-min: 650px; }
-
-/* Mobile values (700px matches the breakpoint your modules use internally) */
-@media (max-width: 700px) {
-  .module-frame[data-slug="projection"]    { --frame-min: 1900px; }
-  .module-frame[data-slug="polling"]       { --frame-min: 1100px; }
-  .module-frame[data-slug="probabilities"] { --frame-min: 1100px; }
-  .module-frame[data-slug="geography"]     { --frame-min: 600px; }
-  .module-frame[data-slug="systems"]       { --frame-min: 400px; }
-}
-
-  /* ---- User Input tabs ---- */
-.uip-tabs {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin: 8px 0 18px;
-}
-
-.uip-tab {
-  --tab-bg: none;                 /* overridden per tab with the background image */
-  --c1: #005434;                  /* gradient start (bottom-left) */
-  --c2: #a8dcc4;                  /* gradient end / fallback colour */
-  position: relative;
-  aspect-ratio: 440 / 252;        /* same proportions as your mock-up */
-  padding: 0;
-  border: 0;
-  border-radius: 16px;
-  overflow: hidden;
-  cursor: pointer;
-  text-align: left;
-  font: inherit;
-  color: #fff;
-  background:
-    linear-gradient(35deg, var(--c1) 0%, transparent 65%),
-    var(--tab-bg) center / cover no-repeat,
-    var(--c2);
-  opacity: 0.6;
-  filter: saturate(0.6);
-  transition: opacity .2s, filter .2s, transform .2s, box-shadow .2s;
-}
-@media (hover: hover) {
-  .uip-tab:hover { opacity: 0.85; filter: saturate(0.9); transform: translateY(-2px); }
-}
-.uip-tab:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
-.uip-tab[aria-selected="true"] {
-  opacity: 1;
-  filter: none;
-  box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--accent);
-}
-
-.uip-icon {
-  position: absolute;
-  top: 12%;
-  left: 5%;
-  height: 36%;
-  width: auto;
-  display: block;
-}
-.uip-label {
-  position: absolute;
-  left: 5%;
-  right: 5%;
-  bottom: 8%;
-  font-size: clamp(1.1rem, 2.3vw, 1.9rem);
-  font-weight: 700;
-  line-height: 1.1;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, .35);
-}
-
-/* per-tab colours: swap for your own */
-.uip-tab[data-tab="commons"] { --c1: #005434; --c2: #a8dcc4; }
-.uip-tab[data-tab="senedd"]  { --c1: #8a1c2b; --c2: #e9b4bb; }
-.uip-tab[data-tab="holyrood"]{ --c1: #1d3b7a; --c2: #b3c6ee; }
-
-.uip-panel[hidden] { display: none; }
-.uip-panel { min-height: 120px; }
-
-@media (max-width: 700px) {
-  .uip-tabs { grid-template-columns: 1fr; gap: 10px; }
-  .uip-tab { aspect-ratio: auto; height: 96px; }
-  .uip-icon { top: 50%; transform: translateY(-50%); height: 56%; }
-  .uip-label { bottom: 50%; transform: translateY(50%); left: 22%; font-size: 1.3rem; }
-}
-
-  footer {
-    text-align: center;
-    padding: 24px var(--gutter) 48px;
-    color: var(--muted);
-    font-size: 0.8rem;
-  }
 </style>
 </head>
 <body>
+<div class="wrap">
+  <div class="cab-layout">
 
-<header class="topbar">
-  <div class="topbar-inner">
-    <a class="brand" href="#projection">
-      <img src="https://raw.githubusercontent.com/Nowcast-EU/United-Kingdom/refs/heads/main/NowcastUKlogo.png" alt="Nowcast UK" class="brand-logo">
-      <span class="brand-name">Nowcast UK</span>
-    </a>
+    <!-- LEFT: stats (pie + histogram) -->
+    <section class="cab-stats" id="cabStats" aria-label="Cabinet summary statistics">
+      <p class="s-text" id="sText">Nowcast UK's central projection for seats held by members of the current cabinet. Select a government minister to see their constituency, role and party-by-party odds.</p>
+      <div class="s-pie-block" id="sPie"></div>
+      <div class="s-divider" aria-hidden="true"></div>
+      <div class="s-hist-block" id="sHist"></div>
+    </section>
 
-    <nav class="tabs" aria-label="Section navigation" id="tabs">
-      <a class="tab" href="#projection" data-slug="projection">Projection</a>
-      <a class="tab" href="#polling" data-slug="polling">Polling</a>
-      <a class="tab" href="#probabilities" data-slug="probabilities">Probabilities</a>
-      <a class="tab" href="#geography" data-slug="geography">Geography</a>
-      <a class="tab" href="#cabinet" data-slug="cabinet">Cabinet</a>
-      <a class="tab" href="#systems" data-slug="systems">Systems</a>
-      <a class="tab" href="#user-input" data-slug="user-input">User Input</a>
-      <a class="tab" href="#methodology" data-slug="methodology">Methodology</a>
-    </nav>
+    <div class="cab-divider" aria-hidden="true"></div>
 
-        <a class="donate" href="https://liberapay.com/Nowcast_UK/donate" target="_blank" rel="noopener">
-      <img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg">
-    </a>
-    
+    <!-- RIGHT: existing bar chart + panel -->
+    <div class="cab-grid" id="cabGrid">
+      <svg class="cab-line" id="cabLine" aria-hidden="true"></svg>
+
+      <div class="cab-chart" id="cabChart" role="listbox" aria-label="Cabinet members by projected margin"></div>
+
+      <aside class="cab-panel" id="cabPanel" aria-live="polite">
+        <h2 class="p-name" id="pName"></h2>
+        <div class="p-photo" id="pPhoto"></div>
+        <div class="p-meta">
+          <div id="pSeat"></div>
+          <div id="pRole"></div>
+        </div>
+        <div class="p-chance" id="pChance">Chance of winning seat</div>
+        <div id="pBars"></div>
+      </aside>
+    </div>
+
   </div>
-</header>
-
-<main>
-
-<!-- ===================== PROJECTION ===================== -->
-<section class="module" id="projection" data-slug="projection">
-  <div class="embed-wrap">
-    <iframe class="module-frame" data-slug="projection"
-             src="https://nowcast-eu.github.io/United-Kingdom/module-projection.html?v1"></iframe>
-  </div>
-</section>
-
-<hr class="divider">
-
-  <!-- ===================== POLLING ===================== -->
-  <section class="module" id="polling" data-slug="polling">
-    <h2>Polling & Projection History</h2>
-  <div class="embed-wrap">
-    <iframe class="module-frame" data-slug="polling"
-             src="https://nowcast-eu.github.io/United-Kingdom/module-polling.html?v1"></iframe>
-  </div>
-  </section>
-
-  <hr class="divider">
-
-  <!-- ===================== PROBABILITIES ===================== -->
-  <section class="module" id="probabilities" data-slug="probabilities">
-    <h2>Probabilities</h2>
-    <p class="wip-note">To account for real-world uncertainty, we run 1,000 simulations using current polling averages as a baseline. Each run randomly adjusts key variables such as tactical voting, incumbent effects and electoral geography to show the full range of possible election outcomes.</p>
-  <div class="embed-wrap">
-    <iframe class="module-frame" data-slug="probabilities"
-             src="https://nowcast-eu.github.io/United-Kingdom/module-probability.html?v1"></iframe>
-  </div>
-  </section>
-
-  <hr class="divider">
-
-    <!-- ===================== GEOGRAPHY ===================== -->
-  <section class="module" id="geography" data-slug="geography">
-    <h2>Geography & Demographics</h2>
-  <div class="embed-wrap">
-    <iframe class="module-frame" data-slug="geography"
-             src="https://nowcast-eu.github.io/United-Kingdom/module-geography.html?v1"></iframe>
-  </div>
-  </section>
-
-  <hr class="divider">
-
-  <!-- ===================== CABINET ===================== -->
-  <section class="module" id="cabinet" data-slug="cabinet">
-    <h2>Cabinet Retention Rate</h2>
-  <div class="embed-wrap">
-    <iframe class="module-frame" data-slug="cabinet"
-             src="https://nowcast-eu.github.io/United-Kingdom/module-cabinet.html?v1"></iframe>
-  </div>
-  </section>
-
-  <hr class="divider">
-
-  <!-- ===================== SYSTEMS ===================== -->
-  <section class="module" id="systems" data-slug="systems">
-    <h2>Alternative Electoral Systems</h2>
-    <p class="wip-note-sys">With a renewed focus on electoral reform under Andy Burnham's premiership, we've simulated a number of scenarios illustrating how current UK polling averages translate to different electoral systems used across the world. Important to note that there are both universal and system-specific rules that can further influence the apportionment of seats such as thresholds, constituency boundaries, and the component ratios within hybrid systems.</p>
-  <div class="embed-wrap">
-    <iframe class="module-frame" data-slug="systems"
-             src="https://nowcast-eu.github.io/United-Kingdom/module-systems.html?v1"></iframe>
-  </div>
-  </section>
-
-  <hr class="divider">
-
-<!-- ===================== USER INPUT ===================== -->
-<section class="module" id="user-input" data-slug="user-input">
-  <h2>User Input</h2>
-
-  <div class="uip-tabs" role="tablist" aria-label="Choose a legislature">
-    <button class="uip-tab" role="tab" id="uip-tab-commons" data-tab="commons"
-            aria-selected="true" aria-controls="uip-panel-commons"
-            style="--tab-bg: url('PLACEHOLDER-commons-bg.jpg');">
-      <img class="uip-icon" src="PLACEHOLDER-commons-icon.png" alt="" onerror="this.style.display='none'">
-      <span class="uip-label">House of Commons</span>
-    </button>
-
-    <button class="uip-tab" role="tab" id="uip-tab-senedd" data-tab="senedd"
-            aria-selected="false" tabindex="-1" aria-controls="uip-panel-senedd"
-            style="--tab-bg: url('PLACEHOLDER-senedd-bg.jpg');">
-      <img class="uip-icon" src="PLACEHOLDER-senedd-icon.png" alt="" onerror="this.style.display='none'">
-      <span class="uip-label">Senedd</span>
-    </button>
-
-    <button class="uip-tab" role="tab" id="uip-tab-holyrood" data-tab="holyrood"
-            aria-selected="false" tabindex="-1" aria-controls="uip-panel-holyrood"
-            style="--tab-bg: url('PLACEHOLDER-holyrood-bg.jpg');">
-      <img class="uip-icon" src="PLACEHOLDER-holyrood-icon.png" alt="" onerror="this.style.display='none'">
-      <span class="uip-label">Holyrood</span>
-    </button>
-  </div>
-
-  <div class="uip-panel" role="tabpanel" id="uip-panel-commons" aria-labelledby="uip-tab-commons">
-    <div class="embed-wrap">Coming soon!</div>
-  </div>
-  <div class="uip-panel" role="tabpanel" id="uip-panel-senedd" aria-labelledby="uip-tab-senedd" hidden>
-    <div class="embed-wrap">Coming soon!</div>
-  </div>
-  <div class="uip-panel" role="tabpanel" id="uip-panel-holyrood" aria-labelledby="uip-tab-holyrood" hidden>
-    <div class="embed-wrap">Coming soon!</div>
-  </div>
-</section>
-
-  <hr class="divider">
-
-  <!-- ===================== METHODOLOGY ===================== -->
-  <section class="module" id="methodology" data-slug="methodology">
-    <h2>Methodology</h2>
-<p class="wip-note">Coming soon! In the meantime you can read about our methodology <a href="https://josh-housden.medium.com/uk-projection-method-explained-cbef51b7afa4">here</a>.</p>
-  </section>
-
-</main>
-
-<footer>© 2026 Nowcast UK</footer>
+</div>
 
 <script>
+// ============================================================
+// PARTIES
+// ============================================================
+const PARTIES = {
+  LAB:{ label:'LAB', color:'#e4003b', text:'#fff' },
+  CON:{ label:'CON', color:'#0087DC', text:'#fff' },
+  RFM:{ label:'RFM', color:'#34d8ef', text:'#1a1a1a' },
+  LDM:{ label:'LDM', color:'#FAA61A', text:'#fff' },
+  GRN:{ label:'GRN', color:'#6ab023', text:'#fff' },
+  SNP:{ label:'SNP', color:'#fdf38e', text:'#1a1a1a' },
+  PLC:{ label:'PLC', color:'#005B54', text:'#fff' },
+  RES:{ label:'RES', color:'#000055', text:'#fff' },
+  OTH:{ label:'OTH', color:'#999999', text:'#fff' },
+};
 
-  // Resizes each module iframe to match the height its own page reports.
-(function () {
-  var frames = Array.prototype.slice.call(document.querySelectorAll('.module-frame'));
+const m = (name, seat, role, winner, margin, probs, nation = 'ENG', photo = '') =>
+  ({ name, seat, role, party: 'LAB', winner, margin, probs, photo, nation });
 
-   frames.forEach(function (f) { f.setAttribute('scrolling', 'no'); });
 
-  var resizeTimers = {};
+const MEMBERS = [
+  m('Angela Rayner','Ashton-under-Lyne','Secretary of State for Housing, Communities and Local Government','LAB',5.5,{LAB:71.4,RFM:28.6},'ENG', 'https://www.nowcast.uk/images/A_Rayner.WebP'),
+  m('Shabana Mahmood','Birmingham Ladywood','Secretary of State for the Home Department','LAB',20.4,{LAB:98.6,GRN:1.0,OTH:0.4},'ENG', 'https://www.nowcast.uk/images/S_Mahmood.WebP'),
+  m('Ed Miliband','Doncaster North','Secretary of State for Foreign, Commonwealth and Development Affairs','LAB',9.3,{LAB:80.6,RFM:19.4},'ENG', 'https://www.nowcast.uk/images/E_Miliband.WebP'),
+  m('Matthew Pennycook','Greenwich and Woolwich','Minister of State for Housing and Planning','LAB',17.7,{LAB:95.4,GRN:4.6},'ENG', 'https://www.nowcast.uk/images/M_Pennycook.WebP'),
+  m('Bridget Phillipson','Houghton and Sunderland South','Minister for Women and Equalities','LAB',2.6,{LAB:60.8,RFM:39.2},'ENG', 'https://www.nowcast.uk/images/B_Phillipson.WebP'),
+  m('Wes Streeting','Ilford North','Secretary of State for Defence','LAB',4.8,{LAB:64.5,CON:15.8,RFM:0.3,OTH:19.4},'ENG', 'https://www.nowcast.uk/images/W_Streeting.WebP'),
+  m('Anneliese Midgley','Knowsley','Parliamentary Secretary to the Treasury (Chief Whip)','LAB',35.2,{LAB:99.7,RFM:0.3},'ENG', 'https://www.nowcast.uk/images/A_Midgley.WebP'),
+  m('Ellie Reeves','Lewisham West and East Dulwich','Attorney General','LAB',10.1,{LAB:81.0,GRN:19.0},'ENG', 'https://www.nowcast.uk/images/E_Reeves.WebP'),
+  m('Hamish Falconer','Lincoln','Minister of State for Intergovernmental Relations and European Relations','LAB',12.1,{LAB:89.0,CON:1.2,RFM:9.8},'ENG', 'https://www.nowcast.uk/images/H_Falconer.WebP'),
+  m('Andy Burnham','Makerfield','Prime Minister of the United Kingdom','LAB',21.0,{LAB:94.6,RFM:5.4},'ENG', 'https://www.nowcast.uk/images/A_Burnham.WebP'),
+  m('Lucy Powell','Manchester Central','Secretary of State for Education','LAB',19.6,{LAB:96.3,GRN:3.7},'ENG', 'https://www.nowcast.uk/images/L_Powell.WebP'),
+  m('Alex Norris','Nottingham North and Kimberley','Lord Chancellor and Secretary of State for Justice','LAB',11.5,{LAB:88.5,RFM:11.5},'ENG', 'https://www.nowcast.uk/images/A_Norris.WebP'),
+  m('Miatta Fahnbulleh','Peckham','Secretary of State for Energy Security and Net Zero','LAB',7.4,{LAB:74.8,GRN:25.2},'ENG', 'https://www.nowcast.uk/images/M_Fahnbulleh.WebP'),
+  m('Yvette Cooper','Pontefract, Castleford and Knottingley','Secretary of State for Health and Social Care','LAB',2.4,{LAB:59.6,RFM:40.4},'ENG', 'https://www.nowcast.uk/images/Y_Cooper.WebP'),
+  m('John Healey','Rawmarsh and Conisbrough','Chancellor of the Exchequer','LAB',2.8,{LAB:59.9,RFM:40.1},'ENG', 'https://www.nowcast.uk/images/J_Healey.WebP'),
+  m('Louise Haigh','Sheffield Heeley','First Secretary of State','LAB',22.6,{LAB:98.4,RFM:0.1,GRN:1.5},'ENG', 'https://www.nowcast.uk/images/L_Haigh.WebP'),
+  m('Jonathan Reynolds','Stalybridge and Hyde','Secretary of State for Business, Innovation, Science and Trade','LAB',10.0,{LAB:83.8,RFM:16.2},'ENG', 'https://www.nowcast.uk/images/J_Reynolds.WebP'),
+  m('Heidi Alexander','Swindon South','Secretary of State for Transport','LAB',13.8,{LAB:90.1,CON:8.6,RFM:1.3},'ENG', 'https://www.nowcast.uk/images/H_Alexander.WebP'),
+  m('Alan Campbell','Tynemouth','Leader of the House of Commons','LAB',23.8,{LAB:98.9,RFM:1.1},'ENG', 'https://www.nowcast.uk/images/A_Campbell.WebP'),
+  m('Angela Eagle','Wallasey','Secretary of State for Environment, Food and Rural Affairs','LAB',28.0,{LAB:99.4,RFM:0.6},'ENG', 'https://www.nowcast.uk/images/A_Eagle.WebP'),
+  m('Lisa Nandy','Wigan','Secretary of State for Digital, Culture, Media and Sport','LAB',8.9,{LAB:78.4,RFM:21.6},'ENG', 'https://www.nowcast.uk/images/L_Nandy.WebP'),
+  m('Pat McFadden','Wolverhampton South East','Secretary of State for Work and Pensions','LAB',9.4,{LAB:82.4,RFM:17.6},'ENG', 'https://www.nowcast.uk/images/P_McFadden.WebP'),
+  m('Emma Reynolds','Wycombe','Chief Secretary to the Treasury','LAB',6.7,{LAB:68.8,CON:28.3,RFM:2.9},'ENG', 'https://www.nowcast.uk/images/E_Reynolds.WebP'),
+  m('Douglas Alexander','Lothian East','Secretary of State for Scotland','LAB',12.6,{LAB:94.7,SNP:5.3},'SCO', 'https://www.nowcast.uk/images/D_Alexander.WebP'),
+  m('Stephen Kinnock','Aberafan Maesteg','Secretary of State for Wales','LAB',1.9,{LAB:56.5,RFM:27.5,PLC:16.0},'WAL', 'https://www.nowcast.uk/images/S_Kinnock.WebP'),
+  m('Chris Bryant','Rhondda and Ogmore','Secretary of State for Northern Ireland','RFM',5.0,{LAB:13.9,RFM:59.8,PLC:26.3},'WAL', 'https://www.nowcast.uk/images/C_Bryant.WebP'),
+  m('Kanishka Narayan','Vale of Glamorgan','Minister of State for Artificial Intelligence','CON',2.7,{LAB:25.9,CON:62.8,RFM:10.4,PLC:0.9},'WAL', 'https://www.nowcast.uk/images/K_Narayan.WebP'),
+];
 
-  window.addEventListener('message', function (event) {
-    var data = event.data;
-    try {
-      if (typeof data === 'string') data = JSON.parse(data);
-    } catch (e) {
-      return;
-    }
-    if (!data || data.sender !== 'nowcast-module' || !data.height) return;
+// ============================================================
+// CONFIG
+// ============================================================
+const LABEL_GAP        = 8;    // px gap between the end of a bar and its value label
+const PANEL_PARTIES = ['LAB','RFM','CON','LDM','GRN','SNP','PLC', 'OTH'];
+const PANEL_MAX_BAR = 75; // the longest bar in each panel = this % of the track width
+const MOBILE_BREAKPOINT = 700; // px — must match the @media (max-width) value in the CSS
+const isMobile    = () => window.innerWidth <= MOBILE_BREAKPOINT;
+const barFill     = () => isMobile() ? 0.55 : 0.88;   // longest bar as a share of the track (mobile leaves room for the label)
+const panelMaxBar = () => isMobile() ? 65 : PANEL_MAX_BAR;
+const labelGap    = () => isMobile() ? 5 : LABEL_GAP;
+const displayName = n => {
+  if (!isMobile()) return n;                       // desktop keeps full names
+  const parts = n.split(' ');
+  return parts.length < 2 ? n : parts[0][0] + '. ' + parts.slice(1).join(' ');
+};
+const HIST_BIN = 5;     // histogram bin width, in percentage points of margin
+const PARTY_NAMES = {   // full names, used in the pie legend
+  LAB:'Labour', CON:'Conservatives', RFM:'Reform UK', LDM:'Liberal Democrats',
+  GRN:'Greens', SNP:'SNP', PLC:'Plaid Cymru', OTH:'Others'
+};
 
-    var frame = frames.filter(function (f) {
-      return f.contentWindow === event.source;
-    })[0];
-    if (!frame) return;
+// ============================================================
+// HELPERS
+// ============================================================
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const partyOf = k => PARTIES[k] || PARTIES.OTH;
+const ICON_HOUSE = `<svg class="p-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-5.5h4V20"/></svg>`;
+const ICON_CASE  = `<svg class="p-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7.5" width="18" height="12.5" rx="1.5"/><path d="M9 7.5V5.5a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 5.5v2"/><path d="M3 13h18"/></svg>`;
+const ICON_DICE = `<svg class="p-icon dice" viewBox="0 0 24 24" aria-hidden="true"><rect x="9.5" y="3" width="12" height="12" rx="2" transform="rotate(12 15.5 9)"/><rect class="front" x="2.5" y="9" width="12" height="12" rx="2"/><circle cx="6.5" cy="13" r="1"/><circle cx="8.5" cy="15" r="1"/><circle cx="10.5" cy="17" r="1"/></svg>`;
 
-    var slug = frame.dataset.slug;
-    clearTimeout(resizeTimers[slug]);
-    resizeTimers[slug] = setTimeout(function () {
-      frame.style.height = data.height + 'px';
-    }, 120);
+const members = MEMBERS
+  .map(m => ({ ...m, party: m.party || 'LAB', v: (m.winner === (m.party || 'LAB')) ? m.margin : -m.margin }))
+  .sort((a, b) => b.v - a.v);
+
+const maxAbs = Math.max(...members.map(m => Math.abs(m.v)), 1);
+const getDomain = () => maxAbs / barFill();
+
+function fmtMargin(v){
+  if (v > 0) return '+' + v.toFixed(1);
+  if (v < 0) return '\u2212' + Math.abs(v).toFixed(1);
+  return '0.0';
+}
+function fmtEdge(v){ return v < 0 ? '\u2212' + Math.abs(v) : v > 0 ? '+' + v : '0'; }
+function groupOf(v){ return v >= 0 ? 0 : 1; }
+
+// ============================================================
+// STATS SECTION: PIE + HISTOGRAM
+// ============================================================
+function arcPath(a0, a1){
+  // angles in radians, 0 = 12 o'clock, clockwise
+  const r = 48, c = 50;
+  const pt = a => [c + r * Math.sin(a), c - r * Math.cos(a)];
+  const [x0, y0] = pt(a0), [x1, y1] = pt(a1);
+  const large = (a1 - a0) > Math.PI ? 1 : 0;
+  return `M${c} ${c} L${x0.toFixed(3)} ${y0.toFixed(3)} A${r} ${r} 0 ${large} 1 ${x1.toFixed(3)} ${y1.toFixed(3)} Z`;
+}
+
+function renderPie(){
+  const total = members.length;
+  const holdN = members.filter(x => x.winner === x.party).length;
+  const holdParty = members[0].party;
+
+  const loseBy = {};
+  members.forEach(x => { if (x.winner !== x.party) loseBy[x.winner] = (loseBy[x.winner] || 0) + 1; });
+
+  const slices = [{ hold:true, label:'Holding seat', color:partyOf(holdParty).color, n:holdN }]
+    .concat(Object.entries(loseBy)
+      .sort((a, b) => b[1] - a[1])
+      .map(([k, n]) => ({ label:'Losing to ' + (PARTY_NAMES[k] || partyOf(k).label), color:partyOf(k).color, n })))
+    .filter(s => s.n > 0);
+
+  let a = 0;
+  const shapes = slices.map(s => {
+    const span = s.n / total * Math.PI * 2;
+    const el = slices.length === 1
+      ? `<circle cx="50" cy="50" r="48" fill="${s.color}"></circle>`
+      : `<path d="${arcPath(a, a + span)}" fill="${s.color}"></path>`;
+    a += span;
+    return el;
+  }).join('');
+
+  const pct = n => Math.round(n / total * 100) + '%';
+  const holdPct = pct(holdN);
+
+  $('sPie').innerHTML = `
+    <svg class="s-pie" viewBox="0 0 100 100" role="img"
+         aria-label="${holdPct} of cabinet members projected to hold their seat">${shapes}</svg>
+    <div class="s-big">${holdPct}</div>
+    <div class="s-sub">${holdN} of ${total} projected to hold</div>
+    <div class="s-legend">
+      ${slices.filter(s => !s.hold).map(s => `
+        <div class="s-leg-row">
+          <span class="s-swatch" style="background:${s.color};"></span>
+          <span>${esc(s.label)}</span>
+          <span class="s-leg-n">${pct(s.n)}</span>
+        </div>`).join('')}
+    </div>`;
+}
+
+function renderHistogram(){
+  const vals = members.map(x => x.v);
+  const lo = Math.floor(Math.min(...vals, 0) / HIST_BIN);
+  const hi = Math.floor(Math.max(...vals, 0) / HIST_BIN);
+  const nb = hi - lo + 1;
+
+  const bins = Array.from({ length: nb }, (_, i) => ({
+    from: (lo + i) * HIST_BIN, to: (lo + i + 1) * HIST_BIN, n: 0, by: {}
+  }));
+  members.forEach(x => {
+    const b = bins[Math.floor(x.v / HIST_BIN) - lo];
+    b.n++;
+    b.by[x.winner] = (b.by[x.winner] || 0) + 1;
   });
-})();
-  
-  // Highlights the nav tab matching whichever section is currently in view.
-  (function () {
-    var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
-    var sections = Array.prototype.slice.call(document.querySelectorAll('.module'));
-    var tabBySlug = {};
-    tabs.forEach(function (t) { tabBySlug[t.dataset.slug] = t; });
+  const maxN = Math.max(...bins.map(b => b.n), 1);
 
-    var tabsEl = document.getElementById('tabs');
-    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const order = k => { const i = PANEL_PARTIES.indexOf(k); return i < 0 ? 99 : i; };
 
-    // Scrolls the tab strip just enough to show the active tab and the one after it.
-     function revealTab(activeTab) {
-      var next = activeTab.nextElementSibling || activeTab; // last tab: reveal itself
-      var box = tabsEl.getBoundingClientRect();
-      var a = activeTab.getBoundingClientRect();
-      var n = next.getBoundingClientRect();
-      var pad = 12;
-      var delta = 0;
+  const cols = bins.map(b => {
+    const segs = Object.entries(b.by)
+      .sort((p, q) => order(p[0]) - order(q[0]))
+      .map(([k, n]) => `<div class="h-seg" style="flex:${n} 0 0;background:${partyOf(k).color};"></div>`)
+      .join('');
+    const tip = `${fmtEdge(b.from)} to ${fmtEdge(b.to)}: ${b.n} seat${b.n === 1 ? '' : 's'}`;
+    return `<div class="h-col" title="${esc(tip)}">
+      <div class="h-stack" style="height:${b.n / maxN * 100}%;">
+        ${b.n ? `<span class="h-n">${b.n}</span>` : ''}${segs}
+      </div>
+    </div>`;
+  }).join('');
 
-      if (n.right > box.right - pad) {
-        // next tab is cut off on the right: scroll right, but keep the active tab's right edge in view
-        delta = Math.min(n.right - (box.right - pad), a.right - (box.left + pad));
-      } else if (a.left < box.left + pad) {
-        // active tab is cut off on the left (scrolling back up the page)
-        delta = a.left - (box.left + pad);
-      }
-
-      if (delta) {
-        tabsEl.scrollBy({ left: delta, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
-      }
-    }
-
-    function setActive(slug) {
-      tabs.forEach(function (t) {
-        t.classList.toggle('is-active', t.dataset.slug === slug);
-      });
-      if (tabBySlug[slug]) revealTab(tabBySlug[slug]);
-    }
-
-    var observer = new IntersectionObserver(function (entries) {
-      var visible = entries.filter(function (e) { return e.isIntersecting; });
-      if (!visible.length) return;
-      visible.sort(function (a, b) {
-        return a.boundingClientRect.top - b.boundingClientRect.top;
-      });
-      var slug = visible[0].target.dataset.slug;
-      if (tabBySlug[slug]) setActive(slug);
-    }, { rootMargin: '-30% 0px -55% 0px', threshold: 0 });
-
-    sections.forEach(function (s) { observer.observe(s); });
-
-    var initial = (location.hash || '').replace('#', '');
-    setActive(tabBySlug[initial] ? initial : (tabs[0] && tabs[0].dataset.slug));
-  })();
-</script>
-
-  <script>
-(function () {
-  var cacheBust = Date.now();
-  document.querySelectorAll('.module-frame[src]').forEach(function (frame) {
-    frame.src = frame.src + (frame.src.indexOf('?') === -1 ? '?' : '&') + 'v=' + cacheBust;
-  });
-})();
-</script>
-
-  <script>
-// User Input tabs: click + arrow-key switching
-(function () {
-  var tabs = Array.prototype.slice.call(document.querySelectorAll('.uip-tab'));
-  var panels = Array.prototype.slice.call(document.querySelectorAll('.uip-panel'));
-
-  function select(tab, focus) {
-    tabs.forEach(function (t) {
-      var on = t === tab;
-      t.setAttribute('aria-selected', on ? 'true' : 'false');
-      t.tabIndex = on ? 0 : -1;
-    });
-    panels.forEach(function (p) {
-      p.hidden = p.id !== tab.getAttribute('aria-controls');
-    });
-    if (focus) tab.focus();
+  const step = nb > 10 ? 2 : 1;
+  let ticks = '';
+  for (let i = 0; i <= nb; i += step){
+    const edge = (lo + i) * HIST_BIN;
+    ticks += `<span class="h-tick${edge === 0 ? ' zero' : ''}" style="left:${i / nb * 100}%;">${fmtEdge(edge)}</span>`;
   }
 
-  tabs.forEach(function (tab, i) {
-    tab.addEventListener('click', function () { select(tab, false); });
-    tab.addEventListener('keydown', function (e) {
-      var next = null;
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = tabs[(i + 1) % tabs.length];
-      if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   next = tabs[(i - 1 + tabs.length) % tabs.length];
-      if (e.key === 'Home') next = tabs[0];
-      if (e.key === 'End')  next = tabs[tabs.length - 1];
-      if (next) { e.preventDefault(); select(next, true); }
-    });
+  const zeroLine = lo < 0
+    ? `<div class="h-zero" style="left:${(-lo) / nb * 100}%;"></div>`
+    : '';
+
+  $('sHist').innerHTML = `
+    <h3 class="s-title">Seats by projected majority</h3>
+    <div class="h-plot" role="img" aria-label="Histogram of cabinet seats by projected majority">${cols}${zeroLine}</div>
+    <div class="h-axis">${ticks}</div>
+    <div class="h-cap">Margin (percentage points)</div>`;
+}
+
+function renderStats(){
+  renderPie();
+  renderHistogram();
+}
+
+// ============================================================
+// CHART
+// ============================================================
+const chart = $('cabChart');
+let selected = -1;
+
+function renderChart(){
+  chart.innerHTML = '';
+  let last = null;
+  members.forEach((m, i) => {
+    const g = groupOf(m.v);
+    if (last !== null && g !== last){
+      const gap = document.createElement('div');
+      gap.className = 'cab-gap';
+      chart.appendChild(gap);
+    }
+    last = g;
+
+    const p = partyOf(m.winner);
+    const pct = Math.max(Math.abs(m.v) / getDomain() * 100, 1.2);
+
+    const row = document.createElement('button');
+    row.type = 'button';
+    row.className = 'cab-row';
+    row.dataset.i = i;
+    row.setAttribute('role', 'option');
+    row.innerHTML = `
+      <span class="cab-name">${esc(displayName(m.name))}</span>
+      <span class="cab-track">
+        <span class="cab-bar" style="width:${pct}%;background:${p.color};"></span>
+        <span class="cab-val" style="left:calc(${pct}% + ${labelGap()}px);">${fmtMargin(m.v)}</span>
+      </span>`;
+    chart.appendChild(row);
   });
-})();
+
+    fitNameColumn();
+}
+
+function fitNameColumn(){
+  const probe = document.createElement('span');
+  probe.className = 'cab-name';
+  probe.style.cssText = 'position:absolute;visibility:hidden;width:auto;overflow:visible;font-weight:700;';
+  chart.appendChild(probe);
+  let w = 0;
+  members.forEach(m => {
+    probe.textContent = displayName(m.name);
+    w = Math.max(w, probe.getBoundingClientRect().width);
+  });
+  probe.remove();
+  chart.style.setProperty('--name-col', (Math.ceil(w) + 2) + 'px');
+}
+
+chart.addEventListener('click', e => {
+  const row = e.target.closest('.cab-row');
+  if (row) select(+row.dataset.i);
+});
+chart.addEventListener('keydown', e => {
+  if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+  e.preventDefault();
+  const n = Math.min(members.length - 1, Math.max(0, selected + (e.key === 'ArrowDown' ? 1 : -1)));
+  select(n, true);
+});
+
+// ============================================================
+// INFO PANEL
+// ============================================================
+function normaliseProbs(probs){
+  const entries = Object.entries(probs || {}).map(([k, v]) => [k, +v || 0]);
+  const sum = entries.reduce((s, [, v]) => s + v, 0);
+  const scale = sum > 1.5 ? 100 : 1; // accept 0–1 or 0–100
+  return entries.map(([k, v]) => [k, v / scale]).sort((a, b) => b[1] - a[1]);
+}
+
+function renderPanel(m){
+  $('pName').textContent = m.name;
+  $('pSeat').innerHTML = `${ICON_HOUSE}<span class="seat-text">MP for ${esc(m.seat)}</span>`;
+  $('pRole').innerHTML = `${ICON_CASE}<span class="role-text">${esc(m.role)}</span>`;
+
+  const photo = $('pPhoto');
+  photo.innerHTML = '';
+  if (m.photo){
+    const img = document.createElement('img');
+    img.src = m.photo; img.alt = m.name;
+    photo.appendChild(img);
+  } else {
+    const d = document.createElement('div');
+    d.className = 'initials';
+    d.textContent = m.name.split(' ').map(w => w[0]).slice(0, 2).join('');
+    photo.appendChild(d);
+  }
+
+const raw = m.probs || {};
+
+// accept 0–1 or 0–100
+const sum = Object.values(raw).reduce((s, v) => s + (+v || 0), 0);
+const scale = sum > 1.5 ? 100 : 1;
+
+// SNP only stands in Scotland, PLC only in Wales; everyone else always stands
+const NATION_ONLY = { SNP: 'SCO', PLC: 'WAL' };
+const stands = k => !NATION_ONLY[k] || m.nation === NATION_ONLY[k];
+
+// standing parties first (by chance, descending), non-standing parties last
+const rows = PANEL_PARTIES
+  .map(k => [k, stands(k), (+raw[k] || 0) / scale])
+  .sort((a, b) => (b[1] - a[1]) || (b[2] - a[2]));
+
+  // longest bar among standing parties; tiny floor avoids divide-by-zero
+const maxPct = Math.max(...rows.filter(r => r[1]).map(r => r[2] * 100), 1e-9);
+
+$('pBars').innerHTML = rows.map(([k, on, v]) => {
+  const p = partyOf(k);
+  if (!on) {
+    return `<div class="p-row out">
+      <div class="p-label">${esc(p.label)}</div>
+      <div class="p-track"></div>
+    </div>`;
+  }
+    const pct = v * 100;
+  const w = pct / maxPct * panelMaxBar();
+  return `<div class="p-row">
+    <div class="p-label">${esc(p.label)}</div>
+    <div class="p-track">
+      <div class="p-fill" style="width:${w}%;background:${p.color};"></div>
+      <div class="p-pct" style="left:calc(${w}% + ${labelGap()}px);">${pct < 1 ? '&lt;1%' : pct > 99 ? '&gt;99%' : Math.round(pct) + '%'}</div>
+    </div>
+  </div>`;
+}).join('');
+}
+
+// ============================================================
+// SELECTION + DOTTED CONNECTOR
+// ============================================================
+function select(i, focus){
+  if (i === selected && !focus) return;
+  selected = i;
+  chart.querySelectorAll('.cab-row').forEach(r => {
+    const on = +r.dataset.i === i;
+    r.classList.toggle('sel', on);
+    r.setAttribute('aria-selected', on);
+    if (on && focus) r.focus();
+  });
+  renderPanel(members[i]);
+  requestAnimationFrame(drawLine);
+}
+
+function drawLine(){
+  const svg = $('cabLine');
+  if (selected < 0){ svg.innerHTML = ''; return; }
+
+  const grid = $('cabGrid').getBoundingClientRect();
+  const row  = chart.querySelector('.cab-row.sel');
+  if (!row) return;
+
+  const bar   = row.querySelector('.cab-bar').getBoundingClientRect();
+  const val   = row.querySelector('.cab-val');
+  const valR  = val.getBoundingClientRect();
+  const chartR  = chart.getBoundingClientRect();
+  const panelR  = $('cabPanel').getBoundingClientRect();
+  const anchorR = $('pChance').getBoundingClientRect();
+
+  const startX = valR.right + 10 - grid.left;
+  const startY = bar.top + bar.height / 2 - grid.top;
+  const endX   = panelR.left - grid.left;
+  const endY   = anchorR.top + anchorR.height / 2 - grid.top;
+  let elbowX   = (chartR.right + panelR.left) / 2 - grid.left;
+  elbowX = Math.max(elbowX, startX + 14);
+
+  svg.setAttribute('width', grid.width);
+  svg.setAttribute('height', grid.height);
+  svg.innerHTML = `
+    <circle cx="${startX}" cy="${startY}" r="3"></circle>
+    <path d="M${startX} ${startY} H${elbowX} V${endY} H${endX}"></path>`;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+$('pChance').innerHTML = `${ICON_DICE}<span>Chance of winning<span class="seat-word"> seat</span></span>`;
+renderStats();
+renderChart();
+select(members.findIndex(m => m.name === 'Andy Burnham'));
+
+let wasMobile = isMobile();
+window.addEventListener('resize', () => {
+  if (isMobile() !== wasMobile){          // crossed the breakpoint: bar lengths and label gaps change, so rebuild
+    wasMobile = isMobile();
+    renderChart();
+    const i = selected; selected = -1; select(i);
+  } else {
+    fitNameColumn();                      // name column width depends on the current font size
+  }
+  drawLine();
+});
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { fitNameColumn(); drawLine(); });
+new ResizeObserver(drawLine).observe($('cabGrid'));
+
+// ============================================================
+// IFRAME HEIGHT MESSAGING (same pattern as the probability module)
+// ============================================================
+function sendHeight(){
+  window.parent.postMessage({
+    sender: 'nowcast-module',
+    height: document.documentElement.scrollHeight
+  }, '*');
+}
+window.addEventListener('load', sendHeight);
+window.addEventListener('resize', sendHeight);
+new ResizeObserver(sendHeight).observe(document.body);
+setTimeout(sendHeight, 100);
+setTimeout(sendHeight, 500);
+setTimeout(sendHeight, 1000);
 </script>
-
-<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "a9260c04fd6447b0a199b629f602cc72"}'></script><!-- End Cloudflare Web Analytics -->
-
 </body>
 </html>
