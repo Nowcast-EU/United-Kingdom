@@ -1,0 +1,1981 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scottish projection dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root { --bg:#f8faf9; --card:#fff; --ink:#1d1d1b; --muted:#6b6b66; --line:#dcdcd6; --accent:#1f6fb2; --out:#b9bdc4; --marker:#d6336c; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width:1200px; margin:0 auto; padding:24px 16px 48px; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  .sub { color:var(--muted); margin:0 0 20px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:16px; }
+  .card.flush { background:transparent; border:none; padding:0; }
+  .card h2 { font-size:15px; margin:0 0 10px; }
+  textarea { width:100%; min-height:130px; font:12.5px/1.4 ui-monospace, Menlo, Consolas, monospace; border:1px solid var(--line); border-radius:6px; padding:8px; resize:vertical; }
+  .row { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:10px; }
+  label { font-size:13px; color:var(--muted); display:flex; gap:6px; align-items:center; }
+  label[hidden] { display:none; }
+  select, button, input[type=text], input[type=number] { font:inherit; padding:6px 10px; border:1px solid var(--line); border-radius:6px; background:#fff; }
+  input[type=number] { width:80px; }
+  input[type=text] { width:240px; }
+  select#mcConst { min-width:220px; }
+  button.primary { background:var(--accent); color:#fff; border-color:var(--accent); cursor:pointer; }
+  button { cursor:pointer; }
+  .msg { font-size:13px; margin-top:8px; min-height:18px; }
+  .msg.err { color:#b42318; }
+  .msg.ok { color:var(--muted); }
+  .chartbox { position:relative; height:650px; }
+  .chartbox.empty { height:120px; }
+  .chartbox.short { height:420px; }
+  .chartbox.seat-distribution { height:560px; }
+  .country-seat-tooltip {
+    position:absolute;
+    z-index:10;
+    width:max-content;
+    min-width:0;
+    max-width:min(360px, calc(100% - 16px));
+    padding:10px 12px;
+    border:2px solid #1d1d1b;
+    border-left-width:4px;
+    border-bottom-width:4px;
+    border-radius:0;
+    background:rgba(255,255,255,0.97);
+    color:var(--ink);
+    font-size:14px;
+    line-height:1.35;
+    pointer-events:none;
+    touch-action:none;
+    user-select:none;
+    cursor:grab;
+    opacity:0;
+  }
+  .country-seat-tooltip.is-visible { pointer-events:auto; opacity:1; }
+  .country-seat-tooltip.is-dragging { cursor:grabbing; }
+  .country-seat-tooltip-title { width:max-content; max-width:100%; padding-bottom:7px; border-bottom:1px solid var(--line); font-size:16px; font-weight:700; overflow-wrap:anywhere; }
+  .country-seat-tooltip-row { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:6px 0; }
+  .country-seat-tooltip-party { display:flex; align-items:center; gap:7px; min-width:0; }
+  .country-seat-tooltip-name { min-width:0; overflow-wrap:anywhere; }
+  .country-seat-tooltip-swatch { width:11px; height:11px; flex:none; border:1px solid rgba(0,0,0,0.12); border-radius:2px; }
+  .country-seat-tooltip-value { white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .country-seat-tooltip-connector { position:absolute; inset:0; z-index:9; width:100%; height:100%; overflow:visible; pointer-events:none; }
+  .country-seat-tooltip-connector path { fill:none; stroke:#1d1d1b; stroke-width:2; stroke-dasharray:6 6; }
+  #countrySeatResults { background:var(--bg); }
+  .key { display:flex; flex-wrap:wrap; gap:16px; font-size:13px; color:var(--muted); margin-bottom:8px; }
+  .key .threshold-keys { display:flex; flex-basis:100%; flex-wrap:wrap; gap:16px; }
+  .chart-topline { display:flex; justify-content:space-between; align-items:center; gap:20px; margin-bottom:8px; }
+  .chart-topline .key { flex:1; margin:0; }
+  .country-seat-legend { display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin-right:auto; font-size:13px; color:var(--muted); }
+  .country-seat-legend-item { display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
+  .country-seat-legend-swatch { display:inline-block; width:14px; height:12px; }
+  .chart-heading { display:flex; align-items:center; gap:12px; flex:none; }
+  .chart-heading-copy { text-align:right; }
+  .chart-heading h3 { font-size:20px; line-height:24px; margin:0 0 4px; }
+  .chart-heading p { font-size:15px; line-height:20px; color:var(--muted); margin:0; }
+  .chart-heading-logo { width:auto; height:48px; flex:none; }
+  @media (max-width: 700px) {
+    .chart-topline { align-items:flex-start; flex-direction:column-reverse; gap:12px; }
+    .chart-heading { align-self:flex-end; }
+  }
+  .key span.sw { display:inline-block; width:12px; height:12px; border-radius:2px; vertical-align:-1px; margin-right:5px; }
+  .key span.sw.proj { background:#555; }
+  .key span.sw.prev { background:rgba(85,85,85,0.3); }
+  .key span.dt { display:inline-block; width:18px; height:0; border-top:2px dotted #444; vertical-align:3px; margin-right:5px; }
+  .key span.mk { display:inline-block; width:18px; height:0; border-top:3px solid #000; vertical-align:3px; margin-right:5px; }
+  .key span.iqr { display:inline-block; width:0; height:14px; border-left:2.5px solid #1d1d1b; vertical-align:-3px; margin-right:7px; }
+  .key span.iqr.rng { border-left-width:1.25px; border-left-color:rgba(29,29,27,0.4); }
+  .stats { display:flex; gap:24px; flex-wrap:wrap; font-size:13px; color:var(--muted); margin-top:8px; }
+  .stats b { color:var(--ink); }
+  details { font-size:13px; color:var(--muted); margin-top:10px; }
+
+  /* Constituency seats already won (compensatory D'Hondt) */
+  .won-box { margin-top:16px; padding-top:12px; border-top:1px solid var(--line); }
+  .won-box h3 { font-size:14px; margin:0 0 4px; }
+  .won-box .hint { font-size:12.5px; color:var(--muted); margin:0 0 8px; }
+  .won-grid { display:flex; flex-wrap:wrap; gap:10px 16px; }
+  .won-grid label { color:var(--ink); }
+  .won-grid input[type=number] { width:64px; }
+  .won-grid .pm-sw { display:inline-block; width:10px; height:10px; border-radius:2px; }
+
+  /* Monte Carlo seat outcomes */
+  .mc-grid { display:grid; grid-template-columns:minmax(0,var(--mc-chart-share,61.5fr)) minmax(0,var(--mc-stats-share,38.5fr)); gap:16px; align-items:stretch; }
+  @media (max-width: 900px) { .mc-grid { grid-template-columns:1fr; } }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; }
+  .mc-grid > .panel { display:flex; flex-direction:column; }
+  .mc-grid > .panel .chartbox.short { flex:1 1 420px; height:auto; min-height:420px; }
+  .mc-grid > .panel, .mc-grid .rightcol > .panel { background:transparent; border:0; border-radius:0; }
+  .mc-grid { gap:0; }
+  .mc-grid > .panel { border-right:1px solid var(--line); }
+  .rightcol > .panel:first-child { border-bottom:1px solid var(--line); }
+  @media (max-width: 900px) {
+    .mc-grid > .panel { border-right:0; border-bottom:1px solid var(--line); }
+  }
+  .panel h2 { font-size:15px; margin:0 0 4px; }
+  .panel .hint { font-size:12.5px; color:var(--muted); margin:0 0 12px; }
+  .mc-layout-control { width:min(100%,520px); }
+  .mc-layout-control input { flex:1; min-width:140px; accent-color:var(--accent); }
+  .mc-layout-control output { min-width:104px; text-align:right; font-variant-numeric:tabular-nums; }
+  .mc-heading { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+  .mc-heading-logo { width:auto; height:48px; flex:none; }
+  #mcTitle { font-size:20px; line-height:24px; margin:0 0 4px; }
+  #mcSubtitle { font-size:15px; line-height:20px; margin:0; }
+  .outcome { padding:10px 0; border-top:1px solid var(--line); }
+  .outcome:first-of-type { border-top:none; }
+  .outcome .top { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .outcome .rank { font-size:15px; font-weight:700; color:#000000; width:18px; }
+  .pills { display:flex; flex-wrap:wrap; gap:5px; flex:1; }
+  .pill { font-size:12.5px; font-weight:600; padding:2px 8px; border-radius:999px; white-space:nowrap; }
+  .outcome .pct { font-variant-numeric:tabular-nums; font-weight:600; white-space:nowrap; }
+  .outcome .pct small { color:var(--muted); font-weight:400; }
+  .bar { height:6px; background:#eceee9; border-radius:3px; margin-top:7px; overflow:hidden; }
+  .bar > i { display:block; height:100%; background:#b50128; border-radius:3px; }
+  .rightcol { display:flex; flex-direction:column; gap:0; min-width:0; }
+  .flip-line { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:10px; }
+  .flip-line .arrow { color:var(--muted); font-size:13px; }
+  .flip-quotients { display:grid; gap:8px; margin:4px 0 12px; }
+  .flip-quotient-label { display:flex; justify-content:space-between; gap:8px; margin-bottom:3px; font-size:12px; color:var(--muted); }
+  .flip-quotient-label .projected-winner { color:#000000; }
+  .flip-quotient-label b { color:var(--ink); font-variant-numeric:tabular-nums; }
+  .flip-quotient-track { height:8px; background:#eceee9; overflow:hidden; }
+  .flip-quotient-track i { display:block; height:100%; }
+  .flip-chart-heading { font-size:15px; font-weight:700; margin-top:14px; padding-top:12px; border-top:1px solid var(--line); }
+  .flip-chart-note { font-size:12.5px; color:var(--muted); margin:2px 0 8px; }
+  .flip-gap { font-size:26px; font-weight:700; font-variant-numeric:tabular-nums; line-height:1.1; }
+  .flip-gap small { font-size:13px; font-weight:400; color:var(--muted); }
+  .flip-detail { font-size:13px; color:var(--muted); margin-top:8px; }
+  .flip-detail b { color:var(--ink); }
+  .coverage { font-size:12.5px; color:var(--muted); margin:0 0 10px; }
+
+    /* Multi-party dropdown */
+  .party-menu { position:relative; margin-top:0; font-size:15px; color:var(--ink); }
+  .party-menu summary { list-style:none; cursor:pointer; padding:6px 10px; border:1px solid var(--line); border-radius:6px; background:#fff; min-width:160px; }
+  .party-menu summary::-webkit-details-marker { display:none; }
+  .party-menu summary::after { content:" ▾"; color:var(--muted); }
+  .party-menu-list { position:absolute; z-index:10; top:100%; left:0; margin-top:4px; background:#fff; border:1px solid var(--line); border-radius:6px; padding:6px 12px; min-width:100%; max-height:260px; overflow:auto; box-shadow:0 4px 12px rgba(0,0,0,.12); }
+  .party-menu-list label { display:flex; gap:8px; align-items:center; padding:3px 0; white-space:nowrap; color:var(--ink); }
+  .party-menu-list .pm-sw { display:inline-block; width:10px; height:10px; border-radius:2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Scottish election projection</h1>
+  <p class="sub">Paste your table, pick a party, and compare its vote share in each region with the threshold line (section 2 is inherited from the Spanish version).</p>
+
+  <div class="card">
+    <h2>1. Paste data</h2>
+    <textarea id="input" spellcheck="false" placeholder="Paste straight from a spreadsheet or CSV.&#10;&#10;Wide format:  Region | Seats | SNP | Lab | Con | ...&#10;Long format:  Region | Seats | Party | Vote share"></textarea>
+    <div class="row">
+      <button class="primary" id="load">Load table</button>
+      <button id="example">Load dummy example</button>
+    </div>
+    <div class="msg" id="msg"></div>
+    <details>
+      <summary>Accepted formats</summary>
+      <p><b>Wide:</b> first column = region, second = seats, every other column = a party's vote share (header row = party names).<br>
+      <b>Long:</b> header row containing columns matching "constituency/province", "seats/magnitude", "party" and "share/vote".<br>
+      Tab, semicolon or comma separated. Values can have a % sign; decimal commas work with tab or semicolon separators. If every value in the table is 1 or below, they are treated as fractions and multiplied by 100.</p>
+    </details>
+  </div>
+
+<div class="card flush">
+    <h2>2. Vote share vs effective threshold</h2>
+    <div class="row" style="margin-top:0;margin-bottom:10px">
+      <label>Party <select id="party"></select></label>
+      <label>Sort by
+        <select id="sort">
+          <option value="input">Input order</option>
+          <option value="mag-desc">Magnitude (largest first)</option>
+          <option value="mag-asc">Magnitude (smallest first)</option>
+          <option value="share-desc">Vote share (highest first)</option>
+          <option value="margin-desc">Margin over threshold (highest first)</option>
+          <option value="margin-asc">Margin over threshold (lowest first)</option>
+          <option value="name">Name (A–Z)</option>
+        </select>
+      </label>
+      <label><input type="checkbox" id="hideZero"> Hide regions where the selected party is at 0%</label>
+    </div>
+    <div class="chart-topline">
+      <div class="key">
+        <span><span class="sw" id="swOn"></span>At or above effective threshold</span>
+        <span><span class="sw" id="swOff"></span>Below effective threshold</span>
+        <span class="threshold-keys">
+          <span><span class="mk"></span>Effective threshold = 75% ÷ (M + 1)</span>
+          <span id="hardKey"><span class="dt"></span><span id="hardKeyText"></span></span>
+        </span>
+      </div>
+      <div class="chart-heading">
+        <div class="chart-heading-copy">
+          <h3>Nowcast EU | Scottish Parliament Projection</h3>
+          <p id="projectionSubtitle"></p>
+        </div>
+        <img class="chart-heading-logo" src="https://raw.githubusercontent.com/Nowcast-EU/Spain/main/ES_logo.png" alt="Nowcast EU">
+      </div>
+    </div>
+    <div class="chartbox empty" id="projectionChartBox"><canvas id="chart"></canvas></div>
+    <div class="stats" id="stats"></div>
+  </div>
+
+  <!-- ============ Monte Carlo ============ -->
+  <div class="card">
+    <h2>3. Monte Carlo runs</h2>
+    <textarea id="mcInput" spellcheck="false" placeholder="Paste one or more simulation runs (regional list vote shares).&#10;&#10;Runs across columns:  Region | 1 | 2 | 3 | ... | 1000   (then one row per party)&#10;Runs down the rows:    Region | SNP | Lab | Con | ...   (then one row per run)"></textarea>
+    <div class="row">
+      <button class="primary" id="mcLoad">Load runs</button>
+      <button id="mcExample">Load dummy runs (1,000)</button>
+    </div>
+    <div class="msg" id="mcMsg"></div>
+    <div class="row">
+      <label>Region <select id="mcConst"></select></label>
+      <label>List seats (D'Hondt) <input type="number" id="mcSeats" value="7" min="1" step="1"></label>
+      <label>Sort chart by
+        <select id="mcSort">
+          <option value="projected">Projected result</option>
+          <option value="previous">Previous result</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="won-box">
+      <h3>Constituency seats already won (this region)</h3>
+      <p class="hint">Enter the number of constituency seats each party is projected to win in the selected region. They are treated as seats already won in the compensatory list allocation: a party's D'Hondt divisor is (constituency seats + list seats won so far + 1). Values are remembered per region.</p>
+      <div class="won-grid" id="mcWon"></div>
+      <div class="msg ok" id="mcWonTotal"></div>
+      <details>
+        <summary>Paste constituency seats for all regions at once</summary>
+        <p>Header row: <code>Region | SNP | Lab | Con | ...</code>, then one row per region with that party's constituency seats. Regions are matched by name (accents and case ignored). Pasting replaces the stored values for each region listed.</p>
+        <textarea id="mcWonPaste" spellcheck="false" style="min-height:90px" placeholder="Region&#9;SNP&#9;Lab&#9;Con&#9;LD&#10;Glasgow&#9;7&#9;2&#9;0&#9;0&#10;Lothian&#9;5&#9;3&#9;0&#9;1"></textarea>
+        <div class="row"><button id="mcWonApply">Apply constituency seats</button></div>
+        <div class="msg" id="mcWonMsg"></div>
+      </details>
+    </div>
+
+    <div class="row">
+      <label class="mc-layout-control">Chart / stats width
+        <input type="range" id="mcLayoutSlider" min="25" max="75" step="any" value="61.5384615385" aria-label="Monte Carlo chart width relative to stats panel">
+        <output id="mcLayoutValue" for="mcLayoutSlider">61.5% / 38.5%</output>
+      </label>
+    </div>
+    <details>
+      <summary>Accepted formats</summary>
+      <p>Either orientation is detected automatically. A single run is supported. <b>Runs across columns:</b> the header row is run numbers (1, 2, 3… or "Run 1"…) and the first column is party names. <b>Runs down rows:</b> header row is party names, and an optional first column holds the run number. Cells are regional list vote shares. Tab, semicolon or comma separated; % signs are fine; if every value is 1 or below they are treated as fractions and multiplied by 100. A run with a blank or non-numeric cell is skipped (the count is reported above).<br>
+      List seats are allocated per run by <b>compensatory D'Hondt</b> on the vote shares: each party's quotient is votes ÷ (constituency seats won + list seats won so far + 1). In each run, a party below the legal threshold (set by <code>MC_THRESHOLD</code>, 0 by default for Scotland) wins no list seats. A row or column named "Others" is always shown as the right-most bar and never receives seats. Parties that are 0.0 in every run are left out of the chart.<br>
+      Choosing a region sets the list seats to that region's magnitude from the hard-coded previous results table (<code>PREVIOUS_RESULTS</code> in the script; you can still overwrite the seats). <code>PARTY_ALIASES</code> maps a party to its name in that table, so the two are compared as the same movement, and adds that region's previous result behind each party's bar.</p>
+      <p>The chart can be sorted by projected result or previous result. When sorting by previous result, parties with a non-zero previous result appear first in descending order; parties with no previous result or a 0% previous result follow, sorted by projected result. "Others" remains last.</p>
+    </details>
+  </div>
+
+  <div class="card flush" id="mcResults" style="display:none">
+    <div class="mc-grid">
+      <div class="panel">
+        <div class="mc-heading">
+          <img class="mc-heading-logo" src="https://raw.githubusercontent.com/Nowcast-EU/Spain/main/ES_logo.png" alt="Nowcast EU">
+          <div>
+            <h2 id="mcTitle">Average vote share</h2>
+            <p class="hint" id="mcSubtitle"></p>
+          </div>
+        </div>
+        <div class="chartbox short"><canvas id="mcChart"></canvas></div>
+      </div>
+      <div class="rightcol">
+      <div class="panel" id="mcOutcomesPanel">
+        <h2 id="mcOutcomesTitle">Most likely seat outcomes</h2>
+        <div class="coverage" id="mcCoverage"></div>
+        <div id="mcOutcomes"></div>
+      </div>
+      <div class="panel">
+        <h2>Closest list seat to flipping</h2>
+        <div id="mcFlip"></div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>4. Nationwide Monte Carlo seat runs</h2>
+    <textarea id="countrySeatInput" spellcheck="false" placeholder="Paste whole-country seat totals (constituency + list).&#10;&#10;Party | 1 | 2 | 3 | ...&#10;SNP | 55 | 58 | 52 | ...&#10;Reform | 22 | 20 | 24 | ...&#10;Lab | 18 | 17 | 20 | ..."></textarea>
+    <div class="row">
+      <button class="primary" id="countrySeatLoad">Load seat runs</button>
+      <button id="countrySeatExample">Load dummy example</button>
+    </div>
+    <div class="msg" id="countrySeatMsg" aria-live="polite"></div>
+    <details>
+      <summary>Accepted format</summary>
+      <p>The first row must contain run numbers (for example, <code>1</code>, <code>2</code>, or <code>Run 1</code>, <code>Run 2</code>). Put one party per row in the first column and that party's seat total for each run in the remaining columns. Seat totals must be whole numbers from 0 to 129. Incomplete or invalid runs are skipped.</p>
+    </details>
+    <h3 style="font-size:14px;margin:14px 0 0">Chart settings</h3>
+    <div class="row">
+      <span style="font-size:13px;color:var(--muted)">Parties</span>
+      <details id="countrySeatPartyMenu" class="party-menu">
+        <summary id="countrySeatPartySummary">Select parties</summary>
+        <div id="countrySeatParty" class="party-menu-list" role="group" aria-label="Select parties"></div>
+      </details>
+      <label for="countrySeatCombine"><input type="checkbox" id="countrySeatCombine"> Combine selected parties</label>
+      <label for="countrySeatBinSize">Seats per bin</label>
+      <input type="number" id="countrySeatBinSize" value="5" min="1" max="100" step="1" aria-label="Seats per histogram bin">
+      <label for="countrySeatAxisMin">X-axis minimum</label>
+      <input type="number" id="countrySeatAxisMin" value="0" min="0" step="1" aria-label="Minimum projected seats on horizontal axis">
+      <label for="countrySeatAxisMax">X-axis maximum</label>
+      <input type="number" id="countrySeatAxisMax" value="130" min="1" step="1" aria-label="Maximum projected seats on horizontal axis">
+      <label for="countrySeatYAxisMax">Y-axis maximum (%)</label>
+      <input type="number" id="countrySeatYAxisMax" min="0.1" step="any" placeholder="Auto" aria-label="Maximum probability on vertical axis">
+      <label for="countrySeatTickSpacing">Seats between X-axis ticks</label>
+      <input type="number" id="countrySeatTickSpacing" value="10" min="1" step="1" aria-label="Seats between horizontal axis ticks">
+      <label for="countrySeatBellCurve"><input type="checkbox" id="countrySeatBellCurve"> Show bell curve and quartiles</label>
+      <label id="countrySeatQuartileLabelYControl" for="countrySeatQuartileLabelY" hidden>
+        Seat range label Y-axis value (%)
+        <input type="number" id="countrySeatQuartileLabelY" min="0" step="any" placeholder="Auto" aria-label="Seat range label Y-axis value">
+      </label>
+      <label id="countrySeatCurveSmoothnessControl" for="countrySeatCurveSmoothness" hidden>
+        Curve smoothness
+        <input type="range" id="countrySeatCurveSmoothness" min="0" max="100" step="5" value="60" aria-label="Bell curve smoothness">
+        <output id="countrySeatCurveSmoothnessValue" for="countrySeatCurveSmoothness">60%</output>
+      </label>
+    </div>
+  </div>
+
+  <div class="card" id="countrySeatResults" style="display:none">
+    <h2>Nationwide seat distribution</h2>
+    <div class="chart-topline">
+      <div id="countrySeatLegend" class="country-seat-legend" aria-label="Party color legend"></div>
+      <div class="chart-heading">
+        <div class="chart-heading-copy">
+          <h3>Nowcast EU | Scottish Parliament Projection</h3>
+          <p id="countrySeatSubtitle"></p>
+        </div>
+        <img class="chart-heading-logo" src="https://raw.githubusercontent.com/Nowcast-EU/Spain/main/ES_logo.png" alt="Nowcast EU">
+      </div>
+    </div>
+    <div class="chartbox seat-distribution"><canvas id="countrySeatChart" role="img" aria-label="Probability distribution of the selected party's projected seats"></canvas></div>
+  </div>
+
+</div>
+
+<script>
+(() => {
+  // ====================== CONFIG — edit these ======================
+  // Party colours: keys must match the party names in your table's header
+  // (case-insensitive). Use hex codes. Starter values only.
+  const PARTY_COLOURS = {
+    "SNP":     "#FDF38E",
+    "LAB":     "#E4003B",
+    "CON":     "#0087DC",
+    "LDM":      "#FAA61A",
+    "GRN":   "#6AB023",
+    "RFM":  "#34D8EF",
+    "Alba":    "#005EB8",
+    "Others":  "#999999"
+  };
+  const DEFAULT_COLOUR = "#1f6fb2";   // used for any party not listed above
+  const BELOW_ALPHA = 0.35;           // opacity of bars below the effective threshold
+  const HARD_THRESHOLD = null;        // legal threshold in % for section 2, drawn as a dotted line; null = hidden (no formal threshold in Scotland)
+  const MC_TOP_N = 5;                 // how many seat outcomes to list in the Monte Carlo panel
+  const MC_THRESHOLD = 0;             // legal threshold (%) for the Monte Carlo D'Hondt: parties below it win no list seats in that run (0 = none)
+  const MC_BAR_MAX = 56;              // max thickness (px) of the projected bars in the Monte Carlo chart
+  const PREV_ALPHA = 0.35;            // opacity of the previous-election comparison bar (lower = lighter)
+  const PREV_WIDTH = 0.5;             // width of the comparison bar relative to the projected bar (0–1)
+  const PREV_TICK = false;             // draw a short tick at the previous-election value, so it stays visible when it sits behind the projected bar
+  // Previous election REGIONAL LIST vote shares, hard-coded. One row per region: name, list seats (magnitude), then each party's vote share (%).
+  // Party names must match the names in your Monte Carlo runs (case-insensitive), or be listed in PARTY_ALIASES below. Comma, semicolon or tab separated all work.
+  // *** PLACEHOLDER VALUES (all 0.0): replace with the real results. ***
+  const PREVIOUS_RESULTS = `
+Region;Seats;SNP;Lab;Con;Green;LD;Alba;Reform;Others
+Central Scotland;7;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+Glasgow;7;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+Highlands and Islands;7;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+Lothian;7;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+Mid Scotland and Fife;7;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+North East Scotland;7;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+South Scotland;7;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+West Scotland;7;0.0;0.0;0.0;0.0;0.0;0.0;0.0;0.0
+`;
+  // Same movement under a different name: current name -> name used in PREVIOUS_RESULTS.
+  // The comparison bar for the key uses the previous name's colour and is annotated as such.
+  const PARTY_ALIASES = { "Labour": "Lab", "Greens": "Green", "Cons": "Con" };
+  const isOthers = p => /^others?$/i.test(String(p).trim());   // the "Others" row: always the right-most bar, never gets seats
+  // =================================================================
+
+  const SUPERSAMPLE = 2;              // render the chart at this multiple of the screen's pixel ratio (higher = sharper, heavier)
+  const chartDpr = () => Math.max(window.devicePixelRatio || 1, 1) * SUPERSAMPLE;
+
+  const partyColour = p => {
+    const k = Object.keys(PARTY_COLOURS).find(k => k.toLowerCase() === String(p).toLowerCase());
+    return k ? PARTY_COLOURS[k] : DEFAULT_COLOUR;
+  };
+  const fade = (hex, a) => {
+    let h = String(hex).replace("#", "");
+    if (h.length === 3) h = h.split("").map(c => c + c).join("");
+    if (!/^[0-9a-f]{6}$/i.test(h)) return hex;
+    const n = parseInt(h, 16);
+    return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+  };
+  const darken = hex => {
+    let h = String(hex).replace("#", "");
+    if (h.length === 3) h = h.split("").map(c => c + c).join("");
+    if (!/^[0-9a-f]{6}$/i.test(h)) return hex;
+    const n = parseInt(h, 16);
+    return `#${[((n >> 16) & 255), ((n >> 8) & 255), (n & 255)]
+      .map(channel => Math.round(channel * 0.75).toString(16).padStart(2, "0"))
+      .join("")}`;
+  };
+  const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  // Pick black/white text for a given background hex
+  const textOn = hex => {
+    let h = String(hex).replace("#", "");
+    if (h.length === 3) h = h.split("").map(c => c + c).join("");
+    if (!/^[0-9a-f]{6}$/i.test(h)) return "#fff";
+    const n = parseInt(h, 16);
+    const lum = (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
+    return lum > 0.62 ? "#1d1d1b" : "#fff";
+  };
+
+  const $ = id => document.getElementById(id);
+  const dateParts = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric" })
+    .formatToParts(new Date())
+    .reduce((parts, part) => { parts[part.type] = part.value; return parts; }, {});
+  const pollingSubtitle = `Based on Scottish polling averages • ${dateParts.day} ${dateParts.month}, ${dateParts.year}`;
+  $("mcSubtitle").textContent = pollingSubtitle;
+  $("projectionSubtitle").textContent = pollingSubtitle;
+  $("countrySeatSubtitle").textContent = pollingSubtitle;
+  const state = { rows: [], parties: [] };   // rows: {name, seats, shares:{party:value}}
+  const prev = { rows: [], parties: [] };    // previous election results, same shape as state
+  let chart = null;
+
+  // Effective threshold (%) for a district magnitude M: 75 / (M + 1)
+  const threshold = m => 75 / (m + 1);
+
+  const EXAMPLE = [
+    ["Region","Seats","SNP","Lab","Con","Green","LD","Reform"],
+    ["Glasgow","7","30.0","24.0","8.0","14.0","5.0","14.0"],
+    ["Lothian","7","27.0","20.0","12.0","15.0","9.0","13.0"],
+    ["Highlands and Islands","7","33.0","10.0","14.0","10.0","12.0","16.0"],
+    ["South Scotland","7","28.0","16.0","20.0","8.0","6.0","18.0"]
+  ].map(r => r.join("\t")).join("\n");
+
+  function setMsg(text, err) { const m = $("msg"); m.textContent = text; m.className = "msg " + (err ? "err" : "ok"); }
+
+  function detectDelim(text) {
+    const first = text.split(/\r?\n/).find(l => l.trim()) || "";
+    if (first.includes("\t")) return "\t";
+    if (first.includes(";")) return ";";
+    return ",";
+  }
+
+  // Minimal CSV-ish splitter that respects double quotes
+  function splitLine(line, d) {
+    const out = []; let cur = "", q = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') { if (q && line[i+1] === '"') { cur += '"'; i++; } else q = !q; }
+      else if (c === d && !q) { out.push(cur); cur = ""; }
+      else cur += c;
+    }
+    out.push(cur);
+    return out.map(s => s.trim());
+  }
+
+  function num(s) {
+    if (s == null) return NaN;
+    let t = String(s).replace(/%/g, "").replace(/\s/g, "");
+    if (t === "" || t === "-" || t === "–") return NaN;
+    if (t.includes(",") && !t.includes(".")) t = t.replace(",", ".");
+    else t = t.replace(/,/g, "");
+    const v = parseFloat(t);
+    return isFinite(v) ? v : NaN;
+  }
+
+  function parse(text) {
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    if (lines.length < 2) throw new Error("Need a header row and at least one data row.");
+    const d = detectDelim(text);
+    const grid = lines.map(l => splitLine(l, d));
+    const header = grid[0];
+    const body = grid.slice(1);
+
+    const find = re => header.findIndex(h => re.test(h));
+    const iParty = find(/party|partido/i);
+    const iShare = find(/share|vote|voto|%/i);
+    const rows = []; let parties = [];
+
+    if (iParty > -1 && iShare > -1 && iParty !== iShare) {
+      // long format
+      let iName = find(/constit|provinc|circ|distrit|district|region|name/i); if (iName < 0) iName = 0;
+      let iSeats = find(/seat|magnit|esca|esc\b|m$/i); if (iSeats < 0) iSeats = 1;
+      const map = new Map();
+      for (const r of body) {
+        const name = r[iName], seats = num(r[iSeats]), p = r[iParty], v = num(r[iShare]);
+        if (!name || !p || !isFinite(seats) || !isFinite(v)) continue;
+        if (!map.has(name)) { const o = { name, seats, shares: {} }; map.set(name, o); rows.push(o); }
+        map.get(name).shares[p] = v;
+        if (!parties.includes(p)) parties.push(p);
+      }
+    } else {
+      // wide format
+      if (header.length < 3) throw new Error("Wide format needs: region, seats, then at least one party column.");
+      parties = header.slice(2).filter(Boolean);
+      for (const r of body) {
+        const name = r[0], seats = num(r[1]);
+        if (!name || !isFinite(seats)) continue;
+        const shares = {};
+        header.slice(2).forEach((p, i) => { if (!p) return; const v = num(r[i + 2]); if (isFinite(v)) shares[p] = v; });
+        rows.push({ name, seats, shares });
+      }
+    }
+    if (!rows.length) throw new Error("No valid rows found. Check that the seats column is numeric.");
+
+    // fractions -> percentages
+    let max = 0; rows.forEach(r => Object.values(r.shares).forEach(v => { if (v > max) max = v; }));
+    let scaled = false;
+    if (max <= 1) { rows.forEach(r => { for (const k in r.shares) r.shares[k] *= 100; }); scaled = true; }
+    return { rows, parties, scaled };
+  }
+
+  function load() {
+    try {
+      const res = parse($("input").value);
+      state.rows = res.rows; state.parties = res.parties;
+      $("projectionChartBox").classList.remove("empty");
+      const sel = $("party"); const prev = sel.value;
+      sel.innerHTML = res.parties.map(p => `<option>${p.replace(/&/g,"&amp;").replace(/</g,"&lt;")}</option>`).join("");
+      if (res.parties.includes(prev)) sel.value = prev;
+      setMsg(`Loaded ${res.rows.length} regions, ${res.parties.length} parties` + (res.scaled ? " (values were fractions, scaled ×100)." : "."));
+      draw();
+    } catch (e) { setMsg(e.message, true); }
+  }
+
+  function sorted(rows, party) {
+    const r = rows.filter(x => x.shares[party] != null).map(x => ({
+      ...x, share: x.shares[party], thr: threshold(x.seats)
+    }));
+    r.forEach(x => x.margin = x.share - x.thr);
+    switch ($("sort").value) {
+      case "mag-desc": r.sort((a,b) => b.seats - a.seats || a.name.localeCompare(b.name)); break;
+      case "mag-asc": r.sort((a,b) => a.seats - b.seats || a.name.localeCompare(b.name)); break;
+      case "share-desc": r.sort((a,b) => b.share - a.share); break;
+      case "margin-desc": r.sort((a,b) => b.margin - a.margin); break;
+      case "margin-asc": r.sort((a,b) => a.margin - b.margin); break;
+      case "name": r.sort((a,b) => a.name.localeCompare(b.name)); break;
+    }
+    return r;
+  }
+
+  // Draws a horizontal marker at each region's threshold
+  const markerPlugin = {
+    id: "thresholdMarkers",
+    afterDatasetsDraw(c) {
+      const t = c.$thr; if (!t) return;
+      const { ctx, scales: { x, y } } = c;
+      const meta = c.getDatasetMeta(0);
+      if (HARD_THRESHOLD != null) {
+        const yh = y.getPixelForValue(HARD_THRESHOLD);
+        ctx.save();
+        ctx.setLineDash([2, 4]); ctx.lineWidth = 1.5; ctx.strokeStyle = "#444";
+        ctx.beginPath(); ctx.moveTo(c.chartArea.left, yh); ctx.lineTo(c.chartArea.right, yh); ctx.stroke();
+        ctx.setLineDash([]); ctx.fillStyle = "#444"; ctx.font = "11px system-ui, sans-serif";
+        ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+        ctx.fillText(HARD_THRESHOLD + "% legal threshold", c.chartArea.right - 4, yh - 3);
+        ctx.restore();
+      }
+      ctx.save();
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 3; ctx.lineCap = "butt";
+      meta.data.forEach((bar, i) => {
+        const yy = y.getPixelForValue(t[i]);
+        const half = Math.max(bar.width / 2, 3) + 3;
+        ctx.beginPath(); ctx.moveTo(bar.x - half, yy); ctx.lineTo(bar.x + half, yy); ctx.stroke();
+      });
+      ctx.restore();
+    }
+  };
+
+  function draw() {
+    const party = $("party").value;
+    if (!party) return;
+    const data = sorted(state.rows, party).filter(d => !$("hideZero").checked || d.share !== 0);
+    const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+    const labels = data.map(d => `${d.name} (${d.seats})`);
+    const base = partyColour(party);
+    const colours = data.map(d => d.margin >= 0 ? base : fade(base, BELOW_ALPHA));
+    $("swOn").style.background = base;
+    $("swOff").style.background = fade(base, BELOW_ALPHA);
+    $("hardKey").style.display = HARD_THRESHOLD != null ? "" : "none";
+    $("hardKeyText").textContent = HARD_THRESHOLD + "% legal threshold";
+    const yMax = Math.max(...data.map(d => Math.max(d.share, d.thr)), HARD_THRESHOLD || 0, 1);
+    const maxBarThickness = Math.min(56, Math.max(6, 1200 / Math.max(data.length, 1)));
+
+    if (chart) chart.destroy();
+    chart = new Chart($("chart"), {
+      type: "bar",
+      data: { labels, datasets: [{ label: party + " vote share", data: data.map(d => d.share), backgroundColor: colours, borderRadius: 2, maxBarThickness }] },
+      options: {
+        responsive: true, maintainAspectRatio: false, animation: { duration: 250 },
+        devicePixelRatio: chartDpr(),
+        scales: {
+          y: { beginAtZero: true, suggestedMax: Math.ceil(yMax * 1.08), title: { display: true, text: "Vote share (%)" }, ticks: { callback: v => v + "%" }, grid: { display: false, drawTicks: true } },
+          x: { ticks: { autoSkip: false, maxRotation: 90, minRotation: 60, font: { size: 11 } }, title: { display: true, text: "Region (seats)" }, grid: { display: false, drawTicks: true } }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => `${party}: ${data[ctx.dataIndex].share.toFixed(1)}%`,
+              afterLabel: ctx => {
+                const d = data[ctx.dataIndex];
+                return [`Seats: ${d.seats}`, `Effective threshold: ${d.thr.toFixed(1)}%`, `Margin: ${d.margin >= 0 ? "+" : ""}${d.margin.toFixed(1)} pts`];
+              }
+            }
+          }
+        }
+      },
+      plugins: [markerPlugin]
+    });
+    chart.$thr = data.map(d => d.thr);
+    chart.update("none");
+
+    if (!data.length) {
+      $("stats").textContent = "No regions to display for this party.";
+      return;
+    }
+
+    const above = data.filter(d => d.margin >= 0).length;
+    $("stats").innerHTML =
+      `<span><b>${above}</b> of <b>${data.length}</b> regions at or above threshold</span>` +
+      `<span>Average share: <b>${(data.reduce((s,d)=>s+d.share,0)/data.length).toFixed(1)}%</b></span>` +
+      `<span>Seats in regions above threshold: <b>${data.filter(d=>d.margin>=0).reduce((s,d)=>s+d.seats,0)}</b> of <b>${data.reduce((s,d)=>s+d.seats,0)}</b></span>`;
+  }
+
+  // =================================================================
+  // Previous election results (hard-coded in PREVIOUS_RESULTS)
+  // =================================================================
+  // The row of the previous-results table currently chosen in the Monte Carlo dropdown (or null)
+  function selectedPrev() {
+    const v = $("mcConst").value;
+    return v === "" ? null : (prev.rows[Number(v)] || null);
+  }
+
+  // Use the chosen region's magnitude as the default number of list seats
+  function applyConstSeats() {
+    const r = selectedPrev();
+    if (r && isFinite(r.seats) && r.seats >= 1) $("mcSeats").value = Math.floor(r.seats);
+  }
+
+  // Build the region dropdown from the hard-coded table
+  function initPrev() {
+    const res = parse(PREVIOUS_RESULTS.trim());
+    prev.rows = res.rows; prev.parties = res.parties;
+    $("mcConst").innerHTML = res.rows.map((r, i) => `<option value="${i}">${esc(r.name)}</option>`).join("");
+    $("mcConst").value = "0";
+    applyConstSeats();
+  }
+
+  // =================================================================
+  // Monte Carlo
+  // =================================================================
+  const mc = { parties: [], runs: [] };   // runs: array of arrays, runs[r][partyIndex] = vote share
+  let mcChart = null;
+  const COUNTRY_SEAT_MAX = 129;
+  const COUNTRY_MAJORITY_LINE = 64.5;     // 65 of 129 seats needed for a majority
+  const countrySeatMC = { parties: [], runs: [] };   // runs[r][partyIndex] = seats won
+  let countrySeatPartySelectionOrder = [];
+  let countrySeatChart = null;
+
+  // Constituency seats already won, remembered per region: wonStore[regionIndex][partyNameLowercase] = seats
+  const wonStore = {};
+  const wonFor = p => ((wonStore[$("mcConst").value] || {})[String(p).toLowerCase()]) || 0;
+
+  function updateWonTotal() {
+    const total = mc.parties.filter(p => !isOthers(p)).reduce((s, p) => s + wonFor(p), 0);
+    $("mcWonTotal").textContent = mc.parties.length ? `Total constituency seats entered for this region: ${total}` : "";
+  }
+
+  function renderWonInputs() {
+    const box = $("mcWon");
+    const ps = mc.parties.filter(p => !isOthers(p));
+    if (!ps.length) {
+      box.innerHTML = `<span style="font-size:13px;color:var(--muted)">Load Monte Carlo runs to set constituency seats.</span>`;
+      updateWonTotal();
+      return;
+    }
+    box.innerHTML = ps.map(p =>
+      `<label><span class="pm-sw" style="background:${partyColour(p)}"></span>${esc(p)} ` +
+      `<input type="number" min="0" step="1" value="${wonFor(p)}" data-party="${esc(p)}" aria-label="Constituency seats won by ${esc(p)}"></label>`
+    ).join("");
+    updateWonTotal();
+  }
+
+  function applyWonPaste() {
+    const msg = $("mcWonMsg");
+    try {
+      const text = $("mcWonPaste").value;
+      const lines = text.split(/\r?\n/).filter(l => l.trim());
+      if (lines.length < 2) throw new Error("Need a header row of party names and at least one region row.");
+      const d = detectDelim(text);
+      const grid = lines.map(l => splitLine(l, d));
+      const partyNames = grid[0].slice(1).filter(Boolean);
+      if (!partyNames.length) throw new Error("The header row needs party names after the first column.");
+      let applied = 0; const missing = [];
+      for (const r of grid.slice(1)) {
+        if (!r[0]) continue;
+        const idx = prev.rows.findIndex(x => normName(x.name) === normName(r[0]));
+        if (idx < 0) { missing.push(r[0]); continue; }
+        const o = {};
+        partyNames.forEach((p, i) => { const v = num(r[i + 1]); o[p.toLowerCase()] = isFinite(v) && v > 0 ? Math.floor(v) : 0; });
+        wonStore[String(idx)] = o;
+        applied++;
+      }
+      if (!applied) throw new Error("No region names matched the previous results table.");
+      msg.textContent = `Applied constituency seats for ${applied} region${applied === 1 ? "" : "s"}` +
+        (missing.length ? `; not found: ${missing.join(", ")}` : "") + ".";
+      msg.className = "msg ok";
+      renderWonInputs();
+      drawMC();
+    } catch (e) {
+      msg.textContent = e.message;
+      msg.className = "msg err";
+    }
+  }
+
+  Chart.register({
+    id: "countrySeatMajority",
+    afterDatasetsDraw(chartInstance) {
+      const { ctx, chartArea, scales: { x } } = chartInstance;
+      const markerX = x.getPixelForValue(COUNTRY_MAJORITY_LINE);
+      ctx.save();
+      ctx.setLineDash([6, 5]);
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = "#888";
+      ctx.beginPath();
+      ctx.moveTo(markerX, chartArea.top);
+      ctx.lineTo(markerX, chartArea.bottom);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = "#888";
+      ctx.font = "13px system-ui, sans-serif";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "top";
+      ctx.fillText("majority", markerX + 5, chartArea.top + 1);
+      ctx.restore();
+    }
+  },   {
+    id: "countrySeatQuartiles",
+    beforeDraw(chartInstance, _args, options) {
+      if (!options.display || !options.items) return;
+      const { ctx, chartArea, scales: { x } } = chartInstance;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(chartArea.left, chartArea.top, chartArea.right - chartArea.left, chartArea.bottom - chartArea.top);
+      ctx.clip();
+      options.items.forEach(item => {
+        const left = x.getPixelForValue(item.q1);
+        const right = x.getPixelForValue(item.q3);
+        if (right > left) {
+          ctx.fillStyle = item.highlightColor;
+          ctx.fillRect(left, chartArea.top, right - left, chartArea.bottom - chartArea.top);
+        }
+      });
+      ctx.restore();
+    },
+    afterDatasetsDraw(chartInstance, _args, options) {
+      if (!options.display || !options.items) return;
+      const { ctx, chartArea, scales: { x, y } } = chartInstance;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(chartArea.left, chartArea.top, chartArea.right - chartArea.left, chartArea.bottom - chartArea.top);
+      ctx.clip();
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.font = "600 20px system-ui, sans-serif";
+      const placedLabels = [];
+      const labelGap = 8;
+      const labelStep = (options.items.some(item => item.partyLabel) ? 48 : 20) + labelGap;
+      options.items.forEach((item, k) => {
+        if (item.q3 <= x.min || item.q1 >= x.max) return;
+        const left = Math.max(chartArea.left, x.getPixelForValue(item.q1));
+        const right = Math.min(chartArea.right, x.getPixelForValue(item.q3));
+        if (right <= left) return;
+        let labelY = options.labelYValue === null
+          ? item.curvePeak < y.max
+            ? y.getPixelForValue(item.curvePeak + (y.max - item.curvePeak) * (k + 1) / (options.items.length + 1))
+            : chartArea.top + 12 + k * 22
+          : y.getPixelForValue(options.labelYValue);
+        const labelX = (left + right) / 2;
+        const rangeWidth = ctx.measureText(item.rangeLabel).width;
+        let partyWidth = 0;
+        if (item.partyLabel) {
+          ctx.font = "600 16px system-ui, sans-serif";
+          partyWidth = ctx.measureText(item.partyLabel).width;
+        }
+        ctx.font = "600 20px system-ui, sans-serif";
+        const labelWidth = Math.max(rangeWidth, partyWidth);
+        if (options.items.length > 1) {
+          const minY = chartArea.top + labelStep / 2;
+          const maxY = chartArea.bottom - labelStep / 2;
+          labelY = Math.max(minY, Math.min(maxY, labelY));
+          const overlaps = candidateY => placedLabels.some(label =>
+            labelX - labelWidth / 2 < label.right + labelGap &&
+            labelX + labelWidth / 2 > label.left - labelGap &&
+            Math.abs(candidateY - label.y) < labelStep
+          );
+          if (overlaps(labelY)) {
+            for (let distance = 1; distance <= maxY - minY; distance++) {
+              const aboveY = labelY - distance;
+              if (aboveY >= minY && !overlaps(aboveY)) {
+                labelY = aboveY;
+                break;
+              }
+              const belowY = labelY + distance;
+              if (belowY <= maxY && !overlaps(belowY)) {
+                labelY = belowY;
+                break;
+              }
+            }
+          }
+          placedLabels.push({
+            left: labelX - labelWidth / 2,
+            right: labelX + labelWidth / 2,
+            y: labelY
+          });
+        }
+        ctx.fillStyle = item.textColor;
+        ctx.lineJoin = "round";
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "#f8faf9";
+        if (item.partyLabel) {
+          ctx.font = "600 16px system-ui, sans-serif";
+          ctx.strokeText(item.partyLabel, labelX, labelY - 12);
+          ctx.fillText(item.partyLabel, labelX, labelY - 12);
+          ctx.font = "600 20px system-ui, sans-serif";
+          ctx.strokeText(item.rangeLabel, labelX, labelY + 12);
+          ctx.fillText(item.rangeLabel, labelX, labelY + 12);
+        } else {
+          ctx.strokeText(item.rangeLabel, labelX, labelY);
+          ctx.fillText(item.rangeLabel, labelX, labelY);
+        }
+      });
+      ctx.restore();
+    }
+  });
+
+  function setMcMsg(text, err) { const m = $("mcMsg"); m.textContent = text; m.className = "msg " + (err ? "err" : "ok"); }
+
+  const isRunLabel = s => /^(run\s*)?#?\d+$/i.test(String(s).trim());
+
+  function parseCountrySeatMC(text) {
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    if (lines.length < 2) throw new Error("Need a header row and at least one party row.");
+    const d = detectDelim(text);
+    const grid = lines.map(l => splitLine(l, d));
+    const runLabels = grid[0].slice(1);
+    if (!runLabels.length || !runLabels.every(isRunLabel)) {
+      throw new Error("The header row must contain run numbers after the first column.");
+    }
+
+    const partyRows = [];
+    const partyNames = new Set();
+    for (const row of grid.slice(1)) {
+      const party = (row[0] || "").trim();
+      if (!party) {
+        if (row.slice(1).some(cell => cell.trim())) throw new Error("Every data row must start with a party name.");
+        continue;
+      }
+      const key = party.toLowerCase();
+      if (partyNames.has(key)) throw new Error(`Duplicate party name: ${party}`);
+      partyNames.add(key);
+      if (row.length > runLabels.length + 1 && row.slice(runLabels.length + 1).some(cell => cell.trim())) {
+        throw new Error(`The row for ${party} has more values than there are run numbers.`);
+      }
+      partyRows.push({ party, values: row.slice(1, runLabels.length + 1) });
+    }
+    if (!partyRows.length) throw new Error("No party rows found.");
+
+    const runs = [];
+    let skipped = 0;
+    for (let runIndex = 0; runIndex < runLabels.length; runIndex++) {
+      const run = partyRows.map(row => {
+        const cell = String(row.values[runIndex] ?? "").trim();
+        return /^\+?\d+(?:[.,]0+)?$/.test(cell) ? num(cell) : NaN;
+      });
+      if (run.every(seats => Number.isInteger(seats) && seats >= 0 && seats <= COUNTRY_SEAT_MAX)) runs.push(run);
+      else skipped++;
+    }
+    if (!runs.length) throw new Error(`No valid runs found. Seat totals must be whole numbers from 0 to ${COUNTRY_SEAT_MAX}.`);
+    return { parties: partyRows.map(row => row.party), runs, skipped };
+  }
+
+  function setCountrySeatMsg(text, err) {
+    const m = $("countrySeatMsg");
+    m.textContent = text;
+    m.className = "msg " + (err ? "err" : "ok");
+  }
+
+  const selectedCountryParties = () =>
+    countrySeatPartySelectionOrder.filter(index =>
+      $("countrySeatParty").querySelector(`input[value="${index}"]:checked`)
+    );
+
+  function updateCountryPartySummary() {
+    const names = selectedCountryParties().map(i => countrySeatMC.parties[i]);
+    $("countrySeatPartySummary").textContent = !names.length ? "Select parties"
+      : names.length <= 3 ? names.join(", ") : `${names.length} parties selected`;
+  }
+
+  function updateCountrySeatTooltipConnector(chartBox, connector, tooltipEl, anchor) {
+    if (!anchor) {
+      connector.firstElementChild.setAttribute("d", "");
+      return;
+    }
+    const left = parseFloat(tooltipEl.style.left) || 0;
+    const top = parseFloat(tooltipEl.style.top) || 0;
+    const width = tooltipEl.offsetWidth;
+    const height = tooltipEl.offsetHeight;
+    const side = left + width / 2 < anchor.x ? "right" : "left";
+    const edgeX = side === "right" ? left + width : left;
+    const edgeY = top + height / 2;
+    const directionToAnchor = edgeX < anchor.x ? 1 : -1;
+    const bendX = anchor.x - directionToAnchor * Math.abs(anchor.y - edgeY);
+    connector.firstElementChild.setAttribute("d", `M ${anchor.x} ${anchor.y} L ${bendX} ${edgeY} L ${edgeX} ${edgeY}`);
+    connector.setAttribute("viewBox", `0 0 ${chartBox.clientWidth} ${chartBox.clientHeight}`);
+  }
+
+  const countrySeatRangeLabel = (start, end) => start === end
+    ? `${start} seat${start === 1 ? "" : "s"}`
+    : `${start}–${end} seats`;
+
+  function renderCountrySeatTooltip({ chart, tooltip }) {
+    const chartBox = chart.canvas.parentNode;
+    let tooltipEl = chartBox.querySelector(".country-seat-tooltip");
+    if (!tooltipEl) {
+      tooltipEl = document.createElement("div");
+      tooltipEl.className = "country-seat-tooltip";
+      chartBox.appendChild(tooltipEl);
+    }
+    let connector = chartBox.querySelector(".country-seat-tooltip-connector");
+    if (!connector) {
+      connector = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      connector.classList.add("country-seat-tooltip-connector");
+      connector.setAttribute("preserveAspectRatio", "none");
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      connector.appendChild(path);
+      chartBox.appendChild(connector);
+    }
+    if (!tooltipEl.dataset.dragHandlersAttached) {
+      tooltipEl.dataset.dragHandlersAttached = "true";
+      tooltipEl.addEventListener("pointerdown", event => {
+        if (event.button !== 0) return;
+        chart.$countrySeatTooltipPinned = true;
+        tooltipEl.classList.add("is-visible", "is-pinned", "is-dragging");
+        chart.$countrySeatTooltipDrag = {
+          pointerId: event.pointerId,
+          startX: event.clientX,
+          startY: event.clientY,
+          startLeft: parseFloat(tooltipEl.style.left) || 0,
+          startTop: parseFloat(tooltipEl.style.top) || 0
+        };
+        tooltipEl.setPointerCapture(event.pointerId);
+        event.preventDefault();
+      });
+      tooltipEl.addEventListener("pointermove", event => {
+        const drag = chart.$countrySeatTooltipDrag;
+        if (!drag || drag.pointerId !== event.pointerId) return;
+        const margin = 8;
+        const left = Math.max(margin, Math.min(
+          drag.startLeft + event.clientX - drag.startX,
+          chartBox.clientWidth - tooltipEl.offsetWidth - margin
+        ));
+        const top = Math.max(margin, Math.min(
+          drag.startTop + event.clientY - drag.startY,
+          chartBox.clientHeight - tooltipEl.offsetHeight - margin
+        ));
+        tooltipEl.style.left = `${left}px`;
+        tooltipEl.style.top = `${top}px`;
+        updateCountrySeatTooltipConnector(chartBox, connector, tooltipEl, chart.$countrySeatTooltipAnchor);
+      });
+      const stopDragging = event => {
+        const drag = chart.$countrySeatTooltipDrag;
+        if (!drag || drag.pointerId !== event.pointerId) return;
+        chart.$countrySeatTooltipDrag = null;
+        tooltipEl.classList.remove("is-dragging");
+      };
+      tooltipEl.addEventListener("pointerup", stopDragging);
+      tooltipEl.addEventListener("pointercancel", stopDragging);
+    }
+    if (chart.$countrySeatTooltipPinned) return;
+    if (tooltip.opacity === 0) {
+      tooltipEl.style.opacity = "0";
+      tooltipEl.classList.remove("is-visible");
+      connector.firstElementChild.setAttribute("d", "");
+      return;
+    }
+
+    const barItems = tooltip.dataPoints.filter(item => item.raw && item.raw.seatStart !== undefined);
+    tooltipEl.replaceChildren();
+    const title = document.createElement("div");
+    title.className = "country-seat-tooltip-title";
+    if (barItems.length) {
+      const bin = barItems[0].raw;
+      title.textContent = `${countrySeatRangeLabel(bin.seatStart, bin.seatEnd)} • ${bin.combinedChance.toFixed(1)}%`;
+      tooltipEl.appendChild(title);
+      barItems.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "country-seat-tooltip-row";
+        const party = document.createElement("span");
+        party.className = "country-seat-tooltip-party";
+        const swatch = document.createElement("span");
+        swatch.className = "country-seat-tooltip-swatch";
+        swatch.style.backgroundColor = item.dataset.backgroundColor;
+        const name = document.createElement("span");
+        name.className = "country-seat-tooltip-name";
+        name.textContent = item.dataset.label;
+        party.append(swatch, name);
+        const value = document.createElement("span");
+        value.className = "country-seat-tooltip-value";
+        value.textContent = `~${item.raw.averageSeats.toFixed(1)}`;
+        row.append(party, value);
+        tooltipEl.appendChild(row);
+      });
+    } else {
+      const lineItem = tooltip.dataPoints.find(item => item.dataset.type === "line");
+      if (!lineItem) {
+        tooltipEl.style.opacity = "0";
+        tooltipEl.classList.remove("is-visible");
+        connector.firstElementChild.setAttribute("d", "");
+        return;
+      }
+      title.textContent = `${lineItem.parsed.x} seats`;
+      tooltipEl.appendChild(title);
+      const row = document.createElement("div");
+      row.className = "country-seat-tooltip-row";
+      const party = document.createElement("span");
+      party.className = "country-seat-tooltip-party";
+      party.textContent = lineItem.dataset.label;
+      const value = document.createElement("span");
+      value.className = "country-seat-tooltip-value";
+      value.textContent = `${lineItem.parsed.y.toFixed(1)}% (smoothed)`;
+      row.append(party, value);
+      tooltipEl.appendChild(row);
+    }
+
+    title.style.maxWidth = `${Math.max(0, Math.min(332, chartBox.clientWidth - 44))}px`;
+    tooltipEl.style.width = `${Math.ceil(title.getBoundingClientRect().width + 28)}px`;
+    const boxRect = chartBox.getBoundingClientRect();
+    const canvasRect = chart.canvas.getBoundingClientRect();
+    const anchorX = canvasRect.left - boxRect.left + tooltip.caretX;
+    const anchorY = canvasRect.top - boxRect.top + tooltip.caretY;
+    const width = tooltipEl.offsetWidth;
+    const height = tooltipEl.offsetHeight;
+    const diagonalLength = 64;
+    const horizontalGap = diagonalLength + 24;
+    const margin = 8;
+    const candidates = [
+      { left: anchorX - width - horizontalGap, top: anchorY - diagonalLength - height / 2 },
+      { left: anchorX + horizontalGap, top: anchorY - diagonalLength - height / 2 },
+      { left: anchorX - width - horizontalGap, top: anchorY + diagonalLength - height / 2 },
+      { left: anchorX + horizontalGap, top: anchorY + diagonalLength - height / 2 }
+    ];
+    const fits = position => position.left >= margin && position.top >= margin &&
+      position.left + width <= chartBox.clientWidth - margin &&
+      position.top + height <= chartBox.clientHeight - margin;
+    let position = candidates.find(fits);
+    if (!position) {
+      const overflow = candidate =>
+        Math.max(0, margin - candidate.left) +
+        Math.max(0, margin - candidate.top) +
+        Math.max(0, candidate.left + width - chartBox.clientWidth + margin) +
+        Math.max(0, candidate.top + height - chartBox.clientHeight + margin);
+      position = candidates.reduce((best, candidate) => overflow(candidate) < overflow(best) ? candidate : best);
+    }
+    const left = Math.max(margin, Math.min(position.left, chartBox.clientWidth - width - margin));
+    const top = Math.max(margin, Math.min(position.top, chartBox.clientHeight - height - margin));
+    tooltipEl.style.opacity = "1";
+    tooltipEl.classList.add("is-visible");
+    tooltipEl.style.left = `${left}px`;
+    tooltipEl.style.top = `${top}px`;
+
+    chart.$countrySeatTooltipAnchor = { x: anchorX, y: anchorY };
+    updateCountrySeatTooltipConnector(chartBox, connector, tooltipEl, chart.$countrySeatTooltipAnchor);
+  }
+
+  function loadCountrySeatMC() {
+    try {
+      const res = parseCountrySeatMC($("countrySeatInput").value);
+      // remember which parties were ticked (by name) before the data is replaced
+      const previouslySelected = selectedCountryParties().map(i => countrySeatMC.parties[i]);
+      countrySeatMC.parties = res.parties;
+      countrySeatMC.runs = res.runs;
+      const keep = res.parties.map(p => previouslySelected.includes(p));
+      if (!keep.some(Boolean)) keep[0] = true;   // default: first party ticked
+      countrySeatPartySelectionOrder = previouslySelected
+        .map(party => res.parties.indexOf(party))
+        .filter(index => index >= 0);
+      if (!countrySeatPartySelectionOrder.length && keep[0]) countrySeatPartySelectionOrder = [0];
+      $("countrySeatParty").innerHTML = res.parties.map((party, index) =>
+        `<label><input type="checkbox" value="${index}"${keep[index] ? " checked" : ""}>` +
+        `<span class="pm-sw" style="background:${partyColour(party)}"></span>${esc(party)}</label>`
+      ).join("");
+      updateCountryPartySummary();
+      setCountrySeatMsg(`Loaded ${res.runs.length.toLocaleString()} runs for ${res.parties.length} parties` +
+        (res.skipped ? `; skipped ${res.skipped.toLocaleString()} incomplete or invalid run${res.skipped === 1 ? "" : "s"}` : "") + ".", false);
+      drawCountrySeatMC();
+    } catch (e) {
+      setCountrySeatMsg(e.message, true);
+    }
+  }
+
+  function drawCountrySeatMC() {
+    if (!countrySeatMC.runs.length) return;
+    const runCount = countrySeatMC.runs.length;
+    const binSize = Number($("countrySeatBinSize").value);
+    if (!Number.isInteger(binSize) || binSize < 1 || binSize > 100) {
+      setCountrySeatMsg("Seats per bin must be a whole number between 1 and 100.", true);
+      return;
+    }
+    const axisMin = Number($("countrySeatAxisMin").value);
+    if (!Number.isInteger(axisMin) || axisMin < 0) {
+      setCountrySeatMsg("The X-axis minimum must be a non-negative whole number.", true);
+      return;
+    }
+    const axisMax = Number($("countrySeatAxisMax").value);
+    if (!Number.isInteger(axisMax) || axisMax < 1) {
+      setCountrySeatMsg("The X-axis maximum must be a positive whole number.", true);
+      return;
+    }
+    if (axisMin >= axisMax) {
+      setCountrySeatMsg("The X-axis minimum must be less than its maximum.", true);
+      return;
+    }
+    const tickSpacing = Number($("countrySeatTickSpacing").value);
+    if (!Number.isInteger(tickSpacing) || tickSpacing < 1) {
+      setCountrySeatMsg("The X-axis tick spacing must be a positive whole number of seats.", true);
+      return;
+    }
+    const yAxisMaxInput = $("countrySeatYAxisMax").value.trim();
+    const customYMax = yAxisMaxInput === "" ? null : Number(yAxisMaxInput);
+    if (customYMax !== null && (!Number.isFinite(customYMax) || customYMax <= 0)) {
+      setCountrySeatMsg("The Y-axis maximum must be a positive number.", true);
+      return;
+    }
+    const partyIndices = selectedCountryParties();
+    updateCountryPartySummary();
+    if (!partyIndices.length) {
+      setCountrySeatMsg("Select at least one party.", true);
+      return;
+    }
+    const multi = partyIndices.length > 1;
+    const combineSelectedParties = $("countrySeatCombine").checked;
+    const showBellCurve = $("countrySeatBellCurve").checked;
+    const quartileLabelYInput = $("countrySeatQuartileLabelY").value.trim();
+    const quartileLabelYValue = quartileLabelYInput === "" ? null : Number(quartileLabelYInput);
+    if (showBellCurve && quartileLabelYValue !== null &&
+      (!Number.isFinite(quartileLabelYValue) || quartileLabelYValue < 0)) {
+      setCountrySeatMsg("The seat range label Y-axis value must be a non-negative number.", true);
+      return;
+    }
+    const curveSmoothness = Number($("countrySeatCurveSmoothness").value) / 100;
+
+    const barDatasets = [], curveDatasets = [], quartileItems = [];
+    let peakProbability = 0;
+    $("countrySeatLegend").innerHTML = multi
+      ? partyIndices.map(index => {
+        const party = countrySeatMC.parties[index];
+        return `<span class="country-seat-legend-item"><span class="country-seat-legend-swatch" style="background:${partyColour(party)}"></span>${esc(party)}</span>`;
+      }).join("")
+      : "";
+
+    if (combineSelectedParties) {
+      const combinedRuns = countrySeatMC.runs.map(run => {
+        const seats = partyIndices.map(partyIndex => run[partyIndex]);
+        return { seats, total: seats.reduce((sum, value) => sum + value, 0) };
+      });
+      const maxCombinedSeats = combinedRuns.reduce((max, run) => Math.max(max, run.total), 0);
+      const combinedCounts = new Array(maxCombinedSeats + 1).fill(0);
+      const bins = Array.from(
+        { length: Math.floor(maxCombinedSeats / binSize) + 1 },
+        (_, index) => ({
+          start: index * binSize,
+          count: 0,
+          contributionShares: new Array(partyIndices.length).fill(0),
+          seatTotals: new Array(partyIndices.length).fill(0)
+        })
+      );
+      combinedRuns.forEach(run => {
+        combinedCounts[run.total]++;
+        const bin = bins[Math.floor(run.total / binSize)];
+        bin.count++;
+        run.seats.forEach((seats, index) => {
+          bin.seatTotals[index] += seats;
+          if (run.total > 0) bin.contributionShares[index] += seats / run.total;
+        });
+      });
+
+      const partyData = partyIndices.map(() => []);
+      bins.forEach(bin => {
+        const chance = bin.count / runCount * 100;
+        if (chance < 0.1) return;
+        const lastSeat = bin.start + binSize - 1;
+        const x = (bin.start + lastSeat) / 2;
+        partyIndices.forEach((partyIndex, index) => {
+          const contributionShare = bin.count
+            ? bin.contributionShares[index] / bin.count
+            : 0;
+          partyData[index].push({
+            x,
+            y: chance * contributionShare,
+            seatStart: bin.start,
+            seatEnd: lastSeat,
+            runCount: bin.count,
+            combinedChance: chance,
+            contributionShare,
+            averageSeats: bin.seatTotals[index] / bin.count
+          });
+        });
+        peakProbability = Math.max(peakProbability, chance);
+      });
+
+      partyIndices.forEach((partyIndex, index) => {
+        const party = countrySeatMC.parties[partyIndex];
+        const colour = partyColour(party);
+        barDatasets.push({
+          label: party,
+          data: partyData[index],
+          backgroundColor: colour,
+          borderColor: "#fff",
+          borderWidth: 1,
+          stack: "combined-parties",
+          grouped: true,
+          categoryPercentage: 1,
+          barPercentage: 1,
+          order: 1
+        });
+      });
+
+      if (showBellCurve) {
+        const sortedTotals = combinedRuns.map(run => run.total).sort((a, b) => a - b);
+        const quantile = probability => {
+          const index = (sortedTotals.length - 1) * probability;
+          const lower = Math.floor(index);
+          const fraction = index - lower;
+          return sortedTotals[lower] + (sortedTotals[Math.ceil(index)] - sortedTotals[lower]) * fraction;
+        };
+        const meanSeats = sortedTotals.reduce((sum, seats) => sum + seats, 0) / runCount;
+        const variance = sortedTotals.reduce((sum, seats) => sum + (seats - meanSeats) ** 2, 0) / runCount;
+        const standardDeviation = Math.sqrt(variance);
+        const minBandwidth = Math.max(1, binSize / 2);
+        const maxBandwidth = Math.max(minBandwidth, Math.min(40, Math.max(binSize, standardDeviation * 1.5)));
+        const bandwidth = minBandwidth + (maxBandwidth - minBandwidth) * curveSmoothness;
+        const kernelScale = 1 / (bandwidth * Math.sqrt(2 * Math.PI) * runCount);
+        const curve = Array.from({ length: maxCombinedSeats + 1 }, (_, seat) => {
+          let density = 0;
+          for (let outcome = 0; outcome <= maxCombinedSeats; outcome++) {
+            if (!combinedCounts[outcome]) continue;
+            const distance = (seat - outcome) / bandwidth;
+            density += combinedCounts[outcome] * Math.exp(-0.5 * distance * distance);
+          }
+          return density * kernelScale * binSize * 100;
+        });
+        const peak = Math.max(...curve);
+        const tailThreshold = peak * 0.005;
+        let firstVisibleSeat = curve.findIndex(value => value >= tailThreshold);
+        let lastVisibleSeat = curve.length - 1 - [...curve].reverse().findIndex(value => value >= tailThreshold);
+        firstVisibleSeat = Math.max(0, firstVisibleSeat);
+        lastVisibleSeat = Math.max(firstVisibleSeat, lastVisibleSeat);
+        const curveStart = Math.max(0, firstVisibleSeat - 5);
+        const curveEnd = Math.min(maxCombinedSeats, lastVisibleSeat + 5);
+        const curveData = Array.from({ length: curveEnd - curveStart + 1 }, (_, index) => {
+          const seat = curveStart + index;
+          return { x: seat, y: seat < firstVisibleSeat || seat > lastVisibleSeat ? 0 : curve[seat] };
+        });
+        curveDatasets.push({
+          type: "line",
+          label: "Combined parties empirical distribution",
+          data: curveData,
+          borderColor: "#333",
+          backgroundColor: "transparent",
+          borderWidth: 2.5,
+          pointRadius: 0,
+          pointHoverRadius: 0,
+          pointHitRadius: 6,
+          tension: 0.15,
+          spanGaps: false,
+          order: 0
+        });
+        quartileItems.push({
+          q1: quantile(0.25),
+          q3: quantile(0.75),
+          curvePeak: peak,
+          highlightColor: "rgba(80, 80, 80, 0.1)",
+          textColor: "#333",
+          rangeLabel: `${Math.round(quantile(0.25))}–${Math.round(quantile(0.75))}`
+        });
+        peakProbability = Math.max(peakProbability, ...curveData.map(point => point.y));
+      }
+    } else partyIndices.forEach(partyIndex => {
+      const party = countrySeatMC.parties[partyIndex];
+      const colour = partyColour(party);
+
+      const seatCounts = new Array(COUNTRY_SEAT_MAX + 1).fill(0);
+      countrySeatMC.runs.forEach(run => seatCounts[run[partyIndex]]++);
+      const data = [];
+      for (let start = 0; start <= COUNTRY_SEAT_MAX; start += binSize) {
+        const end = Math.min(start + binSize, COUNTRY_SEAT_MAX + 1);
+        const lastSeat = end - 1;
+        const count = seatCounts.slice(start, end).reduce((sum, value) => sum + value, 0);
+        const chance = count / runCount * 100;
+        if (chance < 0.1) continue;
+        data.push({ x: (start + lastSeat) / 2, y: chance, seatStart: start, seatEnd: lastSeat, runCount: count });
+      }
+
+      const sortedSeats = countrySeatMC.runs.map(run => run[partyIndex]).sort((a, b) => a - b);
+      const quantile = probability => {
+        const index = (sortedSeats.length - 1) * probability;
+        const lower = Math.floor(index);
+        const fraction = index - lower;
+        return sortedSeats[lower] + (sortedSeats[Math.ceil(index)] - sortedSeats[lower]) * fraction;
+      };
+
+      let curveData = [];
+      let curvePeak = 0;
+      if (showBellCurve) {
+        const meanSeats = sortedSeats.reduce((sum, seats) => sum + seats, 0) / runCount;
+        const variance = sortedSeats.reduce((sum, seats) => sum + (seats - meanSeats) ** 2, 0) / runCount;
+        const standardDeviation = Math.sqrt(variance);
+        const minBandwidth = Math.max(1, binSize / 2);
+        const maxBandwidth = Math.max(minBandwidth, Math.min(40, Math.max(binSize, standardDeviation * 1.5)));
+        const bandwidth = minBandwidth + (maxBandwidth - minBandwidth) * curveSmoothness;
+        const kernelScale = 1 / (bandwidth * Math.sqrt(2 * Math.PI) * runCount);
+        const curve = Array.from({ length: COUNTRY_SEAT_MAX + 1 }, (_, seat) => {
+          let density = 0;
+          for (let outcome = 0; outcome <= COUNTRY_SEAT_MAX; outcome++) {
+            if (!seatCounts[outcome]) continue;
+            const distance = (seat - outcome) / bandwidth;
+            density += seatCounts[outcome] * Math.exp(-0.5 * distance * distance);
+          }
+          return density * kernelScale * binSize * 100;
+        });
+        const peak = Math.max(...curve);
+        curvePeak = peak;
+        const tailThreshold = peak * 0.005;
+        let firstVisibleSeat = curve.findIndex(value => value >= tailThreshold);
+        let lastVisibleSeat = curve.length - 1 - [...curve].reverse().findIndex(value => value >= tailThreshold);
+        firstVisibleSeat = Math.max(0, firstVisibleSeat);
+        lastVisibleSeat = Math.max(firstVisibleSeat, lastVisibleSeat);
+        const curveStart = Math.max(0, firstVisibleSeat - 5);
+        const curveEnd = Math.min(COUNTRY_SEAT_MAX, lastVisibleSeat + 5);
+        curveData = Array.from({ length: curveEnd - curveStart + 1 }, (_, index) => {
+          const seat = curveStart + index;
+          return { x: seat, y: seat < firstVisibleSeat || seat > lastVisibleSeat ? 0 : curve[seat] };
+        });
+        curveDatasets.push({
+          type: "line",
+          label: `${party} empirical distribution`,
+          data: curveData,
+          borderColor: multi ? colour : darken(colour),
+          backgroundColor: "transparent",
+          borderWidth: 2.5,
+          pointRadius: 0,
+          pointHoverRadius: 0,
+          pointHitRadius: 6,
+          tension: 0.15,
+          spanGaps: false,
+          order: 0
+        });
+        quartileItems.push({
+          q1: quantile(0.25),
+          q3: quantile(0.75),
+          curvePeak,
+          highlightColor: fade(colour, multi ? 0.08 : 0.12),
+          textColor: colour,
+          partyLabel: multi ? party : null,
+          rangeLabel: `${Math.round(quantile(0.25))}–${Math.round(quantile(0.75))}`
+        });
+      }
+
+      peakProbability = Math.max(peakProbability, ...data.map(b => b.y), ...curveData.map(p => p.y));
+
+      barDatasets.push({
+        label: party,
+        data,
+        // translucent when several parties overlap so the one behind stays visible
+        backgroundColor: fade(colour, multi ? 0.6 : 1),
+        borderColor: "#fff",
+        borderWidth: 1,
+        grouped: false,          // every dataset sits on the same x position, so bars overlap instead of sitting side by side
+        categoryPercentage: 1,
+        barPercentage: 1,
+        order: 1
+      });
+    });
+
+    const automaticYMax = Math.floor((peakProbability + 10) / 10) * 10;
+    const yMax = customYMax === null ? automaticYMax : customYMax;
+    if (showBellCurve && quartileLabelYValue !== null && quartileLabelYValue > yMax) {
+      setCountrySeatMsg("The seat range label Y-axis value must not exceed the Y-axis maximum.", true);
+      return;
+    }
+
+    const chartBox = $("countrySeatChart").parentNode;
+    const previousTooltip = chartBox.querySelector(".country-seat-tooltip");
+    const previousConnector = chartBox.querySelector(".country-seat-tooltip-connector");
+    if (previousTooltip) previousTooltip.remove();
+    if (previousConnector) previousConnector.remove();
+    if (countrySeatChart) countrySeatChart.destroy();
+    $("countrySeatResults").style.display = "";
+    countrySeatChart = new Chart($("countrySeatChart"), {
+      type: "bar",
+      data: { datasets: [...barDatasets, ...curveDatasets] },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 250 },
+        devicePixelRatio: chartDpr(),
+        interaction: { mode: "x", intersect: false },
+        onClick: (_event, _activeElements, chartInstance) => {
+          const tooltipEl = chartInstance.canvas.parentNode.querySelector(".country-seat-tooltip");
+          if (!tooltipEl) return;
+          if (chartInstance.$countrySeatTooltipPinned) {
+            chartInstance.$countrySeatTooltipPinned = false;
+            tooltipEl.classList.remove("is-pinned", "is-visible");
+            tooltipEl.style.opacity = "0";
+            const connector = chartInstance.canvas.parentNode.querySelector(".country-seat-tooltip-connector");
+            if (connector) connector.firstElementChild.setAttribute("d", "");
+          } else if (chartInstance.tooltip.opacity > 0 && tooltipEl.classList.contains("is-visible")) {
+            chartInstance.$countrySeatTooltipPinned = true;
+            tooltipEl.classList.add("is-pinned");
+          }
+        },
+        scales: {
+          x: {
+            type: "linear", min: axisMin - 0.5, max: axisMax + 0.5, offset: false,
+            title: { display: true, text: "Projected seats" },
+            ticks: { stepSize: tickSpacing, precision: 0, autoSkip: false },
+            afterBuildTicks: scale => {
+              const ticks = [];
+              for (let value = axisMin; value <= axisMax; value += tickSpacing) ticks.push({ value });
+              scale.ticks = ticks;
+            },
+            grid: { drawOnChartArea: false, drawTicks: true }
+          },
+          y: {
+            type: "linear", beginAtZero: true, max: yMax, stacked: combineSelectedParties,
+            title: { display: true, text: "Probability (%)" },
+            ticks: { callback: value => value + "%" },
+            grid: { drawOnChartArea: false, drawTicks: true }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          countrySeatQuartiles: { display: showBellCurve, items: quartileItems, labelYValue: quartileLabelYValue },
+          tooltip: {
+            enabled: !combineSelectedParties,
+            external: combineSelectedParties ? renderCountrySeatTooltip : undefined,
+            callbacks: {
+              title: items => {
+                const barItem = items.find(i => i.raw && i.raw.seatStart !== undefined);
+                if (!barItem) return items[0].dataset.label;
+                const bin = barItem.raw;
+                return countrySeatRangeLabel(bin.seatStart, bin.seatEnd);
+              },
+              label: context => context.dataset.type === "line"
+                ? `${context.dataset.label}: ${context.parsed.y.toFixed(1)}% (smoothed)`
+                : `${context.dataset.label}: ${context.parsed.y.toFixed(1)}% of runs (${context.raw.runCount.toLocaleString()} runs)`
+            }
+          }
+        }
+      },
+      plugins: [{
+        // Give every bar the same fixed width: one bin = binSize seats on the x-axis.
+        // Without this, "flex" thickness is worked out per dataset, so parties with gaps in their data would get different widths.
+        id: "countrySeatBarWidth",
+        afterLayout(c) {
+          const x = c.scales.x;
+          const w = Math.abs(x.getPixelForValue(binSize) - x.getPixelForValue(0));
+          c.data.datasets.forEach(ds => { if (ds.type !== "line") ds.barThickness = w; });
+          $("countrySeatLegend").style.marginLeft = `${c.chartArea.left}px`;
+        }
+      }]
+    });
+    if ($("countrySeatMsg").className.includes("err")) setCountrySeatMsg("", false);
+  }
+
+  function parseMC(text) {
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    if (lines.length < 2) throw new Error("Need at least a header row and one data row.");
+    const d = detectDelim(text);
+    const grid = lines.map(l => splitLine(l, d));
+    const head = grid[0], body = grid.slice(1);
+
+    let parties, runs = [], skipped = 0, orientation;
+     // Top-left header cell: a region name, unless it's a generic label like "Run" or "Party"
+    const cell0 = (head[0] || "").trim();
+    const constituency = /^(run|runs|party|parties|constituency|region|#)?$/i.test(cell0) ? "" : cell0;
+    const headRuns = head.slice(1);
+
+    if (headRuns.length > 0 && headRuns.every(isRunLabel)) {
+      // runs across the columns, parties down the rows
+      orientation = "runs across columns";
+      parties = []; const cols = [];
+      for (const r of body) {
+        if (!r[0]) continue;
+        parties.push(r[0]);
+        cols.push(r.slice(1).map(num));
+      }
+      if (!parties.length) throw new Error("No party rows found.");
+      const n = Math.max(...cols.map(c => c.length));
+      for (let i = 0; i < n; i++) {
+        const run = cols.map(c => c[i]);
+        if (run.every(v => isFinite(v))) runs.push(run); else skipped++;
+      }
+    } else {
+      // runs down the rows, parties across the columns
+      orientation = "runs down rows";
+      const hasRunCol = body.length > 0 && body.every(r => isRunLabel(r[0] ?? ""));
+      const start = hasRunCol ? 1 : 0;
+      parties = head.slice(start).filter(Boolean);
+      if (!parties.length) throw new Error("No party columns found in the header row.");
+      for (const r of body) {
+        const run = parties.map((_, i) => num(r[i + start]));
+        if (run.every(v => isFinite(v))) runs.push(run); else skipped++;
+      }
+    }
+    if (!runs.length) throw new Error("No valid runs found. Check the layout and that cells are numeric.");
+
+    let max = 0; runs.forEach(r => r.forEach(v => { if (v > max) max = v; }));
+    let scaled = false;
+    if (max <= 1) { runs.forEach(r => { for (let i = 0; i < r.length; i++) r[i] *= 100; }); scaled = true; }
+    return { parties, runs, skipped, scaled, orientation, constituency };
+  }
+
+  // Accent- and case-insensitive name comparison ("Álava" matches "alava")
+  const normName = s => String(s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
+
+  function loadMC() {
+    if (!$("mcInput").value.trim()) {
+      mc.parties = [];
+      mc.runs = [];
+      if (mcChart) { mcChart.destroy(); mcChart = null; }
+      $("mcResults").style.display = "none";
+      renderWonInputs();
+      setMcMsg("", false);
+      return;
+    }
+
+    try {
+      const res = parseMC($("mcInput").value);
+      mc.parties = res.parties; mc.runs = res.runs;
+
+      // Auto-select the region named in the top-left cell
+      let constNote = "";
+      if (res.constituency) {
+        const idx = prev.rows.findIndex(r => normName(r.name) === normName(res.constituency));
+        if (idx >= 0) {
+          $("mcConst").value = String(idx);
+          applyConstSeats();                     // also sets list seats to its magnitude
+          constNote = `; region set to ${prev.rows[idx].name}`;
+        } else {
+          constNote = `; "${res.constituency}" not found in PREVIOUS_RESULTS, selector left unchanged`;
+        }
+      }
+
+      setMcMsg(`Loaded ${res.runs.length} runs × ${res.parties.length} parties (${res.orientation})` +
+        (res.skipped ? `; skipped ${res.skipped} incomplete run${res.skipped > 1 ? "s" : ""}` : "") +
+        (res.scaled ? "; values were fractions, scaled ×100" : "") + constNote + ".");
+      renderWonInputs();
+      drawMC();
+    } catch (e) {
+      mc.parties = [];
+      mc.runs = [];
+      if (mcChart) { mcChart.destroy(); mcChart = null; }
+      $("mcResults").style.display = "none";
+      renderWonInputs();
+      setMcMsg(e.message, true);
+    }
+  }
+
+  // Linear-interpolated percentile on a sorted array (same as Excel's QUARTILE.INC / numpy default)
+  function pct(sortedArr, p) {
+    const pos = (sortedArr.length - 1) * p, lo = Math.floor(pos), hi = Math.ceil(pos);
+    return sortedArr[lo] + (sortedArr[hi] - sortedArr[lo]) * (pos - lo);
+  }
+
+  // Compensatory D'Hondt: allocates `seats` list seats. `won` = seats each party already holds
+  // (constituency seats); a party's quotient is votes / (won + list seats so far + 1).
+  // Returns the number of LIST seats per party. With no `won` array this is plain D'Hondt.
+  function dhondt(shares, seats, won) {
+    const base = won || new Array(shares.length).fill(0);
+    const alloc = new Array(shares.length).fill(0);
+    for (let s = 0; s < seats; s++) {
+      let best = -1, bestQ = -Infinity;
+      for (let j = 0; j < shares.length; j++) {
+        const q = shares[j] / (base[j] + alloc[j] + 1);
+        if (q > bestQ + 1e-12 || (Math.abs(q - bestQ) <= 1e-12 && best >= 0 && shares[j] > shares[best])) { bestQ = q; best = j; }
+      }
+      if (best < 0 || bestQ <= 0) break;   // nobody has any votes left to win a seat with
+      alloc[best]++;
+    }
+    return alloc;
+  }
+
+  function drawMC() {
+    if (!mc.runs.length) return;
+    const seats = Math.floor(Number($("mcSeats").value));
+    const selRow = selectedPrev();                 // previous-results row for the chosen region (or null)
+    const name = selRow ? selRow.name : "";
+    const label = name || "Projection";
+    if (!isFinite(seats) || seats < 1) { setMcMsg("Enter a whole number of list seats (1 or more).", true); return; }
+
+    // Constituency seats already won by each party in this region, aligned with mc.parties
+    const won = mc.parties.map(p => isOthers(p) ? 0 : wonFor(p));
+
+    // Previous-election result for a party in the chosen region: the party's own name first (case-insensitive),
+    // then its PARTY_ALIASES name. Returns { name: name used in the table, share } or nulls.
+    const prevMatch = p => {
+      if (!selRow) return { name: null, share: null };
+      const find = n => Object.keys(selRow.shares).find(k => k.toLowerCase() === String(n).toLowerCase());
+      const ak = Object.keys(PARTY_ALIASES).find(k => k.toLowerCase() === String(p).toLowerCase());
+      const k = find(p) || (ak ? find(PARTY_ALIASES[ak]) : undefined);
+      return k ? { name: k, share: selRow.shares[k] } : { name: null, share: null };
+    };
+
+    const N = mc.runs.length;
+
+    // --- vote share summary per party
+    // Parties that are 0.0 in every run are dropped; "Others" is always placed last.
+    const stats = mc.parties.map((p, j) => {
+      const v = mc.runs.map(r => r[j]).sort((a, b) => a - b);
+      return { party: p, mean: v.reduce((s, x) => s + x, 0) / N, q1: pct(v, 0.25), q3: pct(v, 0.75), min: v[0], max: v[v.length - 1], j, allZero: v[v.length - 1] === 0 && v[0] === 0, others: isOthers(p), prev: prevMatch(p).share, prevName: prevMatch(p).name };
+    }).filter(s => !s.allZero);
+    const sortByPrevious = $("mcSort").value === "previous";
+    const hasPreviousShare = s => s.prev != null && s.prev > 0;
+    stats.sort((a, b) => (a.others - b.others) || (
+      sortByPrevious
+        ? (Number(hasPreviousShare(b)) - Number(hasPreviousShare(a))) || (hasPreviousShare(a) && hasPreviousShare(b) ? b.prev - a.prev : 0) || (b.mean - a.mean)
+        : b.mean - a.mean
+    ));
+    const P = stats.length;
+    if (!P) { setMcMsg("Every party is 0.0 in every run, so there is nothing to show.", true); $("mcResults").style.display = "none"; return; }
+    const rank = new Map(stats.map((s, i) => [s.j, i]));
+    const rankOf = j => rank.has(j) ? rank.get(j) : 999;
+    const othersIdx = new Set(mc.parties.map((p, j) => isOthers(p) ? j : -1).filter(j => j >= 0));
+    const hasPrev = stats.some(s => s.prev != null);
+    const renamed = s => s.prev != null && s.prevName.toLowerCase() !== String(s.party).toLowerCase();
+
+    // --- seat outcomes (compensatory: constituency seats count as already won)
+    const counts = new Map();
+    for (const run of mc.runs) {
+      // "Others" and any party under the legal threshold in this run are ineligible for list seats (share set to 0)
+      const eligible = run.map((v, j) => (othersIdx.has(j) || v < MC_THRESHOLD) ? 0 : v);
+      const alloc = dhondt(eligible, seats, won);
+      const key = alloc.join(",");
+      const e = counts.get(key);
+      if (e) e.n++; else counts.set(key, { alloc, n: 1 });
+    }
+    const outcomes = [...counts.values()].sort((a, b) => b.n - a.n);
+    const top = outcomes.slice(0, MC_TOP_N);
+
+    // Pills show total seats (constituency + list); the split is shown in brackets when constituency seats are set
+    const seatPill = (j, listSeats) => {
+      const col = partyColour(mc.parties[j]);
+      const c = won[j];
+      return `<span class="pill" style="background:${col};color:${textOn(col)}">${esc(mc.parties[j])} ${c + listSeats}` +
+        (c ? ` <small style="font-weight:400">(${c}+${listSeats})</small>` : "") + `</span>`;
+    };
+    const allocPills = alloc => alloc
+      .map((n, j) => ({ n, j, t: n + won[j] }))
+      .filter(x => x.t > 0)
+      .sort((a, b) => b.t - a.t || rankOf(a.j) - rankOf(b.j))
+      .map(x => seatPill(x.j, x.n))
+      .join("") || `<span class="pill" style="background:#eceee9;color:#6b6b66">No seats allocated</span>`;
+
+    // --- chart
+    $("mcResults").style.display = "";
+    $("mcOutcomesPanel").style.display = "";
+    $("mcOutcomesTitle").textContent = N === 1 ? "Projected seat allocation" : "Most likely seat outcomes";
+    $("mcTitle").textContent = name
+      ? `Nowcast EU | ${name} region seat projection`
+      : "Nowcast EU | Regional seat projection";
+    if (mcChart) mcChart.destroy();
+    const yMax = Math.max(...stats.map(s => Math.max(s.max, s.prev ?? 0)), MC_THRESHOLD, 1);
+
+    // Projected bars are dataset 0 (drawn on top). The previous-election bars are dataset 1: thinner, lighter, and
+    // drawn behind. grouped:false makes both datasets sit on the same x position instead of side by side.
+    const datasets = [{
+      label: "Mean vote share", data: stats.map(s => s.mean), backgroundColor: stats.map(s => partyColour(s.party)),
+      borderRadius: 0, maxBarThickness: MC_BAR_MAX, barPercentage: 0.9, grouped: false, order: 0
+    }];
+    if (hasPrev) datasets.push({
+      label: "Previous election", data: stats.map(s => s.prev), backgroundColor: stats.map(s => fade(partyColour(s.prevName || s.party), PREV_ALPHA)),
+      borderRadius: 0, maxBarThickness: MC_BAR_MAX * PREV_WIDTH, barPercentage: 0.9 * PREV_WIDTH, grouped: false, order: 1
+    });
+
+    mcChart = new Chart($("mcChart"), {
+      type: "bar",
+      data: { labels: stats.map(s => renamed(s) ? [s.party, `(vs. ${s.prevName})`] : s.party), datasets },
+      options: {
+        responsive: true, maintainAspectRatio: false, animation: { duration: 250 },
+        devicePixelRatio: chartDpr(),
+        interaction: { mode: "index", intersect: false },
+        scales: {
+        y: { beginAtZero: true, suggestedMax: Math.ceil(yMax * 1.1), grid: { drawOnChartArea: false }, title: { display: true, text: "Vote share (%)" }, ticks: { callback: v => v + "%" } },
+        x: { grid: { drawOnChartArea: false }, ticks: { autoSkip: false, font: { size: 12 } } }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            filter: item => item.raw != null,
+            callbacks: {
+              label: ctx => ctx.datasetIndex === 0 ? `Mean: ${stats[ctx.dataIndex].mean.toFixed(1)}%` : `Previous election${renamed(stats[ctx.dataIndex]) ? " (as " + stats[ctx.dataIndex].prevName + ")" : ""}: ${stats[ctx.dataIndex].prev.toFixed(1)}%`,
+              afterLabel: ctx => {
+                if (ctx.datasetIndex !== 0) return [];
+                const s = stats[ctx.dataIndex];
+                const out = [`Min: ${s.min.toFixed(1)}%`, `Max: ${s.max.toFixed(1)}%`];
+                if (won[s.j]) out.push(`Constituency seats: ${won[s.j]}`);
+                if (s.prev != null) { const dlt = s.mean - s.prev; out.push(`Change vs previous: ${dlt >= 0 ? "+" : ""}${dlt.toFixed(1)} pts`); }
+                return out;
+              }
+            }
+          }
+        }
+      },
+      plugins: [{
+        id: "thresholdLine",
+        afterDatasetsDraw(c) {
+          if (!MC_THRESHOLD) return;
+          const { ctx, chartArea, scales: { y } } = c;
+          const yh = y.getPixelForValue(MC_THRESHOLD);
+          ctx.save();
+          ctx.setLineDash([2, 4]); ctx.lineWidth = 1.5; ctx.strokeStyle = "#000";
+          ctx.beginPath(); ctx.moveTo(chartArea.left, yh); ctx.lineTo(chartArea.right, yh); ctx.stroke();
+          ctx.restore();
+        },
+        afterDraw(c) {
+          if (!MC_THRESHOLD) return;
+          const { ctx, chartArea, scales: { y } } = c;
+          const yh = y.getPixelForValue(MC_THRESHOLD);
+          const label = MC_THRESHOLD + "% legal threshold";
+          ctx.save();
+          ctx.setLineDash([]); ctx.fillStyle = "#000"; ctx.font = "11px system-ui, sans-serif";
+          ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+          ctx.lineJoin = "round"; ctx.lineWidth = 3; ctx.strokeStyle = "#fff";
+          ctx.strokeText(label, chartArea.right - 4, yh - 3);
+          ctx.fillText(label, chartArea.right - 4, yh - 3);
+          ctx.restore();
+        }
+
+      }, {
+        id: "prevOffset",
+        // Shift the previous-election bars right by half the projected bar's width,
+        // so their centre sits on the projected bar's right-hand edge.
+        beforeDatasetDraw(c, args) {
+          if (args.index !== 1) return;
+          const b = c.getDatasetMeta(0).data[0];
+          c.ctx.save();
+          c.ctx.translate(b ? b.width / 2 : 0, 0);
+        },
+        afterDatasetDraw(c, args) {
+          if (args.index === 1) c.ctx.restore();
+        }
+      }, {
+        id: "iqrWhiskers",
+        afterDatasetsDraw(c) {
+          if (N === 1) return;
+          const { ctx, scales: { y } } = c;
+          const meta = c.getDatasetMeta(0);
+          ctx.save();
+          // Previous-election tick: a short line across the thin bar at its exact value, drawn over the projected bar
+          if (hasPrev && PREV_TICK) {
+            const shift = meta.data[0] ? meta.data[0].width / 2 : 0;
+            ctx.strokeStyle = "rgba(29,29,27,0.55)"; ctx.lineWidth = 2; ctx.lineCap = "butt";
+            c.getDatasetMeta(1).data.forEach((bar, i) => {
+              const v = stats[i].prev; if (v == null) return;
+              const yy = y.getPixelForValue(v), half = bar.width / 2;
+              ctx.beginPath(); ctx.moveTo(bar.x - half + shift, yy); ctx.lineTo(bar.x + half + shift, yy); ctx.stroke();
+            });
+          }
+          // Full range (min to max), drawn first so the IQR sits on top
+          ctx.strokeStyle = "#000000"; ctx.lineWidth = 1.25; ctx.lineCap = "butt";
+          meta.data.forEach((bar, i) => {
+            if (stats[i].others) return;
+            const ylo = y.getPixelForValue(stats[i].min), yhi = y.getPixelForValue(stats[i].max), cap = 6;
+            ctx.beginPath();
+            ctx.moveTo(bar.x, ylo); ctx.lineTo(bar.x, yhi);
+            ctx.moveTo(bar.x - cap, ylo); ctx.lineTo(bar.x + cap, ylo);
+            ctx.moveTo(bar.x - cap, yhi); ctx.lineTo(bar.x + cap, yhi);
+            ctx.stroke();
+          });
+          ctx.restore();
+        }
+      }]
+    });
+
+    // --- outcomes list
+    if (N === 1) {
+      $("mcCoverage").style.display = "none";
+      $("mcOutcomes").innerHTML = `<div class="pills">${allocPills(top[0].alloc)}</div>`;
+    } else {
+      $("mcCoverage").style.display = "";
+      const topShare = top.length ? top[0].n / N * 100 : 0;
+      $("mcOutcomes").innerHTML = top.map((o, i) => {
+        const pc = o.n / N * 100;
+        return `<div class="outcome">
+          <div class="top"><span class="rank">#${i + 1}</span><div class="pills">${allocPills(o.alloc)}</div>
+          <span class="pct">${pc.toFixed(1)}% <small>(${o.n.toLocaleString()} runs)</small></span></div>
+          <div class="bar"><i style="width:${topShare ? (pc / topShare * 100).toFixed(1) : 0}%"></i></div>
+        </div>`;
+      }).join("");
+      const covered = top.reduce((s, o) => s + o.n, 0) / N * 100;
+      $("mcCoverage").textContent = `Top ${top.length} of ${outcomes.length.toLocaleString()} distinct outcome${outcomes.length > 1 ? "s" : ""} cover ${covered.toFixed(1)}% of runs. Bars are scaled to the most likely outcome.` +
+        (won.some(c => c > 0) ? " Pills show total seats, with (constituency + list) in brackets." : "");
+    }
+
+    // --- closest list seat to flipping, from the average vote shares
+    // Mean shares with the same eligibility rules as the per-run allocation (Others and sub-threshold parties get 0).
+    const means = new Array(mc.parties.length).fill(0);
+    stats.forEach(s => { if (!s.others && s.mean >= MC_THRESHOLD) means[s.j] = s.mean; });
+    const mAlloc = dhondt(means, seats, won);
+    const penultimateAlloc = dhondt(means, seats - 1, won);
+    // The marginal seat is the winning list seat with the lowest quotient; that is the one a challenger has to overtake.
+    // A party that has won n list seats and already holds c constituency seats won its last list seat at divisor (c + n).
+    let M = -1, qmin = Infinity;
+    mAlloc.forEach((n, j) => { if (n > 0 && means[j] / (won[j] + n) < qmin) { qmin = means[j] / (won[j] + n); M = j; } });
+    let flip = null;
+    if (M >= 0) {
+      for (let B = 0; B < means.length; B++) {
+        if (B === M || means[B] <= 0) continue;
+        const b = mAlloc[B] + 1;                 // B's next list seat
+        const divisor = won[B] + b;              // its divisor: constituency seats + list seats incl. this one
+        const gain = divisor * qmin - means[B];
+        if (!flip || gain < flip.gain) flip = { B, b, m: mAlloc[M], gain };
+      }
+    }
+    const pill = (j, txt) => { const col = partyColour(mc.parties[j]); return `<span class="pill" style="background:${col};color:${textOn(col)}">${esc(mc.parties[j])} ${txt}</span>`; };
+    const ordinal = n => `${n}${n % 100 >= 11 && n % 100 <= 13 ? "th" : ({ 1: "st", 2: "nd", 3: "rd" }[n % 10] || "th")}`;
+    if (!flip) {
+      $("mcFlip").innerHTML = `<div class="flip-detail">No flip to show: fewer than two parties have list votes in the average.</div>`;
+    } else {
+      const A = M, a = flip.m, B = flip.B, b = flip.b, pa = esc(mc.parties[A]), pb = esc(mc.parties[B]);
+      const quotientBars = mc.parties.map((party, j) => !othersIdx.has(j) && means[j] > 0
+        ? { j, seatLabel: `list seat ${penultimateAlloc[j] + 1}${mAlloc[j] > penultimateAlloc[j] ? " ✓" : ""}`, quotient: means[j] / (won[j] + penultimateAlloc[j] + 1), projectedWinner: mAlloc[j] > penultimateAlloc[j] }
+        : null)
+        .filter(Boolean);
+      quotientBars.sort((left, right) => right.quotient - left.quotient);
+      const quotientMax = Math.max(...quotientBars.map(item => item.quotient));
+      const quotientBar = ({ j, seatLabel, quotient, projectedWinner }) => {
+        const width = (quotient / quotientMax * 100).toFixed(1);
+        const colour = partyColour(mc.parties[j]);
+        return `<div><div class="flip-quotient-label"><span class="${projectedWinner ? "projected-winner" : ""}">${esc(mc.parties[j])} ${seatLabel}</span><b>${quotient.toFixed(1)}</b></div><div class="flip-quotient-track"><i style="width:${width}%;background:${colour}"></i></div></div>`;
+      };
+      $("mcFlip").innerHTML =
+        `<div class="flip-line">${pill(A, "list seat " + a)}<span class="arrow">could flip to</span>${pill(B, "list seat " + b)}</div>` +
+        `<div class="flip-gap">${flip.gain.toFixed(1)} pt <small>gap</small></div>` +
+        `<div class="flip-detail"><b>${pb}</b> would need to rise from <b>${means[B].toFixed(1)}%</b> to <b>${(means[B] + flip.gain).toFixed(1)}%</b> (+${flip.gain.toFixed(1)} pt) to take their ${ordinal(b)} list seat from <b>${pa}</b>'s ${ordinal(a)} list seat.</div>` +
+        `<div class="flip-chart-heading">The race for list seat ${seats}</div>` +
+        `<p class="flip-chart-note">Bars show each party's quotient (votes ÷ (constituency seats + list seats so far + 1)) when list seat ${seats} is allocated, after the first ${seats - 1} list seats.</p>` +
+        `<div class="flip-quotients">${quotientBars.map(quotientBar).join("")}</div>`;
+    }
+
+    setMcMsg($("mcMsg").className.includes("err") ? "" : $("mcMsg").textContent, false);
+  }
+
+  // Dummy runs: 1,000 draws, correlated-free normal noise around fixed means (regional list vote shares)
+  function mcExampleText() {
+    const spec = [["SNP", 28, 2.2], ["Reform", 18, 1.8], ["Lab", 17, 1.8], ["Con", 12, 1.4], ["Green", 9, 1.2], ["LD", 8, 1.1], ["Alba", 2, 0.5]];
+    const gauss = () => { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+    const lines = [["Run", ...spec.map(s => s[0])].join("\t")];
+    for (let i = 1; i <= 1000; i++) lines.push([i, ...spec.map(s => Math.max(0, s[1] + s[2] * gauss()).toFixed(2))].join("\t"));
+    return lines.join("\n");
+  }
+
+  // Browser zoom changes devicePixelRatio and fires a resize event: re-sync the charts
+  window.addEventListener("resize", () => {
+    [chart, mcChart, countrySeatChart].forEach(c => { if (!c) return; c.options.devicePixelRatio = chartDpr(); c.resize(); });
+  });
+
+  try { initPrev(); } catch (e) { setMcMsg("PREVIOUS_RESULTS: " + e.message, true); }
+  renderWonInputs();
+
+  $("load").addEventListener("click", load);
+  $("example").addEventListener("click", () => { $("input").value = EXAMPLE; load(); });
+  $("party").addEventListener("change", draw);
+  $("sort").addEventListener("change", draw);
+  $("hideZero").addEventListener("change", draw);
+  $("input").addEventListener("paste", () => setTimeout(load, 0));
+
+  $("mcLoad").addEventListener("click", loadMC);
+  $("mcExample").addEventListener("click", () => { $("mcInput").value = mcExampleText(); loadMC(); });
+  let mcInputTimer = null;
+  $("mcInput").addEventListener("input", () => {
+    clearTimeout(mcInputTimer);
+    mcInputTimer = setTimeout(loadMC, 300);
+  });
+  $("mcConst").addEventListener("change", () => { applyConstSeats(); renderWonInputs(); drawMC(); });
+  $("mcSeats").addEventListener("input", drawMC);
+  $("mcSort").addEventListener("change", drawMC);
+  $("mcWon").addEventListener("input", event => {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement) || !input.dataset.party) return;
+    const v = Math.max(0, Math.floor(Number(input.value)) || 0);
+    const key = $("mcConst").value;
+    if (!wonStore[key]) wonStore[key] = {};
+    wonStore[key][input.dataset.party.toLowerCase()] = v;
+    updateWonTotal();
+    drawMC();
+  });
+  $("mcWonApply").addEventListener("click", applyWonPaste);
+  $("mcLayoutSlider").addEventListener("input", () => {
+    const chartShare = Number($("mcLayoutSlider").value);
+    const grid = $("mcResults").querySelector(".mc-grid");
+    grid.style.setProperty("--mc-chart-share", chartShare + "fr");
+    grid.style.setProperty("--mc-stats-share", (100 - chartShare) + "fr");
+    $("mcLayoutValue").textContent = `${chartShare.toFixed(1)}% / ${(100 - chartShare).toFixed(1)}%`;
+  });
+  $("countrySeatLoad").addEventListener("click", loadCountrySeatMC);
+  $("countrySeatExample").addEventListener("click", () => {
+    $("countrySeatInput").value = [
+      ["Party", "1", "2", "3", "4", "5", "6", "7", "8"].join("\t"),
+      ["SNP", 55, 58, 52, 60, 56, 50, 57, 54].join("\t"),
+      ["Reform", 22, 20, 24, 18, 21, 25, 20, 23].join("\t"),
+      ["Lab", 18, 17, 20, 15, 19, 22, 18, 17].join("\t"),
+      ["Con", 12, 12, 11, 14, 11, 10, 13, 12].join("\t"),
+      ["Green", 10, 9, 10, 11, 10, 12, 9, 11].join("\t"),
+      ["LD", 10, 10, 10, 9, 11, 9, 10, 10].join("\t"),
+      ["Others", 2, 3, 2, 2, 1, 1, 2, 2].join("\t")
+    ].join("\n");
+    loadCountrySeatMC();
+  });
+  $("countrySeatInput").addEventListener("paste", () => setTimeout(loadCountrySeatMC, 0));
+  $("countrySeatParty").addEventListener("change", event => {
+    const checkbox = event.target;
+    if (checkbox instanceof HTMLInputElement && checkbox.type === "checkbox") {
+      const partyIndex = Number(checkbox.value);
+      countrySeatPartySelectionOrder = countrySeatPartySelectionOrder.filter(index => index !== partyIndex);
+      if (checkbox.checked) countrySeatPartySelectionOrder.push(partyIndex);
+    }
+    drawCountrySeatMC();
+  });
+  $("countrySeatCombine").addEventListener("change", drawCountrySeatMC);
+    document.addEventListener("click", e => {
+    const m = $("countrySeatPartyMenu");
+    if (m.open && !m.contains(e.target)) m.open = false;
+  });
+  $("countrySeatBinSize").addEventListener("change", drawCountrySeatMC);
+  $("countrySeatAxisMin").addEventListener("change", drawCountrySeatMC);
+  $("countrySeatAxisMax").addEventListener("change", drawCountrySeatMC);
+  $("countrySeatYAxisMax").addEventListener("change", drawCountrySeatMC);
+  $("countrySeatQuartileLabelY").addEventListener("change", drawCountrySeatMC);
+  $("countrySeatTickSpacing").addEventListener("change", drawCountrySeatMC);
+  $("countrySeatBellCurve").addEventListener("change", () => {
+    $("countrySeatCurveSmoothnessControl").hidden = !$("countrySeatBellCurve").checked;
+    $("countrySeatQuartileLabelYControl").hidden = !$("countrySeatBellCurve").checked;
+    drawCountrySeatMC();
+  });
+  $("countrySeatCurveSmoothness").addEventListener("input", () => {
+    $("countrySeatCurveSmoothnessValue").value = $("countrySeatCurveSmoothness").value + "%";
+    drawCountrySeatMC();
+  });
+})();
+</script>
+</body>
+</html>
