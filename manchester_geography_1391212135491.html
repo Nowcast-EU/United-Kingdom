@@ -489,7 +489,7 @@ const NAMES = [], DATA = {x:{}, win:{}};
   rows.forEach(r=>NAMES.push((r[0]||'').trim()));
   head.forEach((h,c)=>{
     if(c===0 || h==='') return;
-    const w = h.match(/^(\d{4}|proj)_winner$/i);
+    const w = h.match(/^(\d{4}|ME)_winner$/i);
     if(w){ DATA.win[w[1].toLowerCase()] = rows.map(r=>String(r[c]||'').trim().toUpperCase()); return; }
     const m = h.match(/^([A-Za-z]+)_(.+)$/);
     const isParty = m && PARTIES[m[1].toUpperCase()];
