@@ -407,10 +407,7 @@ const ELECTIONS = [
 ];
 const PERIODS = {
   share: ELECTIONS.map(e=>({id:e.id, label:e.label, a:e.id})),
-  swing: ELECTIONS.slice(1).map((e,i)=>{
-    const b = ELECTIONS[i];
-    return {id:b.id+'_'+e.id, label:b.label+' → '+e.label, a:e.id, b:b.id};
-  })
+  swing: [{id:'2024_2026', label:'LE2024 → LE2026', a:'2026', b:'2024'}]
 };
 
 /* X-axis variables. d = key in DATA.x, fmt = tick/tooltip formatter */
@@ -519,7 +516,7 @@ Object.keys(PARTIES).forEach(p=>(PARTIES[p].elections || ELECTIONS.map(e=>e.id))
    STATE + DOM
    ============================================================ */
 const $ = id => document.getElementById(id);
-const state = {party:'LAB', metric:'share', period:'2024', xvar:'density', trend:true, hi:-1, xparty:'LAB', xel:'2024', colourByWin:true, scalePop:false};
+const state = {party:'LAB', metric:'share', period:'2026', xvar:'depriv', trend:true, hi:-1, xparty:'LAB', xel:'2024', colourByWin:true, scalePop:false};
 
 $('party').innerHTML  = Object.keys(PARTIES).map(k=>`<option value="${k}">${PARTIES[k].name}</option>`).join('');
 function fillXVar(){
