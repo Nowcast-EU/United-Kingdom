@@ -929,9 +929,10 @@ const ys = pts.map(p=>p.y);
 const baseR = m ? 2.5 : 3.6;
 const pops = DATA.x.population;
 const minPop = Math.min(...pops.filter(v => v > 0));
+const EXPONENT = 0.75;   // 0.5 = true area scaling; higher = more exaggerated
 const radii = allPts.map(p =>
   state.scalePop && pops[p.i] > 0
-    ? (baseR/2) * Math.sqrt(pops[p.i] / minPop)
+    ? baseR * Math.pow(pops[p.i] / minPop, EXPONENT)
     : baseR);
 ds0.pointRadius      = radii;
 ds0.pointHoverRadius = radii.map(r => r + (m ? 2 : 2.4));
