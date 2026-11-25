@@ -14,10 +14,8 @@
     font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
   .wrap{margin:0;padding:0;display:flow-root}
   .controls{display:flex;flex-direction:column;gap:8px}
-  .content-grid{display:grid;grid-template-columns:8fr 2fr;gap:14px}
+  .content-grid{display:grid;grid-template-columns:1fr;gap:14px}
   .main-panel{min-width:0}
-  .side-panel{border-left:1px solid var(--line);padding-left:14px;font-size:0.94rem;line-height:1.5}
-  .side-panel p{margin:0;font-size:0.94rem;line-height:1.5;color:#000000}
   .source{font-size:12.5px;font-style:italic;color:#999999;margin-top:4px}
   .source a{color:inherit;text-decoration:underline}
   .source a:hover{color:#666666}
@@ -102,7 +100,6 @@
   
     @media (max-width:700px){
     .content-grid{grid-template-columns:1fr}
-    .side-panel{border-left:none;padding-left:0;order:-1;margin-bottom:4px}
   }
   
   @media (max-width:640px){
@@ -112,7 +109,6 @@
     .chartbox{height:280px;margin-top:8px}
     .stats{font-size:12px}
     .note,.source{font-size:11px}
-    .side-panel p{font-size:12.5px;line-height:1.5}
     input[type=text]{min-width:0;flex:1}
     .dd-menu{max-height:240px}
     .dd-item,.dd-head{padding-top:7px;padding-bottom:7px}
@@ -149,12 +145,6 @@
   <div class="stats" id="stats"></div>
 <div class="note" id="note"></div>
 <div class="source" id="source"></div>
-</div>
-
-<div class="side-panel">
-  <p>Each dot represents one Greater Manchester ward. Choose a party, a measurement and a time period to set the vertical axis, then pick a ward-level attribute to compare it against. Wards with missing data (e.g. where the selected party did not stand) are removed.<br>
-    <br>
-    This data forms the basis of what our election forecasting model relies upon, beyond the initial application of a proportional swing from the previous election, by using demographic-specific or demographic breakdowns of polling data to inform future movement.<br></p>
 </div>
 
 </div>
