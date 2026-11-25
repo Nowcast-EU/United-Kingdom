@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Nowcast UK – Geography module</title>
+<title>Greater Manchester wards – data visualiser</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root{
@@ -151,11 +151,9 @@
 </div>
 
 <div class="side-panel">
-  <p>Each dot represents one English constituency. Choose a party, a measurement and a time period to set the vertical axis, then pick a constituency-level attribute to compare it against. Constituencies with missing data (e.g. Reform not standing in 2024) are removed.<br>
+  <p>Each dot represents one Greater Manchester ward. Choose a party, a measurement and a time period to set the vertical axis, then pick a ward-level attribute to compare it against. Wards with missing data (e.g. where the selected party did not stand) are removed.<br>
     <br>
-    This data forms the basis of what our election forecasting model relies upon, beyond the initial application of a proportional swing from the previous election, by using demographic-specific or demographic breakdowns of polling data to inform future movement.<br>
-  <br>
-    Note — 2019 vote shares are notional results applied to 2024 constituency boundaries.</p>
+    This data forms the basis of what our election forecasting model relies upon, beyond the initial application of a proportional swing from the previous election, by using demographic-specific or demographic breakdowns of polling data to inform future movement.<br></p>
 </div>
 
 </div>
@@ -396,7 +394,7 @@ const PARTIES = {
   RES:{name:'Restore',           colour:'#000055', elections:['ME']}
 };
 
-const EXTRA_WIN = {SNP:'#e0c800', PLC:'#005B54', OTH:'#999999'};
+const EXTRA_WIN = {SNP:'#e0c800', PLC:'#005B54', OTH:'#999999', LOC:'#8e5bb5', IND:'#777777', WPB:'#7a1f1f'};
 const winColour = k => (PARTIES[k] && PARTIES[k].colour) || EXTRA_WIN[k] || '#999999';
 const YEAR_LABEL = {2024:'LE2024', 2026:'LE2026', ME:'mayoral election'};
 
@@ -410,14 +408,14 @@ const PERIODS = {
   share: ELECTIONS.map(e=>({id:e.id, label:e.label, a:e.id})),
   swing: ELECTIONS.slice(1).map((e,i)=>{
     const b = ELECTIONS[i];
-    return {id:b.id+'_'+e.id, label:b.label+' → '+(/^\d/.test(e.label)?e.label:e.label.toLowerCase()), a:e.id, b:b.id};
+    return {id:b.id+'_'+e.id, label:b.label+' → '+e.label, a:e.id, b:b.id};
   })
 };
 
 /* X-axis variables. d = key in DATA.x, fmt = tick/tooltip formatter */
 const fmtInt = v => Math.round(v).toLocaleString('en-GB');
 const XVARS = [
-  {id:'prox', label:'Distance from centre (km)',          axis:'Distance from city centre (km)',            fmt:v=>fmtInt(v)+' km', tick:v=>fmtInt(v), min:0, max:30},
+  {id:'prox', label:'Distance from centre (km)',          axis:'Distance from city centre (km)',            fmt:v=>fmtInt(v)+' km', tick:v=>fmtInt(v), min:0, max:35},
   {id:'density', label:'Population Density',              axis:'Population per square km',                    fmt:v=>fmtInt(v), tick:v=>fmtInt(v), min:0, max:20000},
   {id:'depriv',   label:'Household Deprivation',            axis:'Households deprived in 1-4 dimensions',     fmt:v=>v.toFixed(1)+'%', tick:v=>v, min:0, max:100},
   {id:'a1524', label:'Aged 15–24 (%)',                      axis:'Population aged 15–24 (%)',              fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:0, max:100},
@@ -490,7 +488,7 @@ const NAMES = [], DATA = {x:{}, win:{}};
   head.forEach((h,c)=>{
     if(c===0 || h==='') return;
     const w = h.match(/^(\d{4}|ME)_winner$/i);
-    if(w){ DATA.win[w[1].toLowerCase()] = rows.map(r=>String(r[c]||'').trim().toUpperCase()); return; }
+    if(w){ DATA.win[w[1].toUpperCase()] = rows.map(r=>String(r[c]||'').trim().toUpperCase()); return; }
     const m = h.match(/^([A-Za-z]+)_(.+)$/);
     const isParty = m && PARTIES[m[1].toUpperCase()];
     const col = rows.map(r=>{
@@ -517,7 +515,7 @@ Object.keys(PARTIES).forEach(p=>(PARTIES[p].elections || ELECTIONS.map(e=>e.id))
    STATE + DOM
    ============================================================ */
 const $ = id => document.getElementById(id);
-const state = {party:'LAB', metric:'share', period:'2024', xvar:'lat', trend:true, hi:-1, xparty:'LAB', xel:'2024', colourByWin:true};
+const state = {party:'LAB', metric:'share', period:'2024', xvar:'density', trend:true, hi:-1, xparty:'LAB', xel:'2024', colourByWin:true};
 
 $('party').innerHTML  = Object.keys(PARTIES).map(k=>`<option value="${k}">${PARTIES[k].name}</option>`).join('');
 function fillXVar(){
@@ -573,7 +571,7 @@ function getXv(){
   return {
     id:'pshare',
     label: `${name} vote share (${lab})`,
-    short: `${state.xparty} (${lab.toLowerCase()})`,
+    short: `${state.xparty} (${lab})`,
     axis:  `${name} vote share, ${lab==='Projected'?'projected':lab} (%)`,
     fmt: v=>v.toFixed(1)+'%',
     tick:v=>v+'%',
@@ -835,7 +833,7 @@ function fmtY(v){
 }
 function periodLabel(){ return PERIODS[state.metric].find(o=>o.id===state.period).label; }
 function yAxisShort(){
-  return state.party+(state.metric==='share' ? '' : ' swing')+' ('+periodLabel().toLowerCase()+')';
+  return state.party+(state.metric==='share' ? '' : ' swing')+' ('+periodLabel()+')';
 }
 function yAxisTitle(){
   return state.metric==='share'
@@ -843,40 +841,29 @@ function yAxisTitle(){
     : `${PARTIES[state.party].name} swing, ${periodLabel()} (percentage points)`;
 }
 
-  const SOURCES = {
+const SOURCES = {
   y: {
-    2019: {label:'House of Commons Library: 2019 general election results', url:'https://commonslibrary.parliament.uk/research-briefings/cbp-8749/'},
-    2024: {label:'House of Commons Library: 2024 general election results', url:'https://electionresults.parliament.uk/general-elections/6'},
-    proj:  {label:'Nowcast UK projection', url:''}
+    '2024':     {label:'ADD SOURCE (2024)', url:''},
+    '2026':     {label:'ADD SOURCE (2026)', url:''},
+    ME:         {label:'ADD SOURCE (ME)', url:''},
   },
   x: {
-    leave: {label:'BES - Professor Chris Hanretty', url:'https://www.britishelectionstudy.com/wp-content/uploads/2025/02/BES_2024_General_Election_results_file_codebook.pdf'},
-    remain: {label:'BES - Professor Chris Hanretty', url:'https://www.britishelectionstudy.com/wp-content/uploads/2025/02/BES_2024_General_Election_results_file_codebook.pdf'},
-    area:  {label:'', url:''},
-    lat:   {label:'', url:''},
-    prox:   {label:'', url:''},
-    income:  {label:'HMRC: Personal Incomes Statistics 2023 to 2024', url:'https://www.gov.uk/government/statistics/personal-incomes-statistics-for-the-tax-year-2023-to-2024/personal-incomes-statistics-2023-to-2024-summary-statistics'},
-    imd:   {label:'House of Commons Library: People & Places Data', url:'https://commonslibrary.parliament.uk/data/local-data/people-and-places/'},
-    cpov:  {label:'House of Commons Library: People & Places Data', url:'https://commonslibrary.parliament.uk/research-briefings/cbp-10522/'},
-    a017:  {label:'House of Commons Library: People & Places Data', url:'https://commonslibrary.parliament.uk/research-briefings/cbp-10529/'},
-    a1824: {label:'House of Commons Library: People & Places Data', url:'https://commonslibrary.parliament.uk/research-briefings/cbp-10529/'},
-    a2534: {label:'House of Commons Library: People & Places Data', url:'https://commonslibrary.parliament.uk/research-briefings/cbp-10529/'},
-    a3549: {label:'House of Commons Library: People & Places Data', url:'https://commonslibrary.parliament.uk/research-briefings/cbp-10529/'},
-    a5064: {label:'House of Commons Library: People & Places Data', url:'https://commonslibrary.parliament.uk/research-briefings/cbp-10529/'},
-    a65:   {label:'House of Commons Library: People & Places Data', url:'https://commonslibrary.parliament.uk/research-briefings/cbp-10529/'},
-    white:   {label:'House of Commons Library: People & Places Data', url:'https://commonslibrary.parliament.uk/research-briefings/cbp-10566/'},
-    black:   {label:'House of Commons Library: People & Places Data', url:'https://commonslibrary.parliament.uk/research-briefings/cbp-10566/'},
-    asian:   {label:'House of Commons Library: People & Places Data', url:'https://commonslibrary.parliament.uk/research-briefings/cbp-10566/'},
-    mixed:   {label:'House of Commons Library: People & Places Data', url:'https://commonslibrary.parliament.uk/research-briefings/cbp-10566/'},
-    christian:   {label:'House of Commons Library: People & Places Data', url:'https://commonslibrary.parliament.uk/research-briefings/cbp-10571/'},
-    muslim:   {label:'House of Commons Library: People & Places Data', url:'https://commonslibrary.parliament.uk/research-briefings/cbp-10571/'},
-    jewish:   {label:'House of Commons Library: People & Places Data', url:'https://commonslibrary.parliament.uk/research-briefings/cbp-10571/'},
-    hindu:   {label:'House of Commons Library: People & Places Data', url:'https://commonslibrary.parliament.uk/research-briefings/cbp-10571/'},
-    noreligion:   {label:'House of Commons Library: People & Places Data', url:'https://commonslibrary.parliament.uk/research-briefings/cbp-10571/'},
-    born:  {label:'House of Commons Library: People & Places Data', url:'https://commonslibrary.parliament.uk/data/local-data/people-and-places/'},
-    noqual:  {label:'House of Commons Library: People & Places Data', url:'https://commonslibrary.parliament.uk/data/local-data/people-and-places/'},
-    highqual:  {label:'House of Commons Library: People & Places Data', url:'https://commonslibrary.parliament.uk/data/local-data/people-and-places/'},
-    lgbt:  {label:'House of Commons Library: People & Places Data', url:'https://commonslibrary.parliament.uk/data/local-data/people-and-places/'}
+    density:    {label:'ADD SOURCE (density)', url:''},
+    prox:       {label:'ADD SOURCE (prox)', url:''},
+    depriv:     {label:'ADD SOURCE (depriv)', url:''},
+    a1524:      {label:'ADD SOURCE (a1524)', url:''},
+    a2539:      {label:'ADD SOURCE (a2539)', url:''},
+    a4064:      {label:'ADD SOURCE (a4064)', url:''},
+    a65:        {label:'ADD SOURCE (a65)', url:''},
+    white:      {label:'ADD SOURCE (white)', url:''},
+    black:      {label:'ADD SOURCE (black)', url:''},
+    asian:      {label:'ADD SOURCE (asian)', url:''},
+    mixed:      {label:'ADD SOURCE (mixed)', url:''},
+    christian:  {label:'ADD SOURCE (christian)', url:''},
+    muslim:     {label:'ADD SOURCE (muslim)', url:''},
+    noreligion: {label:'ADD SOURCE (noreligion)', url:''},
+    noqual:     {label:'ADD SOURCE (noqual)', url:''},
+    highqual:   {label:'ADD SOURCE (highqual)', url:''},
   }
 };
 function updateSource(){
@@ -970,8 +957,8 @@ const correlationLabel =
     ? 'virtually no correlation'
     : `${strength} ${r>=0?'positive':'negative'}`;
 
-statsHtml = `Correlation <b>r = ${r.toFixed(2).replace('-','−')}</b> (R² = ${(r*r).toFixed(2)}) across ${xs.length} English constituencies – ${correlationLabel}${useLog?' (on log scale)':''}.`;
-  } else { tr.data = []; statsHtml = `${xs.length} English constituencies.`; }
+statsHtml = `Correlation <b>r = ${r.toFixed(2).replace('-','−')}</b> (R² = ${(r*r).toFixed(2)}) across ${xs.length} Greater Manchester wards – ${correlationLabel}${useLog?' (on log scale)':''}.`;
+  } else { tr.data = []; statsHtml = `${xs.length} Greater Manchester wards.`; }
   $('stats').innerHTML = statsHtml;
 
   /* highlight */
