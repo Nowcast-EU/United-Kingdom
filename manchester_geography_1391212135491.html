@@ -748,7 +748,7 @@ const title = borough ? `${NAMES[raw.i]} (${borough})` : NAMES[raw.i];
 
     /* leader line: dot -> (elbow) -> box side midpoint */
     const r = (el.options && el.options.hoverRadius || 5) + 2;
-    ctx.strokeStyle = '#d9085c';
+    ctx.strokeStyle = '#850538';
     ctx.lineWidth = 1;
     ctx.lineJoin = 'round';
     ctx.beginPath();
@@ -760,7 +760,7 @@ const title = borough ? `${NAMES[raw.i]} (${borough})` : NAMES[raw.i];
 
 /* box + text */
 ctx.fillStyle = '#fffaf7';
-ctx.strokeStyle = '#d9085c';
+ctx.strokeStyle = '#850538';
 ctx.lineWidth = 1;
 ctx.lineJoin = 'miter';     /* sharp corners (it was set to 'round' for the leader line) */
 ctx.beginPath(); ctx.rect(best.bx, best.by, bw, bh);
