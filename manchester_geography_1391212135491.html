@@ -7,7 +7,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root{
-    --bg:#f8faf9; --fg:#1b1f24; --muted:#5d6670; --line:#dfe3e8; --panel:#f5f6f8; --accent:#1b1f24;
+    --bg:#fffaf7; --fg:#1b1f24; --muted:#5d6670; --line:#dfe3e8; --panel:#f5f6f8; --accent:#1b1f24;
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);
@@ -27,6 +27,7 @@
   input[type=text]{cursor:text;background-image:none;padding-right:10px;min-width:210px}
   label.chk{display:inline-flex;align-items:center;gap:6px;font-size:14px;cursor:pointer;user-select:none}
   label.chk.off{opacity:.4;cursor:default}
+  label.chk input[type=checkbox]{accent-color:#d9085c;}
   .chartbox{position:relative;height:700px;margin-top:12px}
   .stats{min-height:20px;font-size:13.5px;color:var(--muted);margin-top:6px}
   .stats b{color:var(--fg)}
@@ -747,7 +748,7 @@ const title = borough ? `${NAMES[raw.i]} (${borough})` : NAMES[raw.i];
 
     /* leader line: dot -> (elbow) -> box side midpoint */
     const r = (el.options && el.options.hoverRadius || 5) + 2;
-    ctx.strokeStyle = '#1b1f24';
+    ctx.strokeStyle = '#d9085c';
     ctx.lineWidth = 1;
     ctx.lineJoin = 'round';
     ctx.beginPath();
@@ -758,8 +759,8 @@ const title = borough ? `${NAMES[raw.i]} (${borough})` : NAMES[raw.i];
     ctx.setLineDash([]);
 
 /* box + text */
-ctx.fillStyle = '#f8faf9';
-ctx.strokeStyle = '#1b1f24';
+ctx.fillStyle = '#fffaf7';
+ctx.strokeStyle = '#d9085c';
 ctx.lineWidth = 1;
 ctx.lineJoin = 'miter';     /* sharp corners (it was set to 'round' for the leader line) */
 ctx.beginPath(); ctx.rect(best.bx, best.by, bw, bh);
