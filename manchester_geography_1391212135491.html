@@ -409,7 +409,7 @@ const XVARS = [
   {id:'a1524', label:'Aged 15–24 (%)',                      axis:'Population aged 15–24 (%)',              fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:0, max:50},
   {id:'a2539', label:'Aged 25–39 (%)',                    axis:'Population aged 25–39 (%)',             fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:0, max:60},
   {id:'a4064', label:'Aged 40–64 (%)',                    axis:'Population aged 40–64 (%)',              fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:0, max:40},
-  {id:'a65',   label:'Aged 65+ (%)',                      axis:'Population aged 65+ (%)',               fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:0, max:40},
+  {id:'a65',   label:'Aged 65+ (%)',                      axis:'Population aged 65+ (%)',               fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:0, max:35},
   {id:'white',   label:'White (%)',                       axis:'White (%)',                              fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:10, max:100},
   {id:'black',   label:'Black (%)',                       axis:'Black, African or Caribbean (%)',         fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:0, max:40},
   {id:'asian',   label:'Asian (%)',                       axis:'Asian (%)',                                 fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:0, max:80},
@@ -506,7 +506,7 @@ Object.keys(PARTIES).forEach(p=>(PARTIES[p].elections || ELECTIONS.map(e=>e.id))
    STATE + DOM
    ============================================================ */
 const $ = id => document.getElementById(id);
-const state = {party:'LAB', metric:'share', period:'2026', xvar:'depriv', trend:true, hi:-1, xparty:'LAB', xel:'2024', colourByWin:true, scalePop:false};
+const state = {party:'LAB', metric:'share', period:'2026', xvar:'a65', trend:true, hi:-1, xparty:'LAB', xel:'2024', colourByWin:true, scalePop:false};
 
 $('party').innerHTML  = Object.keys(PARTIES).map(k=>`<option value="${k}">${PARTIES[k].name}</option>`).join('');
 function fillXVar(){
