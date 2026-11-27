@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Spanish projection dashboard</title>
+<title>Monte Carlo dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root { --bg:#f8faf9; --card:#fff; --ink:#1d1d1b; --muted:#6b6b66; --line:#dcdcd6; --accent:#1f6fb2; --out:#b9bdc4; --marker:#d6336c; }
@@ -707,7 +707,7 @@ Zaragoza	7	30.8	36.1	15.3	13.5	0.0	0.0	0	0	0	0	0	0	0	4.3
     id: "countrySeatMajority",
     afterDatasetsDraw(chartInstance) {
       const { ctx, chartArea, scales: { x } } = chartInstance;
-      const markerX = x.getPixelForValue(175);
+      const markerX = x.getPixelForValue(325);
       ctx.save();
       ctx.setLineDash([6, 5]);
       ctx.lineWidth = 1.5;
