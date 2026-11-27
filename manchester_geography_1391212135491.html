@@ -405,8 +405,14 @@ const PERIODS = {
 const fmtInt = v => Math.round(v).toLocaleString('en-GB');
 const XVARS = [
   {id:'prox', label:'Distance from centre (km)',          axis:'Distance from city centre (km)',            fmt:v=>fmtInt(v)+' km', tick:v=>fmtInt(v), min:0, max:35},
-  {id:'density', label:'Population Density',              axis:'Population per square km',                    fmt:v=>fmtInt(v), tick:v=>fmtInt(v), min:0, max:17500},
-  {id:'depriv',   label:'Household Deprivation',            axis:'Households deprived in 1-4 dimensions',     fmt:v=>v.toFixed(1)+'%', tick:v=>v, min:30, max:80},
+  {id:'density', label:'Population density',              axis:'Population per square km',                    fmt:v=>fmtInt(v), tick:v=>fmtInt(v), min:0, max:17500},
+  {id:'depriv',   label:'Household deprivation',            axis:'Households deprived in 1-4 dimensions',     fmt:v=>v.toFixed(1)+'%', tick:v=>v, min:30, max:80},
+  {id:'outright', label:'Owns outright',                      axis:'Housing owned outright (%)',              fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:0, max:100},
+  {id:'mortgage', label:'Owns w/ mortgage',                      axis:'Housing owned with a mortgage (%)',              fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:0, max:100},
+  {id:'social', label:'Social rent',                      axis:'Social rented housing (%)',              fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:0, max:100},
+  {id:'private', label:'Private rent',                      axis:'Privetely rented housing (%)',              fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:0, max:100},
+  {id:'flat', label:'Flats',                      axis:'Flats or apartments (%)',              fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:0, max:100},
+   {id:'house', label:'House',                      axis:'Whole house or bungalow (%)',              fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:0, max:100},
   {id:'a1524', label:'Aged 15–24 (%)',                      axis:'Population aged 15–24 (%)',              fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:5, max:50},
   {id:'a2539', label:'Aged 25–39 (%)',                    axis:'Population aged 25–39 (%)',             fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:0, max:60},
   {id:'a4064', label:'Aged 40–64 (%)',                    axis:'Population aged 40–64 (%)',              fmt:v=>v.toFixed(1)+'%', tick:v=>v+'%', min:0, max:40},
@@ -443,6 +449,14 @@ const XVAR_NESTS = [
     name: 'Education',
     attributes: ['noqual', 'highqual']
   },
+
+  {
+  name: 'Housing',
+  groups: [
+    { name: 'Type',   attributes: ['flat', 'house'] },
+    { name: 'Tenure', attributes: ['outright', 'mortgage', 'social', 'private'] }
+  ]
+},
   
   {
     name: 'Economy',
@@ -515,22 +529,20 @@ function fillXVar(){
   const assigned = new Set();
 
   // Add the manually defined attribute nests
-  XVAR_NESTS.forEach(nest => {
-    const attributes = nest.attributes
-      .map(id => XVARS.find(x => x.id === id))
-      .filter(Boolean);
-
-    if (!attributes.length) return;
-
-    h += `<optgroup label="${nest.name}">`;
-
-    attributes.forEach(x => {
-      h += `<option value="${x.id}">${x.label}</option>`;
+XVAR_NESTS.forEach(nest => {
+  const groups = nest.groups || [{attributes: nest.attributes}];
+  h += `<optgroup label="${nest.name}">`;
+  groups.forEach(group => {
+    group.attributes.forEach(id => {
+      const x = XVARS.find(x => x.id === id);
+      if (!x) return;
+      const sub = group.name ? ` data-sub="${group.name}"` : '';
+      h += `<option value="${x.id}"${sub}>${x.label}</option>`;
       assigned.add(x.id);
     });
-
-    h += '</optgroup>';
   });
+  h += '</optgroup>';
+});
 
   // Keep any attributes not assigned to a nest available
   XVARS.filter(x => !assigned.has(x.id)).forEach(x => {
